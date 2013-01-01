@@ -135,8 +135,18 @@
   ],
   "56": [
     {
-      "name": "dummy",
+      "name": "data",
       "type": "mapChunkBulk"
+    }
+  ],
+  "70": [
+    {
+      "name": "reason",
+      "type": "byte"
+    },
+    {
+      "name": "gameMode",
+      "type": "byte"
     }
   ],
   "103": [
