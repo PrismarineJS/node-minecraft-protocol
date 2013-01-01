@@ -135,7 +135,7 @@
   ],
   "23": [
     {
-      "name": "eid",
+      "name": "entityId",
       "type": "int"
     },
     {
@@ -169,7 +169,7 @@
   ],
   "24": [
     {
-      "name": "eid",
+      "name": "entityId",
       "type": "int"
     },
     {
@@ -217,9 +217,47 @@
       "type": "entityMetadata"
     }
   ],
+  "28": [
+    {
+      "name": "entityId",
+      "type": "int"
+    },
+    {
+      "name": "velocityX",
+      "type": "short"
+    },
+    {
+      "name": "velocityY",
+      "type": "short"
+    },
+    {
+      "name": "velocityZ",
+      "type": "short"
+    }
+  ],
+  "35": [
+    {
+      "name": "entityId",
+      "type": "int"
+    },
+    {
+      "name": "headYaw",
+      "type": "byte"
+    }
+  ],
+  "39": [
+    {
+      "name": "entityId",
+      "type": "int"
+    },
+    {
+      "name": "vehicleId",
+      "type": "int"
+    }
+  ],
   "40": [
     {
-      "name": "eid",
+      "name": "entityId",
       "type": "int"
     },
     {
@@ -265,6 +303,28 @@
     {
       "name": "slots",
       "type": "slotArray"
+    }
+  ],
+  "132": [
+    {
+      "name": "x",
+      "type": "int"
+    },
+    {
+      "name": "y",
+      "type": "short"
+    },
+    {
+      "name": "z",
+      "type": "int"
+    },
+    {
+      "name": "action",
+      "type": "byte"
+    },
+    {
+      "name": "nbtData",
+      "type": "byteArray"
     }
   ],
   "201": [

@@ -12,6 +12,7 @@ var input = {
 };
 
 var parser = new Parser();
+var loginSession = null;
 parser.on('connect', function() {
   console.info("connect");
   parser.writePacket(Parser.HANDSHAKE, {
@@ -36,7 +37,6 @@ parser.on('end', function() {
   console.info("disconnect");
 });
 
-var loginSession = null;
 getLoginSession(function() {
   parser.connect(input.serverPort, input.serverHost);
 });
@@ -63,7 +63,7 @@ function getLoginSession(cb) {
         id: values[3],
         uid: values[4],
       };
-      if (session.id) {
+      if (session.id && session.username) {
         loginSession = session;
         console.info("logged in as", session.username);
         cb();
