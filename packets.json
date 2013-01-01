@@ -35,7 +35,7 @@
       "type": "byte"
     },
     {
-      "name": "userName",
+      "name": "username",
       "type": "string"
     },
     {
