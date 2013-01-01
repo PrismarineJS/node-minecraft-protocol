@@ -133,6 +133,90 @@
       "type": "short"
     }
   ],
+  "23": [
+    {
+      "name": "eid",
+      "type": "int"
+    },
+    {
+      "name": "type",
+      "type": "byte"
+    },
+    {
+      "name": "x",
+      "type": "int"
+    },
+    {
+      "name": "y",
+      "type": "int"
+    },
+    {
+      "name": "z",
+      "type": "int"
+    },
+    {
+      "name": "yaw",
+      "type": "byte"
+    },
+    {
+      "name": "pitch",
+      "type": "byte"
+    },
+    {
+      "name": "objectData",
+      "type": "objectData"
+    }
+  ],
+  "24": [
+    {
+      "name": "eid",
+      "type": "int"
+    },
+    {
+      "name": "type",
+      "type": "byte"
+    },
+    {
+      "name": "x",
+      "type": "int"
+    },
+    {
+      "name": "y",
+      "type": "int"
+    },
+    {
+      "name": "z",
+      "type": "int"
+    },
+    {
+      "name": "yaw",
+      "type": "byte"
+    },
+    {
+      "name": "pitch",
+      "type": "byte"
+    },
+    {
+      "name": "headYaw",
+      "type": "byte"
+    },
+    {
+      "name": "velocityX",
+      "type": "short"
+    },
+    {
+      "name": "velocityY",
+      "type": "short"
+    },
+    {
+      "name": "velocityZ",
+      "type": "short"
+    },
+    {
+      "name": "metadata",
+      "type": "entityMetadata"
+    }
+  ],
   "56": [
     {
       "name": "data",
