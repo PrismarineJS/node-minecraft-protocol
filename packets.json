@@ -133,6 +133,16 @@
       "type": "short"
     }
   ],
+  "104": [
+    {
+      "name": "windowId",
+      "type": "byte"
+    },
+    {
+      "name": "slots",
+      "type": "slotArray"
+    }
+  ],
   "201": [
     {
       "name": "playerName",
