@@ -75,12 +75,19 @@ function getLoginSession(cb) {
 }
 
 var packetHandlers = {
+  0x00: onKeepAlive,
+  0x01: onLoginRequest,
+  0x03: onChatMessage,
   0xFC: onEncryptionKeyResponse,
   0xFD: onEncryptionKeyRequest,
-  0x01: onLoginRequest,
   0xFF: onKick,
-  0x03: onChatMessage,
 };
+
+function onKeepAlive(packet) {
+  parser.writePacket(Parser.KEEP_ALIVE, {
+    keepAliveId: packet.keepAliveId
+  });
+}
 
 function onKick(packet) {
   console.log("kick", packet);
@@ -92,6 +99,11 @@ function onLoginRequest(packet) {
 
 function onChatMessage(packet) {
   console.log("chat message", packet);
+  if (packet.message.indexOf(loginSession.username) === -1) {
+    parser.writePacket(Parser.CHAT_MESSAGE, {
+      message: packet.message,
+    });
+  }
 }
 
 function onEncryptionKeyRequest(packet) {
