@@ -133,6 +133,26 @@
       "type": "short"
     }
   ],
+  "56": [
+    {
+      "name": "dummy",
+      "type": "mapChunkBulk"
+    }
+  ],
+  "103": [
+    {
+      "name": "windowId",
+      "type": "byte"
+    },
+    {
+      "name": "slotId",
+      "type": "short"
+    },
+    {
+      "name": "slot",
+      "type": "slot"
+    }
+  ],
   "104": [
     {
       "name": "windowId",
