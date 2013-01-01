@@ -97,6 +97,98 @@
       "type": "int"
     }
   ],
+  "7": [
+    {
+      "name": "user",
+      "type": "int"
+    },
+    {
+      "name": "target",
+      "type": "int"
+    },
+    {
+      "name": "mouseButton",
+      "type": "bool"
+    }
+  ],
+  "8": [
+    {
+      "name": "health",
+      "type": "short"
+    },
+    {
+      "name": "food",
+      "type": "short"
+    },
+    {
+      "name": "foodSaturation",
+      "type": "float"
+    }
+  ],
+  "9": [
+    {
+      "name": "dimension",
+      "type": "int"
+    },
+    {
+      "name": "difficulty",
+      "type": "byte"
+    },
+    {
+      "name": "gameMode",
+      "type": "byte"
+    },
+    {
+      "name": "worldHeight",
+      "type": "short"
+    },
+    {
+      "name": "levelType",
+      "type": "string"
+    }
+  ],
+  "10": [
+    {
+      "name": "onGround",
+      "type": "bool"
+    }
+  ],
+  "11": [
+    {
+      "name": "x",
+      "type": "double"
+    },
+    {
+      "name": "y",
+      "type": "double"
+    },
+    {
+      "name": "stance",
+      "type": "double"
+    },
+    {
+      "name": "z",
+      "type": "double"
+    },
+    {
+      "name": "onGround",
+      "type": "bool"
+    }
+  ],
+  "12": [
+    {
+      "name": "yaw",
+      "type": "float"
+    },
+    {
+      "name": "pitch",
+      "type": "float"
+    },
+    {
+      "name": "onGround",
+      "type": "bool"
+    }
+  ],
   "13": [
     {
       "name": "x",
@@ -127,10 +219,108 @@
       "type": "bool"
     }
   ],
+  "14": [
+    {
+      "name": "status",
+      "type": "byte"
+    },
+    {
+      "name": "x",
+      "type": "int"
+    },
+    {
+      "name": "y",
+      "type": "byte"
+    },
+    {
+      "name": "z",
+      "type": "int"
+    },
+    {
+      "name": "face",
+      "type": "byte"
+    }
+  ],
+  "15": [
+    {
+      "name": "x",
+      "type": "int"
+    },
+    {
+      "name": "y",
+      "type": "ubyte"
+    },
+    {
+      "name": "z",
+      "type": "int"
+    },
+    {
+      "name": "direction",
+      "type": "byte"
+    },
+    {
+      "name": "heldItem",
+      "type": "slot"
+    },
+    {
+      "name": "cursorX",
+      "type": "byte"
+    },
+    {
+      "name": "cursorY",
+      "type": "byte"
+    },
+    {
+      "name": "cursorZ",
+      "type": "byte"
+    }
+  ],
   "16": [
     {
       "name": "slotId",
       "type": "short"
+    }
+  ],
+  "17": [
+    {
+      "name": "entityId",
+      "type": "int"
+    },
+    {
+      "name": "_unknown",
+      "type": "byte"
+    },
+    {
+      "name": "x",
+      "type": "int"
+    },
+    {
+      "name": "y",
+      "type": "byte"
+    },
+    {
+      "name": "z",
+      "type": "int"
+    }
+  ],
+  "18": [
+    {
+      "name": "entityId",
+      "type": "int"
+    },
+    {
+      "name": "animation",
+      "type": "byte"
+    }
+  ],
+  "19": [
+    {
+      "name": "entityId",
+      "type": "int"
+    },
+    {
+      "name": "actionId",
+      "type": "byte"
     }
   ],
   "20": [
@@ -169,6 +359,16 @@
     {
       "name": "metadata",
       "type": "entityMetadata"
+    }
+  ],
+  "22": [
+    {
+      "name": "collectedEntityId",
+      "type": "int"
+    },
+    {
+      "name": "collectorEntityId",
+      "type": "int"
     }
   ],
   "23": [
