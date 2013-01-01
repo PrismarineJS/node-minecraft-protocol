@@ -17,6 +17,22 @@
       "type": "int"
     }
   ],
+  "205": [
+    {
+      "name": "payload",
+      "type": "byte"
+    }
+  ],
+  "252": [
+    {
+      "name": "sharedSecret",
+      "type": "byteArray"
+    },
+    {
+      "name": "verifyToken",
+      "type": "byteArray"
+    }
+  ],
   "253": [
     {
       "name": "serverId",
