@@ -217,6 +217,16 @@
       "type": "entityMetadata"
     }
   ],
+  "40": [
+    {
+      "name": "eid",
+      "type": "int"
+    },
+    {
+      "name": "metadata",
+      "type": "entityMetadata"
+    }
+  ],
   "56": [
     {
       "name": "data",
