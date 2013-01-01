@@ -1,4 +1,10 @@
 {
+  "0": [
+    {
+      "name": "keepAliveId",
+      "type": "int"
+    }
+  ],
   "1": [
     {
       "name": "entityId",
@@ -45,6 +51,114 @@
     {
       "name": "serverPort",
       "type": "int"
+    }
+  ],
+  "3": [
+    {
+      "name": "message",
+      "type": "string"
+    }
+  ],
+  "4": [
+    {
+      "name": "ageOfWorld",
+      "type": "long"
+    },
+    {
+      "name": "timeOfDay",
+      "type": "long"
+    }
+  ],
+  "5": [
+    {
+      "name": "entityId",
+      "type": "int"
+    },
+    {
+      "name": "slot",
+      "type": "short"
+    },
+    {
+      "name": "item",
+      "type": "slot"
+    }
+  ],
+  "6": [
+    {
+      "name": "x",
+      "type": "int"
+    },
+    {
+      "name": "y",
+      "type": "int"
+    },
+    {
+      "name": "z",
+      "type": "int"
+    }
+  ],
+  "13": [
+    {
+      "name": "x",
+      "type": "double"
+    },
+    {
+      "name": "y",
+      "type": "double"
+    },
+    {
+      "name": "stance",
+      "type": "double"
+    },
+    {
+      "name": "z",
+      "type": "double"
+    },
+    {
+      "name": "yaw",
+      "type": "float"
+    },
+    {
+      "name": "pitch",
+      "type": "float"
+    },
+    {
+      "name": "onGround",
+      "type": "bool"
+    }
+  ],
+  "16": [
+    {
+      "name": "slotId",
+      "type": "short"
+    }
+  ],
+  "201": [
+    {
+      "name": "playerName",
+      "type": "string"
+    },
+    {
+      "name": "online",
+      "type": "bool"
+    },
+    {
+      "name": "ping",
+      "type": "short"
+    }
+  ],
+  "202": [
+    {
+      "name": "flags",
+      "type": "byte"
+    },
+    {
+      "name": "flyingSpeed",
+      "type": "byte"
+    },
+    {
+      "name": "walkingSpeed",
+      "type": "byte"
     }
   ],
   "205": [
