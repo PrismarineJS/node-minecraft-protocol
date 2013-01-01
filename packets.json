@@ -335,6 +335,16 @@
       "type": "byte"
     }
   ],
+  "38": [
+    {
+      "name": "entityId",
+      "type": "int"
+    },
+    {
+      "name": "entityStatus",
+      "type": "byte"
+    }
+  ],
   "39": [
     {
       "name": "entityId",
@@ -353,6 +363,24 @@
     {
       "name": "metadata",
       "type": "entityMetadata"
+    }
+  ],
+  "52": [
+    {
+      "name": "chunkX",
+      "type": "int"
+    },
+    {
+      "name": "chunkZ",
+      "type": "int"
+    },
+    {
+      "name": "recordCount",
+      "type": "short"
+    },
+    {
+      "name": "data",
+      "type": "byteArray"
     }
   ],
   "53": [
@@ -381,6 +409,32 @@
     {
       "name": "data",
       "type": "mapChunkBulk"
+    }
+  ],
+  "61": [
+    {
+      "name": "effectId",
+      "type": "int"
+    },
+    {
+      "name": "x",
+      "type": "int"
+    },
+    {
+      "name": "y",
+      "type": "byte"
+    },
+    {
+      "name": "z",
+      "type": "int"
+    },
+    {
+      "name": "data",
+      "type": "int"
+    },
+    {
+      "name": "disableRelativeVolume",
+      "type": "bool"
     }
   ],
   "62": [

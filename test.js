@@ -79,6 +79,7 @@ var packetHandlers = {
   0xFD: onEncryptionKeyRequest,
   0x01: onLoginRequest,
   0xFF: onKick,
+  0x03: onChatMessage,
 };
 
 function onKick(packet) {
@@ -87,6 +88,10 @@ function onKick(packet) {
 
 function onLoginRequest(packet) {
   console.log("login request", packet);
+}
+
+function onChatMessage(packet) {
+  console.log("chat message", packet);
 }
 
 function onEncryptionKeyRequest(packet) {
