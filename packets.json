@@ -1,0 +1,34 @@
+{
+  "2": [
+    {
+      "name": "protocolVersion",
+      "type": "byte"
+    },
+    {
+      "name": "userName",
+      "type": "string"
+    },
+    {
+      "name": "serverHost",
+      "type": "string"
+    },
+    {
+      "name": "serverPort",
+      "type": "int"
+    }
+  ],
+  "253": [
+    {
+      "name": "serverId",
+      "type": "string"
+    },
+    {
+      "name": "publicKey",
+      "type": "byteArray"
+    },
+    {
+      "name": "verifyToken",
+      "type": "byteArray"
+    }
+  ]
+}
