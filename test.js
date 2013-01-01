@@ -32,7 +32,17 @@ parser.connect(25565, 'localhost');
 var packetHandlers = {
   0xFC: onEncryptionKeyResponse,
   0xFD: onEncryptionKeyRequest,
+  0x01: onLoginRequest,
+  0xFF: onKick,
 };
+
+function onKick(packet) {
+  console.log("kick", packet);
+}
+
+function onLoginRequest(packet) {
+  console.log("login request", packet);
+}
 
 function onEncryptionKeyRequest(packet) {
   console.log("enc key request");
@@ -43,6 +53,8 @@ function onEncryptionKeyRequest(packet) {
     var encryptedSharedSecretBuffer = new Buffer(encryptedSharedSecret, 'base64');
     var encryptedVerifyToken = pubKey.encrypt(packet.verifyToken, 'binary', 'base64', ursa.RSA_PKCS1_PADDING);
     var encryptedVerifyTokenBuffer = new Buffer(encryptedVerifyToken, 'base64');
+    parser.cipher = crypto.createCipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
+    parser.decipher = crypto.createDecipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
     console.log("write enc key response");
     parser.writePacket(Parser.ENCRYPTION_KEY_RESPONSE, {
       sharedSecret: encryptedSharedSecretBuffer,
@@ -55,8 +67,8 @@ function onEncryptionKeyResponse(packet) {
   console.log("confirmation enc key response");
   assert.strictEqual(packet.sharedSecret.length, 0);
   assert.strictEqual(packet.verifyToken.length, 0);
-  // TODO: enable AES encryption, then we can do the below line
-  //parser.writePacket(Parser.CLIENT_STATUSES, { payload: 0 });
+  parser.encryptionEnabled = true;
+  parser.writePacket(Parser.CLIENT_STATUSES, { payload: 0 });
 }
 
 function mcPubKeyToURsa(mcPubKeyBuffer) {

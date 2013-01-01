@@ -1,4 +1,34 @@
 {
+  "1": [
+    {
+      "name": "entityId",
+      "type": "int"
+    },
+    {
+      "name": "levelType",
+      "type": "string"
+    },
+    {
+      "name": "gameMode",
+      "type": "byte"
+    },
+    {
+      "name": "dimension",
+      "type": "byte"
+    },
+    {
+      "name": "difficulty",
+      "type": "byte"
+    },
+    {
+      "name": "_notUsed1",
+      "type": "byte"
+    },
+    {
+      "name": "maxPlayers",
+      "type": "byte"
+    }
+  ],
   "2": [
     {
       "name": "protocolVersion",
@@ -45,6 +75,12 @@
     {
       "name": "verifyToken",
       "type": "byteArray"
+    }
+  ],
+  "255": [
+    {
+      "name": "reason",
+      "type": "string"
     }
   ]
 }
