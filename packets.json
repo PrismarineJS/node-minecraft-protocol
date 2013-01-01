@@ -273,6 +273,32 @@
       "type": "byte"
     }
   ],
+  "33": [
+    {
+      "name": "entityId",
+      "type": "int"
+    },
+    {
+      "name": "deltaX",
+      "type": "byte"
+    },
+    {
+      "name": "deltaY",
+      "type": "byte"
+    },
+    {
+      "name": "deltaZ",
+      "type": "byte"
+    },
+    {
+      "name": "yaw",
+      "type": "byte"
+    },
+    {
+      "name": "pitch",
+      "type": "byte"
+    }
+  ],
   "34": [
     {
       "name": "entityId",
@@ -329,10 +355,58 @@
       "type": "entityMetadata"
     }
   ],
+  "53": [
+    {
+      "name": "x",
+      "type": "int"
+    },
+    {
+      "name": "y",
+      "type": "byte"
+    },
+    {
+      "name": "z",
+      "type": "int"
+    },
+    {
+      "name": "blockType",
+      "type": "short"
+    },
+    {
+      "name": "blockMetadata",
+      "type": "byte"
+    }
+  ],
   "56": [
     {
       "name": "data",
       "type": "mapChunkBulk"
+    }
+  ],
+  "62": [
+    {
+      "name": "soundName",
+      "type": "string"
+    },
+    {
+      "name": "x",
+      "type": "int"
+    },
+    {
+      "name": "y",
+      "type": "int"
+    },
+    {
+      "name": "z",
+      "type": "int"
+    },
+    {
+      "name": "volume",
+      "type": "float"
+    },
+    {
+      "name": "pitch",
+      "type": "byte"
     }
   ],
   "70": [
