@@ -3,13 +3,35 @@
   "version": "0.0.0",
   "description": "Parse and serialize minecraft packets, plus authentication and encryption.",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/superjoe30/node-minecraft-protocol.git"
+  },
   "scripts": {
     "test": "mocha"
   },
   "keywords": [
     "minecraft",
-    "protocol"
+    "protocol",
+    "parse",
+    "serialize",
+    "packet",
+    "authentication",
+    "encrypton",
+    "bot"
   ],
   "author": "Andrew Kelley",
   "license": "BSD",
+  "engines": {
+    "node": ">=0.8.16"
+  },
+  "devDependencies": {
+    "mocha": "~1.7.4"
+  },
+  "dependencies": {
+    "ursa": "~0.8.0",
+    "buffer-more-ints": "~0.0.1",
+    "superagent": "~0.10.0",
+    "iconv": "~1.2.4"
+  }
 }
