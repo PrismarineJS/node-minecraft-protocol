@@ -8,10 +8,9 @@ Parse and serialize minecraft packets, plus authentication and encryption.
    objects.
  * Send a packet by supplying fields as a JavaScript object.
  * Supports authenticating and logging in.
-   - Supports encryption enabled
-   - Supports encryption disabled (TODO #2)
+   - Supports encryption
    - Supports online mode
-   - Supports offline mode (TODO #1)
+   - Supports offline mode
  * Send keep-alive packet at the correct interval.
  * Reasonable amount of test coverage (TODO #3)
  * Optimized for rapidly staying up to date with Minecraft protocol updates.
