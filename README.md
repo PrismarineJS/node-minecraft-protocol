@@ -47,4 +47,15 @@ client.on('packet', function(packet) {
 ## Testing
 
 * Ensure your system has the `java` executable in `PATH`.
+* Download the appropriate version of `minecraft_server.jar`.
 * `MC_SERVER_JAR=path/to/minecraft_server.jar MC_USERNAME=username MC_EMAIL=email@example.com MC_PASSWORD=password npm test`
+
+## Updating to a newer protocol version
+
+In most cases you should only have to do the following:
+
+1. In `packets.json`:
+ * Update `protocolVersion` to the correct number.
+ * Edit the data structure to reflect the new packet layout.
+2. Update the "Minecraft Compatibility" section above in this README.
+3. Run the test suite to make sure everything still works. See "Testing" above.
