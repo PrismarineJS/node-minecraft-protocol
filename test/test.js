@@ -85,10 +85,10 @@ describe("minecraft protocol", function() {
       }
       mcServer.on('line', onLine);
       mcServer.on('line', function(line) {
-        //process.stderr.write('.');
+        process.stderr.write('.');
         // uncomment this line when debugging for more insight as to what is
         // happening on the minecraft server
-        console.error("[MC]", line);
+        //console.error("[MC]", line);
       });
       function onLine(line) {
         if (/\[INFO\] Done/.test(line)) {
@@ -198,5 +198,23 @@ describe("minecraft protocol", function() {
       });
     });
   });
-  it("survives for " + SURVIVE_TIME + "ms");
+  it("does not crash for " + SURVIVE_TIME + "ms", function(done) {
+    startServer({ 'online-mode': 'false' }, function() {
+      var client = mc.createClient({
+        username: process.env.MC_USERNAME,
+      });
+      client.on('packet', function(packet) {
+        if (packet.id === 0x01) {
+          client.writePacket(0x03, {
+            message: "hello everyone; I have logged in."
+          });
+        } else if (packet.id === 0x03) {
+          assert.strictEqual(packet.message, "<" + process.env.MC_USERNAME + ">" + " hello everyone; I have logged in.");
+          setTimeout(function() {
+            done();
+          }, SURVIVE_TIME);
+        }
+      });
+    });
+  });
 });

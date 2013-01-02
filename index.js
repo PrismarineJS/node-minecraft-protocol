@@ -30,6 +30,7 @@ function createClient(options) {
   };
 
   var client = new Client();
+  client.username = options.username;
   client.on('connect', function() {
     client.writePacket(0x02, {
       protocolVersion: packets.meta.protocolVersion,
@@ -39,6 +40,7 @@ function createClient(options) {
     });
   });
   client.on('packet', function(packet) {
+    if (options.verbose) console.info("packet", packet);
     var handler = packetHandlers[packet.id];
     if (handler) handler(packet);
   });
@@ -71,6 +73,7 @@ function createClient(options) {
       var sharedSecret;
       if (haveCredentials) {
         client.session = results[0];
+        client.username = client.session.username;
         client.emit('session');
         sharedSecret = results[1];
         joinServerRequest(onJoinServerResponse);

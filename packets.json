@@ -744,7 +744,7 @@
     },
     {
       "name": "data",
-      "type": "byteArray"
+      "type": "bigByteArray"
     }
   ],
   "53": [
