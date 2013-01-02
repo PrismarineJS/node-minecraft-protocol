@@ -169,6 +169,7 @@ Client.prototype.connect = function(port, host) {
       if (! parsed) break;
       incomingBuffer = incomingBuffer.slice(parsed.size);
       self.emit('packet', parsed.results);
+      self.emit('packet-' + parsed.results.id, parsed.results);
     }
   });
 
