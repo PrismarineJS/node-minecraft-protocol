@@ -3,31 +3,149 @@ var net = require('net')
   , util = require('util')
   , assert = require('assert')
   , Iconv = require('iconv').Iconv
-  , packets = require('../packets.json')
+  , ursa = require('ursa')
+  , crypto = require('crypto')
+  , superagent = require('superagent')
+  , Batch = require('batch')
+  , packets = require('./packets.json')
   , toUcs2 = new Iconv('UTF-8', 'utf16be')
   , fromUcs2 = new Iconv('utf16be', 'UTF-8')
 
 require('buffer-more-ints');
 
-module.exports = Parser;
+exports.createClient = createClient;
 
-function Parser(options) {
+function createClient(options) {
+  // defaults
+  options = options || {};
+  var port = options.port || 25565;
+  var host = options.host || 'localhost';
+  assert.ok(options.username, "username is required");
+  var haveCredentials = options.email && options.password;
+
+  var packetHandlers = {
+    0x00: onKeepAlive,
+    0xFC: onEncryptionKeyResponse,
+    0xFD: onEncryptionKeyRequest,
+  };
+
+  var client = new Client();
+  client.on('connect', function() {
+    client.writePacket(0x02, {
+      protocolVersion: packets.meta.protocolVersion,
+      username: options.username,
+      serverHost: host,
+      serverPort: port,
+    });
+  });
+  client.on('packet', function(packet) {
+    var handler = packetHandlers[packet.id];
+    if (handler) handler(packet);
+  });
+  client.connect(port, host);
+
+  return client;
+
+  function onKeepAlive(packet) {
+    client.writePacket(0x00, {
+      keepAliveId: packet.keepAliveId
+    });
+  }
+
+  function onEncryptionKeyRequest(packet) {
+    if (! haveCredentials) {
+      var err = new Error("server is in online mode and no credentials supplied");
+      err.code = 'ENOCRED';
+      client.emit('error', err);
+      client.end();
+      return;
+    }
+    var hash = crypto.createHash('sha1');
+    hash.update(packet.serverId);
+    var batch = new Batch();
+    batch.push(function(cb) { getLoginSession(options.email, options.password, cb); });
+    batch.push(function(cb) { crypto.randomBytes(16, cb); });
+    batch.end(function (err, results) {
+      if (err) {
+        client.emit('error', err);
+        client.end();
+        return
+      }
+
+      client.session = results[0];
+      client.emit('session');
+
+      var sharedSecret = results[1];
+      hash.update(sharedSecret);
+      hash.update(packet.publicKey);
+      var digest = mcHexDigest(hash);
+      var request = superagent.get("http://session.minecraft.net/game/joinserver.jsp");
+      request.query({
+        user: client.session.username,
+        sessionId: client.session.id,
+        serverId: digest,
+      });
+      request.end(function(err, resp) {
+        var myErr;
+        if (err) {
+          client.emit('error', err);
+          client.end();
+        } else if (resp.serverError) {
+          myErr = new Error("session.minecraft.net is broken: " + resp.status);
+          myErr.code = 'EMCSESSION500';
+          client.emit('error', myErr);
+          client.end();
+        } else if (resp.clientError) {
+          myErr = new Error("session.minecraft.net rejected request: " + resp.status + " " + resp.text);
+          myErr.code = 'EMCSESSION400';
+          client.emit('error', myErr);
+          client.end();
+        } else {
+          sendEncryptionKeyResponse();
+        }
+      });
+
+      function sendEncryptionKeyResponse() {
+        var pubKey = mcPubKeyToURsa(packet.publicKey);
+        var encryptedSharedSecret = pubKey.encrypt(sharedSecret, 'binary', 'base64', ursa.RSA_PKCS1_PADDING);
+        var encryptedSharedSecretBuffer = new Buffer(encryptedSharedSecret, 'base64');
+        var encryptedVerifyToken = pubKey.encrypt(packet.verifyToken, 'binary', 'base64', ursa.RSA_PKCS1_PADDING);
+        var encryptedVerifyTokenBuffer = new Buffer(encryptedVerifyToken, 'base64');
+        client.cipher = crypto.createCipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
+        client.decipher = crypto.createDecipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
+        client.writePacket(0xfc, {
+          sharedSecret: encryptedSharedSecretBuffer,
+          verifyToken: encryptedVerifyTokenBuffer,
+        });
+      }
+    });
+  }
+
+  function onEncryptionKeyResponse(packet) {
+    assert.strictEqual(packet.sharedSecret.length, 0);
+    assert.strictEqual(packet.verifyToken.length, 0);
+    client.encryptionEnabled = true;
+    client.writePacket(0xcd, { payload: 0 });
+  }
+}
+
+function Client(options) {
   EventEmitter.call(this);
 
-  this.client = null;
+  this.socket = null;
   this.encryptionEnabled = false;
   this.cipher = null;
   this.decipher = null;
 }
-util.inherits(Parser, EventEmitter);
+util.inherits(Client, EventEmitter);
 
-Parser.prototype.connect = function(port, host) {
+Client.prototype.connect = function(port, host) {
   var self = this;
-  self.client = net.connect(port, host, function() {
+  self.socket = net.connect(port, host, function() {
     self.emit('connect');
   });
   var incomingBuffer = new Buffer(0);
-  self.client.on('data', function(data) {
+  self.socket.on('data', function(data) {
     if (self.encryptionEnabled) data = new Buffer(self.decipher.update(data), 'binary');
     incomingBuffer = Buffer.concat([incomingBuffer, data]);
     var parsed;
@@ -39,24 +157,23 @@ Parser.prototype.connect = function(port, host) {
     }
   });
 
-  self.client.on('error', function(err) {
+  self.socket.on('error', function(err) {
     self.emit('error', err);
   });
 
-  self.client.on('end', function() {
+  self.socket.on('close', function() {
     self.emit('end');
   });
 };
 
-Parser.prototype.end = function() {
-  this.client.end();
+Client.prototype.end = function() {
+  this.socket.end();
 };
 
-Parser.prototype.writePacket = function(packetId, params) {
+Client.prototype.writePacket = function(packetId, params) {
   var buffer = createPacketBuffer(packetId, params);
   var out = this.encryptionEnabled ? new Buffer(this.cipher.update(buffer), 'binary') : buffer;
-  if (this.encryptionEnabled) console.log("writing", packetId, "packet with encryption");
-  this.client.write(out);
+  this.socket.write(out);
 };
 
 var writers = {
@@ -598,7 +715,6 @@ function createPacketBuffer(packetId, params) {
 function parsePacket(buffer) {
   if (buffer.length < 1) return null;
   var packetId = buffer.readUInt8(0);
-  console.log("parsing packet " + packetId);
   var size = 1;
   var results = { id: packetId };
   var packetInfo = packets[packetId];
@@ -623,78 +739,80 @@ function parsePacket(buffer) {
   };
 }
 
-// packet ids
-Parser.KEEP_ALIVE = 0x00;
-Parser.LOGIN_REQUEST = 0x01;
-Parser.HANDSHAKE = 0x02;
-Parser.CHAT_MESSAGE = 0x03;
-Parser.TIME_UPDATE = 0x04;
-Parser.ENTITY_EQUIPMENT = 0x05;
-Parser.SPAWN_POSITION = 0x06;
-Parser.USE_ENTITY = 0x07;
-Parser.UPDATE_HEALTH = 0x08;
-Parser.RESPAWN = 0x09;
-Parser.PLAYER = 0x0A;
-Parser.PLAYER_POSITION = 0x0B;
-Parser.PLAYER_LOOK = 0x0C;
-Parser.PLAYER_POSITION_AND_LOOK = 0x0D;
-Parser.PLAYER_DIGGING = 0x0E;
-Parser.PLAYER_BLOCK_PLACEMENT = 0x0F;
-Parser.HELD_ITEM_CHANGE = 0x10;
-Parser.USE_BED = 0x11;
-Parser.ANIMATION = 0x12;
-Parser.ENTITY_ACTION = 0x13;
-Parser.SPAWN_NAMED_ENTITY = 0x14;
-Parser.COLLECT_ITEM = 0x16;
-Parser.SPAWN_OBJECT_VEHICLE = 0x17;
-Parser.SPAWN_MOB = 0x18;
-Parser.SPAWN_PAINTING = 0x19;
-Parser.SPAWN_EXPERIENCE_ORB = 0x1A;
-Parser.ENTITY_VELOCITY = 0x1C;
-Parser.DESTROY_ENTITY = 0x1D;
-Parser.ENTITY = 0x1E;
-Parser.ENTITY_RELATIVE_MOVE = 0x1F;
-Parser.ENTITY_LOOK = 0x20;
-Parser.ENTITY_LOOK_AND_RELATIVE_MOVE = 0x21;
-Parser.ENTITY_TELEPORT = 0x22;
-Parser.ENTITY_HEAD_LOOK = 0x23;
-Parser.ENTITY_STATUS = 0x26;
-Parser.ATTACH_ENTITY = 0x27;
-Parser.ENTITY_METADATA = 0x28;
-Parser.ENTITY_EFFECT = 0x29;
-Parser.REMOVE_ENTITY_EFFECT = 0x2A;
-Parser.SET_EXPERIENCE = 0x2B;
-Parser.CHUNK_DATA = 0x33;
-Parser.MULTI_BLOCK_CHANGE = 0x34;
-Parser.BLOCK_CHANGE = 0x35;
-Parser.BLOCK_ACTION = 0x36;
-Parser.BLOCK_BREAK_ANIMATION = 0x37;
-Parser.MAP_CHUNK_BULK = 0x38;
-Parser.EXPLOSION = 0x3C;
-Parser.SOUND_OR_PARTICLE_EFFECT = 0x3D;
-Parser.NAMED_SOUND_EFFECT = 0x3E;
-Parser.CHANGE_GAME_STATE = 0x46;
-Parser.SPAWN_GLOBAL_ENTITY = 0x47;
-Parser.OPEN_WINDOW = 0x64;
-Parser.CLOSE_WINDOW = 0x65;
-Parser.CLICK_WINDOW = 0x66;
-Parser.SET_SLOT = 0x67;
-Parser.SET_WINDOW_ITEMS = 0x68;
-Parser.UPDATE_WINDOW_PROPERTY = 0x69;
-Parser.CONFIRM_TRANSACTION = 0x6A;
-Parser.CREATIVE_INVENTORY_ACTION = 0x6B;
-Parser.ENCHANT_ITEM = 0x6C;
-Parser.UPDATE_SIGN = 0x82;
-Parser.ITEM_DATA = 0x83;
-Parser.UPDATE_TILE_ENTITY = 0x84;
-Parser.INCREMENT_STATISTIC = 0xC8;
-Parser.PLAYER_LIST_ITEM = 0xC9;
-Parser.PLAYER_ABILITIES = 0xCA;
-Parser.TAB_COMPLETE = 0xCB;
-Parser.CLIENT_SETTINGS = 0xCC;
-Parser.CLIENT_STATUSES = 0xCD;
-Parser.PLUGIN_MESSAGE = 0xFA;
-Parser.ENCRYPTION_KEY_RESPONSE = 0xFC;
-Parser.ENCRYPTION_KEY_REQUEST = 0xFD;
-Parser.SERVER_LIST_PING = 0xFE;
-Parser.DISCONNECT_KICK = 0xFF;
+function mcPubKeyToURsa(mcPubKeyBuffer) {
+  var pem = "-----BEGIN PUBLIC KEY-----\n";
+  var base64PubKey = mcPubKeyBuffer.toString('base64');
+  var maxLineLength = 65;
+  while (base64PubKey.length > 0) {
+    pem += base64PubKey.substring(0, maxLineLength) + "\n";
+    base64PubKey = base64PubKey.substring(maxLineLength);
+  }
+  pem += "-----END PUBLIC KEY-----\n";
+  return ursa.createPublicKey(pem, 'utf8');
+}
+
+function mcHexDigest(hash) {
+  var buffer = new Buffer(hash.digest(), 'binary');
+  // check for negative hashes
+  var negative = buffer.readInt8(0) < 0;
+  if (negative) performTwosCompliment(buffer);
+  var digest = buffer.toString('hex');
+  // trim leading zeroes
+  digest = digest.replace(/^0+/g, '');
+  if (negative) digest = '-' + digest;
+  return digest;
+
+  function performTwosCompliment(buffer) {
+    var carry = true;
+    var i, newByte, value;
+    for (i = buffer.length - 1; i >= 0; --i) {
+      value = buffer.readUInt8(i);
+      newByte = ~value & 0xff;
+      if (carry) {
+        carry = newByte === 0xff;
+        buffer.writeUInt8(newByte + 1, i);
+      } else {
+        buffer.writeUInt8(newByte, i);
+      }
+    }
+  }
+}
+
+function getLoginSession(email, password, cb) {
+  var req = superagent.post("https://login.minecraft.net");
+  req.type('form');
+  req.send({
+    user: email,
+    password: password,
+    version: packets.meta.sessionVersion,
+  });
+  req.end(function(err, resp) {
+    var myErr;
+    if (err) {
+      cb(err);
+    } else if (resp.serverError) {
+      myErr = new Error("login.minecraft.net is broken: " + resp.status);
+      myErr.code = 'ELOGIN500';
+      cb(myErr);
+    } else if (resp.clientError) {
+      myErr = new Error("login.minecraft.net rejected request: " + resp.status + " " + resp.text);
+      myErr.code = 'ELOGIN400';
+      cb(myErr);
+    } else {
+      var values = resp.text.split(':');
+      var session = {
+        currentGameVersion: values[0],
+        username: values[2],
+        id: values[3],
+        uid: values[4],
+      };
+      if (session.id && session.username) {
+        cb(null, session);
+      } else {
+        myErr = new Error("login.minecraft.net rejected request: " + resp.status + " " + resp.text);
+        myErr.code = 'ELOGIN400';
+        cb(myErr);
+      }
+    }
+  });
+}

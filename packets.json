@@ -1,4 +1,8 @@
 {
+  "meta": {
+    "protocolVersion": 51,
+    "sessionVersion": 13
+  },
   "0": [
     {
       "name": "keepAliveId",

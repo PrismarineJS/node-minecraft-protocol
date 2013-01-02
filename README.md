@@ -20,6 +20,26 @@ Parse and serialize minecraft packets, plus authentication and encryption.
 
 Supports Minecraft version 1.4.6
 
-## Try it out so far
+## Usage
 
-`MC_EMAIL=you@example.com MC_PASSWORD=your_pass node test.js`
+### Echo example
+
+Listen for chat messages and echo them back.
+
+```js
+var mc = require('minecraft-protocol');
+var client = mc.createClient({
+  host: "localhost", // optional
+  port: 25565,       // optional
+  username: "player",
+  email: "email@example.com", // email and password are required only for
+  password: "12345678",       // encrypted and online servers
+});
+client.on('packet', function(packet) {
+  if (packet.id !== 0x03) return;
+  if (packet.message.indexOf(client.session.username) !== -1) return;
+  client.writePacket(0x03, {
+    message: packet.message,
+  });
+});
+```
