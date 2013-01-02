@@ -1,19 +1,18 @@
 # minecraft protocol
 
-Parse minecraft
-This project simply provides protocol support. You'll want to use a higher
-level library to write bots.
-
-Hopefully eventually we can merge 
-[mineflayer](https://github.com/superjoe30/mineflayer) with this project.
+Parse and serialize minecraft packets, plus authentication and encryption.
 
 ## Features
 
- * (TODO #8) Parse all packets and emit `packet` events with packet fields as JavaScript
+ * Parses all packets and emits `packet` events with packet fields as JavaScript
    objects.
  * Send a packet by supplying fields as a JavaScript object.
- * (TODO #9) Send keep-alive packet at the correct interval.
- * Supports encryption, no encryption (TODO #2), online, and offline (TODO #1) modes.
+ * Supports authenticating and logging in.
+   - Supports encryption enabled
+   - Supports encryption disabled (TODO #2)
+   - Supports online mode
+   - Supports offline mode (TODO #1)
+ * Send keep-alive packet at the correct interval.
  * Reasonable amount of test coverage (TODO #3)
  * Optimized for rapidly staying up to date with Minecraft protocol updates.
 
