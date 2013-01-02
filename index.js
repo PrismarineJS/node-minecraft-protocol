@@ -17,7 +17,7 @@ exports.createClient = createClient;
 
 function createClient(options) {
   // defaults
-  options = options || {};
+  assert.ok(options, "options is required");
   var port = options.port || 25565;
   var host = options.host || 'localhost';
   assert.ok(options.username, "username is required");
