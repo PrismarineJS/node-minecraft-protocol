@@ -53,17 +53,13 @@ function createClient(options) {
   }
 
   function onEncryptionKeyRequest(packet) {
-    if (! haveCredentials) {
-      var err = new Error("server is in online mode and no credentials supplied");
-      err.code = 'ENOCRED';
-      client.emit('error', err);
-      client.end();
-      return;
-    }
-    var hash = crypto.createHash('sha1');
-    hash.update(packet.serverId);
     var batch = new Batch();
-    batch.push(function(cb) { getLoginSession(options.email, options.password, cb); });
+    var hash;
+    if (haveCredentials) {
+      hash = crypto.createHash('sha1');
+      hash.update(packet.serverId);
+      batch.push(function(cb) { getLoginSession(options.email, options.password, cb); });
+    }
     batch.push(function(cb) { crypto.randomBytes(16, cb); });
     batch.end(function (err, results) {
       if (err) {
@@ -72,38 +68,54 @@ function createClient(options) {
         return
       }
 
-      client.session = results[0];
-      client.emit('session');
+      var sharedSecret;
+      if (haveCredentials) {
+        client.session = results[0];
+        client.emit('session');
+        sharedSecret = results[1];
+        joinServerRequest(onJoinServerResponse);
+      } else {
+        sharedSecret = results[0];
+        sendEncryptionKeyResponse();
+      }
 
-      var sharedSecret = results[1];
-      hash.update(sharedSecret);
-      hash.update(packet.publicKey);
-      var digest = mcHexDigest(hash);
-      var request = superagent.get("http://session.minecraft.net/game/joinserver.jsp");
-      request.query({
-        user: client.session.username,
-        sessionId: client.session.id,
-        serverId: digest,
-      });
-      request.end(function(err, resp) {
-        var myErr;
+      function onJoinServerResponse(err) {
         if (err) {
           client.emit('error', err);
-          client.end();
-        } else if (resp.serverError) {
-          myErr = new Error("session.minecraft.net is broken: " + resp.status);
-          myErr.code = 'EMCSESSION500';
-          client.emit('error', myErr);
-          client.end();
-        } else if (resp.clientError) {
-          myErr = new Error("session.minecraft.net rejected request: " + resp.status + " " + resp.text);
-          myErr.code = 'EMCSESSION400';
-          client.emit('error', myErr);
           client.end();
         } else {
           sendEncryptionKeyResponse();
         }
-      });
+      }
+
+      function joinServerRequest(cb) {
+        hash.update(sharedSecret);
+        hash.update(packet.publicKey);
+
+        var digest = mcHexDigest(hash);
+        var request = superagent.get("http://session.minecraft.net/game/joinserver.jsp");
+        request.query({
+          user: client.session.username,
+          sessionId: client.session.id,
+          serverId: digest,
+        });
+        request.end(function(err, resp) {
+          var myErr;
+          if (err) {
+            cb(err);
+          } else if (resp.serverError) {
+            myErr = new Error("session.minecraft.net is broken: " + resp.status);
+            myErr.code = 'EMCSESSION500';
+            cb(myErr);
+          } else if (resp.clientError) {
+            myErr = new Error("session.minecraft.net rejected request: " + resp.status + " " + resp.text);
+            myErr.code = 'EMCSESSION400';
+            cb(myErr);
+          } else {
+            cb();
+          }
+        });
+      }
 
       function sendEncryptionKeyResponse() {
         var pubKey = mcPubKeyToURsa(packet.publicKey);

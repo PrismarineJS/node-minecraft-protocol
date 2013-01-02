@@ -85,8 +85,10 @@ describe("minecraft protocol", function() {
       }
       mcServer.on('line', onLine);
       mcServer.on('line', function(line) {
-        //process.stderr.write('.');
-        console.error("[MC]", line);
+        process.stderr.write('.');
+        // uncomment this line when debugging for more insight as to what is
+        // happening on the minecraft server
+        //console.error("[MC]", line);
       });
       function onLine(line) {
         if (/\[INFO\] Done/.test(line)) {
@@ -143,10 +145,41 @@ describe("minecraft protocol", function() {
       });
     });
   });
-  it("connects successfully - offline mode");
+  it("connects successfully - offline mode", function(done) {
+    startServer({ 'online-mode': 'false' }, function() {
+      var client = mc.createClient({
+        username: process.env.MC_USERNAME,
+      });
+      mcServer.on('line', function(line) {
+        var match = line.match(/\[INFO\] <(.+?)> (.+)$/);
+        if (! match) return;
+        assert.strictEqual(match[1], process.env.MC_USERNAME);
+        assert.strictEqual(match[2], "hello everyone; I have logged in.");
+        mcServer.stdin.write("say hello\n");
+      });
+      var chatCount = 0;
+      client.on('packet', function(packet) {
+        if (packet.id === 0x01) {
+          assert.strictEqual(packet.levelType, 'default');
+          assert.strictEqual(packet.difficulty, 1);
+          assert.strictEqual(packet.dimension, 0);
+          assert.strictEqual(packet.gameMode, 0);
+          client.writePacket(0x03, {
+            message: "hello everyone; I have logged in."
+          });
+        } else if (packet.id === 0x03) {
+          chatCount += 1;
+          assert.ok(chatCount <= 2);
+          if (chatCount === 1) {
+            assert.strictEqual(packet.message, "<" + process.env.MC_USERNAME + ">" + " hello everyone; I have logged in.");
+          } else if (chatCount === 2) {
+            assert.strictEqual(packet.message, "[Server] hello");
+            done();
+          }
+        }
+      });
+    });
+  });
   it("emits error when no credentials supplied in online mode");
   it("survives for " + SURVIVE_TIME + "ms");
 });
-
-function doIt() {
-}
