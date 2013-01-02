@@ -915,6 +915,78 @@
       "type": "byte"
     }
   ],
+  "71": [
+    {
+      "name": "entityId",
+      "type": "int"
+    },
+    {
+      "name": "type",
+      "type": "byte"
+    },
+    {
+      "name": "x",
+      "type": "int"
+    },
+    {
+      "name": "y",
+      "type": "int"
+    },
+    {
+      "name": "z",
+      "type": "int"
+    }
+  ],
+  "100": [
+    {
+      "name": "windowId",
+      "type": "byte"
+    },
+    {
+      "name": "inventoryType",
+      "type": "byte"
+    },
+    {
+      "name": "windowTitle",
+      "type": "string"
+    },
+    {
+      "name": "slotCount",
+      "type": "byte"
+    }
+  ],
+  "101": [
+    {
+      "name": "windowId",
+      "type": "byte"
+    }
+  ],
+  "102": [
+    {
+      "name": "windowId",
+      "type": "byte"
+    },
+    {
+      "name": "slot",
+      "type": "short"
+    },
+    {
+      "name": "mouseButton",
+      "type": "byte"
+    },
+    {
+      "name": "actionNumber",
+      "type": "short"
+    },
+    {
+      "name": "shift",
+      "type": "bool"
+    },
+    {
+      "name": "clickedItem",
+      "type": "slot"
+    }
+  ],
   "103": [
     {
       "name": "windowId",
@@ -937,6 +1009,98 @@
     {
       "name": "slots",
       "type": "slotArray"
+    }
+  ],
+  "105": [
+    {
+      "name": "windowId",
+      "type": "byte"
+    },
+    {
+      "name": "property",
+      "type": "short"
+    },
+    {
+      "name": "value",
+      "type": "short"
+    }
+  ],
+  "106": [
+    {
+      "name": "windowId",
+      "type": "byte"
+    },
+    {
+      "name": "actionNumber",
+      "type": "short"
+    },
+    {
+      "name": "accepted",
+      "type": "bool"
+    }
+  ],
+  "107": [
+    {
+      "name": "slot",
+      "type": "short"
+    },
+    {
+      "name": "clickedItem",
+      "type": "slot"
+    }
+  ],
+  "108": [
+    {
+      "name": "windowId",
+      "type": "byte"
+    },
+    {
+      "name": "enchantment",
+      "type": "byte"
+    }
+  ],
+  "130": [
+    {
+      "name": "x",
+      "type": "int"
+    },
+    {
+      "name": "y",
+      "type": "short"
+    },
+    {
+      "name": "z",
+      "type": "int"
+    },
+    {
+      "name": "text1",
+      "type": "string"
+    },
+    {
+      "name": "text2",
+      "type": "string"
+    },
+    {
+      "name": "text3",
+      "type": "string"
+    },
+    {
+      "name": "text4",
+      "type": "string"
+    }
+  ],
+  "131": [
+    {
+      "name": "itemType",
+      "type": "short"
+    },
+    {
+      "name": "itemId",
+      "type": "short"
+    },
+    {
+      "name": "text",
+      "type": "ascii"
     }
   ],
   "132": [
@@ -999,10 +1163,48 @@
       "type": "byte"
     }
   ],
+  "203": [
+    {
+      "name": "text",
+      "type": "string"
+    }
+  ],
+  "204": [
+    {
+      "name": "locale",
+      "type": "string"
+    },
+    {
+      "name": "viewDistance",
+      "type": "byte"
+    },
+    {
+      "name": "chatFlags",
+      "type": "byte"
+    },
+    {
+      "name": "difficulty",
+      "type": "byte"
+    },
+    {
+      "name": "showCape",
+      "type": "bool"
+    }
+  ],
   "205": [
     {
       "name": "payload",
       "type": "byte"
+    }
+  ],
+  "250": [
+    {
+      "name": "channel",
+      "type": "string"
+    },
+    {
+      "name": "data",
+      "type": "byteArray"
     }
   ],
   "252": [
@@ -1027,6 +1229,12 @@
     {
       "name": "verifyToken",
       "type": "byteArray"
+    }
+  ],
+  "255": [
+    {
+      "name": "magic",
+      "type": "byte"
     }
   ],
   "255": [
