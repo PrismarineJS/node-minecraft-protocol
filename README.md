@@ -36,7 +36,7 @@ var client = mc.createClient({
   port: 25565,       // optional
   username: "player",
   email: "email@example.com", // email and password are required only for
-  password: "12345678",       // encrypted and online servers
+  password: "12345678",       // online-mode=true servers
 });
 client.on('packet', function(packet) {
   if (packet.id !== 0x03) return;
