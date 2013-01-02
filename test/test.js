@@ -85,10 +85,10 @@ describe("minecraft protocol", function() {
       }
       mcServer.on('line', onLine);
       mcServer.on('line', function(line) {
-        process.stderr.write('.');
+        //process.stderr.write('.');
         // uncomment this line when debugging for more insight as to what is
         // happening on the minecraft server
-        //console.error("[MC]", line);
+        console.error("[MC]", line);
       });
       function onLine(line) {
         if (/\[INFO\] Done/.test(line)) {
@@ -180,6 +180,23 @@ describe("minecraft protocol", function() {
       });
     });
   });
-  it("emits error when no credentials supplied in online mode");
+  it("gets kicked when no credentials supplied in online mode", function(done) {
+    startServer({ 'online-mode': 'true' }, function() {
+      var client = mc.createClient({
+        username: process.env.MC_USERNAME,
+      });
+      var gotKicked = false;
+      client.on('packet', function(packet) {
+        if (packet.id === 0xff) {
+          assert.strictEqual(packet.reason, "Failed to verify username!");
+          gotKicked = true;
+        }
+      });
+      client.on('end', function() {
+        assert.ok(gotKicked);
+        done();
+      });
+    });
+  });
   it("survives for " + SURVIVE_TIME + "ms");
 });

@@ -11,8 +11,12 @@ Parse and serialize minecraft packets, plus authentication and encryption.
    - Supports encryption
    - Supports online mode
    - Supports offline mode
- * Send keep-alive packet at the correct interval.
- * Reasonable amount of test coverage (TODO #3)
+ * Respond to keep-alive packets.
+ * Test coverage
+   - encryption
+   - authentication/online mode
+   - offline mode
+   - initialization packets
  * Optimized for rapidly staying up to date with Minecraft protocol updates.
 
 ## Minecraft Compatibility
