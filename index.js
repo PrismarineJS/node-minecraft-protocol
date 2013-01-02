@@ -294,7 +294,7 @@ function readIntVector(buffer, offset) {
 function readEntityMetadata(buffer, offset) {
   var cursor = offset;
   var metadata = {};
-  var item, key, type, results;
+  var item, key, type, results, reader;
   while (true) {
     if (cursor + 1 > buffer.length) return null;
     item = buffer.readUInt8(cursor);

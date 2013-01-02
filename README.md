@@ -43,3 +43,8 @@ client.on('packet', function(packet) {
   });
 });
 ```
+
+## Testing
+
+* Ensure your system has the `java` executable in `PATH`.
+* `MC_SERVER_JAR=path/to/minecraft_server.jar MC_USERNAME=username MC_EMAIL=email@example.com MC_PASSWORD=password npm test`
