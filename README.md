@@ -38,8 +38,7 @@ var client = mc.createClient({
   email: "email@example.com", // email and password are required only for
   password: "12345678",       // online-mode=true servers
 });
-client.on('packet', function(packet) {
-  if (packet.id !== 0x03) return;
+client.on('packet-3', function(packet) {
   if (packet.message.indexOf(client.session.username) !== -1) return;
   client.writePacket(0x03, {
     message: packet.message,
