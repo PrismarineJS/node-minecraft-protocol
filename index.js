@@ -163,13 +163,15 @@ Client.prototype.connect = function(port, host) {
   self.socket.on('data', function(data) {
     if (self.encryptionEnabled) data = new Buffer(self.decipher.update(data), 'binary');
     incomingBuffer = Buffer.concat([incomingBuffer, data]);
-    var parsed;
+    var parsed, packet;
     while (true) {
       parsed = parsePacket(incomingBuffer);
       if (! parsed) break;
+      packet = parsed.results;
+      hax(packet); // fuck you, notch
       incomingBuffer = incomingBuffer.slice(parsed.size);
-      self.emit('packet', parsed.results);
-      self.emit('packet-' + parsed.results.id, parsed.results);
+      self.emit('packet', packet);
+      self.emit('packet-' + packet.id, packet);
     }
   });
 
@@ -831,4 +833,15 @@ function getLoginSession(email, password, cb) {
       }
     }
   });
+}
+
+function hax(packet) {
+  // bullshit post-parsing hax that we have to do due to mojang incompetence
+  var tmp;
+  if (packet.id === 0x0d) {
+    // when 0x0d is sent from the server, the Y and the Stance fields are swapped.
+    tmp = packet.y;
+    packet.y = packet.stance;
+    packet.stance = tmp;
+  }
 }
