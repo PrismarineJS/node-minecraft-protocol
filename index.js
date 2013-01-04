@@ -26,7 +26,7 @@ function createClient(options) {
   var client = new Client();
   client.username = options.username;
   client.on('connect', function() {
-    client.writePacket(0x02, {
+    client.write(0x02, {
       protocolVersion: packets.meta.protocolVersion,
       username: options.username,
       serverHost: host,
@@ -34,14 +34,14 @@ function createClient(options) {
     });
   });
   client.on(0x00, onKeepAlive);
-  client.on(0xFC, onEncryptionKeyResponse);
-  client.on(0xFD, onEncryptionKeyRequest);
+  client.once(0xFC, onEncryptionKeyResponse);
+  client.once(0xFD, onEncryptionKeyRequest);
   client.connect(port, host);
 
   return client;
 
   function onKeepAlive(packet) {
-    client.writePacket(0x00, {
+    client.write(0x00, {
       keepAliveId: packet.keepAliveId
     });
   }
@@ -120,7 +120,7 @@ function createClient(options) {
         var encryptedVerifyTokenBuffer = new Buffer(encryptedVerifyToken, 'base64');
         client.cipher = crypto.createCipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
         client.decipher = crypto.createDecipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
-        client.writePacket(0xfc, {
+        client.write(0xfc, {
           sharedSecret: encryptedSharedSecretBuffer,
           verifyToken: encryptedVerifyTokenBuffer,
         });
@@ -132,7 +132,7 @@ function createClient(options) {
     assert.strictEqual(packet.sharedSecret.length, 0);
     assert.strictEqual(packet.verifyToken.length, 0);
     client.encryptionEnabled = true;
-    client.writePacket(0xcd, { payload: 0 });
+    client.write(0xcd, { payload: 0 });
   }
 }
 
@@ -179,7 +179,7 @@ Client.prototype.end = function() {
   this.socket.end();
 };
 
-Client.prototype.writePacket = function(packetId, params) {
+Client.prototype.write = function(packetId, params) {
   var buffer = createPacketBuffer(packetId, params);
   var out = this.encryptionEnabled ? new Buffer(this.cipher.update(buffer), 'binary') : buffer;
   this.socket.write(out);

@@ -14,5 +14,5 @@ client.on(0x03, function(packet) {
   var username = match[1];
   var msg = match[2];
   if (username === client.username) return;
-  client.writePacket(0x03, {message: msg});
+  client.write(0x03, {message: msg});
 });

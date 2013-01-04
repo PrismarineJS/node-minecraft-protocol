@@ -128,7 +128,7 @@ describe("minecraft protocol", function() {
         assert.strictEqual(packet.difficulty, 1);
         assert.strictEqual(packet.dimension, 0);
         assert.strictEqual(packet.gameMode, 0);
-        client.writePacket(0x03, {
+        client.write(0x03, {
           message: "hello everyone; I have logged in."
         });
       });
@@ -162,7 +162,7 @@ describe("minecraft protocol", function() {
           assert.strictEqual(packet.difficulty, 1);
           assert.strictEqual(packet.dimension, 0);
           assert.strictEqual(packet.gameMode, 0);
-          client.writePacket(0x03, {
+          client.write(0x03, {
             message: "hello everyone; I have logged in."
           });
       });
@@ -200,7 +200,7 @@ describe("minecraft protocol", function() {
         username: process.env.MC_USERNAME,
       });
       client.on(0x01, function(packet) {
-        client.writePacket(0x03, {
+        client.write(0x03, {
           message: "hello everyone; I have logged in."
         });
       });

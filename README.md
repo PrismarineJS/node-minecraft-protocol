@@ -25,9 +25,7 @@ Supports Minecraft version 1.4.7pre
 
 ## Usage
 
-### Echo example
-
-Listen for chat messages and echo them back.
+### Echo client example
 
 ```js
 var mc = require('minecraft-protocol');
@@ -39,8 +37,9 @@ var client = mc.createClient({
   password: "12345678",       // online-mode=true servers
 });
 client.on(0x03, function(packet) {
+  // Listen for chat messages and echo them back.
   if (packet.message.indexOf(client.session.username) !== -1) return;
-  client.writePacket(0x03, {
+  client.write(0x03, {
     message: packet.message,
   });
 });
