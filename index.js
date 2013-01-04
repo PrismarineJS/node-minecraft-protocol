@@ -7,7 +7,7 @@ var net = require('net')
   , crypto = require('crypto')
   , superagent = require('superagent')
   , Batch = require('batch')
-  , packets = require('./packets.json')
+  , packets = require('./packets')
   , toUcs2 = new Iconv('UTF-8', 'utf16be')
   , fromUcs2 = new Iconv('utf16be', 'UTF-8')
 
