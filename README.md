@@ -45,6 +45,39 @@ client.on(0x03, function(packet) {
 });
 ```
 
+### Hello World server example
+
+```js
+var mc = require('minecraft-protocol');
+var server = mc.createServer({
+  'online-mode': true, // optional
+  'encryption': true,  // optional
+});
+server.on('connection', function(client) {
+  client.write(0x01, {
+    entityId: 0,
+    levelType: 'default',
+    gameMode: 0,
+    dimension: 0,
+    difficulty: 2,
+    maxPlayers: 32
+  });
+  client.write(0x0d, {
+    x: 0,
+    y: 1.62,
+    stance: 0,
+    z: 0,
+    yaw: 0,
+    pitch: 0,
+    onGround: true
+  });
+  client.write(0x03, { message: 'Hello, world!' });
+});
+server.listen();
+	console.log('Server listening on port', server.port);
+});
+```
+
 ## Testing
 
 * Ensure your system has the `java` executable in `PATH`.
