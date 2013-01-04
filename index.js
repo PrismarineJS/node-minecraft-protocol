@@ -11,8 +11,6 @@ var net = require('net')
   , toUcs2 = new Iconv('UTF-8', 'utf16be')
   , fromUcs2 = new Iconv('utf16be', 'UTF-8')
 
-require('buffer-more-ints');
-
 exports.createClient = createClient;
 
 function createClient(options) {
@@ -532,9 +530,8 @@ function readDouble(buffer, offset) {
 
 function readLong(buffer, offset) {
   if (offset + 8 > buffer.length) return null;
-  var value = buffer.readInt64BE(offset);
   return {
-    value: value,
+    value: [buffer.readInt32BE(offset), buffer.readInt32BE(offset + 4)],
     size: 8,
   };
 }
