@@ -21,7 +21,7 @@ Parse and serialize minecraft packets, plus authentication and encryption.
 
 ## Minecraft Compatibility
 
-Supports Minecraft version 1.4.6
+Supports Minecraft version 1.4.7pre
 
 ## Usage
 
