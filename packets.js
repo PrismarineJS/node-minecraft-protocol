@@ -726,7 +726,7 @@ module.exports = {
     },
     {
       name: "compressedData",
-      type: "bigByteArray"
+      type: "byteArray32"
     }
   ],
   0x34: [
@@ -744,7 +744,7 @@ module.exports = {
     },
     {
       name: "data",
-      type: "bigByteArray"
+      type: "byteArray32"
     }
   ],
   0x35: [
@@ -1126,7 +1126,7 @@ module.exports = {
     },
     {
       name: "nbtData",
-      type: "byteArray"
+      type: "byteArray16"
     }
   ],
   0xc8: [
@@ -1208,17 +1208,17 @@ module.exports = {
     },
     {
       name: "data",
-      type: "byteArray"
+      type: "byteArray16"
     }
   ],
   0xfc: [
     {
       name: "sharedSecret",
-      type: "byteArray"
+      type: "byteArray16"
     },
     {
       name: "verifyToken",
-      type: "byteArray"
+      type: "byteArray16"
     }
   ],
   0xfd: [
@@ -1228,11 +1228,11 @@ module.exports = {
     },
     {
       name: "publicKey",
-      type: "byteArray"
+      type: "byteArray16"
     },
     {
       name: "verifyToken",
-      type: "byteArray"
+      type: "byteArray16"
     }
   ],
   0xfe: [

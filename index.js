@@ -197,7 +197,7 @@ var writers = {
   'byte': ByteWriter,
   'ubyte': UByteWriter,
   'string': StringWriter,
-  'byteArray': ByteArrayWriter,
+  'byteArray16': ByteArray16Writer,
   'bool': BoolWriter,
   'double': DoubleWriter,
   'float': FloatWriter,
@@ -207,8 +207,8 @@ var writers = {
 var readers = {
   'string': readString,
   'ascii': readAscii,
-  'byteArray': readByteArray,
-  'bigByteArray': readBigByteArray,
+  'byteArray16': readByteArray16,
+  'byteArray32': readByteArray32,
   'short': readShort,
   'ushort': readUShort,
   'int': readInt,
@@ -439,7 +439,7 @@ function readString (buffer, offset) {
   };
 }
 
-function readByteArray (buffer, offset) {
+function readByteArray16 (buffer, offset) {
   var results = readShort(buffer, offset);
   if (! results) return null;
 
@@ -455,7 +455,7 @@ function readByteArray (buffer, offset) {
   };
 }
 
-function readBigByteArray(buffer, offset) {
+function readByteArray32(buffer, offset) {
   var results = readInt(buffer, offset);
   if (! results) return null;
 
@@ -632,13 +632,13 @@ StringWriter.prototype.write = function(buffer, offset) {
   this.encoded.copy(buffer, offset + 2);
 };
 
-function ByteArrayWriter(value) {
-  assert.ok(Buffer.isBuffer(value), "non buffer passed to ByteArrayWriter");
+function ByteArray16Writer(value) {
+  assert.ok(Buffer.isBuffer(value), "non buffer passed to ByteArray16Writer");
   this.value = value;
   this.size = 2 + value.length;
 }
 
-ByteArrayWriter.prototype.write = function(buffer, offset) {
+ByteArray16Writer.prototype.write = function(buffer, offset) {
   buffer.writeInt16BE(this.value.length, offset);
   this.value.copy(buffer, offset + 2);
 };
