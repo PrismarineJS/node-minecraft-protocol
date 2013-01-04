@@ -8,8 +8,8 @@ Parse and serialize minecraft packets, plus authentication and encryption.
    objects.
  * Send a packet by supplying fields as a JavaScript object.
  * Supports authenticating and logging in.
-   - Supports encryption
-   - Supports online mode
+   - Supports encryption (client only)
+   - Supports online mode (client only)
    - Supports offline mode
  * Respond to keep-alive packets.
  * Test coverage
@@ -50,17 +50,19 @@ client.on(0x03, function(packet) {
 ```js
 var mc = require('minecraft-protocol');
 var server = mc.createServer({
-  'online-mode': true, // optional
-  'encryption': true,  // optional
+  'online-mode': true,   // optional
+  encryption: true,      // optional
+  host: '0.0.0.0',       // optional
+  port: 25565,           // optional
 });
-server.on('connection', function(client) {
+server.on('login', function(client) {
   client.write(0x01, {
     entityId: 0,
     levelType: 'default',
     gameMode: 0,
     dimension: 0,
     difficulty: 2,
-    maxPlayers: 32
+    maxPlayers: server.maxPlayers
   });
   client.write(0x0d, {
     x: 0,
@@ -71,10 +73,7 @@ server.on('connection', function(client) {
     pitch: 0,
     onGround: true
   });
-  client.write(0x03, { message: 'Hello, world!' });
-});
-server.listen();
-	console.log('Server listening on port', server.port);
+  client.write(0x03, { message: 'Hello, ' + client.username });
 });
 ```
 

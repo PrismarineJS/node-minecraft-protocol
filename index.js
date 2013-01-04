@@ -1,5 +1,4 @@
-var net = require('net')
-  , EventEmitter = require('events').EventEmitter
+var EventEmitter = require('events').EventEmitter
   , util = require('util')
   , assert = require('assert')
   , ursa = require('ursa')
@@ -7,10 +6,92 @@ var net = require('net')
   , superagent = require('superagent')
   , Batch = require('batch')
   , protocol = require('./lib/protocol')
-  , createPacketBuffer = protocol.createPacketBuffer
-  , parsePacket = protocol.parsePacket
+  , Client = require('./lib/client')
+  , Server = require('./lib/server')
 
 exports.createClient = createClient;
+exports.createServer = createServer;
+
+function createServer(options) {
+  var port = options.port != null ?
+    options.port :
+    options['server-port'] != null ?
+      options['server-port'] :
+      25565 ;
+  var host = options.host || '0.0.0.0';
+  var timeout = options.timeout || 10 * 1000;
+  var keepAliveInterval = options.keepAliveInterval || 4 * 1000;
+  var motd = options.motd || "A Minecraft server";
+  var onlineMode = options['online-mode'] == null ? true : options['online-mode'];
+  assert.ok(! onlineMode, "online mode for servers is not yet supported");
+
+  var server = new Server(options);
+  server.on("connection", function(client) {
+    client.once(0xfe, onPing);
+    client.on(0x02, onHandshake);
+    client.on(0x00, onKeepAlive);
+    client.on('end', onEnd);
+
+    var keepAlive = false;
+    var loggedIn = false;
+    var lastKeepAlive = null;
+
+    var keepAliveTimer = setInterval(keepAliveLoop, keepAliveInterval);
+
+    function keepAliveLoop() {
+      if (keepAlive) {
+        // check if the last keepAlive was too long ago (timeout)
+        if (lastKeepAlive) {
+          var elapsed = new Date() - lastKeepAlive;
+          if (elapsed > timeout) {
+            client.end();
+            return;
+          }
+        }
+        client.write(0x00, {
+          keepAliveId: Math.floor(Math.random() * 2147483648)
+        });
+      }
+    }
+
+    function onEnd() {
+      clearInterval(keepAliveTimer);
+    }
+
+    function onKeepAlive(packet) {
+      if (keepAlive) {
+        lastKeepAlive = new Date();
+      } else {
+        lastKeepAlive = null;
+      }
+    }
+
+    function onPing(packet) {
+      if (loggedIn) return;
+      client.write(0xff, {
+        reason: [
+          '§1',
+          protocol.version,
+          protocol.minecraftVersion,
+          motd,
+          server.playerCount,
+          server.maxPlayers,
+        ].join('\u0000')
+      });
+    }
+
+    function onHandshake(packet) {
+      assert.ok(! onlineMode);
+      loggedIn = true;
+      keepAlive = true;
+      client.username = packet.username;
+      server.emit('login', client);
+    }
+  });
+  server.listen(port, host);
+  return server;
+
+}
 
 function createClient(options) {
   // defaults
@@ -20,7 +101,9 @@ function createClient(options) {
   assert.ok(options.username, "username is required");
   var haveCredentials = options.email && options.password;
 
-  var client = new Client();
+  var client = new Client({
+    isServer: false
+  });
   client.username = options.username;
   client.on('connect', function() {
     client.write(0x02, {
@@ -29,6 +112,9 @@ function createClient(options) {
       serverHost: host,
       serverPort: port,
     });
+  });
+  client.on('packet', function(packet) {
+    console.log(packet.id, packet);
   });
   client.on(0x00, onKeepAlive);
   client.once(0xFC, onEncryptionKeyResponse);
@@ -133,53 +219,6 @@ function createClient(options) {
   }
 }
 
-function Client(options) {
-  EventEmitter.call(this);
-
-  this.socket = null;
-  this.encryptionEnabled = false;
-  this.cipher = null;
-  this.decipher = null;
-}
-util.inherits(Client, EventEmitter);
-
-Client.prototype.connect = function(port, host) {
-  var self = this;
-  self.socket = net.connect(port, host, function() {
-    self.emit('connect');
-  });
-  var incomingBuffer = new Buffer(0);
-  self.socket.on('data', function(data) {
-    if (self.encryptionEnabled) data = new Buffer(self.decipher.update(data), 'binary');
-    incomingBuffer = Buffer.concat([incomingBuffer, data]);
-    var parsed, packet;
-    while (true) {
-      parsed = parsePacket(incomingBuffer);
-      if (! parsed) break;
-      packet = parsed.results;
-      incomingBuffer = incomingBuffer.slice(parsed.size);
-      self.emit(packet.id, packet);
-    }
-  });
-
-  self.socket.on('error', function(err) {
-    self.emit('error', err);
-  });
-
-  self.socket.on('close', function() {
-    self.emit('end');
-  });
-};
-
-Client.prototype.end = function() {
-  this.socket.end();
-};
-
-Client.prototype.write = function(packetId, params) {
-  var buffer = createPacketBuffer(packetId, params);
-  var out = this.encryptionEnabled ? new Buffer(this.cipher.update(buffer), 'binary') : buffer;
-  this.socket.write(out);
-};
 
 
 function mcPubKeyToURsa(mcPubKeyBuffer) {

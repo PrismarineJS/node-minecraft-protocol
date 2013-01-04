@@ -1,12 +1,12 @@
 var mc = require('../');
 
 var options = {
-  'online-mode': false,
+  'online-mode': false, // optional
 };
 
 var server = mc.createServer(options);
 
-server.on('connection', function(client) {
+server.on('login', function(client) {
   var addr = client.socket.remoteAddress;
   console.log('Incoming connection', '('+addr+')');
 
@@ -15,6 +15,14 @@ server.on('connection', function(client) {
   });
 
   // send init data so client will start rendering world
+  client.write(0x01, {
+    entityId: 0,
+    levelType: 'default',
+    gameMode: 0,
+    dimension: 0,
+    difficulty: 2,
+    maxPlayers: server.maxPlayers
+  });
   client.write(0x0d, {
     x: 0,
     y: 1.62,
@@ -32,6 +40,6 @@ server.on('error', function(error) {
 	console.log('Error:', error);
 });
 
-server.listen(function() {
-	console.log('Server listening on port', server.port);
+server.on('listening', function() {
+	console.log('Server listening on port', server.socket.address().port);
 });
