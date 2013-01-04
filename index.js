@@ -23,12 +23,6 @@ function createClient(options) {
   assert.ok(options.username, "username is required");
   var haveCredentials = options.email && options.password;
 
-  var packetHandlers = {
-    0x00: onKeepAlive,
-    0xFC: onEncryptionKeyResponse,
-    0xFD: onEncryptionKeyRequest,
-  };
-
   var client = new Client();
   client.username = options.username;
   client.on('connect', function() {
