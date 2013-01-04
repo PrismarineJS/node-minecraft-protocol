@@ -8,7 +8,7 @@ var client = mc.createClient({
 client.on('connect', function() {
   console.info("connected");
 });
-client.on('packet-3', function(packet) {
+client.on(0x03, function(packet) {
   var match = packet.message.match(/^<(.+?)> (.*)$/);
   if (! match) return;
   var username = match[1];

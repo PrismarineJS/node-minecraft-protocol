@@ -123,24 +123,23 @@ describe("minecraft protocol", function() {
         mcServer.stdin.write("say hello\n");
       });
       var chatCount = 0;
-      client.on('packet', function(packet) {
-        if (packet.id === 0x01) {
-          assert.strictEqual(packet.levelType, 'default');
-          assert.strictEqual(packet.difficulty, 1);
-          assert.strictEqual(packet.dimension, 0);
-          assert.strictEqual(packet.gameMode, 0);
-          client.writePacket(0x03, {
-            message: "hello everyone; I have logged in."
-          });
-        } else if (packet.id === 0x03) {
-          chatCount += 1;
-          assert.ok(chatCount <= 2);
-          if (chatCount === 1) {
-            assert.strictEqual(packet.message, "<" + client.session.username + ">" + " hello everyone; I have logged in.");
-          } else if (chatCount === 2) {
-            assert.strictEqual(packet.message, "[Server] hello");
-            done();
-          }
+      client.on(0x01, function(packet) {
+        assert.strictEqual(packet.levelType, 'default');
+        assert.strictEqual(packet.difficulty, 1);
+        assert.strictEqual(packet.dimension, 0);
+        assert.strictEqual(packet.gameMode, 0);
+        client.writePacket(0x03, {
+          message: "hello everyone; I have logged in."
+        });
+      });
+      client.on(0x03, function(packet) {
+        chatCount += 1;
+        assert.ok(chatCount <= 2);
+        if (chatCount === 1) {
+          assert.strictEqual(packet.message, "<" + client.session.username + ">" + " hello everyone; I have logged in.");
+        } else if (chatCount === 2) {
+          assert.strictEqual(packet.message, "[Server] hello");
+          done();
         }
       });
     });
@@ -158,8 +157,7 @@ describe("minecraft protocol", function() {
         mcServer.stdin.write("say hello\n");
       });
       var chatCount = 0;
-      client.on('packet', function(packet) {
-        if (packet.id === 0x01) {
+      client.on(0x01, function(packet) {
           assert.strictEqual(packet.levelType, 'default');
           assert.strictEqual(packet.difficulty, 1);
           assert.strictEqual(packet.dimension, 0);
@@ -167,15 +165,15 @@ describe("minecraft protocol", function() {
           client.writePacket(0x03, {
             message: "hello everyone; I have logged in."
           });
-        } else if (packet.id === 0x03) {
-          chatCount += 1;
-          assert.ok(chatCount <= 2);
-          if (chatCount === 1) {
-            assert.strictEqual(packet.message, "<" + process.env.MC_USERNAME + ">" + " hello everyone; I have logged in.");
-          } else if (chatCount === 2) {
-            assert.strictEqual(packet.message, "[Server] hello");
-            done();
-          }
+      });
+      client.on(0x03, function(packet) {
+        chatCount += 1;
+        assert.ok(chatCount <= 2);
+        if (chatCount === 1) {
+          assert.strictEqual(packet.message, "<" + process.env.MC_USERNAME + ">" + " hello everyone; I have logged in.");
+        } else if (chatCount === 2) {
+          assert.strictEqual(packet.message, "[Server] hello");
+          done();
         }
       });
     });
@@ -186,11 +184,9 @@ describe("minecraft protocol", function() {
         username: process.env.MC_USERNAME,
       });
       var gotKicked = false;
-      client.on('packet', function(packet) {
-        if (packet.id === 0xff) {
-          assert.strictEqual(packet.reason, "Failed to verify username!");
-          gotKicked = true;
-        }
+      client.on(0xff, function(packet) {
+        assert.strictEqual(packet.reason, "Failed to verify username!");
+        gotKicked = true;
       });
       client.on('end', function() {
         assert.ok(gotKicked);
@@ -203,17 +199,16 @@ describe("minecraft protocol", function() {
       var client = mc.createClient({
         username: process.env.MC_USERNAME,
       });
-      client.on('packet', function(packet) {
-        if (packet.id === 0x01) {
-          client.writePacket(0x03, {
-            message: "hello everyone; I have logged in."
-          });
-        } else if (packet.id === 0x03) {
-          assert.strictEqual(packet.message, "<" + process.env.MC_USERNAME + ">" + " hello everyone; I have logged in.");
-          setTimeout(function() {
-            done();
-          }, SURVIVE_TIME);
-        }
+      client.on(0x01, function(packet) {
+        client.writePacket(0x03, {
+          message: "hello everyone; I have logged in."
+        });
+      });
+      client.on(0x03, function(packet) {
+        assert.strictEqual(packet.message, "<" + process.env.MC_USERNAME + ">" + " hello everyone; I have logged in.");
+        setTimeout(function() {
+          done();
+        }, SURVIVE_TIME);
       });
     });
   });

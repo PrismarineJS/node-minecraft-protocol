@@ -39,11 +39,9 @@ function createClient(options) {
       serverPort: port,
     });
   });
-  client.on('packet', function(packet) {
-    if (options.verbose) console.info("packet", packet);
-    var handler = packetHandlers[packet.id];
-    if (handler) handler(packet);
-  });
+  client.on(0x00, onKeepAlive);
+  client.on(0xFC, onEncryptionKeyResponse);
+  client.on(0xFD, onEncryptionKeyRequest);
   client.connect(port, host);
 
   return client;
@@ -170,8 +168,7 @@ Client.prototype.connect = function(port, host) {
       packet = parsed.results;
       hax(packet); // fuck you, notch
       incomingBuffer = incomingBuffer.slice(parsed.size);
-      self.emit('packet', packet);
-      self.emit('packet-' + packet.id, packet);
+      self.emit(packet.id, packet);
     }
   });
 
