@@ -16,7 +16,7 @@ server.on('login', function(client) {
 
   // send init data so client will start rendering world
   client.write(0x01, {
-    entityId: 0,
+    entityId: client.id,
     levelType: 'default',
     gameMode: 0,
     dimension: 0,
@@ -41,5 +41,5 @@ server.on('error', function(error) {
 });
 
 server.on('listening', function() {
-	console.log('Server listening on port', server.socket.address().port);
+	console.log('Server listening on port', server.socketServer.address().port);
 });

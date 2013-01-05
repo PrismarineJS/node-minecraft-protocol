@@ -90,7 +90,6 @@ function createServer(options) {
   });
   server.listen(port, host);
   return server;
-
 }
 
 function createClient(options) {

@@ -214,6 +214,18 @@ describe("client", function() {
   });
 });
 describe("server", function() {
+  it("starts listening", function(done) {
+    var server = mc.createServer({ 'online-mode': false });
+    var listening = false;
+    server.on('listening', function() {
+      listening = true;
+      server.close();
+    });
+    server.on('close', function() {
+      assert.ok(listening);
+      done();
+    });
+  });
   it("kicks clients that do not emit keep alive");
   it("responds to ping requests");
 });
