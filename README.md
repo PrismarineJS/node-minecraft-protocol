@@ -78,6 +78,17 @@ server.on('login', function(client) {
 });
 ```
 
+## Installation
+
+### Linux
+
+`npm install minecraft-protocol`
+
+### Windows
+
+ * Follow the Windows instructions from [Obvious/ursa](https://github.com/Obvious/ursa)
+ * `npm install minecraft-protocol`
+
 ## Testing
 
 * Ensure your system has the `java` executable in `PATH`.
