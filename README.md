@@ -57,7 +57,7 @@ var server = mc.createServer({
 });
 server.on('login', function(client) {
   client.write(0x01, {
-    entityId: 0,
+    entityId: client.id,
     levelType: 'default',
     gameMode: 0,
     dimension: 0,

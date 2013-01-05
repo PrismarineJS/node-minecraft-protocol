@@ -115,6 +115,8 @@ function createClient(options) {
   assert.ok(options.username, "username is required");
   var haveCredentials = options.email && options.password;
   var keepAlive = options.keepAlive == null ? true : options.keepAlive;
+  var email = options.email;
+  var password = options.password;
 
   var client = new Client({
     isServer: false
@@ -123,7 +125,7 @@ function createClient(options) {
   client.on('connect', function() {
     client.write(0x02, {
       protocolVersion: protocol.version,
-      username: options.username,
+      username: client.username,
       serverHost: host,
       serverPort: port,
     });
@@ -147,7 +149,7 @@ function createClient(options) {
     if (haveCredentials) {
       hash = crypto.createHash('sha1');
       hash.update(packet.serverId);
-      batch.push(function(cb) { getLoginSession(options.email, options.password, cb); });
+      batch.push(function(cb) { getLoginSession(email, password, cb); });
     }
     batch.push(function(cb) { crypto.randomBytes(16, cb); });
     batch.end(function (err, results) {

@@ -12,12 +12,12 @@ var options = {
 var server = mc.createServer(options);
 
 server.on('login', function(client) {
-  broadcast(yellow + player.username+' joined the game.');
+  broadcast(yellow + client.username+' joined the game.');
   var addr = client.socket.remoteAddress + ':' + client.socket.remotePort;
-  console.log(player.username+' connected', '('+addr+')');
+  console.log(client.username+' connected', '('+addr+')');
 
   client.on('end', function() {
-    broadcast(yellow + player.username+' left the game.', client);
+    broadcast(yellow + client.username+' left the game.', client);
     console.log(client.username+' disconnected', '('+addr+')');
   });
 

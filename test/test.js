@@ -322,10 +322,73 @@ describe("mc-server", function() {
           playerCount: 0,
           maxPlayers: 120
         });
-        done();
+        server.close();
       });
     });
+    server.on('close', done);
   });
-  it("clients can log in and chat");
+  it("clients can log in and chat", function(done) {
+    var server = mc.createServer({ 'online-mode': false, });
+    var username = ['player1', 'player2'];
+    var index = 0;
+    server.on('login', function(client) {
+      assert.notEqual(client.id, null);
+      assert.strictEqual(client.username, username[index++]);
+      broadcast(client.username + ' joined the game.');
+      client.on('end', function() {
+        broadcast(client.username + ' left the game.', client);
+        if (client.username === 'player2') server.close();
+      });
+      client.write(0x01, {
+        entityId: client.id,
+        levelType: 'default',
+        gameMode: 1,
+        dimension: 0,
+        difficulty: 2,
+        maxPlayers: server.maxPlayers
+      });
+      client.on(0x03, function(packet) {
+        var message = '<' + client.username + '>' + ' ' + packet.message;
+        broadcast(message);
+      });
+    });
+    server.on('close', done);
+    server.on('listening', function() {
+      var player1 = mc.createClient({ username: 'player1' });
+      player1.on(0x01, function(packet) {
+        assert.strictEqual(packet.gameMode, 1);
+        assert.strictEqual(packet.levelType, 'default');
+        assert.strictEqual(packet.dimension, 0);
+        assert.strictEqual(packet.difficulty, 2);
+        var player2 = mc.createClient({ username: 'player2' });
+        player2.on(0x01, function(packet) {
+          player1.once(0x03, function(packet) {
+            assert.strictEqual(packet.message, 'player2 joined the game.');
+            player1.once(0x03, function(packet) {
+              assert.strictEqual(packet.message, '<player2> hi');
+              player2.once(0x03, function(packet) {
+                assert.strictEqual(packet.message, '<player1> hello');
+                player1.once(0x03, function(packet) {
+                  assert.strictEqual(packet.message, 'player2 left the game.');
+                  player1.end();
+                });
+                player2.end();
+              });
+              player1.write(0x03, { message: "hello" } );
+            });
+            player2.write(0x03, { message: "hi" } );
+          });
+        });
+      });
+    });
+
+    function broadcast(message, exclude) {
+      var client;
+      for (var clientId in server.clients) {
+        client = server.clients[clientId];
+        if (client !== exclude) client.write(0x03, { message: message });
+      }
+    }
+  });
   it("gives correct reason for kicking clients when shutting down");
 });
