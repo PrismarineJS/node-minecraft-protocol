@@ -109,7 +109,25 @@ describe("client", function() {
   after(function(done) {
     rimraf(MC_SERVER_PATH, done);
   });
-  it("pings the server");
+  it("pings the server", function(done) {
+    startServer({
+      motd: 'test1234',
+      'max-players': 120,
+    }, function() {
+      mc.ping({}, function(err, results) {
+        if (err) return done(err);
+        assert.deepEqual(results, {
+          prefix: "§1",
+          protocol: protocol.version,
+          version: protocol.minecraftVersion,
+          motd: 'test1234',
+          playerCount: 0,
+          maxPlayers: 120
+        });
+        done();
+      });
+    });
+  });
   it("connects successfully - online mode", function(done) {
     startServer({ 'online-mode': 'true' }, function() {
       var client = mc.createClient({
