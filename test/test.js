@@ -1,4 +1,5 @@
 var mc = require('../')
+  , protocol = require('../lib/protocol')
   , spawn = require('child_process').spawn
   , path = require('path')
   , fs = require('fs')
@@ -108,6 +109,7 @@ describe("client", function() {
   after(function(done) {
     rimraf(MC_SERVER_PATH, done);
   });
+  it("pings the server");
   it("connects successfully - online mode", function(done) {
     startServer({ 'online-mode': 'true' }, function() {
       var client = mc.createClient({
@@ -229,22 +231,53 @@ describe("server", function() {
   it("kicks clients that do not log in", function(done) {
     var server = mc.createServer({
       'online-mode': false,
-      kickTimeout: 500,
+      kickTimeout: 100,
+      checkTimeoutInterval: 10,
     });
+    var count = 2;
     server.on('connection', function(client) {
       client.on('end', function(reason) {
         assert.strictEqual(reason, "LoginTimeout");
+        server.close();
       });
+    });
+    server.on('close', function() {
+      resolve();
     });
     server.on('listening', function() {
       var client = new mc.Client();
       client.on('end', function() {
-        done();
+        resolve();
       });
       client.connect(25565, 'localhost');
     });
+
+    function resolve() {
+      count -= 1;
+      if (count <= 0) done();
+    }
   });
-  it("responds to ping requests");
+  it("responds to ping requests", function(done) {
+    var server = mc.createServer({
+      'online-mode': false,
+      motd: 'test1234',
+      'max-players': 120,
+    });
+    server.on('listening', function() {
+      mc.ping({}, function(err, results) {
+        if (err) return done(err);
+        assert.deepEqual(results, {
+          prefix: "§1",
+          protocol: protocol.version,
+          version: protocol.minecraftVersion,
+          motd: 'test1234',
+          playerCount: 0,
+          maxPlayers: 120
+        });
+        done();
+      });
+    });
+  });
   it("clients can log in and chat");
   it("gives correct reason for kicking clients when shutting down");
 });

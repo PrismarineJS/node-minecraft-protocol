@@ -9,10 +9,13 @@ var EventEmitter = require('events').EventEmitter
   , Client = require('./lib/client')
   , Server = require('./lib/server')
 
-exports.createClient = createClient;
-exports.createServer = createServer;
-exports.Client = Client;
-exports.Server = Server;
+module.exports = {
+  createClient: createClient,
+  createServer: createServer,
+  Client: Client,
+  Server: Server,
+  ping: require('./lib/ping'),
+};
 
 function createServer(options) {
   var port = options.port != null ?
@@ -21,8 +24,8 @@ function createServer(options) {
       options['server-port'] :
       25565 ;
   var host = options.host || '0.0.0.0';
-  var timeout = options.timeout || 10 * 1000;
-  var kickTimeout = options.kickTimeout || 4 * 1000;
+  var kickTimeout = options.kickTimeout || 10 * 1000;
+  var checkTimeoutInterval = options.checkTimeoutInterval || 4 * 1000;
   var motd = options.motd || "A Minecraft server";
   var onlineMode = options['online-mode'] == null ? true : options['online-mode'];
   assert.ok(! onlineMode, "online mode for servers is not yet supported");
@@ -47,10 +50,10 @@ function createServer(options) {
 
     function keepAliveLoop() {
       if (keepAlive) {
-        // check if the last keepAlive was too long ago (timeout)
+        // check if the last keepAlive was too long ago (kickTimeout)
         if (lastKeepAlive) {
           var elapsed = new Date() - lastKeepAlive;
-          if (elapsed > timeout) {
+          if (elapsed > kickTimeout) {
             client.end('KeepAliveTimeout');
             return;
           }
@@ -96,7 +99,7 @@ function createServer(options) {
 
       clearTimeout(loginKickTimer);
       loginKickTimer = null;
-      keepAliveTimer = setInterval(keepAliveLoop, kickTimeout);
+      keepAliveTimer = setInterval(keepAliveLoop, checkTimeoutInterval);
 
       server.emit('login', client);
     }
