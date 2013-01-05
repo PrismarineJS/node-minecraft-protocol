@@ -108,7 +108,6 @@ function createServer(options) {
 }
 
 function createClient(options) {
-  // defaults
   assert.ok(options, "options is required");
   var port = options.port || 25565;
   var host = options.host || 'localhost';

@@ -4,19 +4,23 @@ Parse and serialize minecraft packets, plus authentication and encryption.
 
 ## Features
 
- * Parses all packets and emits `packet` events with packet fields as JavaScript
+ * Parses all packets and emits events with packet fields as JavaScript
    objects.
  * Send a packet by supplying fields as a JavaScript object.
- * Supports authenticating and logging in.
-   - Supports encryption (client only)
-   - Supports online mode (client only)
-   - Supports offline mode
- * Respond to keep-alive packets.
- * Test coverage
-   - encryption
-   - authentication/online mode
-   - offline mode
-   - initialization packets
+ * Client
+   - Authenticating and logging in
+   - Encryption on and encryption off
+   - Both online and offline mode
+   - Respond to keep-alive packets.
+   - Ping a server for status
+ * Server
+   - Offline mode
+   - [TODO](https://github.com/superjoe30/node-minecraft-protocol/issues/13) - 
+     Encryption and online mode
+   - Handshake
+   - Keep-alive checking
+   - Ping status
+ * Robust test coverage. See Test Coverage section below.
  * Optimized for rapidly staying up to date with Minecraft protocol updates.
 
 ## Minecraft Compatibility
@@ -82,6 +86,27 @@ server.on('login', function(client) {
 * Ensure your system has the `java` executable in `PATH`.
 * Download the appropriate version of `minecraft_server.jar`.
 * `MC_SERVER_JAR=path/to/minecraft_server.jar MC_USERNAME=username MC_EMAIL=email@example.com MC_PASSWORD=password npm test`
+
+### Test Coverage
+
+```
+  client
+    ✓ pings the server (6164ms)
+    ✓ connects successfully - online mode (2527ms)
+    ✓ connects successfully - offline mode (1902ms)
+    ✓ gets kicked when no credentials supplied in online mode (3720ms)
+    ✓ does not crash for 10000ms (11731ms)
+  mc-server
+    ✓ starts listening and shuts down cleanly 
+    ✓ kicks clients that do not log in (103ms)
+    ✓ kicks clients that do not send keepalive packets (104ms)
+    ✓ responds to ping requests 
+    ✓ clients can log in and chat (43ms)
+    ✓ gives correct reason for kicking clients when shutting down 
+
+
+  11 tests complete (45 seconds)
+```
 
 ## Updating to a newer protocol version
 
