@@ -360,25 +360,28 @@ describe("mc-server", function() {
         assert.strictEqual(packet.levelType, 'default');
         assert.strictEqual(packet.dimension, 0);
         assert.strictEqual(packet.difficulty, 2);
-        var player2 = mc.createClient({ username: 'player2' });
-        player2.on(0x01, function(packet) {
+        player1.once(0x03, function(packet) {
+          assert.strictEqual(packet.message, 'player2 joined the game.');
           player1.once(0x03, function(packet) {
-            assert.strictEqual(packet.message, 'player2 joined the game.');
-            player1.once(0x03, function(packet) {
-              assert.strictEqual(packet.message, '<player2> hi');
-              player2.once(0x03, function(packet) {
-                assert.strictEqual(packet.message, '<player1> hello');
-                player1.once(0x03, function(packet) {
-                  assert.strictEqual(packet.message, 'player2 left the game.');
-                  player1.end();
-                });
-                player2.end();
+            assert.strictEqual(packet.message, '<player2> hi');
+            player2.once(0x03, fn);
+            function fn(packet) {
+              if (/^<player2>/.test(packet.message)) {
+                player2.once(0x03, fn);
+                return;
+              }
+              assert.strictEqual(packet.message, '<player1> hello');
+              player1.once(0x03, function(packet) {
+                assert.strictEqual(packet.message, 'player2 left the game.');
+                player1.end();
               });
-              player1.write(0x03, { message: "hello" } );
-            });
-            player2.write(0x03, { message: "hi" } );
+              player2.end();
+            }
+            player1.write(0x03, { message: "hello" } );
           });
+          player2.write(0x03, { message: "hi" } );
         });
+        var player2 = mc.createClient({ username: 'player2' });
       });
     });
 
