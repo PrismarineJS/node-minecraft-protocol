@@ -233,7 +233,7 @@ describe("client", function() {
     });
   });
 });
-describe("server", function() {
+describe("mc-server", function() {
   it("starts listening and shuts down cleanly", function(done) {
     var server = mc.createServer({ 'online-mode': false });
     var listening = false;
@@ -270,6 +270,36 @@ describe("server", function() {
       client.connect(25565, 'localhost');
     });
 
+    function resolve() {
+      count -= 1;
+      if (count <= 0) done();
+    }
+  });
+  it("kicks clients that do not send keepalive packets", function(done) {
+    var server = mc.createServer({
+      'online-mode': false,
+      kickTimeout: 100,
+      checkTimeoutInterval: 10,
+    });
+    var count = 2;
+    server.on('connection', function(client) {
+      client.on('end', function(reason) {
+        assert.strictEqual(reason, "KeepAliveTimeout");
+        server.close();
+      });
+    });
+    server.on('close', function() {
+      resolve();
+    });
+    server.on('listening', function() {
+      var client = mc.createClient({
+        username: 'superpants',
+        keepAlive: false,
+      });
+      client.on('end', function() {
+        resolve();
+      });
+    });
     function resolve() {
       count -= 1;
       if (count <= 0) done();

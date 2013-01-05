@@ -34,7 +34,6 @@ function createServer(options) {
   server.on("connection", function(client) {
     client.once(0xfe, onPing);
     client.on(0x02, onHandshake);
-    client.on(0x00, onKeepAlive);
     client.on('end', onEnd);
 
     var keepAlive = false;
@@ -49,32 +48,33 @@ function createServer(options) {
     }
 
     function keepAliveLoop() {
-      if (keepAlive) {
-        // check if the last keepAlive was too long ago (kickTimeout)
-        if (lastKeepAlive) {
-          var elapsed = new Date() - lastKeepAlive;
-          if (elapsed > kickTimeout) {
-            client.end('KeepAliveTimeout');
-            return;
-          }
-        }
-        client.write(0x00, {
-          keepAliveId: Math.floor(Math.random() * 2147483648)
-        });
+      if (! keepAlive) return;
+
+      // check if the last keepAlive was too long ago (kickTimeout)
+      var elapsed = new Date() - lastKeepAlive;
+      if (elapsed > kickTimeout) {
+        client.end('KeepAliveTimeout');
+        return;
       }
+      client.write(0x00, {
+        keepAliveId: Math.floor(Math.random() * 2147483648)
+      });
+    }
+
+    function onKeepAlive(packet) {
+      lastKeepAlive = new Date();
+    }
+
+    function startKeepAlive() {
+      keepAlive = true;
+      lastKeepAlive = new Date();
+      keepAliveTimer = setInterval(keepAliveLoop, checkTimeoutInterval);
+      client.on(0x00, onKeepAlive);
     }
 
     function onEnd() {
       clearInterval(keepAliveTimer);
       clearTimeout(loginKickTimer);
-    }
-
-    function onKeepAlive(packet) {
-      if (keepAlive) {
-        lastKeepAlive = new Date();
-      } else {
-        lastKeepAlive = null;
-      }
     }
 
     function onPing(packet) {
@@ -94,12 +94,11 @@ function createServer(options) {
     function onHandshake(packet) {
       assert.ok(! onlineMode);
       loggedIn = true;
-      keepAlive = true;
       client.username = packet.username;
+      startKeepAlive();
 
       clearTimeout(loginKickTimer);
       loginKickTimer = null;
-      keepAliveTimer = setInterval(keepAliveLoop, checkTimeoutInterval);
 
       server.emit('login', client);
     }
@@ -115,7 +114,7 @@ function createClient(options) {
   var host = options.host || 'localhost';
   assert.ok(options.username, "username is required");
   var haveCredentials = options.email && options.password;
-  var keepAlive = !!options.keepAlive;
+  var keepAlive = options.keepAlive == null ? true : options.keepAlive;
 
   var client = new Client({
     isServer: false
