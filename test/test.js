@@ -214,7 +214,7 @@ describe("client", function() {
   });
 });
 describe("server", function() {
-  it("starts listening", function(done) {
+  it("starts listening and shuts down cleanly", function(done) {
     var server = mc.createServer({ 'online-mode': false });
     var listening = false;
     server.on('listening', function() {
@@ -226,6 +226,25 @@ describe("server", function() {
       done();
     });
   });
-  it("kicks clients that do not emit keep alive");
+  it("kicks clients that do not log in", function(done) {
+    var server = mc.createServer({
+      'online-mode': false,
+      kickTimeout: 500,
+    });
+    server.on('connection', function(client) {
+      client.on('end', function(reason) {
+        assert.strictEqual(reason, "LoginTimeout");
+      });
+    });
+    server.on('listening', function() {
+      var client = new mc.Client();
+      client.on('end', function() {
+        done();
+      });
+      client.connect(25565, 'localhost');
+    });
+  });
   it("responds to ping requests");
+  it("clients can log in and chat");
+  it("gives correct reason for kicking clients when shutting down");
 });

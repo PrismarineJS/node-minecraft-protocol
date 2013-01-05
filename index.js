@@ -11,6 +11,8 @@ var EventEmitter = require('events').EventEmitter
 
 exports.createClient = createClient;
 exports.createServer = createServer;
+exports.Client = Client;
+exports.Server = Server;
 
 function createServer(options) {
   var port = options.port != null ?
@@ -20,7 +22,7 @@ function createServer(options) {
       25565 ;
   var host = options.host || '0.0.0.0';
   var timeout = options.timeout || 10 * 1000;
-  var keepAliveInterval = options.keepAliveInterval || 4 * 1000;
+  var kickTimeout = options.kickTimeout || 4 * 1000;
   var motd = options.motd || "A Minecraft server";
   var onlineMode = options['online-mode'] == null ? true : options['online-mode'];
   assert.ok(! onlineMode, "online mode for servers is not yet supported");
@@ -36,7 +38,12 @@ function createServer(options) {
     var loggedIn = false;
     var lastKeepAlive = null;
 
-    var keepAliveTimer = setInterval(keepAliveLoop, keepAliveInterval);
+    var keepAliveTimer = null;
+    var loginKickTimer = setTimeout(kickForNotLoggingIn, kickTimeout);
+
+    function kickForNotLoggingIn() {
+      client.end('LoginTimeout');
+    }
 
     function keepAliveLoop() {
       if (keepAlive) {
@@ -44,7 +51,7 @@ function createServer(options) {
         if (lastKeepAlive) {
           var elapsed = new Date() - lastKeepAlive;
           if (elapsed > timeout) {
-            client.end();
+            client.end('KeepAliveTimeout');
             return;
           }
         }
@@ -56,6 +63,7 @@ function createServer(options) {
 
     function onEnd() {
       clearInterval(keepAliveTimer);
+      clearTimeout(loginKickTimer);
     }
 
     function onKeepAlive(packet) {
@@ -85,6 +93,11 @@ function createServer(options) {
       loggedIn = true;
       keepAlive = true;
       client.username = packet.username;
+
+      clearTimeout(loginKickTimer);
+      loginKickTimer = null;
+      keepAliveTimer = setInterval(keepAliveLoop, kickTimeout);
+
       server.emit('login', client);
     }
   });
@@ -99,6 +112,7 @@ function createClient(options) {
   var host = options.host || 'localhost';
   assert.ok(options.username, "username is required");
   var haveCredentials = options.email && options.password;
+  var keepAlive = !!options.keepAlive;
 
   var client = new Client({
     isServer: false
@@ -112,10 +126,7 @@ function createClient(options) {
       serverPort: port,
     });
   });
-  client.on('packet', function(packet) {
-    console.log(packet.id, packet);
-  });
-  client.on(0x00, onKeepAlive);
+  if (keepAlive) client.on(0x00, onKeepAlive);
   client.once(0xFC, onEncryptionKeyResponse);
   client.once(0xFD, onEncryptionKeyRequest);
   client.connect(port, host);
