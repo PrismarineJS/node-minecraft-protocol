@@ -390,5 +390,35 @@ describe("mc-server", function() {
       }
     }
   });
-  it("gives correct reason for kicking clients when shutting down");
+  it("gives correct reason for kicking clients when shutting down", function(done) {
+    var server = mc.createServer({ 'online-mode': false, });
+    var count = 2;
+    server.on('login', function(client) {
+      client.on('end', function(reason) {
+        assert.strictEqual(reason, 'ServerShutdown');
+        resolve();
+      });
+      client.write(0x01, {
+        entityId: client.id,
+        levelType: 'default',
+        gameMode: 1,
+        dimension: 0,
+        difficulty: 2,
+        maxPlayers: server.maxPlayers
+      });
+    });
+    server.on('close', function() {
+      resolve();
+    });
+    server.on('listening', function() {
+      var client = mc.createClient({ username: 'lalalal', });
+      client.on(0x01, function() {
+        server.close();
+      });
+    });
+    function resolve() {
+      count -= 1;
+      if (count <= 0) done();
+    }
+  });
 });
