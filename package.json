@@ -33,7 +33,6 @@
   "dependencies": {
     "ursa": "~0.8.0",
     "superagent": "~0.10.0",
-    "iconv": "~1.2.4",
     "batch": "~0.2.1"
   }
 }

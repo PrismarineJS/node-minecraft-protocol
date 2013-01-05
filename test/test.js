@@ -40,7 +40,7 @@ var defaultServerProps = {
   'motd': 'A Minecraft Server',
 };
 
-describe("minecraft protocol", function() {
+describe("client", function() {
   this.timeout(20000);
 
   var mcServer;
@@ -212,4 +212,8 @@ describe("minecraft protocol", function() {
       });
     });
   });
+});
+describe("server", function() {
+  it("kicks clients that do not emit keep alive");
+  it("responds to ping requests");
 });
