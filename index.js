@@ -15,6 +15,7 @@ module.exports = {
   Client: Client,
   Server: Server,
   ping: require('./lib/ping'),
+  constants: protocol.constants,
 };
 
 function createServer(options) {

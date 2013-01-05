@@ -4,6 +4,7 @@ Parse and serialize minecraft packets, plus authentication and encryption.
 
 ## Features
 
+ * Supports Minecraft version 1.4.7pre
  * Parses all packets and emits events with packet fields as JavaScript
    objects.
  * Send a packet by supplying fields as a JavaScript object.
@@ -22,10 +23,6 @@ Parse and serialize minecraft packets, plus authentication and encryption.
    - Ping status
  * Robust test coverage. See Test Coverage section below.
  * Optimized for rapidly staying up to date with Minecraft protocol updates.
-
-## Minecraft Compatibility
-
-Supports Minecraft version 1.4.7pre
 
 ## Usage
 
@@ -107,13 +104,3 @@ server.on('login', function(client) {
 
   11 tests complete (45 seconds)
 ```
-
-## Updating to a newer protocol version
-
-In most cases you should only have to do the following:
-
-1. In `packets.json`:
- * Update `protocolVersion` to the correct number.
- * Edit the data structure to reflect the new packet layout.
-2. Update the "Minecraft Compatibility" section above in this README.
-3. Run the test suite to make sure everything still works. See "Testing" above.
