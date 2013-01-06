@@ -211,10 +211,8 @@ function createClient(options) {
 
       function sendEncryptionKeyResponse() {
         var pubKey = mcPubKeyToURsa(packet.publicKey);
-        var encryptedSharedSecret = pubKey.encrypt(sharedSecret, 'binary', 'base64', ursa.RSA_PKCS1_PADDING);
-        var encryptedSharedSecretBuffer = new Buffer(encryptedSharedSecret, 'base64');
-        var encryptedVerifyToken = pubKey.encrypt(packet.verifyToken, 'binary', 'base64', ursa.RSA_PKCS1_PADDING);
-        var encryptedVerifyTokenBuffer = new Buffer(encryptedVerifyToken, 'base64');
+        var encryptedSharedSecretBuffer = pubKey.encrypt(sharedSecret, undefined, undefined, ursa.RSA_PKCS1_PADDING);
+        var encryptedVerifyTokenBuffer = pubKey.encrypt(packet.verifyToken, undefined, undefined, ursa.RSA_PKCS1_PADDING);
         client.cipher = crypto.createCipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
         client.decipher = crypto.createDecipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
         client.write(0xfc, {
