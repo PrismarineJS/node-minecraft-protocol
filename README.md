@@ -24,6 +24,10 @@ Parse and serialize minecraft packets, plus authentication and encryption.
  * Robust test coverage. See Test Coverage section below.
  * Optimized for rapidly staying up to date with Minecraft protocol updates.
 
+This package aims to be a low-level interface to the Minecraft protocol and
+no more. If you want a higher-level API with which to write bots, see
+[mineflayer](https://github.com/superjoe30/mineflayer/)
+
 ## Usage
 
 ### Echo client example
