@@ -45,38 +45,33 @@ var defaultServerProps = {
   'motd': 'A Minecraft Server',
 };
 
-var eq = assert.strictEqual;
-var ok = assert.ok;
-var noop = function(){};
-
 var values = {
-  'int': [123456, eq],
-  'short': [-123, eq],
-  'ushort': [123, eq],
-  'byte': [-10, eq],
-  'ubyte': [8, eq],
-  'string': ["hi hi this is my string", eq],
-  'byteArray16': [new Buffer(8), ok],
-  'bool': [true, eq],
-  'double': [99999.2222, eq],
-  'float': [-333.444, eq],
-  'slot': [{
+  'int': 123456,
+  'short': -123,
+  'ushort': 123,
+  'byte': -10,
+  'ubyte': 8,
+  'string': "hi hi this is my string",
+  'byteArray16': new Buffer(8),
+  'bool': true,
+  'double': 99999.2222,
+  'float': -333.444,
+  'slot': {
     id: 5,
     itemCount: 56,
     itemDamage: 2,
     nbtData: new Buffer(90),
-  }, ok],
-
-  'ascii': ["hello", eq],
-  'byteArray32': [new Buffer(10), ok],
-  'long': [[0, 1], ok],
-  'slotArray': [[{
+  },
+  'ascii': "hello",
+  'byteArray32': new Buffer(10),
+  'long': [0, 1],
+  'slotArray': [{
     id: 41,
     itemCount: 2,
     itemDamage: 3,
     nbtData: new Buffer(0),
-  }], ok],
-  'mapChunkBulk': [{
+  }],
+  'mapChunkBulk': {
     skyLightSent: true,
     compressedChunkData: new Buffer(1234),
     meta: [{
@@ -85,23 +80,23 @@ var values = {
       bitMap: 3,
       addBitMap: 10,
     }],
-  }, ok],
-  'entityMetadata': [[{
+  },
+  'entityMetadata': [{
     type: 'int',
     key: 3,
     value: 100,
-  }], ok],
-  'objectData': [{
+  }],
+  'objectData': {
     intField: 9,
     velocityX: 1,
     velocityY: 2,
     velocityZ: 3,
-  }, ok],
-  'intArray8': [[1, 2, 3, 4], ok],
-  'intVector': [{x: 1, y: 2, z: 3}, ok],
-  'byteVector': [{x: 1, y: 2, z: 3}, ok],
-  'byteVectorArray': [[{x: 1, y: 2, z: 3}], ok],
-}
+  },
+  'intArray8': [1, 2, 3, 4],
+  'intVector': {x: 1, y: 2, z: 3},
+  'byteVector': {x: 1, y: 2, z: 3},
+  'byteVectorArray': [{x: 1, y: 2, z: 3}],
+};
 
 describe("packets", function() {
   var client, server, serverClient;
@@ -147,7 +142,7 @@ describe("packets", function() {
     var packet = {};
     packetInfo.forEach(function(field) {
       var value = field.type;
-      packet[field.name] = values[field.type][0];
+      packet[field.name] = values[field.type];
     });
     serverClient.once(packetId, function(receivedPacket) {
       delete receivedPacket.id;
@@ -163,8 +158,7 @@ describe("packets", function() {
   }
   function assertPacketsMatch(p1, p2) {
     packetInfo.forEach(function(field) {
-      var cmp = values[field.type][1];
-      cmp(p1[field], p2[field]);
+      assert.deepEqual(p1[field], p2[field]);
     });
     var field, cmp;
     for (field in p1) {
