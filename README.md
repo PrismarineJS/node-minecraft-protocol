@@ -112,25 +112,14 @@ server.on('login', function(client) {
 
 #### entityMetadata
 
-When *writing* a packet with an entityMetadata data type field, the structure
-looks like this:
+Value looks like this:
 
 ```js
 [
-  {type: 'slot', value: slot},
-  {type: 'int', value: value},
+  {type: 'slot', value: slot, key: 3},
+  {type: 'int', value: value, key: 4},
   ...
 ]
-```
-
-When *receiving* a packet with an entityMetadata data type field, the structure
-looks like this:
-
-```js
-{
-  1: value,
-  3: value,
-}
 ```
 
 Where the key is the numeric metadata key and the value is the value of the 
