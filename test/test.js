@@ -45,34 +45,38 @@ var defaultServerProps = {
   'motd': 'A Minecraft Server',
 };
 
+var eq = assert.strictEqual;
+var ok = assert.ok;
+var noop = function(){};
+
 var values = {
-  'int': Math.floor(Math.random() * Math.pow(2, 16)),
-  'short': Math.floor(Math.random() * Math.pow(2, 8)),
-  'ushort': Math.floor(Math.random() * Math.pow(2, 16)),
-  'byte': Math.floor(Math.random() * Math.pow(2, 4)),
-  'ubyte': Math.floor(Math.random() * Math.pow(2, 8)),
-  'string': "hi hi this is my string",
-  'byteArray16': new Buffer(8),
-  'bool': Math.random() < 0.5,
-  'double': Math.random() * Math.pow(2, 64),
-  'float': Math.random() * Math.pow(2, 32),
-  'slot': {
+  'int': [123456, eq],
+  'short': [-123, eq],
+  'ushort': [123, eq],
+  'byte': [-10, eq],
+  'ubyte': [8, eq],
+  'string': ["hi hi this is my string", eq],
+  'byteArray16': [new Buffer(8), ok],
+  'bool': [true, eq],
+  'double': [99999.2222, eq],
+  'float': [-333.444, eq],
+  'slot': [{
     id: 5,
     itemCount: 56,
     itemDamage: 2,
     nbtData: new Buffer(90),
-  },
+  }, ok],
 
-  'ascii': "hello",
-  'byteArray32': new Buffer(10),
-  'long': [0, 1],
-  'slotArray': [{
+  'ascii': ["hello", eq],
+  'byteArray32': [new Buffer(10), ok],
+  'long': [[0, 1], ok],
+  'slotArray': [[{
     id: 41,
     itemCount: 2,
     itemDamage: 3,
     nbtData: new Buffer(0),
-  }],
-  'mapChunkBulk': {
+  }], ok],
+  'mapChunkBulk': [{
     skyLightSent: true,
     compressedChunkData: new Buffer(1234),
     meta: [{
@@ -81,18 +85,18 @@ var values = {
       bitMap: 3,
       addBitMap: 10,
     }],
-  },
-  'entityMetadata': {},
-  'objectData': {
+  }, ok],
+  'entityMetadata': [{}, ok],
+  'objectData': [{
     intField: 9,
     velocityX: 1,
     velocityY: 2,
     velocityZ: 3,
-  },
-  'intArray8': [1, 2, 3, 4],
-  'intVector': {x: 1, y: 2, z: 3},
-  'byteVector': {x: 1, y: 2, z: 3},
-  'byteVectorArray': [{x: 1, y: 2, z: 3}],
+  }, ok],
+  'intArray8': [[1, 2, 3, 4], ok],
+  'intVector': [{x: 1, y: 2, z: 3}, ok],
+  'byteVector': [{x: 1, y: 2, z: 3}, ok],
+  'byteVectorArray': [[{x: 1, y: 2, z: 3}], ok],
 }
 
 describe("packets", function() {
@@ -139,7 +143,7 @@ describe("packets", function() {
     var packet = {};
     packetInfo.forEach(function(field) {
       var value = field.type;
-      packet[field.name] = values[field.type];
+      packet[field.name] = values[field.type][0];
     });
     serverClient.once(packetId, function(receivedPacket) {
       delete receivedPacket.id;
@@ -154,9 +158,13 @@ describe("packets", function() {
     client.write(packetId, packet);
   }
   function assertPacketsMatch(p1, p2) {
-    var field;
+    packetInfo.forEach(function(field) {
+      var cmp = values[field.type][1];
+      cmp(p1[field], p2[field]);
+    });
+    var field, cmp;
     for (field in p1) {
-      assert.ok(field in p2, "field " + field + " missing in p2")
+      assert.ok(field in p2, "field " + field + " missing in p2");
     }
     for (field in p2) {
       assert.ok(field in p1, "field " + field + " missing in p1");
