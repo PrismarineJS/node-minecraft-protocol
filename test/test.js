@@ -1,12 +1,16 @@
 var mc = require('../')
-  , protocol = require('../lib/protocol')
+  , protocol = mc.protocol
+  , Client = mc.Client
+  , Server = mc.Server
   , spawn = require('child_process').spawn
   , path = require('path')
   , fs = require('fs')
+  , net = require('net')
   , assert = require('assert')
   , mkdirp = require('mkdirp')
   , rimraf = require('rimraf')
   , Batch = require('batch')
+  , zfill = require('zfill')
   , MC_SERVER_JAR = process.env.MC_SERVER_JAR
   , SURVIVE_TIME = 10000
   , MC_SERVER_PATH = path.join(__dirname, 'server')
@@ -40,6 +44,125 @@ var defaultServerProps = {
   'spawn-protection': '16',
   'motd': 'A Minecraft Server',
 };
+
+var values = {
+  'int': Math.floor(Math.random() * Math.pow(2, 16)),
+  'short': Math.floor(Math.random() * Math.pow(2, 8)),
+  'ushort': Math.floor(Math.random() * Math.pow(2, 16)),
+  'byte': Math.floor(Math.random() * Math.pow(2, 4)),
+  'ubyte': Math.floor(Math.random() * Math.pow(2, 8)),
+  'string': "hi hi this is my string",
+  'byteArray16': new Buffer(8),
+  'bool': Math.random() < 0.5,
+  'double': Math.random() * Math.pow(2, 64),
+  'float': Math.random() * Math.pow(2, 32),
+  'slot': {
+    id: 5,
+    itemCount: 56,
+    itemDamage: 2,
+    nbtData: new Buffer(90),
+  },
+
+  'ascii': "hello",
+  'byteArray32': new Buffer(10),
+  'long': [0, 1],
+  'slotArray': [{
+    id: 41,
+    itemCount: 2,
+    itemDamage: 3,
+    nbtData: new Buffer(0),
+  }],
+  'mapChunkBulk': {
+    skyLightSent: true,
+    compressedChunkData: new Buffer(1234),
+    meta: [{
+      x: 23,
+      z: 64,
+      bitMap: 3,
+      addBitMap: 10,
+    }],
+  },
+  'entityMetadata': {},
+  'objectData': {
+    intField: 9,
+    velocityX: 1,
+    velocityY: 2,
+    velocityZ: 3,
+  },
+  'intArray8': [1, 2, 3, 4],
+  'intVector': {x: 1, y: 2, z: 3},
+  'byteVector': {x: 1, y: 2, z: 3},
+  'byteVectorArray': [{x: 1, y: 2, z: 3}],
+}
+
+describe("packets", function() {
+  var client, server, serverClient;
+  before(function(done) {
+    server = new Server();
+    server.once('listening', function() {
+      server.once('connection', function(c) {
+        serverClient = c;
+        done();
+      });
+      client = new Client();
+      client.setSocket(net.connect(25565, 'localhost'));
+    });
+    server.listen(25565, 'localhost');
+  });
+  after(function(done) {
+    client.on('end', function() {
+      server.on('close', done);
+      server.close();
+    });
+    client.end();
+  });
+  var packetId, packetInfo, field;
+  for(packetId in protocol.packets) {
+    packetId = parseInt(packetId, 10);
+    packetInfo = protocol.packets[packetId];
+    it("0x" + zfill(parseInt(packetId, 10).toString(16), 2), callTestPacket(packetId, packetInfo));
+  }
+  function callTestPacket(packetId, packetInfo) {
+    return function(done) {
+      var batch = new Batch();
+      batch.push(function(done) {
+        testPacket(packetId, protocol.get(packetId, false), done);
+      });
+      batch.push(function(done) {
+        testPacket(packetId, protocol.get(packetId, true), done);
+      });
+      batch.end(done);
+    };
+  }
+  function testPacket(packetId, packetInfo, done) {
+    // empty object uses default values
+    var packet = {};
+    packetInfo.forEach(function(field) {
+      var value = field.type;
+      packet[field.name] = values[field.type];
+    });
+    serverClient.once(packetId, function(receivedPacket) {
+      delete receivedPacket.id;
+      assertPacketsMatch(packet, receivedPacket);
+      client.once(packetId, function(clientReceivedPacket) {
+        delete clientReceivedPacket.id;
+        assertPacketsMatch(receivedPacket, clientReceivedPacket);
+        done();
+      });
+      serverClient.write(packetId, receivedPacket);
+    });
+    client.write(packetId, packet);
+  }
+  function assertPacketsMatch(p1, p2) {
+    var field;
+    for (field in p1) {
+      assert.ok(field in p2, "field " + field + " missing in p2")
+    }
+    for (field in p2) {
+      assert.ok(field in p1, "field " + field + " missing in p1");
+    }
+  }
+});
 
 describe("client", function() {
   this.timeout(20000);

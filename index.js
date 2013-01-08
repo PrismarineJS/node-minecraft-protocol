@@ -24,6 +24,7 @@ function createServer(options) {
     options['server-port'] != null ?
       options['server-port'] :
       25565 ;
+  var maxPlayers = options['max-players'] || 20;
   var host = options.host || '0.0.0.0';
   var kickTimeout = options.kickTimeout || 10 * 1000;
   var checkTimeoutInterval = options.checkTimeoutInterval || 4 * 1000;
@@ -32,6 +33,7 @@ function createServer(options) {
   assert.ok(! onlineMode, "online mode for servers is not yet supported");
 
   var server = new Server(options);
+  server.maxPlayers = maxPlayers;
   server.on("connection", function(client) {
     client.once(0xfe, onPing);
     client.on(0x02, onHandshake);
@@ -87,7 +89,7 @@ function createServer(options) {
           protocol.minecraftVersion,
           motd,
           server.playerCount,
-          server.maxPlayers,
+          maxPlayers,
         ].join('\u0000')
       });
     }
@@ -118,9 +120,7 @@ function createClient(options) {
   var email = options.email;
   var password = options.password;
 
-  var client = new Client({
-    isServer: false
-  });
+  var client = new Client(false);
   client.username = options.username;
   client.on('connect', function() {
     client.write(0x02, {

@@ -28,7 +28,8 @@
   "devDependencies": {
     "mocha": "~1.7.4",
     "mkdirp": "~0.3.4",
-    "rimraf": "~2.1.1"
+    "rimraf": "~2.1.1",
+    "zfill": "0.0.1"
   },
   "dependencies": {
     "ursa": "~0.8.0",
