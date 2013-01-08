@@ -93,6 +93,49 @@ server.on('login', function(client) {
  * Follow the Windows instructions from [Obvious/ursa](https://github.com/Obvious/ursa)
  * `npm install minecraft-protocol`
 
+## Documentation
+
+### mc.ping(options, callback)
+
+`callback(err, pingResults)`
+
+`pingResults`:
+
+ * `prefix`
+ * `protocol`
+ * `version`
+ * `motd`
+ * `playerCount`
+ * `maxPlayers`
+
+### Not Immediately Obvious Data Type Formats
+
+#### entityMetadata
+
+When *writing* a packet with an entityMetadata data type field, the structure
+looks like this:
+
+```js
+[
+  {type: 'slot', value: slot},
+  {type: 'int', value: value},
+  ...
+]
+```
+
+When *receiving* a packet with an entityMetadata data type field, the structure
+looks like this:
+
+```js
+{
+  1: value,
+  3: value,
+}
+```
+
+Where the key is the numeric metadata key and the value is the value of the 
+correct data type.
+
 ## Testing
 
 * Ensure your system has the `java` executable in `PATH`.
@@ -102,20 +145,97 @@ server.on('login', function(client) {
 ### Test Coverage
 
 ```
+  packets
+    ✓ 0x00 
+    ✓ 0x01 
+    ✓ 0x02 
+    ✓ 0x03 
+    ✓ 0x04 
+    ✓ 0x05 
+    ✓ 0x06 
+    ✓ 0x07 
+    ✓ 0x08 
+    ✓ 0x09 
+    ✓ 0x0a 
+    ✓ 0x0b 
+    ✓ 0x0c 
+    ✓ 0x0d 
+    ✓ 0x0e 
+    ✓ 0x0f 
+    ✓ 0x10 
+    ✓ 0x11 
+    ✓ 0x12 
+    ✓ 0x13 
+    ✓ 0x14 
+    ✓ 0x16
+    ✓ 0x17 
+    ✓ 0x18 
+    ✓ 0x19 
+    ✓ 0x1a 
+    ✓ 0x1c 
+    ✓ 0x1d 
+    ✓ 0x1e 
+    ✓ 0x1f 
+    ✓ 0x20 
+    ✓ 0x21 
+    ✓ 0x22 
+    ✓ 0x23 
+    ✓ 0x26 
+    ✓ 0x27 
+    ✓ 0x28 
+    ✓ 0x29 
+    ✓ 0x2a 
+    ✓ 0x2b 
+    ✓ 0x33 
+    ✓ 0x34 
+    ✓ 0x35 
+    ✓ 0x36 
+    ✓ 0x37 
+    ✓ 0x38 
+    ✓ 0x3c 
+    ✓ 0x3d 
+    ✓ 0x3e 
+    ✓ 0x46 
+    ✓ 0x47 
+    ✓ 0x64 
+    ✓ 0x65 
+    ✓ 0x66 
+    ✓ 0x67 
+    ✓ 0x68 
+    ✓ 0x69 
+    ✓ 0x6a 
+    ✓ 0x6b 
+    ✓ 0x6c 
+    ✓ 0x82 
+    ✓ 0x83 
+    ✓ 0x84 
+    ✓ 0xc8 
+    ✓ 0xc9 
+    ✓ 0xca 
+    ✓ 0xcb 
+    ✓ 0xcc 
+    ✓ 0xcd 
+    ✓ 0xfa 
+    ✓ 0xfc 
+    ✓ 0xfd 
+    ✓ 0xfe 
+    ✓ 0xff 
+
   client
-    ✓ pings the server (6164ms)
-    ✓ connects successfully - online mode (2527ms)
-    ✓ connects successfully - offline mode (1902ms)
-    ✓ gets kicked when no credentials supplied in online mode (3720ms)
-    ✓ does not crash for 10000ms (11731ms)
+    ✓ pings the server
+    ✓ connects successfully - online mode
+    ✓ connects successfully - offline mode
+    ✓ gets kicked when no credentials supplied in online mode
+    ✓ does not crash for 10000ms
+
   mc-server
     ✓ starts listening and shuts down cleanly 
-    ✓ kicks clients that do not log in (103ms)
-    ✓ kicks clients that do not send keepalive packets (104ms)
+    ✓ kicks clients that do not log in
+    ✓ kicks clients that do not send keepalive packets
     ✓ responds to ping requests 
-    ✓ clients can log in and chat (43ms)
+    ✓ clients can log in and chat
     ✓ gives correct reason for kicking clients when shutting down 
 
 
-  11 tests complete (45 seconds)
+  85 tests complete
 ```
