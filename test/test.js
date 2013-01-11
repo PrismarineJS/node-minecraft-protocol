@@ -359,6 +359,9 @@ describe("client", function() {
           done();
         }, SURVIVE_TIME);
       });
+      client.on(0x0d, function(packet) {
+        assert.ok(packet.stance > packet.y, "stance should be > y");
+      });
     });
   });
 });
