@@ -115,9 +115,9 @@ function createClient(options) {
   var port = options.port || 25565;
   var host = options.host || 'localhost';
   assert.ok(options.username, "username is required");
-  var haveCredentials = options.email && options.password;
+  var haveCredentials = typeof options.password !== "undefined";
   var keepAlive = options.keepAlive == null ? true : options.keepAlive;
-  var email = options.email;
+  var email = options.email || options.username;
   var password = options.password;
 
   var client = new Client(false);
