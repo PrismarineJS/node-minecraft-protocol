@@ -228,3 +228,21 @@ correct data type.
 
   85 tests complete
 ```
+
+## History
+
+### 0.6.4
+
+ * Allow minecraft username instead of mojang email. (thanks roblabla)
+
+### 0.6.3
+
+ * y values when only 1 byte are always unsigned
+
+### 0.6.2
+
+ * 0x0e: change face to unsigned byte
+
+### 0.6.1
+
+ * 0x0d: fix incorrectly swapped stance and y
