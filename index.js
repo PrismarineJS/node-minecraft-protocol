@@ -30,13 +30,16 @@ function createServer(options) {
   var checkTimeoutInterval = options.checkTimeoutInterval || 4 * 1000;
   var motd = options.motd || "A Minecraft server";
   var onlineMode = options['online-mode'] == null ? true : options['online-mode'];
-  assert.ok(! onlineMode, "online mode for servers is not yet supported");
+  var encryptionEnabled = options['enable-encryption'] == null ? true : options['enable-encryption'];
+
+  var serverKey = ursa.generatePrivateKey(1024);
 
   var server = new Server(options);
   server.maxPlayers = maxPlayers;
   server.on("connection", function(client) {
     client.once(0xfe, onPing);
-    client.on(0x02, onHandshake);
+    client.once(0x02, onHandshake);
+    client.once(0xFC, onEncryptionKeyResponse);
     client.on('end', onEnd);
 
     var keepAlive = false;
@@ -45,6 +48,8 @@ function createServer(options) {
 
     var keepAliveTimer = null;
     var loginKickTimer = setTimeout(kickForNotLoggingIn, kickTimeout);
+
+    var hash;
 
     function kickForNotLoggingIn() {
       client.end('LoginTimeout');
@@ -95,9 +100,72 @@ function createServer(options) {
     }
 
     function onHandshake(packet) {
-      assert.ok(! onlineMode);
-      loggedIn = true;
       client.username = packet.username;
+      var serverId;
+      if (onlineMode) {
+        serverId = crypto.randomBytes(4).toString('hex');
+      } else {
+        serverId = '-';
+      }
+      if (encryptionEnabled) {
+        client.verifyToken = crypto.randomBytes(4);
+        var publicKeyStrArr = serverKey.toPublicPem("utf8").split("\n");
+        var publicKeyStr = "";
+        for (var i=1;i<publicKeyStrArr.length - 2;i++) {
+          publicKeyStr += publicKeyStrArr[i]
+        }
+        client.publicKey = new Buffer(publicKeyStr,'base64');
+        hash = crypto.createHash("sha1");
+        hash.update(serverId);
+        client.write(0xFD, {
+          serverId: serverId,
+          publicKey: client.publicKey,
+          verifyToken: client.verifyToken
+        });
+      } else {
+        loginClient();      
+      }
+    }
+
+    function onEncryptionKeyResponse(packet) {
+      var success = client.verifyToken.toString("hex") === serverKey.decrypt(packet.verifyToken, undefined, undefined, ursa.RSA_PKCS1_PADDING).toString("hex");
+      if (success) {
+        var sharedSecret = serverKey.decrypt(packet.sharedSecret, undefined, undefined, ursa.RSA_PKCS1_PADDING);
+        client.cipher = crypto.createCipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
+        client.decipher = crypto.createDecipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
+        hash.update(sharedSecret);
+        hash.update(client.publicKey);
+        var digest = mcHexDigest(hash);
+        if (onlineMode) {
+          var request = superagent.get("http://session.minecraft.net/game/checkserver.jsp");
+          request.query({
+            user: client.username,
+            serverId: digest
+          });
+          request.end(function (err,resp){
+            if (err) {
+              client.end('Error :', err);
+              return;
+            }
+            if (resp.text !== "YES") {
+              client.end('FailedToVerifyUsername');
+              return;
+            }
+          });
+        }
+        client.write(0xFC, {
+          sharedSecret: new Buffer(0),
+          verifyToken: new Buffer(0)
+        });
+        client.encryptionEnabled = true;
+        loginClient();
+      } else {
+        client.end('DidNotEncryptVerifyTokenProperly');
+      }
+    }
+
+    function loginClient() {
+      loggedIn = true;
       startKeepAlive();
 
       clearTimeout(loginKickTimer);

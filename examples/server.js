@@ -3,7 +3,6 @@ var mc = require('../');
 var yellow = '§e';
 
 var options = {
-  'online-mode': false,
   motd: 'Vox Industries',
   'max-players': 127,
   port: 25565,
