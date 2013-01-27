@@ -19,6 +19,7 @@ module.exports = {
 };
 
 function createServer(options) {
+  options = options || {};
   var port = options.port != null ?
     options.port :
     options['server-port'] != null ?
@@ -123,7 +124,7 @@ function createServer(options) {
           verifyToken: client.verifyToken
         });
       } else {
-        loginClient();      
+        loginClient();
       }
     }
 
