@@ -101,6 +101,7 @@ function createServer(options) {
 
     function onHandshake(packet) {
       client.username = packet.username;
+      var serverId;
       if (onlineMode) {
         serverId = crypto.randomBytes(4).toString('hex');
       } else {
@@ -110,7 +111,7 @@ function createServer(options) {
         client.verifyToken = crypto.randomBytes(4);
         var publicKeyStrArr = serverKey.toPublicPem("utf8").split("\n");
         var publicKeyStr = "";
-        for (i=1;i<publicKeyStrArr.length - 2;i++) {
+        for (var i=1;i<publicKeyStrArr.length - 2;i++) {
           publicKeyStr += publicKeyStrArr[i]
         }
         client.publicKey = new Buffer(publicKeyStr,'base64');
