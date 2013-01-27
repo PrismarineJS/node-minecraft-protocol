@@ -123,7 +123,7 @@ function createServer(options) {
           verifyToken: client.verifyToken
         });
       } else {
-        logInClient();      
+        loginClient();      
       }
     }
 
