@@ -16,8 +16,7 @@ Parse and serialize minecraft packets, plus authentication and encryption.
    - Ping a server for status
  * Server
    - Offline mode
-   - [TODO](https://github.com/superjoe30/node-minecraft-protocol/issues/13) - 
-     Encryption and online mode
+   - Encryption and online mode
    - Handshake
    - Keep-alive checking
    - Ping status
@@ -230,6 +229,12 @@ correct data type.
 ```
 
 ## History
+
+### 0.6.5
+
+ * createServer: allow empty options
+ * server: support online mode and encryption (thanks roblabla)
+ * server: send a kick packet when kicking clients. (thanks roblabla)
 
 ### 0.6.4
 
