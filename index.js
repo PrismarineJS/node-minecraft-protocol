@@ -143,14 +143,23 @@ function createServer(options) {
             user: client.username,
             serverId: digest
           });
-          request.end(function (err,resp){
+          request.end(function(err, resp) {
+            var myErr;
             if (err) {
-              client.end('Error :', err);
-              return;
-            }
-            if (resp.text !== "YES") {
+              server.emit('error', err);
+              client.end('InternalError');
+            } else if (resp.serverError) {
+              myErr = new Error("session.minecraft.net is broken: " + resp.status);
+              myErr.code = 'EMCSESSION500';
+              server.emit('error', myErr);
+              client.end('McSessionDown');
+            } else if (resp.serverError) {
+              myErr = new Error("session.minecraft.net rejected request: " + resp.status);
+              myErr.code = 'EMCSESSION400';
+              server.emit('error', myErr);
+              client.end('McSessionRejectedAuthRequest');
+            } else if (resp.text !== "YES") {
               client.end('FailedToVerifyUsername');
-              return;
             }
           });
         }

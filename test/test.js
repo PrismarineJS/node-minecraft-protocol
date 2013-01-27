@@ -525,6 +525,37 @@ describe("mc-server", function() {
       }
     }
   });
+  it("kicks clients when invalid credentials", function(done) {
+    var server = mc.createServer();
+    var count = 5;
+    server.on('connection', function(client) {
+      client.on('end', function(reason) {
+        resolve();
+        server.close();
+      });
+    });
+    server.on('close', function() {
+      resolve();
+    });
+    server.on('listening', function() {
+      resolve();
+      var client = mc.createClient({
+        username: 'lalalal',
+        password: "this is wrong",
+      });
+      client.on('error', function(err) {
+        assert.strictEqual(err.code, 'ELOGIN400');
+        resolve();
+      });
+      client.on('end', function() {
+        resolve();
+      });
+    });
+    function resolve() {
+      count -= 1;
+      if (count <= 0) done();
+    }
+  });
   it("gives correct reason for kicking clients when shutting down", function(done) {
     var server = mc.createServer({ 'online-mode': false, });
     var count = 2;
