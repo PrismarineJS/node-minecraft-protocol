@@ -230,11 +230,16 @@ correct data type.
 
 ## History
 
+### 0.6.6
+
+ * ping: fix calling callback twice when server sends kick
+ * server: send a kick packet when kicking clients. (thanks roblabla)
+ * ping: include latency property (thanks Jan Buschtöns)
+
 ### 0.6.5
 
  * createServer: allow empty options
  * server: support online mode and encryption (thanks roblabla)
- * server: send a kick packet when kicking clients. (thanks roblabla)
 
 ### 0.6.4
 
