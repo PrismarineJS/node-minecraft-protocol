@@ -31,7 +31,7 @@ function createServer(options) {
   var checkTimeoutInterval = options.checkTimeoutInterval || 4 * 1000;
   var motd = options.motd || "A Minecraft server";
   var onlineMode = options['online-mode'] == null ? true : options['online-mode'];
-  var encryptionEnabled = options['enable-encryption'] == null ? true : options['enable-encryption'];
+  var encryptionEnabled = options['encryption'] == null ? true : options['encryption'];
 
   var serverKey = ursa.generatePrivateKey(1024);
 
