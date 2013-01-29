@@ -230,6 +230,13 @@ correct data type.
 
 ## History
 
+### 0.6.7
+
+Emit 'error' event instead of crashing when other computers abuse the
+minecraft protocol.
+
+Big thanks to [Robin Lambertz](https://github.com/roblabla) for this release.
+
 ### 0.6.6
 
  * ping: fix calling callback twice when server sends kick
