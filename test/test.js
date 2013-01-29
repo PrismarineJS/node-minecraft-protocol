@@ -245,6 +245,9 @@ describe("client", function() {
     }, function() {
       mc.ping({}, function(err, results) {
         if (err) return done(err);
+        assert.ok(results.latency >= 0);
+        assert.ok(results.latency <= 1000);
+        delete results.latency;
         assert.deepEqual(results, {
           prefix: "§1",
           protocol: protocol.version,
@@ -446,6 +449,9 @@ describe("mc-server", function() {
     server.on('listening', function() {
       mc.ping({}, function(err, results) {
         if (err) return done(err);
+        assert.ok(results.latency >= 0);
+        assert.ok(results.latency <= 1000);
+        delete results.latency;
         assert.deepEqual(results, {
           prefix: "§1",
           protocol: protocol.version,
