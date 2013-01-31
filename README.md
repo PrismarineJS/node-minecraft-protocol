@@ -231,6 +231,19 @@ correct data type.
 
 ## History
 
+### 0.7.0
+
+ * `createServer`: rename `encryption-enabled` option to `encryption` to stay
+   consistent with the examples. (thanks roblabla)
+ * `createClient`: don't require both `email` and `username`.
+   - The `username` and `password` arguments are used to authenticate with the
+     official minecraft servers and determine the case-correct username. If
+     you have migrated your user account to a mojang login, `username` looks
+     like an email address.
+   - If you leave out the `password` argument, `username` is used to connect
+     directly to the server. In this case you will get kicked if the server is
+     in online mode.
+
 ### 0.6.7
 
 Emit 'error' event instead of crashing when other computers abuse the
