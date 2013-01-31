@@ -264,7 +264,6 @@ describe("client", function() {
     startServer({ 'online-mode': 'true' }, function() {
       var client = mc.createClient({
         username: process.env.MC_USERNAME,
-        email: process.env.MC_EMAIL,
         password: process.env.MC_PASSWORD,
       });
       mcServer.on('line', function(line) {
@@ -299,12 +298,12 @@ describe("client", function() {
   it("connects successfully - offline mode", function(done) {
     startServer({ 'online-mode': 'false' }, function() {
       var client = mc.createClient({
-        username: process.env.MC_USERNAME,
+        username: 'Player',
       });
       mcServer.on('line', function(line) {
         var match = line.match(/\[INFO\] <(.+?)> (.+)$/);
         if (! match) return;
-        assert.strictEqual(match[1], process.env.MC_USERNAME);
+        assert.strictEqual(match[1], 'Player');
         assert.strictEqual(match[2], "hello everyone; I have logged in.");
         mcServer.stdin.write("say hello\n");
       });
@@ -322,7 +321,7 @@ describe("client", function() {
         chatCount += 1;
         assert.ok(chatCount <= 2);
         if (chatCount === 1) {
-          assert.strictEqual(packet.message, "<" + process.env.MC_USERNAME + ">" + " hello everyone; I have logged in.");
+          assert.strictEqual(packet.message, "<Player>" + " hello everyone; I have logged in.");
         } else if (chatCount === 2) {
           assert.strictEqual(packet.message, "[Server] hello");
           done();
@@ -333,7 +332,7 @@ describe("client", function() {
   it("gets kicked when no credentials supplied in online mode", function(done) {
     startServer({ 'online-mode': 'true' }, function() {
       var client = mc.createClient({
-        username: process.env.MC_USERNAME,
+        username: 'Player',
       });
       var gotKicked = false;
       client.on(0xff, function(packet) {
@@ -349,7 +348,7 @@ describe("client", function() {
   it("does not crash for " + SURVIVE_TIME + "ms", function(done) {
     startServer({ 'online-mode': 'false' }, function() {
       var client = mc.createClient({
-        username: process.env.MC_USERNAME,
+        username: 'Player',
       });
       client.on(0x01, function(packet) {
         client.write(0x03, {
@@ -357,7 +356,7 @@ describe("client", function() {
         });
       });
       client.on(0x03, function(packet) {
-        assert.strictEqual(packet.message, "<" + process.env.MC_USERNAME + ">" + " hello everyone; I have logged in.");
+        assert.strictEqual(packet.message, "<Player>" + " hello everyone; I have logged in.");
         setTimeout(function() {
           done();
         }, SURVIVE_TIME);
@@ -533,7 +532,7 @@ describe("mc-server", function() {
   });
   it("kicks clients when invalid credentials", function(done) {
     var server = mc.createServer();
-    var count = 5;
+    var count = 4;
     server.on('connection', function(client) {
       client.on('end', function(reason) {
         resolve();
@@ -547,11 +546,6 @@ describe("mc-server", function() {
       resolve();
       var client = mc.createClient({
         username: 'lalalal',
-        password: "this is wrong",
-      });
-      client.on('error', function(err) {
-        assert.strictEqual(err.code, 'ELOGIN400');
-        resolve();
       });
       client.on('end', function() {
         resolve();

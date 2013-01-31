@@ -193,27 +193,43 @@ function createClient(options) {
   var port = options.port || 25565;
   var host = options.host || 'localhost';
   assert.ok(options.username, "username is required");
-  var haveCredentials = typeof options.password !== "undefined";
+  var haveCredentials = options.password != null;
   var keepAlive = options.keepAlive == null ? true : options.keepAlive;
-  var email = options.email || options.username;
-  var password = options.password;
 
   var client = new Client(false);
-  client.username = options.username;
-  client.on('connect', function() {
+  client.on('connect', onConnect);
+  if (keepAlive) client.on(0x00, onKeepAlive);
+  client.once(0xFC, onEncryptionKeyResponse);
+  client.once(0xFD, onEncryptionKeyRequest);
+
+  if (haveCredentials) {
+    // make a request to get the case-correct username before connecting.
+    getLoginSession(options.username, options.password, function(err, session) {
+      if (err) {
+        client.emit('error', err);
+      } else {
+        client.session = session;
+        client.username = session.username;
+        client.emit('session');
+        client.connect(port, host);
+      }
+    });
+  } else {
+    // assume the server is in offline mode and just go for it.
+    client.username = options.username;
+    client.connect(port, host);
+  }
+
+  return client;
+
+  function onConnect() {
     client.write(0x02, {
       protocolVersion: protocol.version,
       username: client.username,
       serverHost: host,
       serverPort: port,
     });
-  });
-  if (keepAlive) client.on(0x00, onKeepAlive);
-  client.once(0xFC, onEncryptionKeyResponse);
-  client.once(0xFD, onEncryptionKeyRequest);
-  client.connect(port, host);
-
-  return client;
+  }
 
   function onKeepAlive(packet) {
     client.write(0x00, {
@@ -222,30 +238,21 @@ function createClient(options) {
   }
 
   function onEncryptionKeyRequest(packet) {
-    var batch = new Batch();
-    var hash;
-    if (haveCredentials) {
-      hash = crypto.createHash('sha1');
-      hash.update(packet.serverId);
-      batch.push(function(cb) { getLoginSession(email, password, cb); });
-    }
-    batch.push(function(cb) { crypto.randomBytes(16, cb); });
-    batch.end(function (err, results) {
+    crypto.randomBytes(16, gotSharedSecret);
+
+    function gotSharedSecret(err, sharedSecret) {
       if (err) {
         client.emit('error', err);
         client.end();
         return
       }
 
-      var sharedSecret;
+      var hash = crypto.createHash('sha1');
+      hash.update(packet.serverId);
+
       if (haveCredentials) {
-        client.session = results[0];
-        client.username = client.session.username;
-        client.emit('session');
-        sharedSecret = results[1];
         joinServerRequest(onJoinServerResponse);
       } else {
-        sharedSecret = results[0];
         sendEncryptionKeyResponse();
       }
 
@@ -298,7 +305,7 @@ function createClient(options) {
           verifyToken: encryptedVerifyTokenBuffer,
         });
       }
-    });
+    }
   }
 
   function onEncryptionKeyResponse(packet) {

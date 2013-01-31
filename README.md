@@ -34,11 +34,10 @@ no more. If you want a higher-level API with which to write bots, see
 ```js
 var mc = require('minecraft-protocol');
 var client = mc.createClient({
-  host: "localhost", // optional
-  port: 25565,       // optional
-  username: "player",
-  email: "email@example.com", // email and password are required only for
-  password: "12345678",       // online-mode=true servers
+  host: "localhost",   // optional
+  port: 25565,         // optional
+  username: "email@example.com",
+  password: "12345678",
 });
 client.on(0x03, function(packet) {
   // Listen for chat messages and echo them back.
@@ -48,6 +47,8 @@ client.on(0x03, function(packet) {
   });
 });
 ```
+
+If the server is in offline mode, you may leave out the `password` option.
 
 ### Hello World server example
 
@@ -128,7 +129,7 @@ correct data type.
 
 * Ensure your system has the `java` executable in `PATH`.
 * Download the appropriate version of `minecraft_server.jar`.
-* `MC_SERVER_JAR=path/to/minecraft_server.jar MC_USERNAME=username MC_EMAIL=email@example.com MC_PASSWORD=password npm test`
+* `MC_SERVER_JAR=path/to/minecraft_server.jar MC_EMAIL=email@example.com MC_PASSWORD=password npm test`
 
 ### Test Coverage
 

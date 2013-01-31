@@ -1,9 +1,7 @@
 var mc = require('../');
 var client = mc.createClient({
   username: process.env.MC_USERNAME,
-  email: process.env.MC_EMAIL,
   password: process.env.MC_PASSWORD,
-  verbose: true,
 });
 client.on('connect', function() {
   console.info("connected");
