@@ -29,11 +29,11 @@
     "mocha": "~1.7.4",
     "mkdirp": "~0.3.4",
     "rimraf": "~2.1.1",
-    "zfill": "0.0.1"
+    "zfill": "0.0.1",
+    "batch": "~0.2.1"
   },
   "dependencies": {
     "ursa": "~0.8.0",
-    "superagent": "~0.10.0",
-    "batch": "~0.2.1"
+    "superagent": "~0.10.0"
   }
 }

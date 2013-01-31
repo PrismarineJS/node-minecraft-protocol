@@ -4,7 +4,6 @@ var EventEmitter = require('events').EventEmitter
   , ursa = require('ursa')
   , crypto = require('crypto')
   , superagent = require('superagent')
-  , Batch = require('batch')
   , protocol = require('./lib/protocol')
   , Client = require('./lib/client')
   , Server = require('./lib/server')
