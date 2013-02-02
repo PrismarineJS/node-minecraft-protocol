@@ -231,6 +231,10 @@ correct data type.
 
 ## History
 
+### 0.7.1
+
+ * remove socket delays to reduce latency. (thanks mappum)
+
 ### 0.7.0
 
  * `createServer`: rename `encryption-enabled` option to `encryption` to stay
