@@ -81,11 +81,14 @@ var values = {
       addBitMap: 10,
     }],
   },
-  'entityMetadata': [{
-    type: 'int',
-    key: 3,
-    value: 100,
-  }],
+  'entityMetadata': [
+    { key: 17, value: 0,   type: 'int'   },
+    { key: 0,  value: 0,   type: 'byte'  },
+    { key: 16, value: 0,   type: 'byte'  },
+    { key: 1,  value: 300, type: 'short' },
+    { key: 19, value: 0,   type: 'int'   },
+    { key: 18, value: 1,   type: 'int'   },
+  ],
   'objectData': {
     intField: 9,
     velocityX: 1,
