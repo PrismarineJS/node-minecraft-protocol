@@ -244,6 +244,12 @@ correct data type.
 
 ## History
 
+### 0.7.5
+
+ * server: add `onlineModeExceptions`. When server is in:
+   - online mode: these usernames are exempt from online mode.
+   - offline mode: these usernames must authenticate.
+
 ### 0.7.4
 
  * server: online mode: don't log in client until username verification
