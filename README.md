@@ -231,6 +231,12 @@ correct data type.
 
 ## History
 
+### 0.7.3
+
+ * revert removing socket delays to reduce latency as it was causing
+   errors and test failures.
+ * server: Client now emits more predictable 'end' events.
+
 ### 0.7.2
 
  * fix objectData writer. This fixes sending an 0x17 packet.
