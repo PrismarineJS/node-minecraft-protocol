@@ -103,7 +103,7 @@ function createServer(options) {
 
     function onHandshake(packet) {
       client.username = packet.username;
-      var isException = !!server.onlineModeExceptions[client.username];
+      var isException = !!server.onlineModeExceptions[client.username.toLowerCase()];
       var needToVerify = (onlineMode && ! isException) || (! onlineMode && isException);
       var serverId;
       if (needToVerify) {
@@ -148,7 +148,7 @@ function createServer(options) {
       });
       client.encryptionEnabled = true;
 
-      var isException = !!server.onlineModeExceptions[client.username];
+      var isException = !!server.onlineModeExceptions[client.username.toLowerCase()];
       var needToVerify = (onlineMode && ! isException) || (! onlineMode && isException);
       var nextStep = needToVerify ? verifyUsername : loginClient;
       nextStep();

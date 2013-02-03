@@ -119,6 +119,8 @@ Returns a `Server` instance and starts listening.
 This is a plain old JavaScript object. Add a key with the username you want to
 be exempt from online mode or offline mode (whatever mode the server is in).
 
+Make sure the entries in this object are all lower case.
+
 #### server.maxPlayers
 
 ### Not Immediately Obvious Data Type Formats
