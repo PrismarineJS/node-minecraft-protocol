@@ -231,6 +231,10 @@ correct data type.
 
 ## History
 
+### 0.7.4
+
+ * server: online mode: don't log in client until username verification
+
 ### 0.7.3
 
  * revert removing socket delays to reduce latency as it was causing
