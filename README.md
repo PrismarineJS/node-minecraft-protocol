@@ -231,6 +231,10 @@ correct data type.
 
 ## History
 
+### 0.7.2
+
+ * fix objectData writer. This fixes sending an 0x17 packet.
+
 ### 0.7.1
 
  * remove socket delays to reduce latency. (thanks mappum)
