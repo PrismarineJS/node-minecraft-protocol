@@ -108,6 +108,19 @@ server.on('login', function(client) {
  * `playerCount`
  * `maxPlayers`
 
+### mc.createServer(options)
+
+Returns a `Server` instance and starts listening.
+
+### Server
+
+#### server.onlineModeExceptions
+
+This is a plain old JavaScript object. Add a key with the username you want to
+be exempt from online mode or offline mode (whatever mode the server is in).
+
+#### server.maxPlayers
+
 ### Not Immediately Obvious Data Type Formats
 
 #### entityMetadata

@@ -3,6 +3,7 @@ var EventEmitter = require('events').EventEmitter
   , assert = require('assert')
   , ursa = require('ursa')
   , crypto = require('crypto')
+  , bufferEqual = require('buffer-equal')
   , superagent = require('superagent')
   , protocol = require('./lib/protocol')
   , Client = require('./lib/client')
@@ -35,6 +36,7 @@ function createServer(options) {
   var serverKey = ursa.generatePrivateKey(1024);
 
   var server = new Server(options);
+  server.onlineModeExceptions = {};
   server.maxPlayers = maxPlayers;
   server.on("connection", function(client) {
     client.once(0xfe, onPing);
@@ -101,8 +103,10 @@ function createServer(options) {
 
     function onHandshake(packet) {
       client.username = packet.username;
+      var isException = !!server.onlineModeExceptions[client.username];
+      var needToVerify = (onlineMode && ! isException) || (! onlineMode && isException);
       var serverId;
-      if (onlineMode) {
+      if (needToVerify) {
         serverId = crypto.randomBytes(4).toString('hex');
       } else {
         serverId = '-';
@@ -128,50 +132,55 @@ function createServer(options) {
     }
 
     function onEncryptionKeyResponse(packet) {
-      var success = client.verifyToken.toString("hex") === serverKey.decrypt(packet.verifyToken, undefined, undefined, ursa.RSA_PKCS1_PADDING).toString("hex");
-      if (success) {
-        var sharedSecret = serverKey.decrypt(packet.sharedSecret, undefined, undefined, ursa.RSA_PKCS1_PADDING);
-        client.cipher = crypto.createCipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
-        client.decipher = crypto.createDecipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
-        hash.update(sharedSecret);
-        hash.update(client.publicKey);
-        var digest = mcHexDigest(hash);
-        if (onlineMode) {
-          var request = superagent.get("http://session.minecraft.net/game/checkserver.jsp");
-          request.query({
-            user: client.username,
-            serverId: digest
-          });
-          request.end(function(err, resp) {
-            var myErr;
-            if (err) {
-              server.emit('error', err);
-              client.end('McSessionUnavailable');
-            } else if (resp.serverError) {
-              myErr = new Error("session.minecraft.net is broken: " + resp.status);
-              myErr.code = 'EMCSESSION500';
-              server.emit('error', myErr);
-              client.end('McSessionDown');
-            } else if (resp.serverError) {
-              myErr = new Error("session.minecraft.net rejected request: " + resp.status);
-              myErr.code = 'EMCSESSION400';
-              server.emit('error', myErr);
-              client.end('McSessionRejectedAuthRequest');
-            } else if (resp.text !== "YES") {
-              client.end('FailedToVerifyUsername');
-            } else {
-              loginClient();
-            }
-          });
-        }
-        client.write(0xFC, {
-          sharedSecret: new Buffer(0),
-          verifyToken: new Buffer(0)
-        });
-        client.encryptionEnabled = true;
-        if (! onlineMode) loginClient();
-      } else {
+      var verifyToken = serverKey.decrypt(packet.verifyToken, undefined, undefined, ursa.RSA_PKCS1_PADDING);
+      if (! bufferEqual(client.verifyToken, verifyToken)) {
         client.end('DidNotEncryptVerifyTokenProperly');
+        return;
+      }
+      var sharedSecret = serverKey.decrypt(packet.sharedSecret, undefined, undefined, ursa.RSA_PKCS1_PADDING);
+      client.cipher = crypto.createCipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
+      client.decipher = crypto.createDecipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
+      hash.update(sharedSecret);
+      hash.update(client.publicKey);
+      client.write(0xFC, {
+        sharedSecret: new Buffer(0),
+        verifyToken: new Buffer(0)
+      });
+      client.encryptionEnabled = true;
+
+      var isException = !!server.onlineModeExceptions[client.username];
+      var needToVerify = (onlineMode && ! isException) || (! onlineMode && isException);
+      var nextStep = needToVerify ? verifyUsername : loginClient;
+      nextStep();
+
+      function verifyUsername() {
+        var digest = mcHexDigest(hash);
+        var request = superagent.get("http://session.minecraft.net/game/checkserver.jsp");
+        request.query({
+          user: client.username,
+          serverId: digest
+        });
+        request.end(function(err, resp) {
+          var myErr;
+          if (err) {
+            server.emit('error', err);
+            client.end('McSessionUnavailable');
+          } else if (resp.serverError) {
+            myErr = new Error("session.minecraft.net is broken: " + resp.status);
+            myErr.code = 'EMCSESSION500';
+            server.emit('error', myErr);
+            client.end('McSessionDown');
+          } else if (resp.serverError) {
+            myErr = new Error("session.minecraft.net rejected request: " + resp.status);
+            myErr.code = 'EMCSESSION400';
+            server.emit('error', myErr);
+            client.end('McSessionRejectedAuthRequest');
+          } else if (resp.text !== "YES") {
+            client.end('FailedToVerifyUsername');
+          } else {
+            loginClient();
+          }
+        });
       }
     }
 
