@@ -246,6 +246,10 @@ correct data type.
 
 ## History
 
+### 0.7.6
+
+ * onlineModeExceptions are all lowercase now. fixes security hole.
+
 ### 0.7.5
 
  * server: add `onlineModeExceptions`. When server is in:
