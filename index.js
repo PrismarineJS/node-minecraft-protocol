@@ -30,7 +30,7 @@ function createServer(options) {
   var checkTimeoutInterval = options.checkTimeoutInterval || 4 * 1000;
   var motd = options.motd || "A Minecraft server";
   var onlineMode = options['online-mode'] == null ? true : options['online-mode'];
-  var encryptionEnabled = options['encryption'] == null ? true : options['encryption'];
+  var encryptionEnabled = options.encryption == null ? true : options.encryption;
 
   var serverKey = ursa.generatePrivateKey(1024);
 
@@ -146,7 +146,7 @@ function createServer(options) {
             var myErr;
             if (err) {
               server.emit('error', err);
-              client.end('InternalError');
+              client.end('McSessionUnavailable');
             } else if (resp.serverError) {
               myErr = new Error("session.minecraft.net is broken: " + resp.status);
               myErr.code = 'EMCSESSION500';
@@ -159,6 +159,8 @@ function createServer(options) {
               client.end('McSessionRejectedAuthRequest');
             } else if (resp.text !== "YES") {
               client.end('FailedToVerifyUsername');
+            } else {
+              loginClient();
             }
           });
         }
@@ -167,7 +169,7 @@ function createServer(options) {
           verifyToken: new Buffer(0)
         });
         client.encryptionEnabled = true;
-        loginClient();
+        if (! onlineMode) loginClient();
       } else {
         client.end('DidNotEncryptVerifyTokenProperly');
       }
