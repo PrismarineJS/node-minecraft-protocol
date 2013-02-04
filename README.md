@@ -246,6 +246,10 @@ correct data type.
 
 ## History
 
+### 0.7.7
+
+ * server: fix crash when client disconnects quickly
+
 ### 0.7.6
 
  * onlineModeExceptions are all lowercase now. fixes security hole.
