@@ -25,20 +25,19 @@ function createServer(options) {
     options['server-port'] != null ?
       options['server-port'] :
       25565 ;
-  var maxPlayers = options['max-players'] || 20;
   var host = options.host || '0.0.0.0';
   var kickTimeout = options.kickTimeout || 10 * 1000;
   var checkTimeoutInterval = options.checkTimeoutInterval || 4 * 1000;
-  var motd = options.motd || "A Minecraft server";
   var onlineMode = options['online-mode'] == null ? true : options['online-mode'];
   var encryptionEnabled = options.encryption == null ? true : options.encryption;
 
   var serverKey = ursa.generatePrivateKey(1024);
 
   var server = new Server(options);
+  server.motd = options.motd || "A Minecraft server";
+  server.maxPlayers = options['max-players'] || 20;
   server.playerCount = 0;
   server.onlineModeExceptions = {};
-  server.maxPlayers = maxPlayers;
   server.on("connection", function(client) {
     client.once(0xfe, onPing);
     client.once(0x02, onHandshake);
@@ -95,9 +94,9 @@ function createServer(options) {
           '§1',
           protocol.version,
           protocol.minecraftVersion,
-          motd,
+          server.motd,
           server.playerCount,
-          maxPlayers,
+          server.maxPlayers,
         ].join('\u0000')
       });
     }
