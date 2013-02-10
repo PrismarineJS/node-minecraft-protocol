@@ -6,6 +6,7 @@ var options = {
   motd: 'Vox Industries',
   'max-players': 127,
   port: 25565,
+  'online-mode': false,
 };
 
 var server = mc.createServer(options);

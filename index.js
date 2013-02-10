@@ -36,6 +36,7 @@ function createServer(options) {
   var serverKey = ursa.generatePrivateKey(1024);
 
   var server = new Server(options);
+  server.playerCount = 0;
   server.onlineModeExceptions = {};
   server.maxPlayers = maxPlayers;
   server.on("connection", function(client) {
@@ -191,6 +192,10 @@ function createServer(options) {
       clearTimeout(loginKickTimer);
       loginKickTimer = null;
 
+      server.playerCount += 1;
+      client.once('end', function() {
+        server.playerCount -= 1;
+      });
       server.emit('login', client);
     }
   });
