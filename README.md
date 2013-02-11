@@ -246,6 +246,11 @@ correct data type.
 
 ## History
 
+### 0.7.8
+
+ * server: ability to change `motd` and `maxPlayers`
+ * server: fix incorrect `playerCount`
+
 ### 0.7.7
 
  * server: fix crash when client disconnects quickly
