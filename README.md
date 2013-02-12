@@ -23,9 +23,13 @@ Parse and serialize minecraft packets, plus authentication and encryption.
  * Robust test coverage. See Test Coverage section below.
  * Optimized for rapidly staying up to date with Minecraft protocol updates.
 
-This package aims to be a low-level interface to the Minecraft protocol and
-no more. If you want a higher-level API with which to write bots, see
-[mineflayer](https://github.com/superjoe30/mineflayer/)
+## Projects Using node-minecraft-protocol
+
+ * [mineflayer](https://github.com/superjoe30/mineflayer/) - create minecraft
+   bots with a stable, high level API.
+ * [mcserve](https://github.com/superjoe30/mcserve) - runs and monitors your
+   minecraft server, provides real-time web interface, allow your users to
+   create bots.
 
 ## Usage
 
