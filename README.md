@@ -4,7 +4,7 @@ Parse and serialize minecraft packets, plus authentication and encryption.
 
 ## Features
 
- * Supports Minecraft version 1.4.7
+ * Supports Minecraft version 1.5
  * Parses all packets and emits events with packet fields as JavaScript
    objects.
  * Send a packet by supplying fields as a JavaScript object.
@@ -175,7 +175,7 @@ correct data type.
     ✓ 0x12 
     ✓ 0x13 
     ✓ 0x14 
-    ✓ 0x16
+    ✓ 0x16 
     ✓ 0x17 
     ✓ 0x18 
     ✓ 0x19 
@@ -203,6 +203,7 @@ correct data type.
     ✓ 0x3c 
     ✓ 0x3d 
     ✓ 0x3e 
+    ✓ 0x3f 
     ✓ 0x46 
     ✓ 0x47 
     ✓ 0x64 
@@ -223,6 +224,10 @@ correct data type.
     ✓ 0xcb 
     ✓ 0xcc 
     ✓ 0xcd 
+    ✓ 0xce 
+    ✓ 0xcf 
+    ✓ 0xd0 
+    ✓ 0xd1 
     ✓ 0xfa 
     ✓ 0xfc 
     ✓ 0xfd 
@@ -230,25 +235,30 @@ correct data type.
     ✓ 0xff 
 
   client
-    ✓ pings the server
-    ✓ connects successfully - online mode
-    ✓ connects successfully - offline mode
-    ✓ gets kicked when no credentials supplied in online mode
-    ✓ does not crash for 10000ms
-
+    ✓ pings the server (6653ms)
+    ✓ connects successfully - online mode (4041ms)
+    ✓ connects successfully - offline mode (2663ms)
+    ✓ gets kicked when no credentials supplied in online mode (4678ms)
+    ✓ does not crash for 10000ms (12492ms)
+...............
   mc-server
-    ✓ starts listening and shuts down cleanly 
-    ✓ kicks clients that do not log in
-    ✓ kicks clients that do not send keepalive packets
+    ✓ starts listening and shuts down cleanly (44ms)
+    ✓ kicks clients that do not log in (149ms)
+    ✓ kicks clients that do not send keepalive packets (153ms)
     ✓ responds to ping requests 
-    ✓ clients can log in and chat
-    ✓ gives correct reason for kicking clients when shutting down 
+    ✓ clients can log in and chat (71ms)
+    ✓ kicks clients when invalid credentials (263ms)
+    ✓ gives correct reason for kicking clients when shutting down (40ms)
 
 
-  85 tests complete
+  91 tests complete (50 seconds)
 ```
 
 ## History
+
+### 0.7.9
+
+ * support minecraft protocol 1.5 / protocol version 60 (thanks mappum)
 
 ### 0.7.8
 
