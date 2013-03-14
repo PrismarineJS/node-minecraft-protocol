@@ -71,6 +71,7 @@ var values = {
     itemDamage: 3,
     nbtData: new Buffer(0),
   }],
+  'stringArray': ['hello', 'dude'],
   'mapChunkBulk': {
     skyLightSent: true,
     compressedChunkData: new Buffer(1234),
@@ -126,7 +127,8 @@ describe("packets", function() {
   for(packetId in protocol.packets) {
     packetId = parseInt(packetId, 10);
     packetInfo = protocol.packets[packetId];
-    it("0x" + zfill(parseInt(packetId, 10).toString(16), 2), callTestPacket(packetId, packetInfo));
+    it("0x" + zfill(parseInt(packetId, 10).toString(16), 2),
+        callTestPacket(packetId, packetInfo));
   }
   function callTestPacket(packetId, packetInfo) {
     return function(done) {
@@ -137,7 +139,9 @@ describe("packets", function() {
       batch.push(function(done) {
         testPacket(packetId, protocol.get(packetId, true), done);
       });
-      batch.end(done);
+      batch.end(function(err, results) {
+        done();
+      });
     };
   }
   function testPacket(packetId, packetInfo, done) {

@@ -26,11 +26,11 @@
     "node": ">=0.8.16"
   },
   "devDependencies": {
-    "mocha": "~1.7.4",
+    "mocha": "~1.8.2",
     "mkdirp": "~0.3.4",
     "rimraf": "~2.1.1",
     "zfill": "0.0.1",
-    "batch": "~0.2.1"
+    "batch": "~0.3.1"
   },
   "dependencies": {
     "ursa": "~0.8.0",
