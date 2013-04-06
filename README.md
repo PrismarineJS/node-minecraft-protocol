@@ -256,6 +256,11 @@ correct data type.
 
 ## History
 
+### 0.8.0
+
+ * fix remaining bugs for 1.5.1 protocol (thanks Xabier de Zuazo)
+ * writing packets is 6% faster (thanks mappum)
+
 ### 0.7.9
 
  * support minecraft protocol 1.5 / protocol version 60 (thanks mappum)
