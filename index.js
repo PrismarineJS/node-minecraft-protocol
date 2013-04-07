@@ -261,9 +261,6 @@ function createClient(options) {
         return
       }
 
-      var hash = crypto.createHash('sha1');
-      hash.update(packet.serverId);
-
       if (haveCredentials) {
         joinServerRequest(onJoinServerResponse);
       } else {
@@ -283,6 +280,8 @@ function createClient(options) {
       }
 
       function joinServerRequest(cb) {
+        var hash = crypto.createHash('sha1');
+        hash.update(packet.serverId);
         hash.update(sharedSecret);
         hash.update(packet.publicKey);
 
