@@ -8,6 +8,7 @@ var EventEmitter = require('events').EventEmitter
   , protocol = require('./lib/protocol')
   , Client = require('./lib/client')
   , Server = require('./lib/server')
+  , debug = protocol.debug
 
 module.exports = {
   createClient: createClient,
