@@ -267,6 +267,9 @@ function createClient(options) {
       if (haveCredentials) {
         joinServerRequest(onJoinServerResponse);
       } else {
+        if (packet.serverId != '-') {
+          debug('This server appears to be an online server and you are providing no password, the authentication will probably fail');
+        }
         sendEncryptionKeyResponse();
       }
 
