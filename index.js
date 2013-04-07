@@ -363,7 +363,7 @@ function mcHexDigest(hash) {
       newByte = ~value & 0xff;
       if (carry) {
         carry = newByte === 0xff;
-        buffer.writeUInt8(newByte + 1, i);
+        buffer.writeUInt8((newByte + 1) & 0xff, i);
       } else {
         buffer.writeUInt8(newByte, i);
       }
