@@ -256,6 +256,12 @@ correct data type.
 
 ## History
 
+### 0.8.1
+
+ * fix buffer length checking bug in readSlot() (thanks Xabier de Zuazo)
+ * fix C2 calculation bug (fixed #35) (thanks Xabier de Zuazo)
+ * fix oob Buffer at readEntityMetadata (fixed #40) (thanks Xabier de Zuazo)
+
 ### 0.8.0
 
  * fix remaining bugs for 1.5.1 protocol (thanks Xabier de Zuazo)
