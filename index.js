@@ -8,6 +8,7 @@ var EventEmitter = require('events').EventEmitter
   , protocol = require('./lib/protocol')
   , Client = require('./lib/client')
   , Server = require('./lib/server')
+  , debug = protocol.debug
 
 module.exports = {
   createClient: createClient,
@@ -261,12 +262,12 @@ function createClient(options) {
         return
       }
 
-      var hash = crypto.createHash('sha1');
-      hash.update(packet.serverId);
-
       if (haveCredentials) {
         joinServerRequest(onJoinServerResponse);
       } else {
+        if (packet.serverId != '-') {
+          debug('This server appears to be an online server and you are providing no password, the authentication will probably fail');
+        }
         sendEncryptionKeyResponse();
       }
 
@@ -280,6 +281,8 @@ function createClient(options) {
       }
 
       function joinServerRequest(cb) {
+        var hash = crypto.createHash('sha1');
+        hash.update(packet.serverId);
         hash.update(sharedSecret);
         hash.update(packet.publicKey);
 
@@ -363,7 +366,7 @@ function mcHexDigest(hash) {
       newByte = ~value & 0xff;
       if (carry) {
         carry = newByte === 0xff;
-        buffer.writeUInt8(newByte + 1, i);
+        buffer.writeUInt8((newByte + 1) & 0xff, i);
       } else {
         buffer.writeUInt8(newByte, i);
       }
