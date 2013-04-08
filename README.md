@@ -256,6 +256,10 @@ correct data type.
 
 ## History
 
+### 0.9.0
+
+ * 0xce: create changed from bool to byte (thanks Robin Lambertz)
+
 ### 0.8.1
 
  * fix buffer length checking bug in readSlot() (thanks Xabier de Zuazo)
