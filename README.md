@@ -1,4 +1,4 @@
-# minecraft protocol
+# minecraft protocol [![NPM version](https://badge.fury.io/js/minecraft-protocol.png)](http://badge.fury.io/js/minecraft-protocol)
 
 Parse and serialize minecraft packets, plus authentication and encryption.
 
