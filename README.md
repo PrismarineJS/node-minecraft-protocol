@@ -254,6 +254,14 @@ correct data type.
   91 tests complete (50 seconds)
 ```
 
+# Debugging
+
+You can enable some protocol debugging output using `NODE_DEBUG` environment variable:
+
+```bash
+NODE_DEBUG="minecraft-protocol" node [...]
+```
+
 ## History
 
 ### 0.9.0
