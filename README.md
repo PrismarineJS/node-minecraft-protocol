@@ -266,22 +266,22 @@ NODE_DEBUG="minecraft-protocol" node [...]
 
 ### 0.9.0
 
- * 0xce: create changed from bool to byte (thanks Robin Lambertz)
+ * 0xce: create changed from bool to byte (thanks [Robin Lambertz](https://github.com/roblabla))
 
 ### 0.8.1
 
- * fix buffer length checking bug in readSlot() (thanks Xabier de Zuazo)
- * fix C2 calculation bug (fixed #35) (thanks Xabier de Zuazo)
- * fix oob Buffer at readEntityMetadata (fixed #40) (thanks Xabier de Zuazo)
+ * fix buffer length checking bug in readSlot() (thanks [Xabier de Zuazo](https://github.com/zuazo))
+ * fix C2 calculation bug (fixed #35) (thanks [Xabier de Zuazo](https://github.com/zuazo))
+ * fix oob Buffer at readEntityMetadata (fixed #40) (thanks [Xabier de Zuazo](https://github.com/zuazo))
 
 ### 0.8.0
 
- * fix remaining bugs for 1.5.1 protocol (thanks Xabier de Zuazo)
- * writing packets is 6% faster (thanks mappum)
+ * fix remaining bugs for 1.5.1 protocol (thanks [Xabier de Zuazo](https://github.com/zuazo))
+ * writing packets is 6% faster (thanks [Matt Bell](https://github.com/mappum))
 
 ### 0.7.9
 
- * support minecraft protocol 1.5 / protocol version 60 (thanks mappum)
+ * support minecraft protocol 1.5 / protocol version 60 (thanks [Matt Bell](https://github.com/mappum))
 
 ### 0.7.8
 
@@ -318,12 +318,12 @@ NODE_DEBUG="minecraft-protocol" node [...]
 
 ### 0.7.1
 
- * remove socket delays to reduce latency. (thanks mappum)
+ * remove socket delays to reduce latency. (thanks [Matt Bell](https://github.com/mappum))
 
 ### 0.7.0
 
  * `createServer`: rename `encryption-enabled` option to `encryption` to stay
-   consistent with the examples. (thanks roblabla)
+   consistent with the examples. (thanks [Robin Lambertz](https://github.com/roblabla))
  * `createClient`: don't require both `email` and `username`.
    - The `username` and `password` arguments are used to authenticate with the
      official minecraft servers and determine the case-correct username. If
@@ -343,17 +343,17 @@ Big thanks to [Robin Lambertz](https://github.com/roblabla) for this release.
 ### 0.6.6
 
  * ping: fix calling callback twice when server sends kick
- * server: send a kick packet when kicking clients. (thanks roblabla)
- * ping: include latency property (thanks Jan Buschtöns)
+ * server: send a kick packet when kicking clients. (thanks [Robin Lambertz](https://github.com/roblabla))
+ * ping: include latency property (thanks [Jan Buschtöns](https://github.com/silvinci))
 
 ### 0.6.5
 
  * createServer: allow empty options
- * server: support online mode and encryption (thanks roblabla)
+ * server: support online mode and encryption (thanks [Robin Lambertz](https://github.com/roblabla))
 
 ### 0.6.4
 
- * Allow minecraft username instead of mojang email. (thanks roblabla)
+ * Allow minecraft username instead of mojang email. (thanks [Robin Lambertz](https://github.com/roblabla))
 
 ### 0.6.3
 
