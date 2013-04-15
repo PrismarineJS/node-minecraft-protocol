@@ -264,6 +264,11 @@ NODE_DEBUG="minecraft-protocol" node [...]
 
 ## History
 
+### 0.10.0
+
+ * Added SRV record support when connecting to a server (thanks [Matt Stith](https://github.com/stith))
+ * 0x66: `shift` renamed to `mode` and changed from bool to byte
+
 ### 0.9.0
 
  * 0xce: create changed from bool to byte (thanks [Robin Lambertz](https://github.com/roblabla))
