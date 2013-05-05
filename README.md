@@ -264,6 +264,10 @@ NODE_DEBUG="minecraft-protocol" node [...]
 
 ## History
 
+### 0.10.1
+
+ * support minecraft protocol 1.5.2 / protocol version 61
+
 ### 0.10.0
 
  * Added SRV record support when connecting to a server (thanks [Matt Stith](https://github.com/stith))
