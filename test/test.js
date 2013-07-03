@@ -72,6 +72,7 @@ var values = {
     nbtData: new Buffer(0),
   }],
   'stringArray': ['hello', 'dude'],
+  'propertyArray': [{ key: 'generic.maxHealth', value: 1.5 }],
   'mapChunkBulk': {
     skyLightSent: true,
     compressedChunkData: new Buffer(1234),
@@ -99,7 +100,7 @@ var values = {
   'intArray8': [1, 2, 3, 4],
   'intVector': {x: 1, y: 2, z: 3},
   'byteVector': {x: 1, y: 2, z: 3},
-  'byteVectorArray': [{x: 1, y: 2, z: 3}],
+  'byteVectorArray': [{x: 1, y: 2, z: 3}]
 };
 
 describe("packets", function() {
