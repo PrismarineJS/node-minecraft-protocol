@@ -294,10 +294,15 @@ describe("client", function() {
       client.on(0x03, function(packet) {
         chatCount += 1;
         assert.ok(chatCount <= 2);
+        var message = JSON.parse(packet.message);
         if (chatCount === 1) {
-          assert.strictEqual(packet.message, "<" + client.session.username + ">" + " hello everyone; I have logged in.");
+          assert.strictEqual(message.translate, "chat.type.text");
+          assert.strictEqual(message.using[0], client.session.username);
+          assert.strictEqual(message.using[1], "hello everyone; I have logged in.");
         } else if (chatCount === 2) {
-          assert.strictEqual(packet.message, "[Server] hello");
+          assert.strictEqual(message.translate, "chat.type.announcement");
+          assert.strictEqual(message.using[0], "Server");
+          assert.strictEqual(message.using[1], "hello");
           done();
         }
       });
@@ -328,10 +333,15 @@ describe("client", function() {
       client.on(0x03, function(packet) {
         chatCount += 1;
         assert.ok(chatCount <= 2);
+        var message = JSON.parse(packet.message);
         if (chatCount === 1) {
-          assert.strictEqual(packet.message, "<Player>" + " hello everyone; I have logged in.");
+          assert.strictEqual(message.translate, "chat.type.text");
+          assert.strictEqual(message.using[0], "Player");
+          assert.strictEqual(message.using[1], "hello everyone; I have logged in.");
         } else if (chatCount === 2) {
-          assert.strictEqual(packet.message, "[Server] hello");
+          assert.strictEqual(message.translate, "chat.type.announcement");
+          assert.strictEqual(message.using[0], "Server");
+          assert.strictEqual(message.using[1], "hello");
           done();
         }
       });
@@ -364,7 +374,10 @@ describe("client", function() {
         });
       });
       client.on(0x03, function(packet) {
-        assert.strictEqual(packet.message, "<Player>" + " hello everyone; I have logged in.");
+        var message = JSON.parse(packet.message);
+        assert.strictEqual(message.translate, "chat.type.text");
+        assert.strictEqual(message.using[0], "Player");
+        assert.strictEqual(message.using[1], "hello everyone; I have logged in.");
         setTimeout(function() {
           done();
         }, SURVIVE_TIME);
