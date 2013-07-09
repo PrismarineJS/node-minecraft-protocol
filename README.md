@@ -90,7 +90,7 @@ server.on('login', function(client) {
   var msg = { translate: 'chat.type.announcement', using [
     'Server',
     'Hello, ' + client.username
-  ];
+  ]};
   client.write(0x03, { message: JSON.stringify(msg) });
 });
 ```
