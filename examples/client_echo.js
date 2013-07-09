@@ -4,13 +4,14 @@ var client = mc.createClient({
   password: process.env.MC_PASSWORD,
 });
 client.on('connect', function() {
-  console.info("connected");
+  console.info('connected');
 });
 client.on(0x03, function(packet) {
-  var match = packet.message.match(/^<(.+?)> (.*)$/);
-  if (! match) return;
-  var username = match[1];
-  var msg = match[2];
-  if (username === client.username) return;
-  client.write(0x03, {message: msg});
+  var jsonMsg = JSON.parse(packet.message);
+  if (jsonMsg.translate == 'chat.type.announcement' || jsonMsg.translate == 'chat.type.text') {
+    var username = jsonMsg.using[0];
+    var msg = jsonMsg.using[1];
+    if (username === client.username) return;
+    client.write(0x03, {message: msg});
+  }
 });

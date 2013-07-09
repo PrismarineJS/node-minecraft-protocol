@@ -33,13 +33,20 @@ server.on('login', function(client) {
     onGround: true
   });
 
-  client.write(0x03, { message: 'Hello, world!' });
+  var msg = {
+    translate: 'chat.type.announcement',
+    using: [
+      'Server',
+      'Hello, world!'
+    ]
+  };
+  client.write(0x03, { message: JSON.stringify(msg) });
 });
 
 server.on('error', function(error) {
-	console.log('Error:', error);
+  console.log('Error:', error);
 });
 
 server.on('listening', function() {
-	console.log('Server listening on port', server.socketServer.address().port);
+  console.log('Server listening on port', server.socketServer.address().port);
 });

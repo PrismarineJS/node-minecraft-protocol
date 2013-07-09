@@ -42,23 +42,34 @@ server.on('login', function(client) {
 
   client.on(0x03, function(data) {
     var message = '<'+client.username+'>' + ' ' + data.message;
-    broadcast(message);
+    broadcast(message, client, client.username);
     console.log(message);
   });
 });
 
 server.on('error', function(error) {
-	console.log('Error:', error);
+  console.log('Error:', error);
 });
 
 server.on('listening', function() {
-	console.log('Server listening on port', server.socketServer.address().port);
+  console.log('Server listening on port', server.socketServer.address().port);
 });
 
-function broadcast(message, exclude) {
-  var client;
+function broadcast(message, exclude, username) {
+  var client, translate, username;
+  translate = username ? 'chat.type.announcement' : 'chat.type.text';
+  username = username || 'Server';
   for (var clientId in server.clients) {
     client = server.clients[clientId];
-    if (client !== exclude) client.write(0x03, { message: message });
+    if (client !== exclude) {
+      var msg = {
+        translate: translate,
+        using: [
+          username,
+          'Hello, world!'
+        ]
+      };
+      client.write(0x03, { message: JSON.stringify(msg) });
+    }
   }
 }
