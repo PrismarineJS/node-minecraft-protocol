@@ -273,6 +273,11 @@ NODE_DEBUG="minecraft-protocol" node [...]
 
 ## History
 
+### 0.11.0
+
+ * support minecraft protocol 1.6.1 / protocol version 73 (thanks [Matt Bell](https://github.com/mappum))
+   * *note:* chat packets have a new format (see [the examples](https://github.com/superjoe30/node-minecraft-protocol/tree/master/examples) for how to upgrade).
+
 ### 0.10.1
 
  * support minecraft protocol 1.5.2 / protocol version 61
