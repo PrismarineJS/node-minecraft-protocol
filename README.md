@@ -4,7 +4,7 @@ Parse and serialize minecraft packets, plus authentication and encryption.
 
 ## Features
 
- * Supports Minecraft version 1.5
+ * Supports Minecraft version 1.6.1
  * Parses all packets and emits events with packet fields as JavaScript
    objects.
  * Send a packet by supplying fields as a JavaScript object.
@@ -45,10 +45,15 @@ var client = mc.createClient({
 });
 client.on(0x03, function(packet) {
   // Listen for chat messages and echo them back.
-  if (packet.message.indexOf(client.session.username) !== -1) return;
-  client.write(0x03, {
-    message: packet.message,
-  });
+  var jsonMsg = JSON.parse(packet.message);
+  if (jsonMsg.translate == 'chat.type.announcement' || jsonMsg.translate == 'chat.type.text') {
+    var username = jsonMsg.using[0];
+    var msg = jsonMsg.using[1];
+    if (username === client.username) return;
+    client.write(0x03, {
+      message: msg
+    });
+  }
 });
 ```
 
@@ -82,7 +87,11 @@ server.on('login', function(client) {
     pitch: 0,
     onGround: true
   });
-  client.write(0x03, { message: 'Hello, ' + client.username });
+  var msg = { translate: 'chat.type.announcement', using [
+    'Server',
+    'Hello, ' + client.username
+  ];
+  client.write(0x03, { message: JSON.stringify(msg) });
 });
 ```
 
