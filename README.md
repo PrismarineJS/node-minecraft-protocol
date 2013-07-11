@@ -153,6 +153,26 @@ Value looks like this:
 Where the key is the numeric metadata key and the value is the value of the 
 correct data type.
 
+#### propertyArray
+
+Included inside *Entity Properties (0x2C)* packets.
+
+```js
+[
+  { key: 'generic.maxHealth', value: 20, elementList: [] },
+  { key: 'generic.movementSpeed', value: 0.25, elementList: [] }
+]
+```
+
+Where elementList is an array with the following structure:
+
+```js
+[
+  { uuid_msb: 123, uuid_lsb: 456, amount: 0.5, operation: 1 },
+  ...
+]
+```
+
 ## Testing
 
 * Ensure your system has the `java` executable in `PATH`.
