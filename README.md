@@ -4,7 +4,7 @@ Parse and serialize minecraft packets, plus authentication and encryption.
 
 ## Features
 
- * Supports Minecraft version 1.6.1
+ * Supports Minecraft version 1.6.2
  * Parses all packets and emits events with packet fields as JavaScript
    objects.
  * Send a packet by supplying fields as a JavaScript object.
@@ -272,6 +272,10 @@ NODE_DEBUG="minecraft-protocol" node [...]
 ```
 
 ## History
+
+### 0.11.1
+
+ * support minecraft protocol 1.6.2 / protocol version 74 (thanks [Matt Bell](https://github.com/mappum))
 
 ### 0.11.0
 
