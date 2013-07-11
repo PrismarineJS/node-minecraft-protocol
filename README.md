@@ -293,6 +293,10 @@ NODE_DEBUG="minecraft-protocol" node [...]
 
 ## History
 
+### 0.11.2
+
+ * 1.6.2 support fixes: updated 0x2c packets to include `elementList` and added 0x85 *Tile Editor Open* packets
+
 ### 0.11.1
 
  * support minecraft protocol 1.6.2 / protocol version 74 (thanks [Matt Bell](https://github.com/mappum))
