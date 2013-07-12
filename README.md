@@ -168,7 +168,7 @@ Where elementList is an array with the following structure:
 
 ```js
 [
-  { uuid_msb: 123, uuid_lsb: 456, amount: 0.5, operation: 1 },
+  { uuid: [ 123, 456, 78, 90 ], amount: 0.5, operation: 1 },
   ...
 ]
 ```

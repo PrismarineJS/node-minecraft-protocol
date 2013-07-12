@@ -72,7 +72,7 @@ var values = {
     nbtData: new Buffer(0),
   }],
   'stringArray': ['hello', 'dude'],
-  'propertyArray': [{ key: 'generic.maxHealth', value: 1.5 }],
+  'propertyArray': [{ key: 'generic.maxHealth', value: 1.5, elementList: [ { uuid: [ 123, 456, 78, 90 ], amount: 0.5, operation: 1 } ] }],
   'mapChunkBulk': {
     skyLightSent: true,
     compressedChunkData: new Buffer(1234),
