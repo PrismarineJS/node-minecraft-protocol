@@ -293,6 +293,10 @@ NODE_DEBUG="minecraft-protocol" node [...]
 
 ## History
 
+### 0.11.3
+
+ * packet 0x2c: packet writing fixed, UUID format simplified, tests updated
+
 ### 0.11.2
 
  * 1.6.2 support fixes: updated 0x2c packets to include `elementList` and added 0x85 *Tile Editor Open* packets
