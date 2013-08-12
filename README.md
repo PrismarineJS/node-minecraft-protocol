@@ -293,6 +293,10 @@ NODE_DEBUG="minecraft-protocol" node [...]
 
 ## History
 
+### 0.11.4
+
+ * Chat packet string max length fix (thanks [Robin Lambertz](https://github.com/roblabla))
+
 ### 0.11.3
 
  * packet 0x2c: packet writing fixed, UUID format simplified, tests updated
