@@ -293,6 +293,10 @@ NODE_DEBUG="minecraft-protocol" node [...]
 
 ## History
 
+### 0.11.5
+
+ * Fix handling of some conditional fields (thanks [Florian Wesch](https://github.com/dividuum))
+
 ### 0.11.4
 
  * Chat packet string max length fix (thanks [Robin Lambertz](https://github.com/roblabla))
