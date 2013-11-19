@@ -56,10 +56,12 @@ server.on('listening', function() {
 });
 
 function broadcast(message, exclude, username) {
-  var client, translate, username;
+  var client, translate;
   translate = username ? 'chat.type.announcement' : 'chat.type.text';
   username = username || 'Server';
   for (var clientId in server.clients) {
+    if (!server.clients.hasOwnProperty(clientId)) continue;
+
     client = server.clients[clientId];
     if (client !== exclude) {
       var msg = {

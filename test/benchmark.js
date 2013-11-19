@@ -8,7 +8,7 @@ var FakeSocket = function() {
   EventEmitter.call(this);
 };
 util.inherits(FakeSocket, EventEmitter);
-FakeSocket.prototype.write = function(){}
+FakeSocket.prototype.write = function(){};
 
 var client = new Client();
 var socket = new FakeSocket();
