@@ -14,6 +14,7 @@ var mc = require('../')
   , MC_SERVER_JAR = process.env.MC_SERVER_JAR
   , SURVIVE_TIME = 10000
   , MC_SERVER_PATH = path.join(__dirname, 'server')
+;
 
 var defaultServerProps = {
   'generator-settings': "",
@@ -127,6 +128,8 @@ describe("packets", function() {
   });
   var packetId, packetInfo, field;
   for(packetId in protocol.packets) {
+    if (!protocol.packets.hasOwnProperty(packetId)) continue;
+
     packetId = parseInt(packetId, 10);
     packetInfo = protocol.packets[packetId];
     it("0x" + zfill(parseInt(packetId, 10).toString(16), 2),
@@ -150,7 +153,6 @@ describe("packets", function() {
     // empty object uses default values
     var packet = {};
     packetInfo.forEach(function(field) {
-      var value = field.type;
       packet[field.name] = values[field.type];
     });
     serverClient.once(packetId, function(receivedPacket) {
@@ -169,7 +171,7 @@ describe("packets", function() {
     packetInfo.forEach(function(field) {
       assert.deepEqual(p1[field], p2[field]);
     });
-    var field, cmp;
+    var field;
     for (field in p1) {
       assert.ok(field in p2, "field " + field + " missing in p2");
     }
@@ -187,9 +189,13 @@ describe("client", function() {
     var props = {};
     var prop;
     for (prop in defaultServerProps) {
+      if (!defaultServerProps.hasOwnProperty(prop)) continue;
+
       props[prop] = defaultServerProps[prop];
     }
     for (prop in propOverrides) {
+      if (!propOverrides.hasOwnProperty(prop)) continue;
+
       props[prop] = propOverrides[prop];
     }
     var batch = new Batch();
@@ -197,6 +203,8 @@ describe("client", function() {
     batch.push(function(cb) {
       var str = "";
       for (var prop in props) {
+        if (!props.hasOwnProperty(prop)) continue;
+
         str += prop + "=" + props[prop] + "\n";
       }
       fs.writeFile(path.join(MC_SERVER_PATH, "server.properties"), str, cb);
@@ -547,6 +555,8 @@ describe("mc-server", function() {
     function broadcast(message, exclude) {
       var client;
       for (var clientId in server.clients) {
+        if (!server.clients.hasOwnProperty(clientId)) continue;
+
         client = server.clients[clientId];
         if (client !== exclude) client.write(0x03, { message: message });
       }
