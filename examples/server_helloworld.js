@@ -1,7 +1,7 @@
 var mc = require('../');
 
 var options = {
-  'online-mode': false, // optional
+ // 'online-mode': false, // optional
 };
 
 var server = mc.createServer(options);
@@ -23,10 +23,9 @@ server.on('login', function(client) {
     difficulty: 2,
     maxPlayers: server.maxPlayers
   });
-  client.write(0x0d, {
+  client.write(0x08, {
     x: 0,
     y: 1.62,
-    stance: 0,
     z: 0,
     yaw: 0,
     pitch: 0,
@@ -35,12 +34,12 @@ server.on('login', function(client) {
 
   var msg = {
     translate: 'chat.type.announcement',
-    using: [
+    "with": [
       'Server',
       'Hello, world!'
     ]
   };
-  client.write(0x03, { message: JSON.stringify(msg) });
+  client.write(0x02, { message: JSON.stringify(msg) });
 });
 
 server.on('error', function(error) {

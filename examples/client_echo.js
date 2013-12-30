@@ -1,4 +1,6 @@
-var mc = require('../');
+var mc = require('../')
+  , states = mc.protocol.states
+
 var client = mc.createClient({
   username: process.env.MC_USERNAME,
   password: process.env.MC_PASSWORD,
@@ -6,12 +8,12 @@ var client = mc.createClient({
 client.on('connect', function() {
   console.info('connected');
 });
-client.on(0x03, function(packet) {
+client.on([states.PLAY, 0x02], function(packet) {
   var jsonMsg = JSON.parse(packet.message);
   if (jsonMsg.translate == 'chat.type.announcement' || jsonMsg.translate == 'chat.type.text') {
-    var username = jsonMsg.using[0];
-    var msg = jsonMsg.using[1];
+    var username = jsonMsg.with[0];
+    var msg = jsonMsg.with[1];
     if (username === client.username) return;
-    client.write(0x03, {message: msg});
+    client.write(0x01, {message: msg});
   }
 });
