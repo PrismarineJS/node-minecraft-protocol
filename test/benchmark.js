@@ -1,4 +1,4 @@
-var ITERATIONS = 1000000;
+var ITERATIONS = 100000;
 
 var Client = require('../lib/client'),
   EventEmitter = require('events').EventEmitter,
