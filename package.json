@@ -36,6 +36,7 @@
     "ursa": "~0.8.0",
     "superagent": "~0.10.0",
     "buffer-equal": "0.0.0",
+    "ansi-color": "0.2.1",
     "node-uuid": "~1.4.1"
   }
 }
