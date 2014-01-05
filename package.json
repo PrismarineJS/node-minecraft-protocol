@@ -25,6 +25,7 @@
   "engines": {
     "node": ">=0.8.16"
   },
+  "browser": "browser.js",
   "devDependencies": {
     "mocha": "~1.8.2",
     "mkdirp": "~0.3.4",
