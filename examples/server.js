@@ -1,4 +1,5 @@
 var mc = require('../');
+var states = mc.protocol.states;
 
 var yellow = '§e';
 
@@ -30,17 +31,16 @@ server.on('login', function(client) {
     difficulty: 2,
     maxPlayers: server.maxPlayers
   });
-  client.write(0x0d, {
+  client.write(0x08, {
     x: 0,
     y: 256,
-    stance: 255,
     z: 0,
     yaw: 0,
     pitch: 0,
     onGround: true
   });
 
-  client.on(0x03, function(data) {
+  client.on([states.PLAY, 0x01], function(data) {
     var message = '<'+client.username+'>' + ' ' + data.message;
     broadcast(message, client, client.username);
     console.log(message);
@@ -66,12 +66,12 @@ function broadcast(message, exclude, username) {
     if (client !== exclude) {
       var msg = {
         translate: translate,
-        using: [
+        "with": [
           username,
           'Hello, world!'
         ]
       };
-      client.write(0x03, { message: JSON.stringify(msg) });
+      client.write(0x02, { message: JSON.stringify(msg) });
     }
   }
 }

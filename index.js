@@ -1,15 +1,20 @@
 var EventEmitter = require('events').EventEmitter
-  , util = require('util')
-  , assert = require('assert')
-  , ursa = require('ursa')
-  , crypto = require('crypto')
-  , bufferEqual = require('buffer-equal')
-  , superagent = require('superagent')
-  , protocol = require('./lib/protocol')
-  , Client = require('./lib/client')
-  , Server = require('./lib/server')
-  , debug = protocol.debug
-;
+        , util = require('util')
+        , assert = require('assert')
+        , ursa = require('ursa')
+        , crypto = require('crypto')
+        , bufferEqual = require('buffer-equal')
+        , superagent = require('superagent')
+        , protocol = require('./lib/protocol')
+        , Client = require('./lib/client')
+        , Server = require('./lib/server')
+        , Yggdrasil = require('./lib/yggdrasil.js')
+        , getSession = Yggdrasil.getSession
+        , validateSession = Yggdrasil.validateSession
+        , joinServer = Yggdrasil.joinServer
+        , states = protocol.states
+        , debug = protocol.debug
+        ;
 
 module.exports = {
   createClient: createClient,
@@ -23,10 +28,10 @@ module.exports = {
 function createServer(options) {
   options = options || {};
   var port = options.port != null ?
-    options.port :
-    options['server-port'] != null ?
-      options['server-port'] :
-      25565 ;
+          options.port :
+          options['server-port'] != null ?
+          options['server-port'] :
+          25565;
   var host = options.host || '0.0.0.0';
   var kickTimeout = options.kickTimeout || 10 * 1000;
   var checkTimeoutInterval = options.checkTimeoutInterval || 4 * 1000;
@@ -41,9 +46,9 @@ function createServer(options) {
   server.playerCount = 0;
   server.onlineModeExceptions = {};
   server.on("connection", function(client) {
-    client.once(0xfe, onPing);
-    client.once(0x02, onHandshake);
-    client.once(0xFC, onEncryptionKeyResponse);
+    client.once([states.HANDSHAKING, 0x00], onHandshake);
+    client.once([states.LOGIN, 0x00], onLogin);
+    client.once([states.STATUS, 0x00], onPing);
     client.on('end', onEnd);
 
     var keepAlive = false;
@@ -60,7 +65,8 @@ function createServer(options) {
     }
 
     function keepAliveLoop() {
-      if (! keepAlive) return;
+      if (!keepAlive)
+        return;
 
       // check if the last keepAlive was too long ago (kickTimeout)
       var elapsed = new Date() - lastKeepAlive;
@@ -90,40 +96,44 @@ function createServer(options) {
     }
 
     function onPing(packet) {
-      if (loggedIn) return;
-      client.write(0xff, {
-        reason: [
-          '§1',
-          protocol.version,
-          protocol.minecraftVersion,
-          server.motd,
-          server.playerCount,
-          server.maxPlayers,
-        ].join('\u0000')
+      var response = {
+        "version": {
+          "name": protocol.minecraftVersion,
+          "protocol": protocol.version
+        },
+        "players": {
+          "max": server.maxPlayers,
+          "online": server.playerCount,
+          "sample": []
+        },
+        "description": {"text": server.motd},
+        "favicon": server.favicon
+      };
+
+      client.once([states.STATUS, 0x01], function(packet) {
+        client.write(0x01, { time: packet.time });
+        client.end();
       });
+      client.write(0x00, {response: JSON.stringify(response)});
     }
 
-    function onHandshake(packet) {
+    function onLogin(packet) {
       client.username = packet.username;
       var isException = !!server.onlineModeExceptions[client.username.toLowerCase()];
       var needToVerify = (onlineMode && ! isException) || (! onlineMode && isException);
-      var serverId;
-      if (needToVerify) {
-        serverId = crypto.randomBytes(4).toString('hex');
-      } else {
-        serverId = '-';
-      }
-      if (encryptionEnabled) {
+      if (encryptionEnabled || needToVerify) {
+        var serverId = crypto.randomBytes(4).toString('hex');
         client.verifyToken = crypto.randomBytes(4);
         var publicKeyStrArr = serverKey.toPublicPem("utf8").split("\n");
         var publicKeyStr = "";
-        for (var i=1;i<publicKeyStrArr.length - 2;i++) {
+        for (var i = 1; i < publicKeyStrArr.length - 2; i++) {
           publicKeyStr += publicKeyStrArr[i]
         }
-        client.publicKey = new Buffer(publicKeyStr,'base64');
+        client.publicKey = new Buffer(publicKeyStr, 'base64');
         hash = crypto.createHash("sha1");
         hash.update(serverId);
-        client.write(0xFD, {
+        client.once([states.LOGIN, 0x01], onEncryptionKeyResponse);
+        client.write(0x01, {
           serverId: serverId,
           publicKey: client.publicKey,
           verifyToken: client.verifyToken
@@ -133,9 +143,17 @@ function createServer(options) {
       }
     }
 
+    function onHandshake(packet) {
+      if (packet.nextState == 1) {
+        client.state = states.STATUS;
+      } else if (packet.nextState == 2) {
+        client.state = states.LOGIN;
+      }
+    }
+
     function onEncryptionKeyResponse(packet) {
       var verifyToken = serverKey.decrypt(packet.verifyToken, undefined, undefined, ursa.RSA_PKCS1_PADDING);
-      if (! bufferEqual(client.verifyToken, verifyToken)) {
+      if (!bufferEqual(client.verifyToken, verifyToken)) {
         client.end('DidNotEncryptVerifyTokenProperly');
         return;
       }
@@ -144,49 +162,29 @@ function createServer(options) {
       client.decipher = crypto.createDecipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
       hash.update(sharedSecret);
       hash.update(client.publicKey);
-      client.write(0xFC, {
-        sharedSecret: new Buffer(0),
-        verifyToken: new Buffer(0)
-      });
       client.encryptionEnabled = true;
 
       var isException = !!server.onlineModeExceptions[client.username.toLowerCase()];
-      var needToVerify = (onlineMode && ! isException) || (! onlineMode && isException);
+      var needToVerify = (onlineMode && !isException) || (!onlineMode && isException);
       var nextStep = needToVerify ? verifyUsername : loginClient;
       nextStep();
 
       function verifyUsername() {
         var digest = mcHexDigest(hash);
-        var request = superagent.get("http://session.minecraft.net/game/checkserver.jsp");
-        request.query({
-          user: client.username,
-          serverId: digest
-        });
-        request.end(function(err, resp) {
-          var myErr;
+        validateSession(client.username, digest, function(err, uuid) {
           if (err) {
-            server.emit('error', err);
-            client.end('McSessionUnavailable');
-          } else if (resp.serverError) {
-            myErr = new Error("session.minecraft.net is broken: " + resp.status);
-            myErr.code = 'EMCSESSION500';
-            server.emit('error', myErr);
-            client.end('McSessionDown');
-          } else if (resp.serverError) {
-            myErr = new Error("session.minecraft.net rejected request: " + resp.status);
-            myErr.code = 'EMCSESSION400';
-            server.emit('error', myErr);
-            client.end('McSessionRejectedAuthRequest');
-          } else if (resp.text !== "YES") {
-            client.end('FailedToVerifyUsername');
-          } else {
-            loginClient();
+            client.end("Failed to verify username!");
+            return;
           }
+          client.UUID = uuid;
+          loginClient();
         });
       }
     }
 
     function loginClient() {
+      client.write(0x02, {uuid: (client.UUID | 0).toString(10), username: client.username});
+      client.state = states.PLAY;
       loggedIn = true;
       startKeepAlive();
 
@@ -208,28 +206,36 @@ function createClient(options) {
   assert.ok(options, "options is required");
   var port = options.port || 25565;
   var host = options.host || 'localhost';
+  var clientToken = options.clientToken || Yggdrasil.generateUUID();
+  var accessToken = options.accessToken || null;
+
   assert.ok(options.username, "username is required");
-  var haveCredentials = options.password != null;
+  var haveCredentials = options.password != null || (clientToken != null && accessToken != null);
   var keepAlive = options.keepAlive == null ? true : options.keepAlive;
+
 
   var client = new Client(false);
   client.on('connect', onConnect);
-  if (keepAlive) client.on(0x00, onKeepAlive);
-  client.once(0xFC, onEncryptionKeyResponse);
-  client.once(0xFD, onEncryptionKeyRequest);
+  if (keepAlive) client.on([states.PLAY, 0x00], onKeepAlive);
+  client.once([states.LOGIN, 0x01], onEncryptionKeyRequest);
+  client.once([states.LOGIN, 0x02], onLogin);
 
   if (haveCredentials) {
     // make a request to get the case-correct username before connecting.
-    getLoginSession(options.username, options.password, function(err, session) {
+    var cb = function(err, session) {
       if (err) {
         client.emit('error', err);
       } else {
         client.session = session;
         client.username = session.username;
+        accessToken = session.accessToken;
         client.emit('session');
         client.connect(port, host);
       }
-    });
+    };
+    
+    if (accessToken != null) getSession(options.username, accessToken, options.clientToken, true, cb);
+    else getSession(options.username, options.password, options.clientToken, false, cb);
   } else {
     // assume the server is in offline mode and just go for it.
     client.username = options.username;
@@ -239,11 +245,16 @@ function createClient(options) {
   return client;
 
   function onConnect() {
-    client.write(0x02, {
+    client.write(0x00, {
       protocolVersion: protocol.version,
-      username: client.username,
       serverHost: host,
       serverPort: port,
+      nextState: 2
+    });
+
+    client.state = states.LOGIN;
+    client.write(0x00, {
+      username: client.username
     });
   }
 
@@ -288,28 +299,7 @@ function createClient(options) {
         hash.update(packet.publicKey);
 
         var digest = mcHexDigest(hash);
-        var request = superagent.get("http://session.minecraft.net/game/joinserver.jsp");
-        request.query({
-          user: client.session.username,
-          sessionId: client.session.id,
-          serverId: digest,
-        });
-        request.end(function(err, resp) {
-          var myErr;
-          if (err) {
-            cb(err);
-          } else if (resp.serverError) {
-            myErr = new Error("session.minecraft.net is broken: " + resp.status);
-            myErr.code = 'EMCSESSION500';
-            cb(myErr);
-          } else if (resp.clientError) {
-            myErr = new Error("session.minecraft.net rejected request: " + resp.status + " " + resp.text);
-            myErr.code = 'EMCSESSION400';
-            cb(myErr);
-          } else {
-            cb();
-          }
-        });
+        joinServer(this.username, digest, accessToken, client.session.selectedProfile.id, cb);
       }
 
       function sendEncryptionKeyResponse() {
@@ -318,19 +308,19 @@ function createClient(options) {
         var encryptedVerifyTokenBuffer = pubKey.encrypt(packet.verifyToken, undefined, undefined, ursa.RSA_PKCS1_PADDING);
         client.cipher = crypto.createCipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
         client.decipher = crypto.createDecipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
-        client.write(0xfc, {
+        client.write(0x01, {
           sharedSecret: encryptedSharedSecretBuffer,
           verifyToken: encryptedVerifyTokenBuffer,
         });
+        client.encryptionEnabled = true;
       }
     }
   }
-
-  function onEncryptionKeyResponse(packet) {
-    assert.strictEqual(packet.sharedSecret.length, 0);
-    assert.strictEqual(packet.verifyToken.length, 0);
-    client.encryptionEnabled = true;
-    client.write(0xcd, { payload: 0 });
+  
+  function onLogin(packet) {
+    client.state = states.PLAY;
+    client.uuid = packet.uuid;
+    client.username = packet.username;
   }
 }
 
@@ -352,11 +342,13 @@ function mcHexDigest(hash) {
   var buffer = new Buffer(hash.digest(), 'binary');
   // check for negative hashes
   var negative = buffer.readInt8(0) < 0;
-  if (negative) performTwosCompliment(buffer);
+  if (negative)
+    performTwosCompliment(buffer);
   var digest = buffer.toString('hex');
   // trim leading zeroes
   digest = digest.replace(/^0+/g, '');
-  if (negative) digest = '-' + digest;
+  if (negative)
+    digest = '-' + digest;
   return digest;
 
   function performTwosCompliment(buffer) {
@@ -373,43 +365,4 @@ function mcHexDigest(hash) {
       }
     }
   }
-}
-
-function getLoginSession(email, password, cb) {
-  var req = superagent.post("https://login.minecraft.net");
-  req.type('form');
-  req.send({
-    user: email,
-    password: password,
-    version: protocol.sessionVersion,
-  });
-  req.end(function(err, resp) {
-    var myErr;
-    if (err) {
-      cb(err);
-    } else if (resp.serverError) {
-      myErr = new Error("login.minecraft.net is broken: " + resp.status);
-      myErr.code = 'ELOGIN500';
-      cb(myErr);
-    } else if (resp.clientError) {
-      myErr = new Error("login.minecraft.net rejected request: " + resp.status + " " + resp.text);
-      myErr.code = 'ELOGIN400';
-      cb(myErr);
-    } else {
-      var values = resp.text.split(':');
-      var session = {
-        currentGameVersion: values[0],
-        username: values[2],
-        id: values[3],
-        uid: values[4],
-      };
-      if (session.id && session.username) {
-        cb(null, session);
-      } else {
-        myErr = new Error("login.minecraft.net rejected request: " + resp.status + " " + resp.text);
-        myErr.code = 'ELOGIN400';
-        cb(myErr);
-      }
-    }
-  });
 }
