@@ -23,6 +23,7 @@ module.exports = {
   Server: Server,
   ping: require('./lib/ping'),
   protocol: protocol,
+  yggdrasil: Yggdrasil,
 };
 
 function createServer(options) {
