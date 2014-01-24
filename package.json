@@ -5,7 +5,7 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/superjoe30/node-minecraft-protocol.git"
+    "url": "git://github.com/andrewrk/node-minecraft-protocol.git"
   },
   "scripts": {
     "test": "mocha --reporter spec"
