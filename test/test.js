@@ -136,17 +136,17 @@ describe("packets", function() {
     client.end();
   });
   var packetId, packetInfo, field;
-  for(state in protocol.packets) {
-    if (!protocol.packets.hasOwnProperty(state)) continue;
-    for(packetId in protocol.packets[state].toServer) {
-      if (!protocol.packets[state].toServer.hasOwnProperty(packetId)) continue;
+  for(state in protocol.packetFields) {
+    if (!protocol.packetFields.hasOwnProperty(state)) continue;
+    for(packetId in protocol.packetFields[state].toServer) {
+      if (!protocol.packetFields[state].toServer.hasOwnProperty(packetId)) continue;
       packetId = parseInt(packetId, 10);
       packetInfo = protocol.get(packetId, state, true);
       it(state + ",ServerBound,0x" + zfill(parseInt(packetId, 10).toString(16), 2),
         callTestPacket(packetId, packetInfo, state, true));
     }
-    for(packetId in protocol.packets[state].toClient) {
-      if (!protocol.packets[state].toClient.hasOwnProperty(packetId)) continue;
+    for(packetId in protocol.packetFields[state].toClient) {
+      if (!protocol.packetFields[state].toClient.hasOwnProperty(packetId)) continue;
       packetId = parseInt(packetId, 10);
       packetInfo = protocol.get(packetId, state, false);
       it(state + ",ClientBound,0x" + zfill(parseInt(packetId, 10).toString(16), 2),

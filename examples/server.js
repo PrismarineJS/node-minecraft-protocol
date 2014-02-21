@@ -1,8 +1,6 @@
 var mc = require('../');
 var states = mc.protocol.states;
 
-var yellow = '§e';
-
 var options = {
   motd: 'Vox Industries',
   'max-players': 127,
@@ -13,17 +11,17 @@ var options = {
 var server = mc.createServer(options);
 
 server.on('login', function(client) {
-  broadcast(yellow + client.username+' joined the game.');
+  broadcast(client.username+' joined the game.');
   var addr = client.socket.remoteAddress + ':' + client.socket.remotePort;
   console.log(client.username+' connected', '('+addr+')');
 
   client.on('end', function() {
-    broadcast(yellow + client.username+' left the game.', client);
+    broadcast(client.username+' left the game.', client);
     console.log(client.username+' disconnected', '('+addr+')');
   });
 
   // send init data so client will start rendering world
-  client.write(0x01, {
+  client.write('join_game', {
     entityId: client.id,
     levelType: 'default',
     gameMode: 1,
@@ -31,7 +29,7 @@ server.on('login', function(client) {
     difficulty: 2,
     maxPlayers: server.maxPlayers
   });
-  client.write(0x08, {
+  client.write('player_position', {
     x: 0,
     y: 256,
     z: 0,
@@ -40,7 +38,7 @@ server.on('login', function(client) {
     onGround: true
   });
 
-  client.on([states.PLAY, 0x01], function(data) {
+  client.on('chat_message', function(data) {
     var message = '<'+client.username+'>' + ' ' + data.message;
     broadcast(message, client, client.username);
     console.log(message);
@@ -68,10 +66,10 @@ function broadcast(message, exclude, username) {
         translate: translate,
         "with": [
           username,
-          'Hello, world!'
+          message
         ]
       };
-      client.write(0x02, { message: JSON.stringify(msg) });
+      client.write('chat', { message: JSON.stringify(msg) });
     }
   }
 }
