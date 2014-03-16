@@ -15,7 +15,7 @@ server.on('login', function(client) {
   });
 
   // send init data so client will start rendering world
-  client.write('join_game', {
+  client.write('login', {
     entityId: client.id,
     levelType: 'default',
     gameMode: 0,
@@ -23,7 +23,7 @@ server.on('login', function(client) {
     difficulty: 2,
     maxPlayers: server.maxPlayers
   });
-  client.write('player_position', {
+  client.write('position', {
     x: 0,
     y: 1.62,
     z: 0,

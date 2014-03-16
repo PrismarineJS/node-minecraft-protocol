@@ -38,7 +38,7 @@ server.on('login', function(client) {
     onGround: true
   });
 
-  client.on('chat_message', function(data) {
+  client.on('chat', function(data) {
     var message = '<'+client.username+'>' + ' ' + data.message;
     broadcast(message, client, client.username);
     console.log(message);
