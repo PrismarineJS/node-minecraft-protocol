@@ -94,7 +94,7 @@ client.on('connect', function() {
 client.on('state', function(newState) {
   if (newState === states.PLAY) {
     chats.forEach(function(chat) {
-      client.write('chat_message', {message: chat});
+      client.write('chat', {message: chat});
     });
   }
 })

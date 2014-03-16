@@ -25,9 +25,9 @@ Parse and serialize minecraft packets, plus authentication and encryption.
 
 ## Projects Using node-minecraft-protocol
 
- * [mineflayer](https://github.com/superjoe30/mineflayer/) - create minecraft
+ * [mineflayer](https://github.com/andrewrk/mineflayer/) - create minecraft
    bots with a stable, high level API.
- * [mcserve](https://github.com/superjoe30/mcserve) - runs and monitors your
+ * [mcserve](https://github.com/andrewrk/mcserve) - runs and monitors your
    minecraft server, provides real-time web interface, allow your users to
    create bots.
 
@@ -320,7 +320,7 @@ NODE_DEBUG="minecraft-protocol" node [...]
 ### 0.11.0
 
  * support minecraft protocol 1.6.1 / protocol version 73 (thanks [Matt Bell](https://github.com/mappum))
-   * *note:* chat packets have a new format (see [the examples](https://github.com/superjoe30/node-minecraft-protocol/tree/master/examples) for how to upgrade).
+   * *note:* chat packets have a new format (see [the examples](https://github.com/andrewrk/node-minecraft-protocol/tree/master/examples) for how to upgrade).
 
 ### 0.10.1
 
