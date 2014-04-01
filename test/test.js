@@ -164,7 +164,9 @@ describe("packets", function() {
     // empty object uses default values
     var packet = {};
     packetInfo.forEach(function(field) {
-      packet[field.name] = values[field.type];
+      if (!field.hasOwnProperty("condition") || field.condition(packet)) {
+        packet[field.name] = values[field.type];
+      }
     });
     if (toServer) {
       serverClient.once([state, packetId], function(receivedPacket) {
