@@ -61,7 +61,31 @@ var values = {
   'ubyte': 8,
   'string': "hi hi this is my client string",
   'ustring': "hi hi this is my server string",
-  'byteArray16': new Buffer(8),
+  'buffer': new Buffer(8),
+  'array': function(typeArgs) {
+    if (typeof values[typeArgs.type] === "undefined") {
+      throw new Error("No data type for " + typeArgs.type);
+    }
+    if (typeof values[typeArgs.type] === "function") {
+      return [values[typeArgs.type](typeArgs.typeArgs)];
+    }
+    return [values[typeArgs.type]];
+  },
+  'container': function(typeArgs) {
+    var results = {};
+    for (var index in typeArgs.fields) {
+      if (typeof values[typeArgs.fields[index].type] === "undefined") {
+        throw new Error("No data type for " + typeArgs.fields[index].type);
+      }
+      if (typeof values[typeArgs.fields[index].type] === "function") {
+        results[typeArgs.fields[index].name] = values[typeArgs.fields[index].type](typeArgs.fields[index].typeArgs);
+      } else {
+        results[typeArgs.fields[index].name] = values[typeArgs.fields[index].type];
+      }
+    }
+    return results;
+  },
+  'count': 1, // TODO : might want to set this to a correct value
   'bool': true,
   'double': 99999.2222,
   'float': -333.444,
@@ -71,27 +95,7 @@ var values = {
     itemDamage: 2,
     nbtData: new Buffer(90),
   },
-  'ascii': "hello",
-  'byteArray32': new Buffer(10),
   'long': [0, 1],
-  'slotArray': [{
-    id: 41,
-    itemCount: 2,
-    itemDamage: 3,
-    nbtData: new Buffer(0),
-  }],
-  'stringArray': ['hello', 'dude'],
-  'propertyArray': [{ key: 'generic.maxHealth', value: 1.5, elementList: [ { uuid: [ 123, 456, 78, 90 ], amount: 0.5, operation: 1 } ] }],
-  'mapChunkBulk': {
-    skyLightSent: true,
-    compressedChunkData: new Buffer(1234),
-    meta: [{
-      x: 23,
-      z: 64,
-      bitMap: 3,
-      addBitMap: 10,
-    }],
-  },
   'entityMetadata': [
     { key: 17, value: 0,   type: 'int'   },
     { key: 0,  value: 0,   type: 'byte'  },
@@ -106,12 +110,7 @@ var values = {
     velocityY: 2,
     velocityZ: 3,
   },
-  'intArray8': [1, 2, 3, 4],
-  'intVector': {x: 1, y: 2, z: 3},
-  'byteVector': {x: 1, y: 2, z: 3},
-  'byteVectorArray': [{x: 1, y: 2, z: 3}],
-  'statisticArray': {"stuff": 13, "anotherstuff": 6392},
-  'matchArray': ["hallo", "heya"]
+  'UUID': [42, 42, 42, 42]
 };
 
 describe("packets", function() {
@@ -164,7 +163,16 @@ describe("packets", function() {
     // empty object uses default values
     var packet = {};
     packetInfo.forEach(function(field) {
-      packet[field.name] = values[field.type];
+      if (!field.hasOwnProperty("condition") || field.condition(packet)) {
+        var fieldVal = values[field.type];
+        if (typeof fieldVal === "undefined") {
+          throw new Error("No value for type " + field.type);
+        }
+        if (typeof fieldVal === "function") {
+          fieldVal = fieldVal(field.typeArgs);
+        }
+        packet[field.name] = fieldVal;
+      }
     });
     if (toServer) {
       serverClient.once([state, packetId], function(receivedPacket) {
