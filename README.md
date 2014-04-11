@@ -4,7 +4,7 @@ Parse and serialize minecraft packets, plus authentication and encryption.
 
 ## Features
 
- * Supports Minecraft version 1.6.4
+ * Supports Minecraft version 1.7.2
  * Parses all packets and emits events with packet fields as JavaScript
    objects.
  * Send a packet by supplying fields as a JavaScript object.
@@ -43,7 +43,7 @@ var client = mc.createClient({
   username: "email@example.com",
   password: "12345678",
 });
-client.on(0x03, function(packet) {
+client.on('chat', function(packet) {
   // Listen for chat messages and echo them back.
   var jsonMsg = JSON.parse(packet.message);
   if (jsonMsg.translate == 'chat.type.announcement' || jsonMsg.translate == 'chat.type.text') {
@@ -70,7 +70,7 @@ var server = mc.createServer({
   port: 25565,           // optional
 });
 server.on('login', function(client) {
-  client.write(0x01, {
+  client.write('login', {
     entityId: client.id,
     levelType: 'default',
     gameMode: 0,
@@ -78,16 +78,15 @@ server.on('login', function(client) {
     difficulty: 2,
     maxPlayers: server.maxPlayers
   });
-  client.write(0x0d, {
+  client.write('position', {
     x: 0,
     y: 1.62,
-    stance: 0,
     z: 0,
     yaw: 0,
     pitch: 0,
     onGround: true
   });
-  var msg = { translate: 'chat.type.announcement', using [
+  var msg = { translate: 'chat.type.announcement', using: [
     'Server',
     'Hello, ' + client.username
   ]};
@@ -134,9 +133,65 @@ be exempt from online mode or offline mode (whatever mode the server is in).
 
 Make sure the entries in this object are all lower case.
 
+#### server.clients
+
+Javascript object mapping a `Client` from a clientId.
+
+### server.playerCount
+
+The amount of players currently present on the server.
+
 #### server.maxPlayers
 
+The maximum amount of players allowed on the server.
+
+#### server.motd
+
+The motd that is sent to the player when he is pinging the server
+
+#### server.favicon
+
+A base64 data string representing the favicon that will appear next to the server
+on the mojang client's multiplayer list.
+
+### mc.createClient(option)
+
+Returns a `Client` instance and perform login
+
+### Client
+
+#### client.state
+
+The internal state that is used to figure out which protocol state we are in during
+packet parsing. This is one of the protocol.states.
+
+#### client.isServer
+
+True if this is a connection going from the server to the client,
+False if it is a connection from client to server.
+
+
+#### client.socket
+
+Returns the internal nodejs Socket used to communicate with this client.
+
+#### client.uuid
+
+A string representation of the client's UUID. Note that UUIDs are unique for
+each players, while playerNames, as of 1.7.7, are not unique and can change.
+
+### client.username
+
+The user's username.
+
+### client.session
+
+The user's session, as returned by the Yggdrasil system. 
+
 ### Not Immediately Obvious Data Type Formats
+
+Note : almost all data formats can be understood by looking at the packet 
+structure in lib/protocol.js
 
 #### entityMetadata
 
@@ -153,26 +208,6 @@ Value looks like this:
 Where the key is the numeric metadata key and the value is the value of the 
 correct data type.
 
-#### propertyArray
-
-Included inside *Entity Properties (0x2C)* packets.
-
-```js
-[
-  { key: 'generic.maxHealth', value: 20, elementList: [] },
-  { key: 'generic.movementSpeed', value: 0.25, elementList: [] }
-]
-```
-
-Where elementList is an array with the following structure:
-
-```js
-[
-  { uuid: [ 123, 456, 78, 90 ], amount: 0.5, operation: 1 },
-  ...
-]
-```
-
 ## Testing
 
 * Ensure your system has the `java` executable in `PATH`.
@@ -183,104 +218,124 @@ Where elementList is an array with the following structure:
 
 ```
   packets
-    ✓ 0x00 
-    ✓ 0x01 
-    ✓ 0x02 
-    ✓ 0x03 
-    ✓ 0x04 
-    ✓ 0x05 
-    ✓ 0x06 
-    ✓ 0x07 
-    ✓ 0x08 
-    ✓ 0x09 
-    ✓ 0x0a 
-    ✓ 0x0b 
-    ✓ 0x0c 
-    ✓ 0x0d 
-    ✓ 0x0e 
-    ✓ 0x0f 
-    ✓ 0x10 
-    ✓ 0x11 
-    ✓ 0x12 
-    ✓ 0x13 
-    ✓ 0x14 
-    ✓ 0x16 
-    ✓ 0x17 
-    ✓ 0x18 
-    ✓ 0x19 
-    ✓ 0x1a 
-    ✓ 0x1c 
-    ✓ 0x1d 
-    ✓ 0x1e 
-    ✓ 0x1f 
-    ✓ 0x20 
-    ✓ 0x21 
-    ✓ 0x22 
-    ✓ 0x23 
-    ✓ 0x26 
-    ✓ 0x27 
-    ✓ 0x28 
-    ✓ 0x29 
-    ✓ 0x2a 
-    ✓ 0x2b 
-    ✓ 0x33 
-    ✓ 0x34 
-    ✓ 0x35 
-    ✓ 0x36 
-    ✓ 0x37 
-    ✓ 0x38 
-    ✓ 0x3c 
-    ✓ 0x3d 
-    ✓ 0x3e 
-    ✓ 0x3f 
-    ✓ 0x46 
-    ✓ 0x47 
-    ✓ 0x64 
-    ✓ 0x65 
-    ✓ 0x66 
-    ✓ 0x67 
-    ✓ 0x68 
-    ✓ 0x69 
-    ✓ 0x6a 
-    ✓ 0x6b 
-    ✓ 0x6c 
-    ✓ 0x82 
-    ✓ 0x83 
-    ✓ 0x84 
-    ✓ 0xc8 
-    ✓ 0xc9 
-    ✓ 0xca 
-    ✓ 0xcb 
-    ✓ 0xcc 
-    ✓ 0xcd 
-    ✓ 0xce 
-    ✓ 0xcf 
-    ✓ 0xd0 
-    ✓ 0xd1 
-    ✓ 0xfa 
-    ✓ 0xfc 
-    ✓ 0xfd 
-    ✓ 0xfe 
-    ✓ 0xff 
+    √ handshaking,ServerBound,0x00
+    √ status,ServerBound,0x00
+    √ status,ServerBound,0x01
+    √ status,ClientBound,0x00
+    √ status,ClientBound,0x01
+    √ login,ServerBound,0x00
+    √ login,ServerBound,0x01
+    √ login,ClientBound,0x00
+    √ login,ClientBound,0x01
+    √ login,ClientBound,0x02
+    √ play,ServerBound,0x00
+    √ play,ServerBound,0x01
+    √ play,ServerBound,0x02
+    √ play,ServerBound,0x03
+    √ play,ServerBound,0x04
+    √ play,ServerBound,0x05
+    √ play,ServerBound,0x06
+    √ play,ServerBound,0x07
+    √ play,ServerBound,0x08
+    √ play,ServerBound,0x09
+    √ play,ServerBound,0x0a
+    √ play,ServerBound,0x0b
+    √ play,ServerBound,0x0c
+    √ play,ServerBound,0x0d
+    √ play,ServerBound,0x0e
+    √ play,ServerBound,0x0f
+    √ play,ServerBound,0x10
+    √ play,ServerBound,0x11
+    √ play,ServerBound,0x12
+    √ play,ServerBound,0x13
+    √ play,ServerBound,0x14
+    √ play,ServerBound,0x15
+    √ play,ServerBound,0x16
+    √ play,ServerBound,0x17
+    √ play,ClientBound,0x00
+    √ play,ClientBound,0x01
+    √ play,ClientBound,0x02
+    √ play,ClientBound,0x03
+    √ play,ClientBound,0x04
+    √ play,ClientBound,0x05
+    √ play,ClientBound,0x06
+    √ play,ClientBound,0x07
+    √ play,ClientBound,0x08
+    √ play,ClientBound,0x09
+    √ play,ClientBound,0x0a
+    √ play,ClientBound,0x0b
+    √ play,ClientBound,0x0c
+    √ play,ClientBound,0x0d
+    √ play,ClientBound,0x0e
+    √ play,ClientBound,0x0f
+    √ play,ClientBound,0x10
+    √ play,ClientBound,0x11
+    √ play,ClientBound,0x12
+    √ play,ClientBound,0x13
+    √ play,ClientBound,0x14
+    √ play,ClientBound,0x15
+    √ play,ClientBound,0x16
+    √ play,ClientBound,0x17
+    √ play,ClientBound,0x18
+    √ play,ClientBound,0x19
+    √ play,ClientBound,0x1a
+    √ play,ClientBound,0x1b
+    √ play,ClientBound,0x1c
+    √ play,ClientBound,0x1d
+    √ play,ClientBound,0x1e
+    √ play,ClientBound,0x1f
+    √ play,ClientBound,0x20
+    √ play,ClientBound,0x21
+    √ play,ClientBound,0x22
+    √ play,ClientBound,0x23
+    √ play,ClientBound,0x24
+    √ play,ClientBound,0x25
+    √ play,ClientBound,0x26
+    √ play,ClientBound,0x27
+    √ play,ClientBound,0x28
+    √ play,ClientBound,0x29
+    √ play,ClientBound,0x2a
+    √ play,ClientBound,0x2b
+    √ play,ClientBound,0x2c
+    √ play,ClientBound,0x2d
+    √ play,ClientBound,0x2e
+    √ play,ClientBound,0x2f
+    √ play,ClientBound,0x30
+    √ play,ClientBound,0x31
+    √ play,ClientBound,0x32
+    √ play,ClientBound,0x33
+    √ play,ClientBound,0x34
+    √ play,ClientBound,0x35
+    √ play,ClientBound,0x36
+    √ play,ClientBound,0x37
+    √ play,ClientBound,0x38
+    √ play,ClientBound,0x39
+    √ play,ClientBound,0x3a
+    √ play,ClientBound,0x3b
+    √ play,ClientBound,0x3c
+    √ play,ClientBound,0x3d
+    √ play,ClientBound,0x3e
+    √ play,ClientBound,0x3f
+    √ play,ClientBound,0x40
 
   client
-    ✓ pings the server (6653ms)
-    ✓ connects successfully - online mode (4041ms)
-    ✓ connects successfully - offline mode (2663ms)
-    ✓ gets kicked when no credentials supplied in online mode (4678ms)
-    ✓ does not crash for 10000ms (12492ms)
-...............
+    √ pings the server (32734ms)
+    √ connects successfully - online mode (23367ms)
+    √ connects successfully - offline mode (10261ms)
+    √ gets kicked when no credentials supplied in online mode (18400ms)
+    √ does not crash for 10000ms (24780ms)
+
   mc-server
-    ✓ starts listening and shuts down cleanly (44ms)
-    ✓ kicks clients that do not log in (149ms)
-    ✓ kicks clients that do not send keepalive packets (153ms)
-    ✓ responds to ping requests 
-    ✓ clients can log in and chat (71ms)
-    ✓ kicks clients when invalid credentials (263ms)
-    ✓ gives correct reason for kicking clients when shutting down (40ms)
+    √ starts listening and shuts down cleanly (73ms)
+    √ kicks clients that do not log in (295ms)
+    √ kicks clients that do not send keepalive packets (266ms)
+    √ responds to ping requests (168ms)
+    √ clients can log in and chat (158ms)
+    √ kicks clients when invalid credentials (680ms)
+    √ gives correct reason for kicking clients when shutting down (123ms)
 
 
-  91 tests complete (50 seconds)
+  111 tests complete (3 minutes)
 ```
 
 # Debugging
@@ -292,6 +347,12 @@ NODE_DEBUG="minecraft-protocol" node [...]
 ```
 
 ## History
+### 0.12.0
+ 
+ * Updated protocol version to support 1.7.2
+ * Overhaul the serializer backend to be more general-purpose and future-proof.
+ * Support listening packets by name (thanks [deathcap](https://github.com/deathcap))
+ * Support reading/writing a raw buffer to the socket.
 
 ### 0.11.6
 
