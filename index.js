@@ -177,14 +177,14 @@ function createServer(options) {
             client.end("Failed to verify username!");
             return;
           }
-          client.UUID = uuid;
+          client.uuid = uuid;
           loginClient();
         });
       }
     }
 
     function loginClient() {
-      client.write(0x02, {uuid: (client.UUID | 0).toString(10), username: client.username});
+      client.write(0x02, {uuid: (client.uuid | 0).toString(10), username: client.username});
       client.state = states.PLAY;
       loggedIn = true;
       startKeepAlive();
