@@ -96,14 +96,10 @@ server.on('login', function(client) {
 
 ## Installation
 
-### Linux
-
 `npm install minecraft-protocol`
 
-### Windows
-
- * Follow the Windows instructions from [Obvious/ursa](https://github.com/Obvious/ursa)
- * `npm install minecraft-protocol`
+On Windows, first follow the Windows instructions from
+[Obvious/ursa](https://github.com/Obvious/ursa)
 
 ## Documentation
 
