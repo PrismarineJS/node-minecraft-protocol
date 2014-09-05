@@ -178,13 +178,16 @@ function createServer(options) {
             return;
           }
           client.uuid = uuid;
+          // Convert to a valid UUID until the session server updates and does
+          // it automatically
+          client.uuid = client.uuid.replace(/(\w{8})(\w{4})(\w{4})(\w{4})(\w{12})/, "$1-$2-$3-$4-$5");
           loginClient();
         });
       }
     }
 
     function loginClient() {
-      client.write(0x02, {uuid: (client.uuid | 0).toString(10), username: client.username});
+      client.write(0x02, {uuid: (client.uuid || 0).toString(10), username: client.username});
       client.state = states.PLAY;
       loggedIn = true;
       startKeepAlive();
