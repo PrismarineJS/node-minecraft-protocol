@@ -232,8 +232,12 @@ describe("client", function() {
       }
       fs.writeFile(path.join(MC_SERVER_PATH, "server.properties"), str, cb);
     });
+    batch.push(function(cb) {
+      fs.writeFile(path.join(MC_SERVER_PATH, "eula.txt"), "eula=true", cb);
+    });
     batch.end(function(err) {
       if (err) return done(err);
+      //console.log(MC_SERVER_JAR);
       mcServer = spawn('java', [ '-jar', MC_SERVER_JAR, 'nogui'], {
         stdio: 'pipe',
         cwd: MC_SERVER_PATH,
@@ -265,6 +269,8 @@ describe("client", function() {
           mcServer.removeListener('line', onLine);
           done();
         }
+        //else
+        //  console.log(line);
       }
     });
   }
