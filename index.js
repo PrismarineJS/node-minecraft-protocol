@@ -191,7 +191,7 @@ function createServer(options) {
       if (onlineMode == false || isException) {
         client.uuid = "0-0-0-0-0";
       }
-      client.write(0x02, {uuid: (client.uuid).toString(10), username: client.username});
+      client.write(0x02, {uuid: client.uuid, username: client.username});
       client.state = states.PLAY;
       loggedIn = true;
       startKeepAlive();
