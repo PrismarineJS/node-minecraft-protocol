@@ -109,12 +109,27 @@ On Windows, first follow the Windows instructions from
 
 `pingResults`:
 
+#### Old version
  * `prefix`
  * `protocol`
  * `version`
  * `motd`
  * `playerCount`
  * `maxPlayers`
+
+#### New version
+ * `description`
+ * `players`
+    * `max`
+    * `online`
+    * `sample`
+       * `id`
+       * `name`
+ * `version`
+    * `name`
+    * `protocol`
+ * `favicon`
+ * `latency`
 
 ### mc.createServer(options)
 
