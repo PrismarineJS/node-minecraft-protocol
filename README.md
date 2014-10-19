@@ -343,6 +343,11 @@ NODE_DEBUG="minecraft-protocol" node [...]
 ```
 
 ## History
+
+### 0.12.3
+
+ * Fix for/in used over array, causing glitches with augmented Array prototypes (thanks [pelikhan](https://github.com/pelikhan))
+
 ### 0.12.2
 
  * Updated protocol version to support 1.7.10
