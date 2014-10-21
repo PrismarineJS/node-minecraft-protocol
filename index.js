@@ -1,7 +1,6 @@
 var EventEmitter = require('events').EventEmitter
         , util = require('util')
         , assert = require('assert')
-        , ursa = require('ursa')
         , crypto = require('crypto')
         , bufferEqual = require('buffer-equal')
         , superagent = require('superagent')
@@ -15,6 +14,14 @@ var EventEmitter = require('events').EventEmitter
         , states = protocol.states
         , debug = protocol.debug
         ;
+var ursa;
+try {
+  ursa = require("ursa");
+} catch(e) {
+  console.log("You are using a pure-javascript implementation of RSA.");
+  console.log("Your performance might be subpar. Please consider installing URSA");
+  ursa = require("./rsa-wrap");
+}
 
 module.exports = {
   createClient: createClient,
