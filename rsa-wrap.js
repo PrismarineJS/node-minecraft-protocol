@@ -224,7 +224,7 @@ function PublicKey(rsa) {
   }
 
   function toPublicPem(encoding) {
-    return encodeBuffer(rsa.getPublicPEM(), encoding);
+    return encodeBuffer(rsa.getPublicPEM() + "\n", encoding);
   }
 
   function toPublicSsh(encoding) {
@@ -339,10 +339,10 @@ function PrivateKey(rsa) {
  */
 function createPublicKey(pem, encoding) {
     var rsa = new RsaWrap();
-    //pem = decodeString(pem, encoding);
+    pem = decodeString(pem, encoding);
 
     try {
-        rsa.loadFromPEM(pem);
+        rsa.loadFromPEM(pem.toString('utf8'));
     } catch (ex) {
         if (!isPublicKeyPem(pem)) {
             throw new Error("Not a public key.");
@@ -548,7 +548,7 @@ function matchingPublicKeys(key1, key2) {
     // This isn't the most efficient implementation, but it will suffice:
     // We convert both to ssh form, which has very little leeway for
     // variation, and compare bytes.
-    
+
     var ssh1 = key1.toPublicSsh(UTF8);
     var ssh2 = key2.toPublicSsh(UTF8);
 
