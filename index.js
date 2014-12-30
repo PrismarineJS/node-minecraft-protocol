@@ -141,6 +141,8 @@ function createServer(options) {
         hash = crypto.createHash("sha1");
         hash.update(serverId);
         client.once([states.LOGIN, 0x01], onEncryptionKeyResponse);
+        client.once([states.LOGIN, 0x03], onCompressionRequest);
+        client.on(  [states.PLAY,  0x46], onCompressionRequest);
         client.write(0x01, {
           serverId: serverId,
           publicKey: client.publicKey,
@@ -191,6 +193,10 @@ function createServer(options) {
           loginClient();
         });
       }
+    }
+
+    function onCompressionRequest(packet) {
+        client.compressionThreshold = packet.threshold;
     }
 
     function loginClient() {
