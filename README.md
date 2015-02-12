@@ -1,4 +1,5 @@
 # minecraft protocol [![NPM version](https://badge.fury.io/js/minecraft-protocol.png)](http://badge.fury.io/js/minecraft-protocol)
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/andrewrk/node-minecraft-protocol?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Parse and serialize minecraft packets, plus authentication and encryption.
 
