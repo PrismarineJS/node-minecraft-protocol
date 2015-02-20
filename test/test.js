@@ -110,7 +110,9 @@ var values = {
     velocityY: 2,
     velocityZ: 3,
   },
-  'UUID': [42, 42, 42, 42]
+  'UUID': [42, 42, 42, 42],
+  'position': { x: 12, y: 332, z: 4382821 },
+  'restBuffer': new Buffer(0)
 };
 
 describe("packets", function() {
@@ -205,7 +207,7 @@ describe("packets", function() {
 });
 
 describe("client", function() {
-  this.timeout(40000);
+  this.timeout(4000000);
 
   var mcServer;
   function startServer(propOverrides, done) {
@@ -238,7 +240,7 @@ describe("client", function() {
     batch.end(function(err) {
       if (err) return done(err);
       //console.log(MC_SERVER_JAR);
-      mcServer = spawn('java', [ '-jar', MC_SERVER_JAR, 'nogui'], {
+      mcServer = spawn('java', [ '-Dlog4j.configurationFile=server/server_debug.xml', '-jar', MC_SERVER_JAR, 'nogui'], {
         stdio: 'pipe',
         cwd: MC_SERVER_PATH,
       });
@@ -320,16 +322,16 @@ describe("client", function() {
         mcServer.stdin.write("say hello\n");
       });
       var chatCount = 0;
-      client.on([states.PLAY, 0x01], function(packet) {
+      client.on('login', function(packet) {
         assert.strictEqual(packet.levelType, 'default');
         assert.strictEqual(packet.difficulty, 1);
         assert.strictEqual(packet.dimension, 0);
         assert.strictEqual(packet.gameMode, 0);
-        client.write(0x01, {
+        client.write('chat', {
           message: "hello everyone; I have logged in."
         });
       });
-      client.on([states.PLAY, 0x02], function(packet) {
+      client.on('chat', function(packet) {
         chatCount += 1;
         assert.ok(chatCount <= 2);
         var message = JSON.parse(packet.message);
@@ -367,7 +369,7 @@ describe("client", function() {
         mcServer.stdin.write("say hello\n");
       });
       var chatCount = 0;
-      client.on([states.PLAY, 0x01], function(packet) {
+      client.on('login', function(packet) {
           assert.strictEqual(packet.levelType, 'default');
           assert.strictEqual(packet.difficulty, 1);
           assert.strictEqual(packet.dimension, 0);
@@ -376,7 +378,7 @@ describe("client", function() {
             message: "hello everyone; I have logged in."
           });
       });
-      client.on([states.PLAY, 0x02], function(packet) {
+      client.on('chat', function(packet) {
         chatCount += 1;
         assert.ok(chatCount <= 2);
         var message = JSON.parse(packet.message);
