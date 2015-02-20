@@ -286,7 +286,6 @@ function createClient(options) {
   }
 
   function onEncryptionKeyRequest(packet) {
-    debug("Generating 16 random bytes");
     crypto.randomBytes(16, gotSharedSecret);
 
     function gotSharedSecret(err, sharedSecret) {
@@ -296,7 +295,6 @@ function createClient(options) {
         client.end();
         return;
       }
-      debug("Got mah bytes");
       if (haveCredentials) {
         joinServerRequest(onJoinServerResponse);
       } else {
