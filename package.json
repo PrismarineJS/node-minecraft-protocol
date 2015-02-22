@@ -2,7 +2,7 @@
   "name": "minecraft-protocol",
   "version": "0.12.3",
   "description": "Parse and serialize minecraft packets, plus authentication and encryption.",
-  "main": "dist/index.js",
+  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/andrewrk/node-minecraft-protocol.git"
