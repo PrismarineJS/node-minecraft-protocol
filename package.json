@@ -2,7 +2,7 @@
   "name": "minecraft-protocol",
   "version": "0.12.3",
   "description": "Parse and serialize minecraft packets, plus authentication and encryption.",
-  "main": "index.js",
+  "main": "dist/index.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/andrewrk/node-minecraft-protocol.git"
@@ -26,11 +26,13 @@
     "node": ">=0.8.16"
   },
   "devDependencies": {
-    "mocha": "~1.8.2",
+    "batch": "~0.3.1",
+    "gulp": "^3.8.11",
+    "gulp-babel": "^4.0.0",
     "mkdirp": "~0.3.4",
+    "mocha": "~1.8.2",
     "rimraf": "~2.1.1",
-    "zfill": "0.0.1",
-    "batch": "~0.3.1"
+    "zfill": "0.0.1"
   },
   "dependencies": {
     "node-rsa": "^0.1.53",
