@@ -7,13 +7,13 @@ var options = {
 
 gulp.task('compile', function() {
     gulp
-        .src('lib/*.js')
+        .src('src/*.js')
         .pipe(babel(options))
-        .pipe(gulp.dest('build/'));
+        .pipe(gulp.dest('dist/'));
 });
 
 gulp.task('watch', function() {
-    gulp.watch('lib/*.js', ['compile']);
+    gulp.watch('src/*.js', ['compile']);
 });
 
 gulp.task('default', ['compile']);
