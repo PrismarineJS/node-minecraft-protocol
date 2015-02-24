@@ -47,7 +47,7 @@ srv.on('login', function (client) {
     endedClient = true;
     console.log('Connection error by client', '('+addr+')');
     if (!endedTargetClient)
-    targetClient.end("Error");
+      targetClient.end("Error");
   });
   var targetClient = mc.createClient({
     host: host,
@@ -64,7 +64,7 @@ srv.on('login', function (client) {
   });
   targetClient.on('packet', function(packet) {
     if (packet.state == states.PLAY && client.state == states.PLAY) {
-      console.log(`client<-server: ${targetClient.state}.${packet.id} : ${JSON.stringify(packet)}`);
+      console.log(`client<-server: ${targetClient.state}.${packet.id} : ${packet.id != 38 ? JSON.stringify(packet) : "Packet too big"}`);
       if (!endedClient)
         client.write(packet.id, packet);
     }
