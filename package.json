@@ -33,11 +33,12 @@
     "batch": "~0.3.1"
   },
   "dependencies": {
-    "node-rsa": "^0.1.53",
-    "superagent": "~0.10.0",
-    "buffer-equal": "0.0.0",
     "ansi-color": "0.2.1",
-    "node-uuid": "~1.4.1"
+    "buffer-equal": "0.0.0",
+    "nbt": "git://github.com/roblabla/nbt-js",
+    "node-rsa": "^0.1.53",
+    "node-uuid": "~1.4.1",
+    "superagent": "~0.10.0"
   },
   "optionalDependencies": {
     "ursa": "~0.8.0"
