@@ -93,7 +93,7 @@ var values = {
     id: 5,
     itemCount: 56,
     itemDamage: 2,
-    nbtData: new Buffer(90),
+    nbtData: { root: "test", value: { test: { type: "string", value: "ohi" } } }
   },
   'long': [0, 1],
   'entityMetadata': [
@@ -186,6 +186,7 @@ describe("packets", function() {
     } else {
       client.once([state, packetId], function(receivedPacket) {
         delete receivedPacket.id;
+        delete receivedPacket.state;
         assertPacketsMatch(packet, receivedPacket);
         done();
       });
