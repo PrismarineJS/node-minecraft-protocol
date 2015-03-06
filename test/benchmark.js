@@ -35,7 +35,7 @@ console.log('Finished write test in ' + (Date.now() - start) / 1000 + ' seconds'
 
 var testDataRead = [
   {id: 0x00, params: {keepAliveId: 957759560}},
-  {id: 0x02, params: {message: '<Bob> Hello World!'}},
+  {id: 0x02, params: {message: '<Bob> Hello World!', position: 0}},
   {id: 0x08, params: {x: 6.5, y: 65.62, z: 7.5, yaw: 0, pitch: 0, flags: 0}},
 ];
 

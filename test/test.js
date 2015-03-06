@@ -90,7 +90,7 @@ var values = {
   'double': 99999.2222,
   'float': -333.444,
   'slot': {
-    id: 5,
+    blockId: 5,
     itemCount: 56,
     itemDamage: 2,
     nbtData: { root: "test", value: {
