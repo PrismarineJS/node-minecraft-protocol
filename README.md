@@ -381,6 +381,9 @@ NODE_DEBUG="minecraft-protocol" node [...]
 
  * Updated protocol version to support 1.8.1 (thanks [wtfaremyinitials](https://github.com/wtfaremyinitials))
  * Lots of changes in how some formats are handled.
+ * Crypto now defaults to a pure-js library if URSA is missing, making the lib easier to use on windows.
+ * Fix a bug in yggdrasil handling of sessions, making reloading a session impossible (thanks [Frase](https://github.com/mrfrase3))
+ * Set noDelay on the TCP streams, making the bot a lot less laggy.
 
 ### 0.12.3
 
