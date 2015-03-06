@@ -84,11 +84,22 @@ client.on([states.PLAY, 0x40], function(packet) { // you can listen for packets 
     console.info(color('Kicked for ' + packet.reason, "blink+red"));
     process.exit(1);
 });
- 
+
  var chats = [];
- 
+
 client.on('connect', function() {
     console.info(color('Successfully connected to ' + host + ':' + port, "blink+green"));
+});
+
+client.on('end', function() {
+  console.log("Connection lost");
+  process.exit();
+});
+
+client.on('error', function(err) {
+  console.log("Error occured");
+  console.log(err);
+  process.exit(1);
 });
 
 client.on('state', function(newState) {
