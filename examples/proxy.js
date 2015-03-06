@@ -88,7 +88,7 @@ srv.on('login', function (client) {
     }
     /*if (client.state == states.PLAY && brokenPackets.indexOf(packetId.value) !== -1)
     {
-      console.log(`client<-server: raw packet`);
+      console.log(`client<-server: raw packet);
       console.log(packetData);
       if (!endedClient)
         client.writeRaw(buffer);
@@ -102,7 +102,7 @@ srv.on('login', function (client) {
     var packetBuff = mc.protocol.createPacketBuffer(packetData.id, packetData.state, packetData, false);
     if (buffertools.compare(buffer, packetBuff) != 0)
     {
-      console.log(`client->server: Error in packetId ${state}.0x${packetId.value.toString(16)}`);
+      console.log("client->server: Error in packetId " + state + ".0x" + packetId.value.toString(16));
       console.log(buffer.toString('hex'));
       console.log(packetBuff.toString('hex'));
     }
