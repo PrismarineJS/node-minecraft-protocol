@@ -217,7 +217,7 @@ describe("packets", function() {
 });
 
 describe("client", function() {
-  this.timeout(4000000);
+  this.timeout(60 * 1000);
 
   var mcServer;
   function startServer(propOverrides, done) {
