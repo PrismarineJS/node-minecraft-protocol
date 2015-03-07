@@ -1,6 +1,7 @@
 var assert = require('assert');
 var util = require('util');
 var zlib = require('zlib');
+var nbt = require('prismarine-nbt');
 
 var STRING_MAX_LENGTH = 240;
 var SRV_STRING_MAX_LENGTH = 32767;
@@ -201,17 +202,17 @@ var packets = {
         { name: "count", type: "short" }
       ]},
       entity_velocity:    {id: 0x12, fields: [
-        { name: "entityId", type: "int" },
+        { name: "entityId", type: "varint" },
         { name: "velocityX", type: "short" },
         { name: "velocityY", type: "short" },
         { name: "velocityZ", type: "short" }
       ]},
       entity_destroy:   {id: 0x13, fields: [
-        { name: "count", type: "count", typeArgs: { type: "byte", countFor: "entityIds" } }, /* TODO: Might not be correct */
-        { name: "entityIds", type: "array", typeArgs: { type: "int", count: "count" } }
+        { name: "count", type: "count", typeArgs: { type: "varint", countFor: "entityIds" } },
+        { name: "entityIds", type: "array", typeArgs: { type: "varint", count: "count" } }
       ]},
       entity:             {id: 0x14, fields: [
-        { name: "entityId", type: "int" }
+        { name: "entityId", type: "varint" }
       ]},
       rel_entity_move: {id: 0x15, fields: [
         { name: "entityId", type: "varint" },
@@ -284,7 +285,7 @@ var packets = {
           type: "container", typeArgs: { fields: [
             { name: "key", type: "string" },
             { name: "value", type: "double" },
-            { name: "listLength", type: "count", typeArgs: { type: "short", countFor: "this.modifiers" } },
+            { name: "listLength", type: "count", typeArgs: { type: "varint", countFor: "this.modifiers" } },
             { name: "modifiers", type: "array", typeArgs: { count: "this.listLength",
               type: "container", typeArgs: { fields: [
                 { name: "UUID", type: "UUID" },
@@ -305,10 +306,12 @@ var packets = {
       multi_block_change: {id: 0x22, fields: [
         { name: "chunkX", type: "int" },
         { name: "chunkZ", type: "int" },
-        { name: "recordCount", type: "varint" },
-        /* TODO: Is dataLength needed? */
-        { name: "dataLength", type: "count", typeArgs: { type: "int", countFor: "data" } },
-        { name: "data", type: "buffer", typeArgs: { count: "dataLength" } },
+        { name: "recordCount", type: "count", typeArgs: { type: "varint", countFor: "records" } },
+        { name: "records", type: "array", typeArgs: { count: "recordCount", type: "container", typeArgs: { fields: [
+            { name: "horizontalPos", type: "ubyte" },
+            { name: "y", type: "ubyte" },
+            { name: "blockId", type: "varint" }
+        ]}}}
       ]},
       block_change:       {id: 0x23, fields: [
         { name: "location", type: "position" },
@@ -376,8 +379,8 @@ var packets = {
         { name: "offsetY", type: "float" },
         { name: "offsetZ", type: "float" },
         { name: "particleData", type: "float" },
-        { name: "particles", type: "int" }
-        /* TODO: Create an Array of VarInts */
+        { name: "particles", type: "count", typeArgs: { countFor: "data", type: "int" } },
+        { name: "data", type: "array", typeArgs: { count: "particles", type: "varint" } }
       ]},
       game_state_change:  {id: 0x2b, fields: [
         { name: "reason", type: "ubyte" },
@@ -458,8 +461,7 @@ var packets = {
       tile_entity_data:{id: 0x35, fields: [
         { name: "location", type: "position" },
         { name: "action", type: "ubyte" },
-        { name: "nbtDataLength", type: "count", typeArgs: { type: "short", countFor: "nbtData" } },
-        { name: "nbtData", type: "buffer", typeArgs: { count: "nbtDataLength" } },
+        { name: "nbtData", type: "restBuffer" }
       ]},
       open_sign_entity:   {id: 0x36, fields: [
         { name: "location", type: "position" },
@@ -483,15 +485,15 @@ var packets = {
             }},
             { name: "propertiesLength", type: "count", condition: function(field_values) {
                 return field_values["action"] === 0;
-            }, typeArgs: { countFor: "properties", type: "varint" }},
+            }, typeArgs: { countFor: "this.properties", type: "varint" }},
             { name: "properties", type: "array", condition: function(field_values) {
                 return field_values["action"] === 0;
-            }, typeArgs: { count: "propertiesLength", type: "container", typeArgs: { fields: [
+            }, typeArgs: { count: "this.propertiesLength", type: "container", typeArgs: { fields: [
                 { name: "name", type: "string" },
-                { name: "value", type: "string" },
+                { name: "value", type: "ustring" },
                 { name: "isSigned", type: "bool" },
-                { name: "signature", type: "string", condition: function(field_values) {
-                    return field_values["isSigned"];
+                { name: "signature", type: "ustring", condition: function(field_values) {
+                    return field_values["this"]["isSigned"];
             }}
         ]}}},
         { name: "gamemode", type: "varint", condition: function(field_values) {
@@ -520,14 +522,18 @@ var packets = {
       scoreboard_objective: {id: 0x3b, fields: [
         { name: "name", type: "string" },
         { name: "action", type: "byte" },
-        { name: "displayText", type: "string" },
-        { name: "type", type: "string"}
+        { name: "displayText", type: "string", condition: function(field_values) {
+          return field_values["action"] == 0 || field_values["action"] == 2;
+        }},
+        { name: "type", type: "string", condition: function(field_values) {
+          return field_values["action"] == 0 || field_values["action"] == 2;
+        }}
       ]},
       scoreboard_score:       {id: 0x3c, fields: [ /* TODO: itemName and scoreName may need to be switched */
         { name: "itemName", type: "string" },
         { name: "action", type: "byte" },
         { name: "scoreName", type: "string" },
-        { name: "value", type: "int", condition: function(field_values) {
+        { name: "value", type: "varint", condition: function(field_values) {
           return field_values['action'] != 1;
         } }
       ]},
@@ -548,6 +554,12 @@ var packets = {
           return field_values['mode'] == 0 || field_values['mode'] == 2;
         } },
         { name: "friendlyFire", type: "byte", condition: function(field_values) {
+          return field_values['mode'] == 0 || field_values['mode'] == 2;
+        } },
+        { name: "nameTagVisibility", type: "string", condition: function(field_values) {
+          return field_values['mode'] == 0 || field_values['mode'] == 2;
+        } },
+        { name: "color", type: "byte", condition: function(field_values) {
           return field_values['mode'] == 0 || field_values['mode'] == 2;
         } },
         { name: "playerCount", type: "count", condition: function(field_values) {
@@ -572,14 +584,11 @@ var packets = {
         { name: "duration", type: "varint", condition: function(field_values) {
             return field_values['event'] == 1;
         } },
-        { name: "entityId", type: "int", condition: function(field_values) {
-            return field_values['event'] == 1;
-        } },
         { name: "playerId", type: "varint", condition: function(field_values) {
             return field_values['event'] == 2;
         } },
         { name: "entityId", type: "int", condition: function(field_values) {
-            return field_values['event'] == 2;
+            return field_values['event'] == 1 || field_values['event'] == 2;
         } },
         { name: "message", type: "string", condition: function(field_values) {
             return field_values['event'] == 2;
@@ -658,17 +667,22 @@ var packets = {
       ]},
       use_entity:         {id: 0x02, fields: [
         { name: "target", type: "varint" },
-        { name: "mouse", type: "byte" },
-        { name: "x", type: "float"},
-        { name: "y", type: "float"},
-        { name: "size", type: "float"}
+        { name: "mouse", type: "varint" },
+        { name: "x", type: "float", condition: function(field_values) {
+          return field_values["mouse"] == 2;
+        }},
+        { name: "y", type: "float", condition: function(field_values) {
+          return field_values["mouse"] == 2;
+        }},
+        { name: "z", type: "float", condition: function(field_values) {
+          return field_values["mouse"] == 2;
+        }},
       ]},
       flying:             {id: 0x03, fields: [
         { name: "onGround", type: "bool" }
       ]},
       position:    {id: 0x04, fields: [
         { name: "x", type: "double" },
-        { name: "stance", type: "double" },
         { name: "y", type: "double" },
         { name: "z", type: "double" },
         { name: "onGround", type: "bool" }
@@ -702,10 +716,7 @@ var packets = {
       held_item_slot:   {id: 0x09, fields: [
         { name: "slotId", type: "short" }
       ]},
-      arm_animation:          {id: 0x0a, fields: [
-        { name: "entityId", type: "int" }, /* TODO: wiki.vg says this is empty? */
-        { name: "animation", type: "byte" }
-      ]},
+      arm_animation:          {id: 0x0a, fields: []},
       entity_action:      {id: 0x0b, fields: [
         { name: "entityId", type: "varint" },
         { name: "actionId", type: "varint" },
@@ -842,6 +853,7 @@ var types = {
   // TODO : remove type-specific, replace with generic containers and arrays.
   'position': [readPosition, writePosition, 8],
   'slot': [readSlot, writeSlot, sizeOfSlot],
+  'nbt': [readNbt, writeBuffer, sizeOfBuffer],
   'entityMetadata': [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata],
 };
 
@@ -870,6 +882,11 @@ var entityMetadataTypes = {
        { name: 'x', type: 'int' },
        { name: 'y', type: 'int' },
        { name: 'z', type: 'int' }
+  ]}},
+  7: { type: 'container', typeArgs: { fields: [
+      { name: 'pitch', type: 'float' },
+      { name: 'yaw', type: 'float' },
+      { name: 'roll', type: 'float' }
   ]}}
 };
 
@@ -904,10 +921,10 @@ function writeEntityMetadata(value, buffer, offset) {
 }
 
 function writeUUID(value, buffer, offset) {
-  buffer.writeInt32BE(value[0], offset);
-  buffer.writeInt32BE(value[1], offset + 4);
-  buffer.writeInt32BE(value[2], offset + 8);
-  buffer.writeInt32BE(value[3], offset + 12);
+  buffer.writeUInt32BE(value[0], offset);
+  buffer.writeUInt32BE(value[1], offset + 4);
+  buffer.writeUInt32BE(value[2], offset + 8);
+  buffer.writeUInt32BE(value[3], offset + 12);
   return offset + 16;
 }
 
@@ -929,7 +946,7 @@ function readEntityMetadata(buffer, offset) {
     type = item >> 5;
     dataType = entityMetadataTypes[type];
     typeName = dataType.type;
-    debug("Reading entity metadata type " + dataType + " (" + ( typeName || "unknown" ) + ")");
+    //debug("Reading entity metadata type " + dataType + " (" + ( typeName || "unknown" ) + ")");
     if (!dataType) {
       return {
         error: new Error("unrecognized entity metadata type " + type)
@@ -944,6 +961,21 @@ function readEntityMetadata(buffer, offset) {
     });
     cursor += results.size;
   }
+}
+
+function readNbt(buffer, offset) {
+  buffer = buffer.slice(offset);
+  return nbt.parseUncompressed(buffer);
+}
+
+function writeNbt(value, buffer, offset) {
+  var newbuf = nbt.writeUncompressed(value);
+  newbuf.copy(buffer, offset);
+  return offset + newbuf.length;
+}
+
+function sizeOfNbt(value) {
+  return nbt.writeUncompressed(value).length;
 }
 
 function readString (buffer, offset) {
@@ -966,10 +998,10 @@ function readString (buffer, offset) {
 function readUUID(buffer, offset) {
   return {
     value: [
-      buffer.readInt32BE(offset),
-      buffer.readInt32BE(offset + 4),
-      buffer.readInt32BE(offset + 8),
-      buffer.readInt32BE(offset + 12),
+      buffer.readUInt32BE(offset),
+      buffer.readUInt32BE(offset + 4),
+      buffer.readUInt32BE(offset + 8),
+      buffer.readUInt32BE(offset + 12),
     ],
     size: 16,
   };
@@ -1058,8 +1090,8 @@ function readBool(buffer, offset) {
 function readPosition(buffer, offset) {
   var longVal = readLong(buffer, offset).value; // I wish I could do destructuring...
   var x = longVal[0] >> 6;
-  var y = ((longVal[0] & 0x3F) << 6) | (longVal[1] >> 26);
-  var z = longVal[1] << 6 >> 6
+  var y = ((longVal[0] & 0x3F) << 6) | ((longVal[1] >> 26) & 0x3f);
+  var z = longVal[1] & 0x3FFFFFF;
   return {
     value: { x: x, y: y, z: z },
     size: 8
@@ -1067,60 +1099,72 @@ function readPosition(buffer, offset) {
 }
 
 function readSlot(buffer, offset) {
+  var value = {};
   var results = readShort(buffer, offset);
   if (! results) return null;
-  var blockId = results.value;
-  var cursor = offset + results.size;
+  value.blockId = results.value;
 
-  if (blockId === -1) {
+  if (value.blockId === -1) {
     return {
-      value: { id: blockId },
-      size: cursor - offset,
+      value: value,
+      size: 2,
     };
   }
 
-  var cursorEnd = cursor + 5;
+  var cursorEnd = offset + 6;
   if (cursorEnd > buffer.length) return null;
-  var itemCount = buffer.readInt8(cursor);
-  var itemDamage = buffer.readInt16BE(cursor + 1);
-  var nbtDataSize = buffer.readInt16BE(cursor + 3);
-  if (nbtDataSize === -1) nbtDataSize = 0;
-  var nbtDataEnd = cursorEnd + nbtDataSize;
-  if (nbtDataEnd > buffer.length) return null;
-  var nbtData = buffer.slice(cursorEnd, nbtDataEnd);
-
+  value.itemCount = buffer.readInt8(offset + 2);
+  value.itemDamage = buffer.readInt16BE(offset + 3);
+  var nbtData = buffer.readInt8(offset + 5);
+  if (nbtData == 0) {
+    return {
+      value: value,
+      size: 6
+    }
+  }
+  var nbtData = readNbt(buffer, offset + 5);
+  value.nbtData = nbtData.value;
   return {
-    value: {
-      id: blockId,
-      itemCount: itemCount,
-      itemDamage: itemDamage,
-      nbtData: nbtData,
-    },
-    size: nbtDataEnd - offset,
+    value: value,
+    size: nbtData.size + 5
   };
 }
 
 function sizeOfSlot(value) {
-  return value.id === -1 ? 2 : 7 + value.nbtData.length;
+  if (value.blockId === -1)
+    return (2);
+  else if (!value.nbtData) {
+    return (6);
+  } else {
+    return (5 + sizeOfNbt(value.nbtData));
+  }
 }
 
 function writePosition(value, buffer, offset) {
   var longVal = [];
-  longVal[0] = ((value.x & 0x3FFFFFF) <<  6) | ((value.y & 0xFC0) >> 6);
+  longVal[0] = ((value.x & 0x3FFFFFF) <<  6) | ((value.y & 0xFFF) >> 6);
   longVal[1] = ((value.y & 0x3F) << 26) | (value.z & 0x3FFFFFF);
   return writeLong(longVal, buffer, offset);
 }
 
 function writeSlot(value, buffer, offset) {
-  buffer.writeInt16BE(value.id, offset);
-  if (value.id === -1) return offset + 2;
+  buffer.writeInt16BE(value.blockId, offset);
+  if (value.blockId === -1) return offset + 2;
   buffer.writeInt8(value.itemCount, offset + 2);
   buffer.writeInt16BE(value.itemDamage, offset + 3);
-  var nbtDataSize = value.nbtData.length;
-  if (nbtDataSize === 0) nbtDataSize = -1; // I don't know wtf mojang smokes
-  buffer.writeInt16BE(nbtDataSize, offset + 5);
-  value.nbtData.copy(buffer, offset + 7);
-  return offset + 7 + value.nbtData.length;
+  var nbtDataLen;
+  if (value.nbtData)
+  {
+    var newbuf = nbt.writeUncompressed(value.nbtData);
+    newbuf.copy(buffer, offset + 5);
+    nbtDataLen = newbuf.length;
+  }
+  else
+  {
+    buffer.writeInt8(0, offset + 5);
+    nbtDataLen = 1;
+  }
+  return offset + 5 + nbtDataLen;
 }
 
 function sizeOfString(value) {
@@ -1236,6 +1280,7 @@ function readContainer(buffer, offset, typeArgs, rootNode) {
     };
     // BLEIGH. Huge hack because I have no way of knowing my current name.
     // TODO : either pass fieldInfo instead of typeArgs as argument (bleigh), or send name as argument (verybleigh).
+    // TODO : what I do inside of roblabla/Protocols is have each "frame" create a new empty slate with just a "super" object pointing to the parent.
     rootNode.this = results.value;
     for (var index in typeArgs.fields) {
         var readResults = read(buffer, offset, typeArgs.fields[index], rootNode);
@@ -1249,11 +1294,15 @@ function readContainer(buffer, offset, typeArgs, rootNode) {
 }
 
 function writeContainer(value, buffer, offset, typeArgs, rootNode) {
+    var context = value.this ? value.this : value;
     rootNode.this = value;
     for (var index in typeArgs.fields) {
-        if (!value.hasOwnProperty(typeArgs.fields[index].name && typeArgs.fields[index].type != "count" && !typeArgs.fields[index].condition))
+        if (!context.hasOwnProperty(typeArgs.fields[index].name) && typeArgs.fields[index].type != "count" && !typeArgs.fields[index].condition)
+        {
           debug(new Error("Missing Property " + typeArgs.fields[index].name).stack);
-        offset = write(value[typeArgs.fields[index].name], buffer, offset, typeArgs.fields[index], rootNode);
+          console.log(context);
+        }
+        offset = write(context[typeArgs.fields[index].name], buffer, offset, typeArgs.fields[index], rootNode);
     }
     delete rootNode.this;
     return offset;
@@ -1261,9 +1310,10 @@ function writeContainer(value, buffer, offset, typeArgs, rootNode) {
 
 function sizeOfContainer(value, typeArgs, rootNode) {
     var size = 0;
+    var context = value.this ? value.this : value;
     rootNode.this = value;
     for (var index in typeArgs.fields) {
-        size += sizeOf(value[typeArgs.fields[index].name], typeArgs.fields[index], rootNode);
+        size += sizeOf(context[typeArgs.fields[index].name], typeArgs.fields[index], rootNode);
     }
     delete rootNode.this;
     return size;
@@ -1360,7 +1410,10 @@ function read(buffer, cursor, fieldInfo, rootNodes) {
     };
   }
   var readResults = type[0](buffer, cursor, fieldInfo.typeArgs, rootNodes);
-  if (readResults.error) return { error: readResults.error };
+  if (readResults == null) {
+    throw new Error("Reader returned null : " + JSON.stringify(fieldInfo));
+  }
+  if (readResults && readResults.error) return { error: readResults.error };
   return readResults;
 }
 
@@ -1415,7 +1468,13 @@ function createPacketBuffer(packetId, state, params, isServer) {
   var packet = get(packetId, state, !isServer);
   assert.notEqual(packet, null);
   packet.forEach(function(fieldInfo) {
+    try {
     length += sizeOf(params[fieldInfo.name], fieldInfo, params);
+    } catch (e) {
+      console.log("fieldInfo : " + JSON.stringify(fieldInfo));
+      console.log("params : " + JSON.stringify(params));
+      throw e;
+    }
   });
   length += sizeOfVarInt(packetId);
   var size = length;// + sizeOfVarInt(length);
@@ -1466,15 +1525,15 @@ function parsePacketData(buffer, state, isServer, packetsToParse) {
   var packetId = packetIdField.value;
   cursor += packetIdField.size;
 
-  var results = { id: packetId };
+  var results = { id: packetId, state: state };
   // Only parse the packet if there is a need for it, AKA if there is a listener attached to it
   var name = packetNames[state][isServer ? "toServer" : "toClient"][packetId];
   var shouldParse = (!packetsToParse.hasOwnProperty(name) || packetsToParse[name] <= 0)
                     && (!packetsToParse.hasOwnProperty("packet") || packetsToParse["packet"] <= 0);
   if (shouldParse) {
     return {
-        buffer: buffer,
-        results: results
+      buffer: buffer,
+      results: results
     };
   }
 
@@ -1513,6 +1572,8 @@ function parsePacketData(buffer, state, isServer, packetsToParse) {
     results[fieldInfo.name] = readResults.value;
     cursor += readResults.size;
   }
+  if (buffer.length > cursor)
+    console.log("DID NOT PARSE THE WHOLE THING!");
   debug(results);
   return {
     results: results,

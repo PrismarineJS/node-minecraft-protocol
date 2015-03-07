@@ -93,10 +93,11 @@ Client.prototype.setSocket = function(socket) {
     //incomingBuffer = incomingBuffer.slice(parsed.size); TODO: Already removed in prepare
 
     var packetName = protocol.packetNames[self.state][self.isServer ? 'toServer' : 'toClient'][packet.id];
+    var packetState = self.state;
     self.emit(packetName, packet);
     self.emit('packet', packet);
-    self.emit('raw.' + packetName, parsed.buffer);
-    self.emit('raw', parsed.buffer);
+    self.emit('raw.' + packetName, parsed.buffer, packetState);
+    self.emit('raw', parsed.buffer, packetState);
     prepareParse();
   }
 
@@ -153,13 +154,13 @@ Client.prototype.setSocket = function(socket) {
 
 Client.prototype.connect = function(port, host) {
   var self = this;
-  if (port == 25565) {
-      dns.resolveSrv("_minecraft._tcp." + host, function(err, addresses) {
-      if (addresses && addresses.length > 0) {
-        self.setSocket(net.connect(addresses[0].port, addresses[0].name));
-      } else {
-        self.setSocket(net.connect(port, host));
-      }
+  if (port == 25565 && net.isIP(host) === 0) {
+    dns.resolveSrv("_minecraft._tcp." + host, function(err, addresses) {
+    if (addresses && addresses.length > 0) {
+      self.setSocket(net.connect(addresses[0].port, addresses[0].name));
+    } else {
+      self.setSocket(net.connect(port, host));
+    }
     });
   } else {
     self.setSocket(net.connect(port, host));
@@ -211,21 +212,20 @@ Client.prototype.write = function(packetId, params) {
 // TODO : Perhaps this should only accept buffers without length, so we can
 // handle compression ourself ? Needs to ask peopl who actually use this feature
 // like @deathcap
-Client.prototype.writeRaw = function(buffer, shouldEncrypt) {
-    if (shouldEncrypt === null) {
-        shouldEncrypt = true;
-    }
+Client.prototype.writeRaw = function(buffer) {
+    var self = this;
 
-    var that = this;
-
-    var finishWriting = function(buffer) {
-        var out = (shouldEncrypt && this.encryptionEnabled) ? new Buffer(this.cipher.update(buffer), 'binary') : buffer;
-        that.socket.write(out);
+    var finishWriting = function(error, buffer) {
+      if (error)
+        throw error; // TODO : How do we handle this error ?
+        var out = self.encryptionEnabled ? new Buffer(self.cipher.update(buffer), 'binary') : buffer;
+        self.socket.write(out);
     };
-
-    if(this.compressionThreshold != -1 && buffer.length > this.compressionThreshold) {
+    if (this.compressionThreshold >= 0 && buffer.length >= this.compressionThreshold) {
         compressPacketBuffer(buffer, finishWriting);
+    } else if (this.compressionThreshold >= -1) {
+        newStylePacket(buffer, finishWriting);
     } else {
-        finishWriting(buffer);
+        oldStylePacket(buffer, finishWriting);
     }
 };
