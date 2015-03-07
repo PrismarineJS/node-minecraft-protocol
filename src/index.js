@@ -4,10 +4,10 @@ var EventEmitter = require('events').EventEmitter
         , crypto = require('crypto')
         , bufferEqual = require('buffer-equal')
         , superagent = require('superagent')
-        , protocol = require('./lib/protocol')
-        , Client = require('./lib/client')
-        , Server = require('./lib/server')
-        , Yggdrasil = require('./lib/yggdrasil.js')
+        , protocol = require('./protocol')
+        , Client = require('./client')
+        , Server = require('./server')
+        , Yggdrasil = require('./yggdrasil.js')
         , getSession = Yggdrasil.getSession
         , validateSession = Yggdrasil.validateSession
         , joinServer = Yggdrasil.joinServer
@@ -28,7 +28,7 @@ module.exports = {
   createServer: createServer,
   Client: Client,
   Server: Server,
-  ping: require('./lib/ping'),
+  ping: require('./ping'),
   protocol: protocol,
   yggdrasil: Yggdrasil,
 };
