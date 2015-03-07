@@ -20,7 +20,7 @@ try {
 } catch(e) {
   console.log("You are using a pure-javascript implementation of RSA.");
   console.log("Your performance might be subpar. Please consider installing URSA");
-  ursa = require("./rsa-wrap");
+  ursa = require("ursa-purejs");
 }
 
 module.exports = {
