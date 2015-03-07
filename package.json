@@ -1,6 +1,6 @@
 {
   "name": "minecraft-protocol",
-  "version": "0.12.3",
+  "version": "0.13.0",
   "description": "Parse and serialize minecraft packets, plus authentication and encryption.",
   "main": "index.js",
   "repository": {
@@ -31,14 +31,16 @@
     "mkdirp": "~0.3.4",
     "rimraf": "~2.1.1",
     "zfill": "0.0.1",
-    "batch": "~0.3.1"
+    "batch": "~0.3.1",
+    "buffertools": "^2.1.2"
   },
   "dependencies": {
-    "node-rsa": "^0.1.53",
-    "superagent": "~0.10.0",
-    "buffer-equal": "0.0.0",
     "ansi-color": "0.2.1",
-    "node-uuid": "~1.4.1"
+    "buffer-equal": "0.0.0",
+    "node-rsa": "^0.1.53",
+    "node-uuid": "~1.4.1",
+    "prismarine-nbt": "0.0.1",
+    "superagent": "~0.10.0"
   },
   "optionalDependencies": {
     "ursa": "~0.8.0"

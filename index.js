@@ -44,7 +44,6 @@ function createServer(options) {
   var kickTimeout = options.kickTimeout || 10 * 1000;
   var checkTimeoutInterval = options.checkTimeoutInterval || 4 * 1000;
   var onlineMode = options['online-mode'] == null ? true : options['online-mode'];
-  var encryptionEnabled = options.encryption == null ? true : options.encryption;
 
   var serverKey = ursa.generatePrivateKey(1024);
 
@@ -128,8 +127,8 @@ function createServer(options) {
     function onLogin(packet) {
       client.username = packet.username;
       var isException = !!server.onlineModeExceptions[client.username.toLowerCase()];
-      var needToVerify = (onlineMode && ! isException) || (! onlineMode && isException);
-      if (encryptionEnabled || needToVerify) {
+      var needToVerify = (onlineMode && !isException) || (! onlineMode && isException);
+      if (needToVerify) {
         var serverId = crypto.randomBytes(4).toString('hex');
         client.verifyToken = crypto.randomBytes(4);
         var publicKeyStrArr = serverKey.toPublicPem("utf8").split("\n");
@@ -194,10 +193,12 @@ function createServer(options) {
     }
 
     function loginClient() {
-        var isException = !!server.onlineModeExceptions[client.username.toLowerCase()];
+      var isException = !!server.onlineModeExceptions[client.username.toLowerCase()];
       if (onlineMode == false || isException) {
         client.uuid = "0-0-0-0-0";
       }
+      //client.write('compress', { threshold: 256 }); // Default threshold is 256
+      //client.compressionThreshold = 256;
       client.write(0x02, {uuid: client.uuid, username: client.username});
       client.state = states.PLAY;
       loggedIn = true;
@@ -234,7 +235,8 @@ function createClient(options) {
   if (keepAlive) client.on([states.PLAY, 0x00], onKeepAlive);
   client.once([states.LOGIN, 0x01], onEncryptionKeyRequest);
   client.once([states.LOGIN, 0x02], onLogin);
-
+  client.once("compress", onCompressionRequest);
+  client.once("set_compression", onCompressionRequest);
   if (haveCredentials) {
     // make a request to get the case-correct username before connecting.
     var cb = function(err, session) {
@@ -248,7 +250,7 @@ function createClient(options) {
         client.connect(port, host);
       }
     };
-    
+
     if (accessToken != null) getSession(options.username, accessToken, options.clientToken, true, cb);
     else getSession(options.username, options.password, options.clientToken, false, cb);
   } else {
@@ -273,6 +275,10 @@ function createClient(options) {
     });
   }
 
+  function onCompressionRequest(packet) {
+    client.compressionThreshold = packet.threshold;
+  }
+
   function onKeepAlive(packet) {
     client.write(0x00, {
       keepAliveId: packet.keepAliveId
@@ -284,11 +290,11 @@ function createClient(options) {
 
     function gotSharedSecret(err, sharedSecret) {
       if (err) {
+        debug(err);
         client.emit('error', err);
         client.end();
-        return
+        return;
       }
-
       if (haveCredentials) {
         joinServerRequest(onJoinServerResponse);
       } else {
