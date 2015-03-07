@@ -37,10 +37,10 @@
   "dependencies": {
     "ansi-color": "0.2.1",
     "buffer-equal": "0.0.0",
-    "node-rsa": "^0.1.53",
     "node-uuid": "~1.4.1",
     "prismarine-nbt": "0.0.1",
-    "superagent": "~0.10.0"
+    "superagent": "~0.10.0",
+    "ursa-purejs": "0.0.1"
   },
   "optionalDependencies": {
     "ursa": "~0.8.0"
