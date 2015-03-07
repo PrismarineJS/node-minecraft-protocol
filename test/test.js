@@ -217,7 +217,7 @@ describe("packets", function() {
 });
 
 describe("client", function() {
-  this.timeout(60 * 1000);
+  this.timeout(10 * 60 * 1000);
 
   var mcServer;
   function startServer(propOverrides, done) {
@@ -565,7 +565,8 @@ describe("mc-server", function() {
         gameMode: 1,
         dimension: 0,
         difficulty: 2,
-        maxPlayers: server.maxPlayers
+        maxPlayers: server.maxPlayers,
+        reducedDebugInfo: 0
       });
       client.on([states.PLAY, 0x01], function(packet) {
         var message = '<' + client.username + '>' + ' ' + packet.message;
@@ -611,7 +612,7 @@ describe("mc-server", function() {
         if (!server.clients.hasOwnProperty(clientId)) continue;
 
         client = server.clients[clientId];
-        if (client !== exclude) client.write(0x02, { message: JSON.stringify({text: message})});
+        if (client !== exclude) client.write(0x02, { message: JSON.stringify({text: message}), position: 0});
       }
     }
   });
@@ -657,7 +658,8 @@ describe("mc-server", function() {
         gameMode: 1,
         dimension: 0,
         difficulty: 2,
-        maxPlayers: server.maxPlayers
+        maxPlayers: server.maxPlayers,
+        reducedDebugInfo: 0
       });
     });
     server.on('close', function() {
