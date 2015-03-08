@@ -8,6 +8,7 @@
     "url": "git://github.com/andrewrk/node-minecraft-protocol.git"
   },
   "scripts": {
+    "prepublish": "gulp",
     "test": "mocha --reporter spec"
   },
   "keywords": [
