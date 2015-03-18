@@ -6,4 +6,5 @@ dependencies:
     - npm install --dev
 test:
   override:
-    - npm test
+    - node_modules/.bin/mocha -g "packets"
+    - node_modules/.bin/mocha -g "mc-server"
