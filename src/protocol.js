@@ -136,7 +136,7 @@ var packets = {
       ]},
       animation:          {id: 0x0b, fields: [
         { name: "entityId", type: "varint" },
-        { name: "animation", type: "byte" }
+        { name: "animation", type: "ubyte" }
       ]},
       named_entity_spawn:       {id: 0x0c, fields: [
         { name: "entityId", type: "varint" },
