@@ -131,7 +131,7 @@ var packets = {
         { name: "slot", type: "byte" }
       ]},
       bed:            {id: 0x0a, fields: [
-        { name: "entityId", type: "int" },
+        { name: "entityId", type: "varint" },
         { name: "location", type: "position" }
       ]},
       animation:          {id: 0x0b, fields: [
