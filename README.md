@@ -379,6 +379,11 @@ NODE_DEBUG="minecraft-protocol" node [...]
 
 ## History
 
+### 0.13.1
+
+ * Externalized rsa-wrap library to its own npm module, named ursa-native
+ * Fixed broken bed-related packets (thanks [rom1504](https://github.com/rom1504))
+
 ### 0.13.0
 
  * Updated protocol version to support 1.8.1 (thanks [wtfaremyinitials](https://github.com/wtfaremyinitials))
