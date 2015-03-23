@@ -379,8 +379,15 @@ var packets = {
         { name: "offsetY", type: "float" },
         { name: "offsetZ", type: "float" },
         { name: "particleData", type: "float" },
-        { name: "particles", type: "count", typeArgs: { countFor: "data", type: "int" } },
-        { name: "data", type: "array", typeArgs: { count: "particles", type: "varint" } }
+        { name: "particles", type: "int" },
+        { name: "data", type: "array", typeArgs: { count: function(fields) {
+          if (fields.particleId === 36)
+            return 2;
+          else if (fields.particleId === 37 || fields.particleId === 38)
+            return 1;
+          else
+            return 0;
+        }, type: "varint" } }
       ]},
       game_state_change:  {id: 0x2b, fields: [
         { name: "reason", type: "ubyte" },
@@ -1348,7 +1355,11 @@ function readArray(buffer, offset, typeArgs, rootNode) {
         value: [],
         size: 0
     }
-    var count = getField(typeArgs.count, rootNode);
+    var count;
+    if (typeof typeArgs.count === "function")
+      count = typeArgs.count(rootNode);
+    else
+      count = getField(typeArgs.count, rootNode);
     for (var i = 0; i < count; i++) {
         var readResults = read(buffer, offset, { type: typeArgs.type, typeArgs: typeArgs.typeArgs }, rootNode);
         results.size += readResults.size;
