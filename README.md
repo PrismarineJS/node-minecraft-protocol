@@ -381,6 +381,11 @@ NODE_DEBUG="minecraft-protocol" node [...]
 
 ## History
 
+### 0.13.2
+
+ * Fixed particle packet.
+ * Fixed release. 0.13.1 release was missing an entire folder.
+
 ### 0.13.1
 
  * Externalized rsa-wrap library to its own npm module, named ursa-native
