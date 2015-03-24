@@ -10,9 +10,14 @@ function printHelpAndExit(exitCode) {
     console.log("    print to stdout all messages, except those specified with -x.");
     console.log("  -x ID");
     console.log("    do not print messages with this ID.");
+    console.log("  ID");
+    console.log("    an integer in decimal or hex (given to JavaScript's parseInt())");
+    console.log("    optionally prefixed with o for client->server or i for client<-server.");
     console.log("examples:");
     console.log("  node proxy.js --dump-all -x 0x0 -x 0x3 -x 0x12 -x 0x015 -x 0x16 -x 0x17 -x 0x18 -x 0x19 localhost Player");
     console.log("    print all messages except for some of the most prolific.");
+    console.log("  node examples/proxy.js --dump i0x2d --dump i0x2e --dump i0x2f dump i0x30 --dump i0x31 --dump i0x32 --dump o0x0d --dump o0x0e --dump o0x0f --dump o0x10 --dump o0x11 localhost Player");
+    console.log("    print messages relating to inventory management.");
 
     process.exit(exitCode);
 }
@@ -46,12 +51,15 @@ var printIdBlacklist = {};
             continue;
         }
         i++;
-        var arg = parseInt(args[i]);
-        if (isNaN(arg)) printHelpAndExit(1);
+        var match = /^([io]?)(.*)/.exec(args[i]);
+        var prefix = match[1];
+        if (prefix === "") prefix = "io";
+        var number = parseInt(match[2]);
+        if (isNaN(number)) printHelpAndExit(1);
         if (option == "--dump") {
-            printIdWhitelist[arg] = true;
+            printIdWhitelist[number] = prefix;
         } else if (option == "-x") {
-            printIdBlacklist[arg] = true;
+            printIdBlacklist[number] = prefix;
         } else {
             printHelpAndExit(1);
         }
@@ -98,7 +106,7 @@ srv.on('login', function (client) {
   var brokenPackets = [/*0x04, 0x2f, 0x30*/];
   client.on('packet', function(packet) {
     if (targetClient.state == states.PLAY && packet.state == states.PLAY) {
-      if (shouldDump(packet.id)) {
+      if (shouldDump(packet.id, "o")) {
         console.log("client->server:",
             client.state + ".0x" + packet.id.toString(16) + " :",
             JSON.stringify(packet));
@@ -111,7 +119,7 @@ srv.on('login', function (client) {
     if (packet.state == states.PLAY && client.state == states.PLAY &&
         brokenPackets.indexOf(packet.id) === -1)
     {
-      if (shouldDump(packet.id)) {
+      if (shouldDump(packet.id, "i")) {
         console.log("client<-server:",
             targetClient.state + ".0x" + packet.id.toString(16) + " :",
             (packet.id != 38 ? JSON.stringify(packet) : "Packet too big"));
@@ -168,9 +176,12 @@ srv.on('login', function (client) {
   });
 });
 
-function shouldDump(id) {
-  if (printIdBlacklist[id]) return false;
+function shouldDump(id, direction) {
+  if (matches(printIdBlacklist[id])) return false;
   if (printAllIds) return true;
-  if (printIdWhitelist[id]) return true;
+  if (matches(printIdWhitelist[id])) return true;
   return false;
+  function matches(result) {
+    return result != null && result.indexOf(direction) !== -1;
+  }
 }
