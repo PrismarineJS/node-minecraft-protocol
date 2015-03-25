@@ -131,12 +131,12 @@ var packets = {
         { name: "slot", type: "byte" }
       ]},
       bed:            {id: 0x0a, fields: [
-        { name: "entityId", type: "int" },
+        { name: "entityId", type: "varint" },
         { name: "location", type: "position" }
       ]},
       animation:          {id: 0x0b, fields: [
         { name: "entityId", type: "varint" },
-        { name: "animation", type: "byte" }
+        { name: "animation", type: "ubyte" }
       ]},
       named_entity_spawn:       {id: 0x0c, fields: [
         { name: "entityId", type: "varint" },
@@ -379,8 +379,15 @@ var packets = {
         { name: "offsetY", type: "float" },
         { name: "offsetZ", type: "float" },
         { name: "particleData", type: "float" },
-        { name: "particles", type: "count", typeArgs: { countFor: "data", type: "int" } },
-        { name: "data", type: "array", typeArgs: { count: "particles", type: "varint" } }
+        { name: "particles", type: "int" },
+        { name: "data", type: "array", typeArgs: { count: function(fields) {
+          if (fields.particleId === 36)
+            return 2;
+          else if (fields.particleId === 37 || fields.particleId === 38)
+            return 1;
+          else
+            return 0;
+        }, type: "varint" } }
       ]},
       game_state_change:  {id: 0x2b, fields: [
         { name: "reason", type: "ubyte" },
@@ -1090,8 +1097,11 @@ function readBool(buffer, offset) {
 function readPosition(buffer, offset) {
   var longVal = readLong(buffer, offset).value; // I wish I could do destructuring...
   var x = longVal[0] >> 6;
+  if(x>33554432) x-=67108864;
   var y = ((longVal[0] & 0x3F) << 6) | ((longVal[1] >> 26) & 0x3f);
+  if(y>2048) y-=4096;
   var z = longVal[1] & 0x3FFFFFF;
+  if(z>33554432) z-=67108864;
   return {
     value: { x: x, y: y, z: z },
     size: 8
@@ -1348,7 +1358,11 @@ function readArray(buffer, offset, typeArgs, rootNode) {
         value: [],
         size: 0
     }
-    var count = getField(typeArgs.count, rootNode);
+    var count;
+    if (typeof typeArgs.count === "function")
+      count = typeArgs.count(rootNode);
+    else
+      count = getField(typeArgs.count, rootNode);
     for (var i = 0; i < count; i++) {
         var readResults = read(buffer, offset, { type: typeArgs.type, typeArgs: typeArgs.typeArgs }, rootNode);
         results.size += readResults.size;

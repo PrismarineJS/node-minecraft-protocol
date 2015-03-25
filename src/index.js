@@ -320,7 +320,7 @@ function createClient(options) {
         hash.update(packet.publicKey);
 
         var digest = mcHexDigest(hash);
-        joinServer(this.username, digest, accessToken, client.session.selectedProfile.id, cb);
+        joinServer(client.username, digest, accessToken, client.session.selectedProfile.id, cb);
       }
 
       function sendEncryptionKeyResponse() {

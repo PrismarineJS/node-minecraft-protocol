@@ -1,27 +1,74 @@
 var mc = require('../');
 
 var states = mc.protocol.states;
-function print_help() {
-    console.log("usage: node proxy.js <target_srv> <user> [<password>]");
+function printHelpAndExit(exitCode) {
+    console.log("usage: node proxy.js [<options>...] <target_srv> <user> [<password>]");
+    console.log("options:");
+    console.log("  --dump ID");
+    console.log("    print to stdout messages with the specified ID.");
+    console.log("  --dump-all");
+    console.log("    print to stdout all messages, except those specified with -x.");
+    console.log("  -x ID");
+    console.log("    do not print messages with this ID.");
+    console.log("  ID");
+    console.log("    an integer in decimal or hex (given to JavaScript's parseInt())");
+    console.log("    optionally prefixed with o for client->server or i for client<-server.");
+    console.log("examples:");
+    console.log("  node proxy.js --dump-all -x 0x0 -x 0x3 -x 0x12 -x 0x015 -x 0x16 -x 0x17 -x 0x18 -x 0x19 localhost Player");
+    console.log("    print all messages except for some of the most prolific.");
+    console.log("  node examples/proxy.js --dump i0x2d --dump i0x2e --dump i0x2f dump i0x30 --dump i0x31 --dump i0x32 --dump o0x0d --dump o0x0e --dump o0x0f --dump o0x10 --dump o0x11 localhost Player");
+    console.log("    print messages relating to inventory management.");
+
+    process.exit(exitCode);
 }
 
 if (process.argv.length < 4) {
     console.log("Too few arguments!");
-    print_help();
-    process.exit(1);
+    printHelpAndExit(1);
 }
 
 process.argv.forEach(function(val, index, array) {
     if (val == "-h") {
-        print_help();
-        process.exit(0);
+        printHelpAndExit(0);
     }
 });
 
-var host = process.argv[2];
+var args = process.argv.slice(2);
+var host;
 var port = 25565;
-var user = process.argv[3];
-var passwd = process.argv[4];
+var user;
+var passwd;
+
+var printAllIds = false;
+var printIdWhitelist = {};
+var printIdBlacklist = {};
+(function() {
+    for (var i = 0; i < args.length; i++) {
+        var option = args[i];
+        if (!/^-/.test(option)) break;
+        if (option == "--dump-all") {
+            printAllIds = true;
+            continue;
+        }
+        i++;
+        var match = /^([io]?)(.*)/.exec(args[i]);
+        var prefix = match[1];
+        if (prefix === "") prefix = "io";
+        var number = parseInt(match[2]);
+        if (isNaN(number)) printHelpAndExit(1);
+        if (option == "--dump") {
+            printIdWhitelist[number] = prefix;
+        } else if (option == "-x") {
+            printIdBlacklist[number] = prefix;
+        } else {
+            printHelpAndExit(1);
+        }
+    }
+    if (!(i + 2 <= args.length && args.length <= i + 3)) printHelpAndExit(1);
+    host = args[i++];
+    user = args[i++];
+    passwd = args[i++];
+})();
 
 if (host.indexOf(':') != -1) {
     port = host.substring(host.indexOf(':')+1);
@@ -59,7 +106,11 @@ srv.on('login', function (client) {
   var brokenPackets = [/*0x04, 0x2f, 0x30*/];
   client.on('packet', function(packet) {
     if (targetClient.state == states.PLAY && packet.state == states.PLAY) {
-      //console.log(`client->server: ${client.state}.${packet.id} : ${JSON.stringify(packet)}`);
+      if (shouldDump(packet.id, "o")) {
+        console.log("client->server:",
+            client.state + ".0x" + packet.id.toString(16) + " :",
+            JSON.stringify(packet));
+      }
       if (!endedTargetClient)
         targetClient.write(packet.id, packet);
     }
@@ -68,7 +119,11 @@ srv.on('login', function (client) {
     if (packet.state == states.PLAY && client.state == states.PLAY &&
         brokenPackets.indexOf(packet.id) === -1)
     {
-      //console.log(`client<-server: ${targetClient.state}.${packet.id} : ${packet.id != 38 ? JSON.stringify(packet) : "Packet too big"}`);
+      if (shouldDump(packet.id, "i")) {
+        console.log("client<-server:",
+            targetClient.state + ".0x" + packet.id.toString(16) + " :",
+            (packet.id != 38 ? JSON.stringify(packet) : "Packet too big"));
+      }
       if (!endedClient)
         client.write(packet.id, packet);
     }
@@ -120,3 +175,13 @@ srv.on('login', function (client) {
       client.end("Error");
   });
 });
+
+function shouldDump(id, direction) {
+  if (matches(printIdBlacklist[id])) return false;
+  if (printAllIds) return true;
+  if (matches(printIdWhitelist[id])) return true;
+  return false;
+  function matches(result) {
+    return result != null && result.indexOf(direction) !== -1;
+  }
+}

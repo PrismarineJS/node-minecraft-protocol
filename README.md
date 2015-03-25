@@ -2,6 +2,8 @@
 
 [![Join the chat at https://gitter.im/PrismarineJS/node-minecraft-protocol](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/PrismarineJS/node-minecraft-protocol?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
+[![Build Status](https://circleci.com/gh/PrismarineJS/node-minecraft-protocol.png?style=shield)](https://circleci.com/gh/PrismarineJS/node-minecraft-protocol)
+
 Parse and serialize minecraft packets, plus authentication and encryption.
 
 ## Features
@@ -378,6 +380,16 @@ NODE_DEBUG="minecraft-protocol" node [...]
 ```
 
 ## History
+
+### 0.13.2
+
+ * Fixed particle packet.
+ * Fixed release. 0.13.1 release was missing an entire folder.
+
+### 0.13.1
+
+ * Externalized rsa-wrap library to its own npm module, named ursa-native
+ * Fixed broken bed-related packets (thanks [rom1504](https://github.com/rom1504))
 
 ### 0.13.0
 
