@@ -36,11 +36,9 @@
     "mocha": "~1.8.2",
     "rimraf": "~2.1.1",
     "zfill": "0.0.1",
-    "batch": "~0.3.1",
-    "buffertools": "^2.1.2"
+    "batch": "~0.3.1"
   },
   "dependencies": {
-    "ansi-color": "0.2.1",
     "buffer-equal": "0.0.0",
     "node-uuid": "~1.4.1",
     "prismarine-nbt": "0.0.1",
