@@ -381,6 +381,10 @@ NODE_DEBUG="minecraft-protocol" node [...]
 
 ## History
 
+### 0.13.3
+
+ * Fixed readPosition for negative packets (thanks [rom1504](https://github.com/rom1504))
+
 ### 0.13.2
 
  * Fixed particle packet.
