@@ -1097,8 +1097,11 @@ function readBool(buffer, offset) {
 function readPosition(buffer, offset) {
   var longVal = readLong(buffer, offset).value; // I wish I could do destructuring...
   var x = longVal[0] >> 6;
+  if(x>33554432) x-=67108864;
   var y = ((longVal[0] & 0x3F) << 6) | ((longVal[1] >> 26) & 0x3f);
+  if(y>2048) y-=4096;
   var z = longVal[1] & 0x3FFFFFF;
+  if(z>33554432) z-=67108864;
   return {
     value: { x: x, y: y, z: z },
     size: 8
