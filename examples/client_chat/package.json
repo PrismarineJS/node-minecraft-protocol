@@ -1,0 +1,10 @@
+{
+  "name": "node-minecraft-protocol-example",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "ansi-color": "^0.2.1",
+    "readline": "0.0.7"
+  },
+  "description": "A node-minecraft-protocol example"
+}
