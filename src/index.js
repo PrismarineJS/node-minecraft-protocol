@@ -44,6 +44,9 @@ function createServer(options) {
   var kickTimeout = options.kickTimeout || 10 * 1000;
   var checkTimeoutInterval = options.checkTimeoutInterval || 4 * 1000;
   var onlineMode = options['online-mode'] == null ? true : options['online-mode'];
+  // a function receiving the default status object and the client
+  // and returning a modified response object.
+  var beforePing = options.beforePing || null;
 
   var serverKey = ursa.generatePrivateKey(1024);
 
@@ -117,6 +120,10 @@ function createServer(options) {
         "favicon": server.favicon
       };
 
+      if (beforePing) {
+        response = beforePing(response, client) || response;
+      }
+
       client.once([states.STATUS, 0x01], function(packet) {
         client.write(0x01, { time: packet.time });
         client.end();
@@ -151,6 +158,9 @@ function createServer(options) {
     }
 
     function onHandshake(packet) {
+      client.serverHost = packet.serverHost;
+      client.serverPort = packet.serverPort;
+      client.protocolVersion = packet.protocolVersion;
       if (packet.nextState == 1) {
         client.state = states.STATUS;
       } else if (packet.nextState == 2) {
