@@ -1,4 +1,4 @@
-var mc = require('../');
+var mc = require('../../');
 
 var options = {
   'online-mode': true,

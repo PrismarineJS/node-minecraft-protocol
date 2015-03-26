@@ -1,4 +1,4 @@
-var mc = require('../')
+var mc = require('../../')
   , states = mc.protocol.states
 
 var client = mc.createClient({

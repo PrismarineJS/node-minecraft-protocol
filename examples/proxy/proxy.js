@@ -1,4 +1,4 @@
-var mc = require('../');
+var mc = require('../../');
 
 var states = mc.protocol.states;
 function printHelpAndExit(exitCode) {
