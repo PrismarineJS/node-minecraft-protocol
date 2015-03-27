@@ -1095,17 +1095,22 @@ function readBool(buffer, offset) {
 }
 
 function readPosition(buffer, offset) {
-  var longVal = readLong(buffer, offset).value; // I wish I could do destructuring...
-  var x = longVal[0] >> 6;
-  if(x>33554432) x-=67108864;
-  var y = ((longVal[0] & 0x3F) << 6) | ((longVal[1] >> 26) & 0x3f);
-  if(y>2048) y-=4096;
-  var z = longVal[1] & 0x3FFFFFF;
-  if(z>33554432) z-=67108864;
+  var longVal = readLong(buffer, offset).value;
+  var x = signExtend26(longVal[0] >> 6);
+  var y = signExtend12(((longVal[0] & 0x3f) << 6) | ((longVal[1] >> 26) & 0x3f));
+  var z = signExtend26(longVal[1] & 0x3FFFFFF);
   return {
     value: { x: x, y: y, z: z },
     size: 8
   };
+}
+function signExtend26(value) {
+  if (value > 0x2000000) value -= 0x4000000;
+  return value;
+}
+function signExtend12(value) {
+  if (value > 0x800) value -= 0x1000;
+  return value;
 }
 
 function readSlot(buffer, offset) {
