@@ -6,6 +6,8 @@ var EventEmitter = require('events').EventEmitter
         , superagent = require('superagent')
         , protocol = require('./protocol')
         , Client = require('./client')
+        , dns = require('dns')
+        , net = require('net')
         , Server = require('./server')
         , Yggdrasil = require('./yggdrasil.js')
         , getSession = Yggdrasil.getSession
@@ -227,6 +229,21 @@ function createServer(options) {
   server.listen(port, host);
   return server;
 }
+
+Client.prototype.connect = function(port, host) {
+  var self = this;
+  if (port == 25565 && net.isIP(host) === 0) {
+    dns.resolveSrv("_minecraft._tcp." + host, function(err, addresses) {
+    if (addresses && addresses.length > 0) {
+      self.setSocket(net.connect(addresses[0].port, addresses[0].name));
+    } else {
+      self.setSocket(net.connect(port, host));
+    }
+    });
+  } else {
+    self.setSocket(net.connect(port, host));
+  }
+};
 
 function createClient(options) {
   assert.ok(options, "options is required");
