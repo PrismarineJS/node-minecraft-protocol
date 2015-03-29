@@ -255,7 +255,7 @@ describe("client", function() {
           return done(new Error("The file "+MC_SERVER_JAR+" doesn't exist."));
       }
 
-        mcServer = spawn('java', [ '-Dlog4j.configurationFile=server/server_debug.xml', '-jar', MC_SERVER_JAR, 'nogui'], {
+      mcServer = spawn('java', [ '-Dlog4j.configurationFile=server/server_debug.xml', '-jar', MC_SERVER_JAR, 'nogui'], {
         stdio: 'pipe',
         cwd: MC_SERVER_PATH,
       });
@@ -266,6 +266,7 @@ describe("client", function() {
       mcServer.stdout.on('data', onData);
       mcServer.stderr.on('data', onData);
       function onData(data) {
+        console.log(data);
         buffer += data;
         var lines = buffer.split("\n");
         var len = lines.length - 1;
