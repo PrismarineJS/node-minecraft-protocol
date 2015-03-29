@@ -249,9 +249,7 @@ describe("client", function() {
     });
     batch.end(function(err) {
       if (err) return done(err);
-      //console.log(MC_SERVER_JAR);
       if (!fs.existsSync(MC_SERVER_JAR)) {
-          console.log("The file "+MC_SERVER_JAR+" doesn't exist.");
           return done(new Error("The file "+MC_SERVER_JAR+" doesn't exist."));
       }
 
@@ -266,7 +264,6 @@ describe("client", function() {
       mcServer.stdout.on('data', onData);
       mcServer.stderr.on('data', onData);
       function onData(data) {
-        console.log(data);
         buffer += data;
         var lines = buffer.split("\n");
         var len = lines.length - 1;
