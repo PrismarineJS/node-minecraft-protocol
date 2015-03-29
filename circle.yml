@@ -1,6 +1,6 @@
 machine:
   environment:
-    MC_SERVER_JAR: $HOME/minecraft-server/minecraft_server.1.8.3.jar
+    MC_SERVER_JAR: /home/ubuntu/node-minecraft-protocol/minecraft-server/minecraft_server.1.8.3.jar
   node:
     version: 0.10.28
   java:
@@ -8,5 +8,4 @@ machine:
 dependencies:
   pre:
     - mkdir minecraft-server
-    - echo `pwd`
     - wget https://s3.amazonaws.com/Minecraft.Download/versions/1.8.3/minecraft_server.1.8.3.jar -O $MC_SERVER_JAR
