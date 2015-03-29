@@ -249,7 +249,10 @@ describe("client", function() {
     });
     batch.end(function(err) {
       if (err) return done(err);
-      //console.log(MC_SERVER_JAR);
+      if (!fs.existsSync(MC_SERVER_JAR)) {
+          return done(new Error("The file "+MC_SERVER_JAR+" doesn't exist."));
+      }
+
       mcServer = spawn('java', [ '-Dlog4j.configurationFile=server/server_debug.xml', '-jar', MC_SERVER_JAR, 'nogui'], {
         stdio: 'pipe',
         cwd: MC_SERVER_PATH,

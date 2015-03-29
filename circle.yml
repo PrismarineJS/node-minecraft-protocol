@@ -1,10 +1,11 @@
 machine:
+  environment:
+    MC_SERVER_JAR: /home/ubuntu/node-minecraft-protocol/minecraft-server/minecraft_server.1.8.3.jar
   node:
     version: 0.10.28
+  java:
+    version: openjdk7
 dependencies:
-  override:
-    - npm install --dev
-test:
-  override:
-    - node_modules/.bin/mocha -g "packets"
-    - node_modules/.bin/mocha -g "mc-server"
+  pre:
+    - mkdir minecraft-server
+    - wget https://s3.amazonaws.com/Minecraft.Download/versions/1.8.3/minecraft_server.1.8.3.jar -O $MC_SERVER_JAR
