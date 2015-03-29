@@ -1,7 +1,10 @@
 machine:
   node:
     version: 0.10.28
-test:
-  override:
-    - node_modules/.bin/mocha -g "packets"
-    - node_modules/.bin/mocha -g "mc-server"
+  java:
+    version: openjdk7
+dependencies:
+  pre:
+    - mkdir minecraft-server
+    - wget https://s3.amazonaws.com/Minecraft.Download/versions/1.8.3/minecraft_server.1.8.3.jar -O minecraft-server/minecraft_server.1.8.3.jar
+    - export MC_SERVER_JAR=`pwd`/minecraft-server/minecraft_server.1.8.3.jar
