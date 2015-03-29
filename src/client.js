@@ -1,8 +1,6 @@
-var net = require('net')
-  , EventEmitter = require('events').EventEmitter
+var EventEmitter = require('events').EventEmitter
   , util = require('util')
   , protocol = require('./protocol')
-  , dns = require('dns')
   , createPacketBuffer = protocol.createPacketBuffer
   , compressPacketBuffer = protocol.compressPacketBuffer
   , oldStylePacket = protocol.oldStylePacket
@@ -149,21 +147,6 @@ Client.prototype.setSocket = function(socket) {
     self.socket.removeListener('end', endSocket);
     self.socket.removeListener('timeout', endSocket);
     self.emit('end', self._endReason);
-  }
-};
-
-Client.prototype.connect = function(port, host) {
-  var self = this;
-  if (port == 25565 && net.isIP(host) === 0) {
-    dns.resolveSrv("_minecraft._tcp." + host, function(err, addresses) {
-    if (addresses && addresses.length > 0) {
-      self.setSocket(net.connect(addresses[0].port, addresses[0].name));
-    } else {
-      self.setSocket(net.connect(port, host));
-    }
-    });
-  } else {
-    self.setSocket(net.connect(port, host));
   }
 };
 
