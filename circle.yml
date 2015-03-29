@@ -1,9 +1,6 @@
 machine:
   node:
     version: 0.10.28
-dependencies:
-  override:
-    - npm install --dev
 test:
   override:
     - node_modules/.bin/mocha -g "packets"
