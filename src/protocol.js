@@ -1,4 +1,3 @@
-var assert = require('assert');
 var util = require('util');
 var zlib = require('zlib');
 var nbt = require('prismarine-nbt');
@@ -820,12 +819,18 @@ var packetStates = {toClient: {}, toServer: {}};
         var id = info.id;
         var fields = info.fields;
 
-        assert(id !== undefined, 'missing id for packet '+name);
-        assert(fields !== undefined, 'missing fields for packet '+name);
-        assert(!packetNames[state][direction].hasOwnProperty(id), 'duplicate packet id '+id+' for '+name);
-        assert(!packetIds[state][direction].hasOwnProperty(name), 'duplicate packet name '+name+' for '+id);
-        assert(!packetFields[state][direction].hasOwnProperty(id), 'duplicate packet id '+id+' for '+name);
-        assert(!packetStates[direction].hasOwnProperty(name), 'duplicate packet name '+name+' for '+id+', must be unique across all states');
+        if(id === undefined)
+            throw(`missing id for packet ${name}`);
+        if(fields === undefined)
+            throw(`missing fields for packet ${name}`);
+        if(packetNames[state][direction].hasOwnProperty(id))
+            throw(`duplicate packet id ${id} for ${name}`);
+        if(packetIds[state][direction].hasOwnProperty(name))
+            throw(`duplicate packet name ${name} for ${id}`);
+        if(packetFields[state][direction].hasOwnProperty(id))
+            throw(`duplicate packet id ${id} for ${name}`);
+        if(packetStates[direction].hasOwnProperty(name))
+            throw(`duplicate packet name ${name} for ${id}, must be unique across all states`);
 
         packetNames[state][direction][id] = name;
         packetIds[state][direction][name] = id;
@@ -1184,13 +1189,15 @@ function writeSlot(value, buffer, offset) {
 
 function sizeOfString(value) {
   var length = Buffer.byteLength(value, 'utf8');
-  assert.ok(length < STRING_MAX_LENGTH, "string greater than max length");
+  if(length >= STRING_MAX_LENGTH)
+    throw('string greater than max length');
   return sizeOfVarInt(length) + length;
 }
 
 function sizeOfUString(value) {
   var length = Buffer.byteLength(value, 'utf8');
-  assert.ok(length < SRV_STRING_MAX_LENGTH, "string greater than max length");
+  if(length >= SRV_STRING_MAX_LENGTH)
+    throw("string greater than max length");
   return sizeOfVarInt(length) + length;
 }
 
@@ -1264,7 +1271,8 @@ function readVarInt(buffer, offset) {
       };
     }
     shift += 7; // we only have 7 bits, MSB being the return-trigger
-    assert.ok(shift < 64, "varint is too big"); // Make sure our shift don't overflow.
+    if(shift >= 64) // Make sure our shift don't overflow.
+        throw("varint is too big")
   }
 }
 
@@ -1482,10 +1490,12 @@ function createPacketBuffer(packetId, state, params, isServer) {
     state = packetStates[!isServer ? 'toServer' : 'toClient'][packetId];
   }
   if (typeof packetId === 'string') packetId = packetIds[state][!isServer ? 'toServer' : 'toClient'][packetId];
-  assert.notEqual(packetId, undefined);
+  if(!packetId)
+    throw('packet id is undefined');
 
   var packet = get(packetId, state, !isServer);
-  assert.notEqual(packet, null);
+  if(!packet)
+    throw('packet is null');
   packet.forEach(function(fieldInfo) {
     try {
     length += sizeOf(params[fieldInfo.name], fieldInfo, params);
