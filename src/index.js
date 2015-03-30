@@ -246,14 +246,14 @@ Client.prototype.connect = function(port, host) {
 
 function createClient(options) {
   if(!options)
-    throw('options object is required');
+    throw(new Error('options object is required'));
   var port = options.port || 25565;
   var host = options.host || 'localhost';
   var clientToken = options.clientToken || Yggdrasil.generateUUID();
   var accessToken = options.accessToken || null;
 
   if(!options.username)
-    throw('username is required');
+    throw(new Error('username is required'));
   var haveCredentials = options.password != null || (clientToken != null && accessToken != null);
   var keepAlive = options.keepAlive == null ? true : options.keepAlive;
 

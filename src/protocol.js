@@ -820,17 +820,17 @@ var packetStates = {toClient: {}, toServer: {}};
         var fields = info.fields;
 
         if(id === undefined)
-            throw(`missing id for packet ${name}`);
+            throw(new Error(`missing id for packet ${name}`));
         if(fields === undefined)
-            throw(`missing fields for packet ${name}`);
+            throw(new Error(`missing fields for packet ${name}`));
         if(packetNames[state][direction].hasOwnProperty(id))
-            throw(`duplicate packet id ${id} for ${name}`);
+            throw(new Error(`duplicate packet id ${id} for ${name}`));
         if(packetIds[state][direction].hasOwnProperty(name))
-            throw(`duplicate packet name ${name} for ${id}`);
+            throw(new Error(`duplicate packet name ${name} for ${id}`));
         if(packetFields[state][direction].hasOwnProperty(id))
-            throw(`duplicate packet id ${id} for ${name}`);
+            throw(new Error(`duplicate packet id ${id} for ${name}`));
         if(packetStates[direction].hasOwnProperty(name))
-            throw(`duplicate packet name ${name} for ${id}, must be unique across all states`);
+            throw(new Error(`duplicate packet name ${name} for ${id}, must be unique across all states`));
 
         packetNames[state][direction][id] = name;
         packetIds[state][direction][name] = id;
@@ -1190,14 +1190,14 @@ function writeSlot(value, buffer, offset) {
 function sizeOfString(value) {
   var length = Buffer.byteLength(value, 'utf8');
   if(length >= STRING_MAX_LENGTH)
-    throw('string greater than max length');
+    throw(new Error('string greater than max length'));
   return sizeOfVarInt(length) + length;
 }
 
 function sizeOfUString(value) {
   var length = Buffer.byteLength(value, 'utf8');
   if(length >= SRV_STRING_MAX_LENGTH)
-    throw("string greater than max length");
+    throw(new Error("string greater than max length"));
   return sizeOfVarInt(length) + length;
 }
 
@@ -1272,7 +1272,7 @@ function readVarInt(buffer, offset) {
     }
     shift += 7; // we only have 7 bits, MSB being the return-trigger
     if(shift >= 64) // Make sure our shift don't overflow.
-        throw("varint is too big")
+        throw(new Error('varint is too big'))
   }
 }
 
@@ -1491,11 +1491,11 @@ function createPacketBuffer(packetId, state, params, isServer) {
   }
   if (typeof packetId === 'string') packetId = packetIds[state][!isServer ? 'toServer' : 'toClient'][packetId];
   if(!packetId)
-    throw('packet id is undefined');
+    throw(new Error('packet id is undefined'));
 
   var packet = get(packetId, state, !isServer);
   if(!packet)
-    throw('packet is null');
+    throw(new Error('packet is null'));
   packet.forEach(function(fieldInfo) {
     try {
     length += sizeOf(params[fieldInfo.name], fieldInfo, params);
