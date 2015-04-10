@@ -1592,7 +1592,7 @@ function parsePacketData(buffer, state, isServer, packetsToParse) {
     cursor += readResults.size;
   }
   if (buffer.length > cursor)
-    console.log("DID NOT PARSE THE WHOLE THING!");
+    debug("Too much data to read for packetId: " + packetId + " (0x" + packetId.toString(16) + ")");
   debug(results);
   return {
     results: results,
