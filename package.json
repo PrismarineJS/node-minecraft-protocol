@@ -43,7 +43,7 @@
     "node-uuid": "~1.4.1",
     "prismarine-nbt": "0.0.1",
     "superagent": "~0.10.0",
-    "ursa-purejs": "0.0.1"
+    "ursa-purejs": "0.0.3"
   },
   "optionalDependencies": {
     "ursa": "~0.8.0"
