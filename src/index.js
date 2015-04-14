@@ -171,12 +171,17 @@ function createServer(options) {
     }
 
     function onEncryptionKeyResponse(packet) {
-      var verifyToken = serverKey.decrypt(packet.verifyToken, undefined, undefined, ursa.RSA_PKCS1_PADDING);
-      if (!bufferEqual(client.verifyToken, verifyToken)) {
+      try {
+        var verifyToken = serverKey.decrypt(packet.verifyToken, undefined, undefined, ursa.RSA_PKCS1_PADDING);
+        if (!bufferEqual(client.verifyToken, verifyToken)) {
+          client.end('DidNotEncryptVerifyTokenProperly');
+          return;
+        }
+        var sharedSecret = serverKey.decrypt(packet.sharedSecret, undefined, undefined, ursa.RSA_PKCS1_PADDING);
+      } catch (e) {
         client.end('DidNotEncryptVerifyTokenProperly');
         return;
       }
-      var sharedSecret = serverKey.decrypt(packet.sharedSecret, undefined, undefined, ursa.RSA_PKCS1_PADDING);
       client.cipher = crypto.createCipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
       client.decipher = crypto.createDecipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
       hash.update(sharedSecret);
