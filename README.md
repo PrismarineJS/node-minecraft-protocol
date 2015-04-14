@@ -381,6 +381,14 @@ NODE_DEBUG="minecraft-protocol" node [...]
 
 ## History
 
+### 0.13.4
+
+ * Added hook to modify server ping (thanks [Brian Schlenker](https://github.com/bschlenk))
+ * Exposed the Client class to the browser, after removing node-specific details
+ * Fixed the examples
+ * Silenced the "DID NOT PARSE THE WHOLE THING" debug message, and made it print more useful info
+ * Updated ursa-purejs dependency, which in turned fixed windows version of node-minecraft-protocol.
+
 ### 0.13.3
 
  * Fixed readPosition for negative packets (thanks [rom1504](https://github.com/rom1504))
