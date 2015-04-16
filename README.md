@@ -1,4 +1,5 @@
-# minecraft protocol [![NPM version](https://badge.fury.io/js/minecraft-protocol.svg)](http://badge.fury.io/js/minecraft-protocol) [![Build Status](https://circleci.com/gh/PrismarineJS/node-minecraft-protocol.png?style=shield)](https://circleci.com/gh/PrismarineJS/node-minecraft-protocol) [![Join the chat at https://gitter.im/PrismarineJS/node-minecraft-protocol](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/PrismarineJS/node-minecraft-protocol?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+# minecraft protocol [![NPM version](https://badge.fury.io/js/minecraft-protocol.svg)](http://badge.fury.io/js/minecraft-protocol)
+[![Build Status](https://circleci.com/gh/PrismarineJS/node-minecraft-protocol.png?style=shield)](https://circleci.com/gh/PrismarineJS/node-minecraft-protocol) [![Join the chat at https://gitter.im/PrismarineJS/node-minecraft-protocol](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/PrismarineJS/node-minecraft-protocol?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 
 
