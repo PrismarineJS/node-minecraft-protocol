@@ -1626,7 +1626,7 @@ function parseNewStylePacket(buffer, state, isServer, packetsToParse, cb) {
       }
     });
   } else {
-    process.nextTick(cb.bind(null, null, parsePacketData(buf, state, isServer, packetsToParse)));
+    setImmediate(cb, null, parsePacketData(buf, state, isServer, packetsToParse));
   }
 }
 
