@@ -326,8 +326,8 @@ describe("client", function() {
       });
     });
   });
-  it("connects successfully - online mode (STUBBED)", function(done) {
-    /*startServer({ 'online-mode': 'true' }, function() {
+  it.skip("connects successfully - online mode (STUBBED)", function(done) {
+    startServer({ 'online-mode': 'true' }, function() {
       var client = mc.createClient({
         username: process.env.MC_USERNAME,
         password: process.env.MC_PASSWORD,
@@ -352,11 +352,11 @@ describe("client", function() {
       client.on('chat', function(packet) {
         done();
       });
-    });*/
+    });
     done();
   });
-  it("connects successfully - offline mode (STUBBED)", function(done) {
-    /*startServer({ 'online-mode': 'false' }, function() {
+  it.skip("connects successfully - offline mode (STUBBED)", function(done) {
+    startServer({ 'online-mode': 'false' }, function() {
       var client = mc.createClient({
         username: 'Player',
       });
@@ -400,7 +400,7 @@ describe("client", function() {
           done();
         }
       });
-    });*/
+    });
     done();
   });
   it("gets kicked when no credentials supplied in online mode", function(done) {
