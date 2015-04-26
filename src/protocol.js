@@ -1626,7 +1626,7 @@ function parseNewStylePacket(buffer, state, isServer, packetsToParse, cb) {
       }
     });
   } else {
-    cb(null, parsePacketData(buf, state, isServer, packetsToParse));
+    setImmediate(cb, null, parsePacketData(buf, state, isServer, packetsToParse));
   }
 }
 
