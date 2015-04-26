@@ -108,7 +108,7 @@ Client.prototype.setSocket = function(socket) {
       incomingBuffer = incomingBuffer.slice(packetLengthField.size + packetLengthField.value);
       if (self.compressionThreshold == -2)
       {
-        setImmediate(afterParse, null, parsePacketData(buf, self.state, self.isServer, self.packetsToParse));
+        afterParse(null, parsePacketData(buf, self.state, self.isServer, self.packetsToParse));
       } else {
         parseNewStylePacket(buf, self.state, self.isServer, self.packetsToParse, afterParse);
       }
