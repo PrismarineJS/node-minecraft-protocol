@@ -358,14 +358,9 @@ module.exports= {
                 { name: "offsetZ", type: "float" },
                 { name: "particleData", type: "float" },
                 { name: "particles", type: "int" },
-                { name: "data", type: "array", typeArgs: { count: function(fields) {
-                    if (fields.particleId === 36)
-                        return 2;
-                    else if (fields.particleId === 37 || fields.particleId === 38)
-                        return 1;
-                    else
-                        return 0;
-                }, type: "varint" } }
+                { name: "data", type: "array",
+                    typeArgs: { count: {"field":"particleId","map":{"36":2,"37":1,"38":1},"default":0},
+                        type: "varint" } }
             ]},
             game_state_change:  {id: 0x2b, fields: [
                 { name: "reason", type: "ubyte" },

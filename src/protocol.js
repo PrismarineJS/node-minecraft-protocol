@@ -591,14 +591,22 @@ function readRestBuffer(buffer, offset, typeArgs, rootNode) {
     };
 }
 
+function evalCount(count,fields)
+{
+    if(fields[count["field"]] in count["map"])
+        return count["map"][fields[count["field"]]];
+    return count["default"];
+}
+
 function readArray(buffer, offset, typeArgs, rootNode) {
     var results = {
         value: [],
         size: 0
     }
     var count;
-    if (typeof typeArgs.count === "function")
-      count = typeArgs.count(rootNode);
+    if (typeof typeArgs.count === "object") {
+        count = evalCount(typeArgs.count,rootNode);
+    }
     else
       count = getField(typeArgs.count, rootNode);
     for (var i = 0; i < count; i++) {
