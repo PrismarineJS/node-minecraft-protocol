@@ -10,8 +10,6 @@ module.exports= {
             ]}
         },
     },
-
-// TODO : protocollib names aren't the best around here
     status: {
         toClient: {
             server_info:    {id: 0x00, fields: [
@@ -90,7 +88,7 @@ module.exports= {
                 { name: "item", type: "slot" }
             ]},
             spawn_position:     {id: 0x05, fields: [
-                { name: "location", type: "position" } /* TODO: Implement position */
+                { name: "location", type: "position" }
             ]},
             update_health:      {id: 0x06, fields: [
                 { name: "health", type: "float" },
@@ -109,7 +107,7 @@ module.exports= {
                 { name: "z", type: "double" },
                 { name: "yaw", type: "float" },
                 { name: "pitch", type: "float" },
-                { name: "flags", type: "byte" /* <Dinnerbone> It's a bitfield, X/Y/Z/Y_ROT/X_ROT. If X is set, the x value is relative and not absolute. */}
+                { name: "flags", type: "byte"}
             ]},
             held_item_slot:   {id: 0x09, fields: [
                 { name: "slot", type: "byte" }
@@ -333,7 +331,7 @@ module.exports= {
                 { name: "playerMotionY", type: "float" },
                 { name: "playerMotionZ", type: "float" }
             ]},
-            world_event:             {id: 0x28, fields: [ // TODO : kinda wtf naming there
+            world_event:             {id: 0x28, fields: [
                 { name: "effectId", type: "int" },
                 { name: "location", type: "position" },
                 { name: "data", type: "int" },
@@ -393,7 +391,7 @@ module.exports= {
                 { name: "count", type: "count", typeArgs: { type: "short", countFor: "items" } },
                 { name: "items", type: "array", typeArgs: { type: "slot", count: "count" } }
             ]},
-            craft_progress_bar:    {id: 0x31, fields: [ /* TODO: Bad name for this packet imo */
+            craft_progress_bar:    {id: 0x31, fields: [
                 { name: "windowId", type: "ubyte" },
                 { name: "property", type: "short" },
                 { name: "value", type: "short" }
@@ -479,7 +477,7 @@ module.exports= {
                 { name: "displayText", type: "string", condition: {"field":"action","values":[0,2]}},
                 { name: "type", type: "string", condition: {"field":"action","values":[0,2]}}
             ]},
-            scoreboard_score:       {id: 0x3c, fields: [ /* TODO: itemName and scoreName may need to be switched */
+            scoreboard_score:       {id: 0x3c, fields: [
                 { name: "itemName", type: "string" },
                 { name: "action", type: "byte" },
                 { name: "scoreName", type: "string" },
@@ -671,7 +669,7 @@ module.exports= {
                 { name: "payload", type: "varint" }
             ]},
             custom_payload:     {id: 0x17, fields: [
-                { name: "channel", type: "string" }, /* TODO: wiki.vg sats no dataLength is needed? */
+                { name: "channel", type: "string" },
                 { name: "data", type: "restBuffer"}
             ]},
             spectate: { id: 0x18, fields: [
