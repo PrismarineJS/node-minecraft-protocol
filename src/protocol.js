@@ -14,7 +14,7 @@ var states = {
   "PLAY": "play"
 }
 
-var packets=require("./protocol_def.js");
+var packets=require("../protocol/protocol");
 
 var packetFields = {};
 var packetNames = {};
