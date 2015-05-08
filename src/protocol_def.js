@@ -147,15 +147,9 @@ module.exports= {
                 { name: "yaw", type: "byte" },
                 { name: "objectData", type: "container", typeArgs: { fields: [
                     { name: "intField", type: "int" },
-                    { name: "velocityX", type: "short", condition: function(field_values) {
-                        return field_values['this']['intField'] != 0;
-                    }},
-                    { name: "velocityY", type: "short", condition: function(field_values) {
-                        return field_values['this']['intField'] != 0;
-                    }},
-                    { name: "velocityZ", type: "short", condition: function(field_values) {
-                        return field_values['this']['intField'] != 0;
-                    }}
+                    { name: "velocityX", type: "short", condition: {"field":"intField","values":[0],"different":true,"this":true}},
+                    { name: "velocityY", type: "short", condition: {"field":"intField","values":[0],"different":true,"this":true}},
+                    { name: "velocityZ", type: "short", condition: {"field":"intField","values":[0],"different":true,"this":true}}
                 ]}}
             ]},
             spawn_entity_living:          {id: 0x0f, fields: [
@@ -389,9 +383,7 @@ module.exports= {
                 { name: "inventoryType", type: "string" },
                 { name: "windowTitle", type: "string" },
                 { name: "slotCount", type: "ubyte" },
-                { name: "entityId", type: "int", condition: function(field_values) {
-                    return field_values['inventoryType'] == 11;
-                } }
+                { name: "entityId", type: "int", condition: {"field":"inventoryType","values":[11]}}
             ]},
             close_window:       {id: 0x2e, fields: [
                 { name: "windowId", type: "ubyte" }
@@ -433,21 +425,11 @@ module.exports= {
                     { name: "y", type: "byte" }
                 ]}}},
                 { name: "columns", type: "byte" },
-                { name: "rows", type: "byte", condition: function(field_values) {
-                    return field_values["columns"] !== 0;
-                }},
-                { name: "x", type: "byte", condition: function(field_values) {
-                    return field_values["columns"] !== 0;
-                }},
-                { name: "y", type: "byte", condition: function(field_values) {
-                    return field_values["columns"] !== 0;
-                }},
-                { name: "dataLength", type: "count", typeArgs: { countFor: "data", type: "varint" }, condition: function(field_values) {
-                    return field_values["columns"] !== 0;
-                }},
-                { name: "data", type: "buffer", typeArgs: { count: "dataLength" }, condition: function(field_values) {
-                    return field_values["columns"] !== 0;
-                }},
+                { name: "rows", type: "byte", condition: {"field":"columns","values":[0],"different":true}},
+                { name: "x", type: "byte", condition: {"field":"columns","values":[0],"different":true}},
+                { name: "y", type: "byte", condition: {"field":"columns","values":[0],"different":true}},
+                { name: "dataLength", type: "count", typeArgs: { countFor: "data", type: "varint" }, condition: {"field":"columns","values":[0],"different":true}},
+                { name: "data", type: "buffer", typeArgs: { count: "dataLength" }, condition: {"field":"columns","values":[0],"different":true}},
             ]},
             tile_entity_data:{id: 0x35, fields: [
                 { name: "location", type: "position" },
@@ -471,34 +453,20 @@ module.exports= {
                 { name: "length", type: "count", typeArgs: { type: "varint", countFor: "data" }},
                 { name: "data", type: "array", typeArgs: { count: "length", type: "container", typeArgs: { fields: [
                     { name: "UUID", type: "UUID" },
-                    { name: "name", type: "string", condition: function(field_values) {
-                        return field_values["action"] === 0;
-                    }},
-                    { name: "propertiesLength", type: "count", condition: function(field_values) {
-                        return field_values["action"] === 0;
-                    }, typeArgs: { countFor: "this.properties", type: "varint" }},
-                    { name: "properties", type: "array", condition: function(field_values) {
-                        return field_values["action"] === 0;
-                    }, typeArgs: { count: "this.propertiesLength", type: "container", typeArgs: { fields: [
+                    { name: "name", type: "string", condition: {"field":"action","values":[0]}},
+                    { name: "propertiesLength", type: "count", condition: {"field":"action","values":[0]}
+                        , typeArgs: { countFor: "this.properties", type: "varint" }},
+                    { name: "properties", type: "array", condition: {"field":"action","values":[0]}
+                        , typeArgs: { count: "this.propertiesLength", type: "container", typeArgs: { fields: [
                         { name: "name", type: "string" },
                         { name: "value", type: "ustring" },
                         { name: "isSigned", type: "bool" },
-                        { name: "signature", type: "ustring", condition: function(field_values) {
-                            return field_values["this"]["isSigned"];
-                        }}
+                        { name: "signature", type: "ustring", condition: {"field":"isSigned","values":[true],"this":true}}
                     ]}}},
-                    { name: "gamemode", type: "varint", condition: function(field_values) {
-                        return field_values["action"] === 0 || field_values["action"] === 1;
-                    }},
-                    { name: "ping", type: "varint", condition: function(field_values) {
-                        return field_values["action"] === 0 || field_values["action"] === 2;
-                    }},
-                    { name: "hasDisplayName", type: "bool", condition: function(field_values) {
-                        return field_values["action"] === 0 || field_values["action"] === 3;
-                    }},
-                    { name: "displayName", type: "string", condition: function(field_values) {
-                        return field_values["hasDisplayName"]; // Returns false if there is no value "hasDisplayName"
-                    }}
+                    { name: "gamemode", type: "varint", condition: {"field":"action","values":[0,1]}},
+                    { name: "ping", type: "varint", condition: {"field":"action","values":[0,2]}},
+                    { name: "hasDisplayName", type: "bool", condition: {"field":"action","values":[0,3]}},
+                    { name: "displayName", type: "string", condition: {"field":"hasDisplayName","values":[true]}}
                 ]}}}
             ]},
             abilities:   {id: 0x39, fields: [
@@ -513,20 +481,14 @@ module.exports= {
             scoreboard_objective: {id: 0x3b, fields: [
                 { name: "name", type: "string" },
                 { name: "action", type: "byte" },
-                { name: "displayText", type: "string", condition: function(field_values) {
-                    return field_values["action"] == 0 || field_values["action"] == 2;
-                }},
-                { name: "type", type: "string", condition: function(field_values) {
-                    return field_values["action"] == 0 || field_values["action"] == 2;
-                }}
+                { name: "displayText", type: "string", condition: {"field":"action","values":[0,2]}},
+                { name: "type", type: "string", condition: {"field":"action","values":[0,2]}}
             ]},
             scoreboard_score:       {id: 0x3c, fields: [ /* TODO: itemName and scoreName may need to be switched */
                 { name: "itemName", type: "string" },
                 { name: "action", type: "byte" },
                 { name: "scoreName", type: "string" },
-                { name: "value", type: "varint", condition: function(field_values) {
-                    return field_values['action'] != 1;
-                } }
+                { name: "value", type: "varint", condition: {"field":"action","values":[1],"different":true}}
             ]},
             scoreboard_display_objective: {id: 0x3d, fields: [
                 { name: "position", type: "byte" },
@@ -535,30 +497,14 @@ module.exports= {
             scoreboard_team:              {id: 0x3e, fields: [
                 { name: "team", type: "string" },
                 { name: "mode", type: "byte" },
-                { name: "name", type: "string", condition: function(field_values) {
-                    return field_values['mode'] == 0 || field_values['mode'] == 2;
-                } },
-                { name: "prefix", type: "string", condition: function(field_values) {
-                    return field_values['mode'] == 0 || field_values['mode'] == 2;
-                } },
-                { name: "suffix", type: "string", condition: function(field_values) {
-                    return field_values['mode'] == 0 || field_values['mode'] == 2;
-                } },
-                { name: "friendlyFire", type: "byte", condition: function(field_values) {
-                    return field_values['mode'] == 0 || field_values['mode'] == 2;
-                } },
-                { name: "nameTagVisibility", type: "string", condition: function(field_values) {
-                    return field_values['mode'] == 0 || field_values['mode'] == 2;
-                } },
-                { name: "color", type: "byte", condition: function(field_values) {
-                    return field_values['mode'] == 0 || field_values['mode'] == 2;
-                } },
-                { name: "playerCount", type: "count", condition: function(field_values) {
-                    return field_values['mode'] == 0 || field_values['mode'] == 3 || field_values['mode'] == 4;
-                }, typeArgs: { type: "short", countFor: "players" } },
-                { name: "players", type: "array", condition: function(field_values) {
-                    return field_values['mode'] == 0 || field_values['mode'] == 3 || field_values['mode'] == 4;
-                }, typeArgs: { type: "string", count: "playerCount" } }
+                { name: "name", type: "string", condition: {"field":"mode","values":[0,2]}},
+                { name: "prefix", type: "string", condition: {"field":"mode","values":[0,2]}},
+                { name: "suffix", type: "string", condition: {"field":"mode","values":[0,2]}},
+                { name: "friendlyFire", type: "byte", condition: {"field":"mode","values":[0,2]}},
+                { name: "nameTagVisibility", type: "string", condition: {"field":"mode","values":[0,2]}},
+                { name: "color", type: "byte", condition: {"field":"mode","values":[0,2]}},
+                { name: "playerCount", type: "count", condition: {"field":"mode","values":[0,3,4]}, typeArgs: { type: "short", countFor: "players" } },
+                { name: "players", type: "array", condition: {"field":"mode","values":[0,3,4]}, typeArgs: { type: "string", count: "playerCount" } }
             ]},
             custom_payload:     {id: 0x3f, fields: [
                 { name: "channel", type: "string" },
@@ -572,66 +518,32 @@ module.exports= {
             ]},
             combat_event: { id: 0x42, fields: [
                 { name: "event", type: "varint"},
-                { name: "duration", type: "varint", condition: function(field_values) {
-                    return field_values['event'] == 1;
-                } },
-                { name: "playerId", type: "varint", condition: function(field_values) {
-                    return field_values['event'] == 2;
-                } },
-                { name: "entityId", type: "int", condition: function(field_values) {
-                    return field_values['event'] == 1 || field_values['event'] == 2;
-                } },
-                { name: "message", type: "string", condition: function(field_values) {
-                    return field_values['event'] == 2;
-                } }
+                { name: "duration", type: "varint", condition: {"field":"event","values":[1]}},
+                { name: "playerId", type: "varint", condition: {"field":"event","values":[2]}},
+                { name: "entityId", type: "int", condition: {"field":"event","values":[1,2]}},
+                { name: "message", type: "string", condition: {"field":"event","values":[2]}}
             ]},
             camera: { id: 0x43, fields: [
                 { name: "cameraId", type: "varint" }
             ]},
             world_border: { id: 0x44, fields: [
                 { name: "action", type: "varint"},
-                { name: "radius", type: "double", condition: function(field_values) {
-                    return field_values['action'] == 0;
-                } },
-                { name: "x", type: "double", condition: function(field_values) {
-                    return field_values['action'] == 2 || field_values['action'] == 3;
-                } },
-                { name: "z", type: "double", condition: function(field_values) {
-                    return field_values['action'] == 2 || field_values['action'] == 3;
-                } },
-                { name: "old_radius", type: "double", condition: function(field_values) {
-                    return field_values['action'] == 1 || field_values['action'] == 3;
-                } },
-                { name: "new_radius", type: "double", condition: function(field_values) {
-                    return field_values['action'] == 1 || field_values['action'] == 3;
-                } },
-                { name: "speed", type: "varint", condition: function(field_values) {
-                    return field_values['action'] == 1 || field_values['action'] == 3;
-                } },
-                { name: "portalBoundary", type: "varint", condition: function(field_values) {
-                    return field_values['action'] == 3;
-                } },
-                { name: "warning_time", type: "varint", condition: function(field_values) {
-                    return field_values['action'] == 4 || field_values['action'] == 3;
-                } },
-                { name: "warning_blocks", type: "varint", condition: function(field_values) {
-                    return field_values['action'] == 5 || field_values['action'] == 3;
-                } }
+                { name: "radius", type: "double", condition: {"field":"action","values":[0]}},
+                { name: "x", type: "double", condition: {"field":"action","values":[2,3]}},
+                { name: "z", type: "double", condition: {"field":"action","values":[2,3]}},
+                { name: "old_radius", type: "double", condition: {"field":"action","values":[1,3]}},
+                { name: "new_radius", type: "double", condition: {"field":"action","values":[1,3]}},
+                { name: "speed", type: "varint", condition: {"field":"action","values":[1,3]}},
+                { name: "portalBoundary", type: "varint", condition: {"field":"action","values":[3]}},
+                { name: "warning_time", type: "varint", condition: {"field":"action","values":[4,3]}},
+                { name: "warning_blocks", type: "varint", condition: {"field":"action","values":[5,3]}}
             ]},
             title: { id: 0x45, fields: [
                 { name: "action", type: "varint"},
-                { name: "text", type: "string", condition: function(field_values) {
-                    return field_values['action'] == 0 || field_values['action'] == 1;
-                } },
-                { name: "fadeIn", type: "int", condition: function(field_values) {
-                    return field_values['action'] == 2;
-                } },
-                { name: "stay", type: "int", condition: function(field_values) {
-                    return field_values['action'] == 2;
-                } },
-                { name: "fadeOut", type: "int", condition: function(field_values) {
-                    return field_values['action'] == 2;
-                } }
+                { name: "text", type: "string", condition: {"field":"action","values":[0,1]}},
+                { name: "fadeIn", type: "int", condition: {"field":"action","values":[2]}},
+                { name: "stay", type: "int", condition: {"field":"action","values":[2]}},
+                { name: "fadeOut", type: "int", condition: {"field":"action","values":[2]}}
             ]},
             set_compression: { id: 0x46, fields: [
                 { name: "threshold", type: "varint"}
@@ -659,15 +571,9 @@ module.exports= {
             use_entity:         {id: 0x02, fields: [
                 { name: "target", type: "varint" },
                 { name: "mouse", type: "varint" },
-                { name: "x", type: "float", condition: function(field_values) {
-                    return field_values["mouse"] == 2;
-                }},
-                { name: "y", type: "float", condition: function(field_values) {
-                    return field_values["mouse"] == 2;
-                }},
-                { name: "z", type: "float", condition: function(field_values) {
-                    return field_values["mouse"] == 2;
-                }},
+                { name: "x", type: "float", condition: {"field":"mouse","values":[2]}},
+                { name: "y", type: "float", condition: {"field":"mouse","values":[2]}},
+                { name: "z", type: "float", condition: {"field":"mouse","values":[2]}},
             ]},
             flying:             {id: 0x03, fields: [
                 { name: "onGround", type: "bool" }
@@ -757,9 +663,7 @@ module.exports= {
             tab_complete:       {id: 0x14, fields: [
                 { name: "text", type: "string" },
                 { name: "hasPosition", type: "bool" },
-                { name: "block", type: "position", condition: function(field_values) {
-                    return field_values['hasPosition'];
-                } }
+                { name: "block", type: "position", condition: {"field":"hasPosition","values":[true]}}
             ]},
             settings:    {id: 0x15, fields: [
                 { name: "locale", type: "string" },

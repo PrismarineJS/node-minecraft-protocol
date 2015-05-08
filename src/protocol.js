@@ -119,9 +119,23 @@ for (var n in entityMetadataTypes) {
   entityMetadataTypeBytes[entityMetadataTypes[n].type] = n;
 }
 
-function evalCondition(condition,arg)
+function isFunction(functionToCheck) {
+    var getType = {};
+    return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+}
+
+function evalCondition(condition,field_values)
 {
-    return condition(arg);
+    if(!isFunction(condition))
+    {
+        var field_value_to_test="this" in condition && condition["this"] ? field_values["this"][condition.field] : field_values[condition.field];
+        var b=condition.values.some(function(value) {return field_value_to_test===value;});
+        if("different" in condition && condition["different"])
+            return !b;
+        else
+            return b;
+    }
+    return condition(field_values);
 }
 
 function sizeOfEntityMetadata(value) {
@@ -869,4 +883,5 @@ module.exports = {
   states: states,
   get: get,
   debug: debug,
+  evalCondition:evalCondition
 };

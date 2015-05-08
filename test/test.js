@@ -173,7 +173,7 @@ describe("packets", function() {
     // empty object uses default values
     var packet = {};
     packetInfo.forEach(function(field) {
-      if (!field.hasOwnProperty("condition") || field.condition(packet)) {
+      if (!field.hasOwnProperty("condition") || protocol.evalCondition(field.condition,packet)) {
         var fieldVal = values[field.type];
         if (typeof fieldVal === "undefined") {
           throw new Error("No value for type " + field.type);
