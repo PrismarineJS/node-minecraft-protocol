@@ -31,7 +31,7 @@ var packetStates = {toClient: {}, toServer: {}};
     ['toClient', 'toServer'].forEach(function(direction) {
       for (var name in packets[state][direction]) {
         var info = packets[state][direction][name];
-        var id = info.id;
+        var id = parseInt(info.id);
         var fields = info.fields;
 
         assert(id !== undefined, 'missing id for packet '+name);
