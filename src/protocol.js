@@ -119,6 +119,11 @@ for (var n in entityMetadataTypes) {
   entityMetadataTypeBytes[entityMetadataTypes[n].type] = n;
 }
 
+function evalCondition(condition,arg)
+{
+    return condition(arg);
+}
+
 function sizeOfEntityMetadata(value) {
   var size = 1 + value.length;
   var item;
@@ -633,7 +638,7 @@ function sizeOfCount(value, typeArgs, rootNode) {
 }
 
 function read(buffer, cursor, fieldInfo, rootNodes) {
-  if (fieldInfo.condition && !fieldInfo.condition(rootNodes)) {
+  if (fieldInfo.condition && !evalCondition(fieldInfo.condition,rootNodes)) {
     return null;
   }
   var type = types[fieldInfo.type];
@@ -651,7 +656,7 @@ function read(buffer, cursor, fieldInfo, rootNodes) {
 }
 
 function write(value, buffer, offset, fieldInfo, rootNode) {
-  if (fieldInfo.condition && !fieldInfo.condition(rootNode)) {
+  if (fieldInfo.condition && !evalCondition(fieldInfo.condition,rootNode)) {
     return offset;
   }
   var type = types[fieldInfo.type];
@@ -664,7 +669,7 @@ function write(value, buffer, offset, fieldInfo, rootNode) {
 }
 
 function sizeOf(value, fieldInfo, rootNode) {
-  if (fieldInfo.condition && !fieldInfo.condition(rootNode)) {
+  if (fieldInfo.condition && !evalCondition(fieldInfo.condition,rootNode)) {
     return 0;
   }
   var type = types[fieldInfo.type];
