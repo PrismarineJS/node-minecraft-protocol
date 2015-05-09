@@ -213,10 +213,10 @@ describe("packets", function() {
     });
     var field;
     for (field in p1) {
-      assert.ok(field in p2, "field " + field + " missing in p2");
+      assert.ok(field in p2, "field " + field + " missing in p2, in p1 it has value "+JSON.stringify(p1[field]));
     }
     for (field in p2) {
-      assert.ok(field in p1, "field " + field + " missing in p1");
+      assert.ok(field in p1, "field " + field + " missing in p1, in p2 it has value "+JSON.stringify(p2[field]));
     }
   }
 });

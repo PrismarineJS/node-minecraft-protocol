@@ -123,7 +123,7 @@ for (var n in entityMetadataTypes) {
 function readCondition(buffer,offset,typeArgs, rootNode)
 {
     if(!evalCondition(typeArgs,rootNode))
-        return null;
+        return { value: null, size: 0 };
     return read(buffer, offset, { type: typeArgs.type, typeArgs:typeArgs.typeArgs }, rootNode);
 }
 
@@ -546,7 +546,7 @@ function readContainer(buffer, offset, typeArgs, rootNode) {
     rootNode.this = results.value;
     for (var index in typeArgs.fields) {
         var readResults = read(buffer, offset, typeArgs.fields[index], rootNode);
-        if (readResults == null) { continue; }
+        if (readResults == null  || readResults.value==null) { continue; }
         results.size += readResults.size;
         offset += readResults.size;
         results.value[typeArgs.fields[index].name] = readResults.value;
@@ -680,7 +680,7 @@ function read(buffer, cursor, fieldInfo, rootNodes) {
     };
   }
   var readResults = type[0](buffer, cursor, fieldInfo.typeArgs, rootNodes);
-  if (readResults == null && fieldInfo.type!=="condition") {
+  if (readResults == null) {
     throw new Error("Reader returned null : " + JSON.stringify(fieldInfo));
   }
   if (readResults && readResults.error) return { error: readResults.error };
@@ -829,7 +829,7 @@ function parsePacketData(buffer, state, isServer, packetsToParse) {
             results: results
         };
     }*/
-    if (readResults === null) continue;
+    if (readResults === null || readResults.value==null) continue;
     if (readResults.error) {
       return readResults;
     }
