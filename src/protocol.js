@@ -76,6 +76,7 @@ var types = {
   'slot': [readSlot, writeSlot, sizeOfSlot],
   'nbt': [readNbt, writeBuffer, sizeOfBuffer],
   'entityMetadata': [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata],
+  'condition': [readCondition, writeCondition, sizeOfCondition]
 };
 
 var debug;
@@ -118,6 +119,28 @@ for (var n in entityMetadataTypes) {
 
   entityMetadataTypeBytes[entityMetadataTypes[n].type] = n;
 }
+
+function readCondition(buffer,offset,typeArgs, rootNode)
+{
+    if(!evalCondition(typeArgs,rootNode))
+        return null;
+    return read(buffer, offset, { type: typeArgs.type, typeArgs:typeArgs.typeArgs }, rootNode);
+}
+
+function writeCondition(value, buffer, offset, typeArgs, rootNode) {
+    if(!evalCondition(typeArgs,rootNode))
+        return offset;
+
+    return write(value, buffer, offset, { type: typeArgs.type, typeArgs:typeArgs.typeArgs  }, rootNode);
+}
+
+function sizeOfCondition(value, fieldInfo, rootNode) {
+    if(!evalCondition(fieldInfo,rootNode))
+        return 0;
+
+    return sizeOf(value,fieldInfo, rootNode);
+}
+
 
 function evalCondition(condition,field_values)
 {
@@ -645,8 +668,6 @@ function writeCount(value, buffer, offset, typeArgs, rootNode) {
 
 function sizeOfCount(value, typeArgs, rootNode) {
     // TODO : should I use value or getField().length ?
-    /*console.log(rootNode);
-    console.log(typeArgs);*/
     return sizeOf(getField(typeArgs.countFor, rootNode).length, { type: typeArgs.type }, rootNode);
 }
 
@@ -661,7 +682,7 @@ function read(buffer, cursor, fieldInfo, rootNodes) {
     };
   }
   var readResults = type[0](buffer, cursor, fieldInfo.typeArgs, rootNodes);
-  if (readResults == null) {
+  if (readResults == null && fieldInfo.type!=="condition") {
     throw new Error("Reader returned null : " + JSON.stringify(fieldInfo));
   }
   if (readResults && readResults.error) return { error: readResults.error };

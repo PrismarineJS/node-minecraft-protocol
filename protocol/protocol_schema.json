@@ -63,7 +63,22 @@
         "countFor": {"$ref" : "#/definitions/fieldTypeArgsCountFor"},
         "count": {"$ref" : "#/definitions/fieldTypeArgsCount"},
         "fields": {"$ref" : "#/definitions/fields"},
-        "typeArgs": {"$ref" : "#/definitions/fieldTypeArgs"}
+        "typeArgs": {"$ref" : "#/definitions/fieldTypeArgs"},
+        "field": {"$ref" : "#/definitions/fieldName"},
+        "values": {
+          "type": "array",
+          "items": {
+            "type": ["integer","boolean"]
+          },
+          "additionalItems": false,
+          "minItems": 1
+        },
+        "different": {
+          "type": "boolean"
+        },
+        "this": {
+          "type": "boolean"
+        }
       },
       "additionalProperties": false
     },

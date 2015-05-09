@@ -476,8 +476,9 @@
                 },
                 {
                   "name": "velocityX",
-                  "type": "short",
-                  "condition": {
+                  "type": "condition",
+                  "typeArgs": {
+                    "type": "short",
                     "field": "intField",
                     "values": [
                       0
@@ -488,8 +489,9 @@
                 },
                 {
                   "name": "velocityY",
-                  "type": "short",
-                  "condition": {
+                  "type": "condition",
+                  "typeArgs": {
+                    "type": "short",
                     "field": "intField",
                     "values": [
                       0
@@ -500,8 +502,9 @@
                 },
                 {
                   "name": "velocityZ",
-                  "type": "short",
-                  "condition": {
+                  "type": "condition",
+                  "typeArgs": {
+                    "type": "short",
                     "field": "intField",
                     "values": [
                       0
@@ -1369,12 +1372,13 @@
           },
           {
             "name": "entityId",
-            "type": "int",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
               "field": "inventoryType",
               "values": [
                 11
-              ]
+              ],
+              "type": "int"
             }
           }
         ]
@@ -1538,8 +1542,9 @@
           },
           {
             "name": "rows",
-            "type": "byte",
-            "condition": {
+            "type":"condition",
+            "typeArgs":{
+              "type":"byte",
               "field": "columns",
               "values": [
                 0
@@ -1549,8 +1554,9 @@
           },
           {
             "name": "x",
-            "type": "byte",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "byte",
               "field": "columns",
               "values": [
                 0
@@ -1560,8 +1566,9 @@
           },
           {
             "name": "y",
-            "type": "byte",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "byte",
               "field": "columns",
               "values": [
                 0
@@ -1571,12 +1578,13 @@
           },
           {
             "name": "dataLength",
-            "type": "count",
+            "type":"condition",
             "typeArgs": {
-              "countFor": "data",
-              "type": "varint"
-            },
-            "condition": {
+              "type": "count",
+              "typeArgs": {
+                "countFor": "data",
+                "type": "varint"
+              },
               "field": "columns",
               "values": [
                 0
@@ -1586,11 +1594,12 @@
           },
           {
             "name": "data",
-            "type": "buffer",
-            "typeArgs": {
-              "count": "dataLength"
-            },
-            "condition": {
+            "type": "condition",
+            "typeArgs":{
+              "type": "buffer",
+              "typeArgs": {
+                "count": "dataLength"
+              },
               "field": "columns",
               "values": [
                 0
@@ -1688,8 +1697,9 @@
                   },
                   {
                     "name": "name",
-                    "type": "string",
-                    "condition": {
+                    "type": "condition",
+                    "typeArgs": {
+                      "type": "string",
                       "field": "action",
                       "values": [
                         0
@@ -1698,63 +1708,67 @@
                   },
                   {
                     "name": "propertiesLength",
-                    "type": "count",
-                    "condition": {
+                    "type": "condition",
+                    "typeArgs": {
+                      "type": "count",
                       "field": "action",
                       "values": [
                         0
-                      ]
-                    },
-                    "typeArgs": {
-                      "countFor": "this.properties",
-                      "type": "varint"
+                      ],
+                      "typeArgs": {
+                        "countFor": "this.properties",
+                        "type": "varint"
+                      }
                     }
                   },
                   {
                     "name": "properties",
-                    "type": "array",
-                    "condition": {
+                    "type": "condition",
+                    "typeArgs": {
+                      "type": "array",
                       "field": "action",
                       "values": [
                         0
-                      ]
-                    },
-                    "typeArgs": {
-                      "count": "this.propertiesLength",
-                      "type": "container",
+                      ],
                       "typeArgs": {
-                        "fields": [
-                          {
-                            "name": "name",
-                            "type": "string"
-                          },
-                          {
-                            "name": "value",
-                            "type": "ustring"
-                          },
-                          {
-                            "name": "isSigned",
-                            "type": "bool"
-                          },
-                          {
-                            "name": "signature",
-                            "type": "ustring",
-                            "condition": {
-                              "field": "isSigned",
-                              "values": [
-                                true
-                              ],
-                              "this": true
+                        "count": "this.propertiesLength",
+                        "type": "container",
+                        "typeArgs": {
+                          "fields": [
+                            {
+                              "name": "name",
+                              "type": "string"
+                            },
+                            {
+                              "name": "value",
+                              "type": "ustring"
+                            },
+                            {
+                              "name": "isSigned",
+                              "type": "bool"
+                            },
+                            {
+                              "name": "signature",
+                              "type": "condition",
+                              "typeArgs": {
+                                "type": "ustring",
+                                "field": "isSigned",
+                                "values": [
+                                  true
+                                ],
+                                "this": true
+                              }
                             }
-                          }
-                        ]
+                          ]
+                        }
                       }
                     }
                   },
                   {
                     "name": "gamemode",
-                    "type": "varint",
-                    "condition": {
+                    "type": "condition",
+                    "typeArgs": {
+                      "type": "varint",
                       "field": "action",
                       "values": [
                         0,
@@ -1764,8 +1778,9 @@
                   },
                   {
                     "name": "ping",
-                    "type": "varint",
-                    "condition": {
+                    "type":"condition",
+                    "typeArgs": {
+                      "type": "varint",
                       "field": "action",
                       "values": [
                         0,
@@ -1775,8 +1790,9 @@
                   },
                   {
                     "name": "hasDisplayName",
-                    "type": "bool",
-                    "condition": {
+                    "type":"condition",
+                    "typeArgs": {
+                      "type": "bool",
                       "field": "action",
                       "values": [
                         0,
@@ -1786,8 +1802,9 @@
                   },
                   {
                     "name": "displayName",
-                    "type": "string",
-                    "condition": {
+                    "type": "condition",
+                    "typeArgs": {
+                      "type": "string",
                       "field": "hasDisplayName",
                       "values": [
                         true
@@ -1851,8 +1868,9 @@
           },
           {
             "name": "displayText",
-            "type": "string",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "string",
               "field": "action",
               "values": [
                 0,
@@ -1862,8 +1880,9 @@
           },
           {
             "name": "type",
-            "type": "string",
-            "condition": {
+            "type":"condition",
+            "typeArgs":{
+              "type": "string",
               "field": "action",
               "values": [
                 0,
@@ -1890,8 +1909,9 @@
           },
           {
             "name": "value",
-            "type": "varint",
-            "condition": {
+            "type": "condition",
+            "typeArgs":{
+              "type": "varint",
               "field": "action",
               "values": [
                 1
@@ -1927,8 +1947,9 @@
           },
           {
             "name": "name",
-            "type": "string",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "string",
               "field": "mode",
               "values": [
                 0,
@@ -1938,8 +1959,9 @@
           },
           {
             "name": "prefix",
-            "type": "string",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "string",
               "field": "mode",
               "values": [
                 0,
@@ -1949,8 +1971,9 @@
           },
           {
             "name": "suffix",
-            "type": "string",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "string",
               "field": "mode",
               "values": [
                 0,
@@ -1960,8 +1983,9 @@
           },
           {
             "name": "friendlyFire",
-            "type": "byte",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "byte",
               "field": "mode",
               "values": [
                 0,
@@ -1971,8 +1995,9 @@
           },
           {
             "name": "nameTagVisibility",
-            "type": "string",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "string",
               "field": "mode",
               "values": [
                 0,
@@ -1982,8 +2007,9 @@
           },
           {
             "name": "color",
-            "type": "byte",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "byte",
               "field": "mode",
               "values": [
                 0,
@@ -1993,34 +2019,36 @@
           },
           {
             "name": "playerCount",
+            "type": "condition",
+            "typeArgs": {
             "type": "count",
-            "condition": {
               "field": "mode",
               "values": [
                 0,
                 3,
                 4
-              ]
-            },
-            "typeArgs": {
-              "type": "short",
-              "countFor": "players"
+              ],
+              "typeArgs": {
+                "type": "short",
+                "countFor": "players"
+              }
             }
           },
           {
             "name": "players",
-            "type": "array",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "array",
               "field": "mode",
               "values": [
                 0,
                 3,
                 4
-              ]
-            },
-            "typeArgs": {
-              "type": "string",
-              "count": "playerCount"
+              ],
+              "typeArgs": {
+                "type": "string",
+                "count": "playerCount"
+              }
             }
           }
         ]
@@ -2065,8 +2093,9 @@
           },
           {
             "name": "duration",
-            "type": "varint",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "varint",
               "field": "event",
               "values": [
                 1
@@ -2075,8 +2104,9 @@
           },
           {
             "name": "playerId",
-            "type": "varint",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "varint",
               "field": "event",
               "values": [
                 2
@@ -2085,8 +2115,9 @@
           },
           {
             "name": "entityId",
-            "type": "int",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "int",
               "field": "event",
               "values": [
                 1,
@@ -2096,8 +2127,9 @@
           },
           {
             "name": "message",
-            "type": "string",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "string",
               "field": "event",
               "values": [
                 2
@@ -2124,8 +2156,9 @@
           },
           {
             "name": "radius",
-            "type": "double",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "double",
               "field": "action",
               "values": [
                 0
@@ -2134,8 +2167,9 @@
           },
           {
             "name": "x",
-            "type": "double",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "double",
               "field": "action",
               "values": [
                 2,
@@ -2145,8 +2179,9 @@
           },
           {
             "name": "z",
-            "type": "double",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "double",
               "field": "action",
               "values": [
                 2,
@@ -2156,8 +2191,9 @@
           },
           {
             "name": "old_radius",
-            "type": "double",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "double",
               "field": "action",
               "values": [
                 1,
@@ -2167,8 +2203,9 @@
           },
           {
             "name": "new_radius",
-            "type": "double",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "double",
               "field": "action",
               "values": [
                 1,
@@ -2178,8 +2215,9 @@
           },
           {
             "name": "speed",
-            "type": "varint",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "varint",
               "field": "action",
               "values": [
                 1,
@@ -2189,8 +2227,9 @@
           },
           {
             "name": "portalBoundary",
-            "type": "varint",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "varint",
               "field": "action",
               "values": [
                 3
@@ -2199,8 +2238,9 @@
           },
           {
             "name": "warning_time",
-            "type": "varint",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "varint",
               "field": "action",
               "values": [
                 4,
@@ -2210,8 +2250,9 @@
           },
           {
             "name": "warning_blocks",
-            "type": "varint",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "varint",
               "field": "action",
               "values": [
                 5,
@@ -2230,8 +2271,9 @@
           },
           {
             "name": "text",
-            "type": "string",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "string",
               "field": "action",
               "values": [
                 0,
@@ -2241,8 +2283,9 @@
           },
           {
             "name": "fadeIn",
-            "type": "int",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "int",
               "field": "action",
               "values": [
                 2
@@ -2251,8 +2294,9 @@
           },
           {
             "name": "stay",
-            "type": "int",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "int",
               "field": "action",
               "values": [
                 2
@@ -2261,8 +2305,9 @@
           },
           {
             "name": "fadeOut",
-            "type": "int",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "int",
               "field": "action",
               "values": [
                 2
@@ -2352,8 +2397,9 @@
           },
           {
             "name": "x",
-            "type": "float",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "float",
               "field": "mouse",
               "values": [
                 2
@@ -2362,8 +2408,9 @@
           },
           {
             "name": "y",
-            "type": "float",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "float",
               "field": "mouse",
               "values": [
                 2
@@ -2372,8 +2419,9 @@
           },
           {
             "name": "z",
-            "type": "float",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "float",
               "field": "mouse",
               "values": [
                 2
@@ -2687,8 +2735,9 @@
           },
           {
             "name": "block",
-            "type": "position",
-            "condition": {
+            "type": "condition",
+            "typeArgs": {
+              "type": "position",
               "field": "hasPosition",
               "values": [
                 true

@@ -120,7 +120,12 @@ var values = {
   },
   'UUID': [42, 42, 42, 42],
   'position': { x: 12, y: 332, z: 4382821 },
-  'restBuffer': new Buffer(0)
+  'restBuffer': new Buffer(0),
+  'condition' : function(typeArgs) {
+      // check whether this should return undefined if needed instead ? (using evalCondition)
+      // probably not since we only send values that respect the condition
+      return values[typeArgs.type];
+  }
 };
 
 describe("packets", function() {
@@ -173,7 +178,7 @@ describe("packets", function() {
     // empty object uses default values
     var packet = {};
     packetInfo.forEach(function(field) {
-      if (!field.hasOwnProperty("condition") || protocol.evalCondition(field.condition,packet)) {
+      if ((!field.hasOwnProperty("condition") || protocol.evalCondition(field.condition,packet)) && (field.type!=="condition" || protocol.evalCondition(field.typeArgs,packet))) {
         var fieldVal = values[field.type];
         if (typeof fieldVal === "undefined") {
           throw new Error("No value for type " + field.type);
