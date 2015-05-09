@@ -42,8 +42,7 @@
       "properties": {
         "name": {"$ref" : "#/definitions/fieldName"},
         "type": {"$ref" : "#/definitions/fieldType"},
-        "typeArgs": {"$ref" : "#/definitions/fieldTypeArgs"},
-        "condition": {"$ref" : "#/definitions/fieldCondition"}
+        "typeArgs": {"$ref" : "#/definitions/fieldTypeArgs"}
       },
       "required":["name","type"],
       "additionalProperties": false
@@ -110,28 +109,6 @@
           "additionalProperties": false
         }
       ]
-    },
-    "fieldCondition": {
-      "type": "object",
-      "properties":{
-        "field": {"$ref" : "#/definitions/fieldName"},
-        "values": {
-          "type": "array",
-          "items": {
-            "type": ["integer","boolean"]
-          },
-          "additionalItems": false,
-          "minItems": 1
-        },
-        "different": {
-          "type": "boolean"
-        },
-        "this": {
-          "type": "boolean"
-        }
-      },
-      "required": ["field","values"],
-      "additionalProperties": false
     }
   },
 

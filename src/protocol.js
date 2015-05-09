@@ -559,7 +559,8 @@ function writeContainer(value, buffer, offset, typeArgs, rootNode) {
     var context = value.this ? value.this : value;
     rootNode.this = value;
     for (var index in typeArgs.fields) {
-        if (!context.hasOwnProperty(typeArgs.fields[index].name) && typeArgs.fields[index].type != "count" && !typeArgs.fields[index].condition)
+        if (!context.hasOwnProperty(typeArgs.fields[index].name) && typeArgs.fields[index].type != "count"  &&
+            (typeArgs.fields[index].type !="condition" || evalCondition(typeArgs.fields[index].typeArgs,rootNode)))
         {
           debug(new Error("Missing Property " + typeArgs.fields[index].name).stack);
           console.log(context);
@@ -672,9 +673,6 @@ function sizeOfCount(value, typeArgs, rootNode) {
 }
 
 function read(buffer, cursor, fieldInfo, rootNodes) {
-  if (fieldInfo.condition && !evalCondition(fieldInfo.condition,rootNodes)) {
-    return null;
-  }
   var type = types[fieldInfo.type];
   if (!type) {
     return {
@@ -690,9 +688,6 @@ function read(buffer, cursor, fieldInfo, rootNodes) {
 }
 
 function write(value, buffer, offset, fieldInfo, rootNode) {
-  if (fieldInfo.condition && !evalCondition(fieldInfo.condition,rootNode)) {
-    return offset;
-  }
   var type = types[fieldInfo.type];
   if (!type) {
     return {
@@ -703,9 +698,6 @@ function write(value, buffer, offset, fieldInfo, rootNode) {
 }
 
 function sizeOf(value, fieldInfo, rootNode) {
-  if (fieldInfo.condition && !evalCondition(fieldInfo.condition,rootNode)) {
-    return 0;
-  }
   var type = types[fieldInfo.type];
   if (!type) {
     throw new Error("missing data type: " + fieldInfo.type);
@@ -756,7 +748,7 @@ function createPacketBuffer(packetId, state, params, isServer) {
   packet.forEach(function(fieldInfo) {
     var value = params[fieldInfo.name];
     // TODO : A better check is probably needed
-    if(typeof value === "undefined" && fieldInfo.type != "count" && !fieldInfo.condition)
+    if(typeof value === "undefined" && fieldInfo.type != "count" && (fieldInfo.type !="condition" || evalCondition(fieldInfo.typeArgs,params)))
       debug(new Error("Missing Property " + fieldInfo.name).stack);
     offset = write(value, buffer, offset, fieldInfo, params);
   });
