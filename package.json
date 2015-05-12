@@ -36,7 +36,8 @@
     "mocha": "~1.8.2",
     "rimraf": "~2.1.1",
     "zfill": "0.0.1",
-    "batch": "~0.3.1"
+    "batch": "~0.3.1",
+    "jsonschema": "~1.0.1"
   },
   "dependencies": {
     "buffer-equal": "0.0.0",
