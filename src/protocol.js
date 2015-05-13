@@ -56,14 +56,14 @@ var numeric=require("./datatypes/numeric");
 
 var types = {
   'byte': numeric.byte,
-  'ubyte': [readUByte, writeUByte, 1],
-  'short': [readShort, writeShort, 2],
-  'ushort': [readUShort, writeUShort, 2],
-  'int': [readInt, writeInt, 4],
-  'long': [readLong, writeLong, 8],
+  'ubyte':numeric.ubyte,
+  'short': numeric.short,
+  'ushort': numeric.ushort,
+  'int': numeric.int,
+  'long': numeric.long,
   'varint': [readVarInt, writeVarInt, sizeOfVarInt],
-  'float': [readFloat, writeFloat, 4],
-  'double': [readDouble, writeDouble, 8],
+  'float': numeric.float,
+  'double': numeric.double,
   'bool': [readBool, writeBool, 1],
   'string': [readString, writeString, sizeOfString],
   'ustring': [readString, writeString, sizeOfUString], // TODO : remove ustring
@@ -263,70 +263,6 @@ function readUUID(buffer, offset) {
   };
 }
 
-function readShort(buffer, offset) {
-  if (offset + 2 > buffer.length) return null;
-  var value = buffer.readInt16BE(offset);
-  return {
-    value: value,
-    size: 2,
-  };
-}
-
-function readUShort(buffer, offset) {
-  if (offset + 2 > buffer.length) return null;
-  var value = buffer.readUInt16BE(offset);
-  return {
-    value: value,
-    size: 2,
-  };
-}
-
-function readInt(buffer, offset) {
-  if (offset + 4 > buffer.length) return null;
-  var value = buffer.readInt32BE(offset);
-  return {
-    value: value,
-    size: 4,
-  };
-}
-
-function readFloat(buffer, offset) {
-  if (offset + 4 > buffer.length) return null;
-  var value = buffer.readFloatBE(offset);
-  return {
-    value: value,
-    size: 4,
-  };
-}
-
-function readDouble(buffer, offset) {
-  if (offset + 8 > buffer.length) return null;
-  var value = buffer.readDoubleBE(offset);
-  return {
-    value: value,
-    size: 8,
-  };
-}
-
-function readLong(buffer, offset) {
-  if (offset + 8 > buffer.length) return null;
-  return {
-    value: [buffer.readInt32BE(offset), buffer.readInt32BE(offset + 4)],
-    size: 8,
-  };
-}
-
-
-
-function readUByte(buffer, offset) {
-  if (offset + 1 > buffer.length) return null;
-  var value = buffer.readUInt8(offset);
-  return {
-    value: value,
-    size: 1,
-  };
-}
-
 function readBool(buffer, offset) {
   if (offset + 1 > buffer.length) return null;
   var value = buffer.readInt8(offset);
@@ -337,7 +273,7 @@ function readBool(buffer, offset) {
 }
 
 function readPosition(buffer, offset) {
-  var longVal = readLong(buffer, offset).value;
+  var longVal = numeric.long[0](buffer, offset).value;
   var x = signExtend26(longVal[0] >> 6);
   var y = signExtend12(((longVal[0] & 0x3f) << 6) | ((longVal[1] >> 26) & 0x3f));
   var z = signExtend26(longVal[1] & 0x3FFFFFF);
@@ -357,7 +293,7 @@ function signExtend12(value) {
 
 function readSlot(buffer, offset) {
   var value = {};
-  var results = readShort(buffer, offset);
+  var results = numeric.short[0](buffer, offset);
   if (! results) return null;
   value.blockId = results.value;
 
@@ -401,7 +337,7 @@ function writePosition(value, buffer, offset) {
   var longVal = [];
   longVal[0] = ((value.x & 0x3FFFFFF) <<  6) | ((value.y & 0xFFF) >> 6);
   longVal[1] = ((value.y & 0x3F) << 26) | (value.z & 0x3FFFFFF);
-  return writeLong(longVal, buffer, offset);
+  return numeric.long[1](longVal, buffer, offset);
 }
 
 function writeSlot(value, buffer, offset) {
@@ -446,42 +382,6 @@ function writeString(value, buffer, offset) {
 function writeBool(value, buffer, offset) {
   buffer.writeInt8(+value, offset);
   return offset + 1;
-}
-
-function writeUByte(value, buffer, offset) {
-  buffer.writeUInt8(value, offset);
-  return offset + 1;
-}
-
-function writeFloat(value, buffer, offset) {
-  buffer.writeFloatBE(value, offset);
-  return offset + 4;
-}
-
-function writeDouble(value, buffer, offset) {
-  buffer.writeDoubleBE(value, offset);
-  return offset + 8;
-}
-
-function writeShort(value, buffer, offset) {
-  buffer.writeInt16BE(value, offset);
-  return offset + 2;
-}
-
-function writeUShort(value, buffer, offset) {
-  buffer.writeUInt16BE(value, offset);
-  return offset + 2;
-}
-
-function writeInt(value, buffer, offset) {
-  buffer.writeInt32BE(value, offset);
-  return offset + 4;
-}
-
-function writeLong(value, buffer, offset) {
-  buffer.writeInt32BE(value[0], offset);
-  buffer.writeInt32BE(value[1], offset + 4);
-  return offset + 8;
 }
 
 function readVarInt(buffer, offset) {
