@@ -12,7 +12,7 @@ var states = {
   "STATUS": "status",
   "LOGIN": "login",
   "PLAY": "play"
-}
+};
 
 var packets=require("../protocol/protocol");
 
@@ -67,18 +67,18 @@ var types = {
   'bool': utils.bool,
   'string': utils.string,
   'ustring': utils.ustring,
-  'UUID': minecraft.UUID,
   'container': [readContainer, writeContainer, sizeOfContainer],
   'array': [readArray, writeArray, sizeOfArray],
   'buffer': utils.buffer,
-  'restBuffer': [readRestBuffer, utils.buffer[1], utils.buffer[2]],
   'count': [readCount, writeCount, sizeOfCount],
+  'condition': [readCondition, writeCondition, sizeOfCondition],
   // TODO : remove type-specific, replace with generic containers and arrays.
+  'restBuffer': minecraft.restBuffer,
+  'UUID': minecraft.UUID,
   'position': minecraft.position,
   'slot': minecraft.slot,
   'nbt': minecraft.nbt,
-  'entityMetadata': [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata],
-  'condition': [readCondition, writeCondition, sizeOfCondition]
+  'entityMetadata': [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata]
 };
 
 var debug;
@@ -264,13 +264,6 @@ function sizeOfContainer(value, typeArgs, rootNode) {
     return size;
 }
 
-
-function readRestBuffer(buffer, offset, typeArgs, rootNode) {
-    return {
-        value: buffer.slice(offset),
-        size: buffer.length - offset
-    };
-}
 
 // begin array
 function evalCount(count,fields)

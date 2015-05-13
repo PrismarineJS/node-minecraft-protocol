@@ -6,7 +6,8 @@ module.exports = {
     'UUID': [readUUID, writeUUID, 16],
     'position': [readPosition, writePosition, 8],
     'slot': [readSlot, writeSlot, sizeOfSlot],
-    'nbt': [readNbt, utils.buffer[1], utils.buffer[2]]
+    'nbt': [readNbt, utils.buffer[1], utils.buffer[2]],
+    'restBuffer': [readRestBuffer, utils.buffer[1], utils.buffer[2]]
 };
 
 function readUUID(buffer, offset) {
@@ -136,3 +137,10 @@ function sizeOfNbt(value) {
     return nbt.writeUncompressed(value).length;
 }
 
+
+function readRestBuffer(buffer, offset, typeArgs, rootNode) {
+    return {
+        value: buffer.slice(offset),
+        size: buffer.length - offset
+    };
+}
