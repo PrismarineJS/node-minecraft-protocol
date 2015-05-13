@@ -7,7 +7,8 @@ module.exports = {
     'position': [readPosition, writePosition, 8],
     'slot': [readSlot, writeSlot, sizeOfSlot],
     'nbt': [readNbt, utils.buffer[1], utils.buffer[2]],
-    'restBuffer': [readRestBuffer, utils.buffer[1], utils.buffer[2]]
+    'restBuffer': [readRestBuffer, utils.buffer[1], utils.buffer[2]],
+    'entityMetadata': [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata]
 };
 
 function readUUID(buffer, offset) {
@@ -143,4 +144,95 @@ function readRestBuffer(buffer, offset, typeArgs, rootNode) {
         value: buffer.slice(offset),
         size: buffer.length - offset
     };
+}
+
+
+var entityMetadataTypes = {
+    0: { type: 'byte' },
+    1: { type: 'short' },
+    2: { type: 'int' },
+    3: { type: 'float' },
+    4: { type: 'string' },
+    5: { type: 'slot' },
+    6: { type: 'container', typeArgs: { fields: [
+        { name: 'x', type: 'int' },
+        { name: 'y', type: 'int' },
+        { name: 'z', type: 'int' }
+    ]}},
+    7: { type: 'container', typeArgs: { fields: [
+        { name: 'pitch', type: 'float' },
+        { name: 'yaw', type: 'float' },
+        { name: 'roll', type: 'float' }
+    ]}}
+};
+
+// maps string type name to number
+var entityMetadataTypeBytes = {};
+for (var n in entityMetadataTypes) {
+    if (!entityMetadataTypes.hasOwnProperty(n)) continue;
+
+    entityMetadataTypeBytes[entityMetadataTypes[n].type] = n;
+}
+
+
+function readEntityMetadata(buffer, offset) {
+    var cursor = offset;
+    var metadata = [];
+    var item, key, type, results, reader, typeName, dataType;
+    while (true) {
+        if (cursor + 1 > buffer.length) return null;
+        item = buffer.readUInt8(cursor);
+        cursor += 1;
+        if (item === 0x7f) {
+            return {
+                value: metadata,
+                size: cursor - offset,
+            };
+        }
+        key = item & 0x1f;
+        type = item >> 5;
+        dataType = entityMetadataTypes[type];
+        typeName = dataType.type;
+        //debug("Reading entity metadata type " + dataType + " (" + ( typeName || "unknown" ) + ")");
+        if (!dataType) {
+            return {
+                error: new Error("unrecognized entity metadata type " + type)
+            }
+        }
+        results = this.read(buffer, cursor, dataType, {});
+        if (! results) return null;
+        metadata.push({
+            key: key,
+            value: results.value,
+            type: typeName,
+        });
+        cursor += results.size;
+    }
+}
+
+
+
+function writeEntityMetadata(value, buffer, offset) {
+    var self=this;
+    value.forEach(function(item) {
+        var type = entityMetadataTypeBytes[item.type];
+        var headerByte = (type << 5) | item.key;
+        buffer.writeUInt8(headerByte, offset);
+        offset += 1;
+        offset = self.write(item.value, buffer, offset, entityMetadataTypes[type], {});
+    });
+    buffer.writeUInt8(0x7f, offset);
+    return offset + 1;
+}
+
+
+
+function sizeOfEntityMetadata(value) {
+    var size = 1 + value.length;
+    var item;
+    for (var i = 0; i < value.length; ++i) {
+        item = value[i];
+        size += this.sizeOf(item.value, entityMetadataTypes[entityMetadataTypeBytes[item.type]], {});
+    }
+    return size;
 }
