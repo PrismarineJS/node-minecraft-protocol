@@ -14,6 +14,13 @@ gulp.task('compile', function() {
         .pipe(babel(options))
         .pipe(sourcemaps.write('maps/'))
         .pipe(gulp.dest('dist/'));
+
+    gulp
+        .src('src/datatypes/*.js')
+        .pipe(sourcemaps.init())
+        .pipe(babel(options))
+        .pipe(sourcemaps.write('maps/'))
+        .pipe(gulp.dest('dist/datatypes/'));
 });
 
 gulp.task('watch', function() {

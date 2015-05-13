@@ -3,6 +3,8 @@ var util = require('util');
 var zlib = require('zlib');
 var nbt = require('prismarine-nbt');
 
+var getField= require("./utils").getField;
+
 var STRING_MAX_LENGTH = 240;
 var SRV_STRING_MAX_LENGTH = 32767;
 
@@ -50,10 +52,10 @@ var packetStates = {toClient: {}, toServer: {}};
   }
 })();
 
-
+var numeric=require("./datatypes/numeric");
 
 var types = {
-  'byte': [readByte, writeByte, 1],
+  'byte': numeric.byte,
   'ubyte': [readUByte, writeUByte, 1],
   'short': [readShort, writeShort, 2],
   'ushort': [readUShort, writeUShort, 2],
@@ -314,14 +316,7 @@ function readLong(buffer, offset) {
   };
 }
 
-function readByte(buffer, offset) {
-  if (offset + 1 > buffer.length) return null;
-  var value = buffer.readInt8(offset);
-  return {
-    value: value,
-    size: 1,
-  };
-}
+
 
 function readUByte(buffer, offset) {
   if (offset + 1 > buffer.length) return null;
@@ -446,11 +441,6 @@ function writeString(value, buffer, offset) {
   offset = writeVarInt(length, buffer, offset);
   buffer.write(value, offset, length, 'utf8');
   return offset + length;
-}
-
-function writeByte(value, buffer, offset) {
-  buffer.writeInt8(value, offset);
-  return offset + 1;
 }
 
 function writeBool(value, buffer, offset) {
@@ -606,6 +596,7 @@ function readRestBuffer(buffer, offset, typeArgs, rootNode) {
     };
 }
 
+// begin array
 function evalCount(count,fields)
 {
     if(fields[count["field"]] in count["map"])
@@ -623,7 +614,7 @@ function readArray(buffer, offset, typeArgs, rootNode) {
         count = evalCount(typeArgs.count,rootNode);
     }
     else
-      count = getField(typeArgs.count, rootNode);
+        count = getField(typeArgs.count, rootNode);
     for (var i = 0; i < count; i++) {
         var readResults = read(buffer, offset, { type: typeArgs.type, typeArgs: typeArgs.typeArgs }, rootNode);
         results.size += readResults.size;
@@ -647,15 +638,7 @@ function sizeOfArray(value, typeArgs, rootNode) {
     }
     return size;
 }
-
-function getField(countField, rootNode) {
-    var countFieldArr = countField.split(".");
-    var count = rootNode;
-    for (var index = 0; index < countFieldArr.length; index++) {
-        count = count[countFieldArr[index]];
-    }
-    return count;
-}
+// end array
 
 function readCount(buffer, offset, typeArgs, rootNode) {
     return read(buffer, offset, { type: typeArgs.type }, rootNode);
