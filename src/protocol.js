@@ -2,7 +2,7 @@ var assert = require('assert');
 var util = require('util');
 var zlib = require('zlib');
 
-var getField= require("./utils").getField;
+var evalCondition= require("./utils").evalCondition;
 
 var STRING_MAX_LENGTH = 240;
 
@@ -54,6 +54,7 @@ var numeric=require("./datatypes/numeric");
 var utils=require("./datatypes/utils");
 var minecraft=require("./datatypes/minecraft");
 var structures=require("./datatypes/structures");
+var conditional=require("./datatypes/conditional");
 
 var types = {
   'byte': numeric.byte,
@@ -72,7 +73,7 @@ var types = {
   'array':structures.array,
   'buffer': utils.buffer,
   'count': structures.count,
-  'condition': [readCondition, writeCondition, sizeOfCondition],
+  'condition': conditional.condition,
   // TODO : remove type-specific, replace with generic containers and arrays.
   'restBuffer': minecraft.restBuffer,
   'UUID': minecraft.UUID,
@@ -122,38 +123,6 @@ for (var n in entityMetadataTypes) {
   if (!entityMetadataTypes.hasOwnProperty(n)) continue;
 
   entityMetadataTypeBytes[entityMetadataTypes[n].type] = n;
-}
-
-function readCondition(buffer,offset,typeArgs, rootNode)
-{
-    if(!evalCondition(typeArgs,rootNode))
-        return { value: null, size: 0 };
-    return proto.read(buffer, offset, { type: typeArgs.type, typeArgs:typeArgs.typeArgs }, rootNode);
-}
-
-function writeCondition(value, buffer, offset, typeArgs, rootNode) {
-    if(!evalCondition(typeArgs,rootNode))
-        return offset;
-
-    return proto.write(value, buffer, offset, { type: typeArgs.type, typeArgs:typeArgs.typeArgs  }, rootNode);
-}
-
-function sizeOfCondition(value, fieldInfo, rootNode) {
-    if(!evalCondition(fieldInfo,rootNode))
-        return 0;
-
-    return proto.sizeOf(value,fieldInfo, rootNode);
-}
-
-
-function evalCondition(condition,field_values)
-{
-    var field_value_to_test="this" in condition && condition["this"] ? field_values["this"][condition.field] : field_values[condition.field];
-    var b=condition.values.some(function(value) {return field_value_to_test===value;});
-    if("different" in condition && condition["different"])
-        return !b;
-    else
-        return b;
 }
 
 
