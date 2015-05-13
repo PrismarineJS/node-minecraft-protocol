@@ -53,6 +53,7 @@ var packetStates = {toClient: {}, toServer: {}};
 var numeric=require("./datatypes/numeric");
 var utils=require("./datatypes/utils");
 var minecraft=require("./datatypes/minecraft");
+var structures=require("./datatypes/structures");
 
 var types = {
   'byte': numeric.byte,
@@ -67,10 +68,10 @@ var types = {
   'bool': utils.bool,
   'string': utils.string,
   'ustring': utils.ustring,
-  'container': [readContainer, writeContainer, sizeOfContainer],
-  'array': [readArray, writeArray, sizeOfArray],
+  'container': structures.container,
+  'array':structures.array,
   'buffer': utils.buffer,
-  'count': [readCount, writeCount, sizeOfCount],
+  'count': structures.count,
   'condition': [readCondition, writeCondition, sizeOfCondition],
   // TODO : remove type-specific, replace with generic containers and arrays.
   'restBuffer': minecraft.restBuffer,
@@ -80,6 +81,7 @@ var types = {
   'nbt': minecraft.nbt,
   'entityMetadata': [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata]
 };
+
 
 var debug;
 if (process.env.NODE_DEBUG && /(minecraft-protocol|mc-proto)/.test(process.env.NODE_DEBUG)) {
@@ -126,21 +128,21 @@ function readCondition(buffer,offset,typeArgs, rootNode)
 {
     if(!evalCondition(typeArgs,rootNode))
         return { value: null, size: 0 };
-    return read(buffer, offset, { type: typeArgs.type, typeArgs:typeArgs.typeArgs }, rootNode);
+    return proto.read(buffer, offset, { type: typeArgs.type, typeArgs:typeArgs.typeArgs }, rootNode);
 }
 
 function writeCondition(value, buffer, offset, typeArgs, rootNode) {
     if(!evalCondition(typeArgs,rootNode))
         return offset;
 
-    return write(value, buffer, offset, { type: typeArgs.type, typeArgs:typeArgs.typeArgs  }, rootNode);
+    return proto.write(value, buffer, offset, { type: typeArgs.type, typeArgs:typeArgs.typeArgs  }, rootNode);
 }
 
 function sizeOfCondition(value, fieldInfo, rootNode) {
     if(!evalCondition(fieldInfo,rootNode))
         return 0;
 
-    return sizeOf(value,fieldInfo, rootNode);
+    return proto.sizeOf(value,fieldInfo, rootNode);
 }
 
 
@@ -179,7 +181,7 @@ function readEntityMetadata(buffer, offset) {
                 error: new Error("unrecognized entity metadata type " + type)
             }
         }
-        results = read(buffer, cursor, dataType, {});
+        results = proto.read(buffer, cursor, dataType, {});
         if (! results) return null;
         metadata.push({
             key: key,
@@ -198,7 +200,7 @@ function writeEntityMetadata(value, buffer, offset) {
         var headerByte = (type << 5) | item.key;
         buffer.writeUInt8(headerByte, offset);
         offset += 1;
-        offset = write(item.value, buffer, offset, entityMetadataTypes[type], {});
+        offset = proto.write(item.value, buffer, offset, entityMetadataTypes[type], {});
     });
     buffer.writeUInt8(0x7f, offset);
     return offset + 1;
@@ -211,155 +213,56 @@ function sizeOfEntityMetadata(value) {
     var item;
     for (var i = 0; i < value.length; ++i) {
         item = value[i];
-        size += sizeOf(item.value, entityMetadataTypes[entityMetadataTypeBytes[item.type]], {});
+        size += proto.sizeOf(item.value, entityMetadataTypes[entityMetadataTypeBytes[item.type]], {});
     }
     return size;
 }
 
 
-function readContainer(buffer, offset, typeArgs, rootNode) {
-    var results = {
-        value: {},
-        size: 0
-    };
-    // BLEIGH. Huge hack because I have no way of knowing my current name.
-    // TODO : either pass fieldInfo instead of typeArgs as argument (bleigh), or send name as argument (verybleigh).
-    // TODO : what I do inside of roblabla/Protocols is have each "frame" create a new empty slate with just a "super" object pointing to the parent.
-    rootNode.this = results.value;
-    for (var index in typeArgs.fields) {
-        var readResults = read(buffer, offset, typeArgs.fields[index], rootNode);
-        if (readResults == null  || readResults.value==null) { continue; }
-        results.size += readResults.size;
-        offset += readResults.size;
-        results.value[typeArgs.fields[index].name] = readResults.value;
-    }
-    delete rootNode.this;
-    return results;
-}
 
-function writeContainer(value, buffer, offset, typeArgs, rootNode) {
-    var context = value.this ? value.this : value;
-    rootNode.this = value;
-    for (var index in typeArgs.fields) {
-        if (!context.hasOwnProperty(typeArgs.fields[index].name) && typeArgs.fields[index].type != "count"  &&
-            (typeArgs.fields[index].type !="condition" || evalCondition(typeArgs.fields[index].typeArgs,rootNode)))
-        {
-          debug(new Error("Missing Property " + typeArgs.fields[index].name).stack);
-          console.log(context);
-        }
-        offset = write(context[typeArgs.fields[index].name], buffer, offset, typeArgs.fields[index], rootNode);
-    }
-    delete rootNode.this;
-    return offset;
-}
-
-function sizeOfContainer(value, typeArgs, rootNode) {
-    var size = 0;
-    var context = value.this ? value.this : value;
-    rootNode.this = value;
-    for (var index in typeArgs.fields) {
-        size += sizeOf(context[typeArgs.fields[index].name], typeArgs.fields[index], rootNode);
-    }
-    delete rootNode.this;
-    return size;
-}
-
-
-// begin array
-function evalCount(count,fields)
+function NMProtocols()
 {
-    if(fields[count["field"]] in count["map"])
-        return count["map"][fields[count["field"]]];
-    return count["default"];
+
 }
 
-function readArray(buffer, offset, typeArgs, rootNode) {
-    var results = {
-        value: [],
-        size: 0
-    }
-    var count;
-    if (typeof typeArgs.count === "object") {
-        count = evalCount(typeArgs.count,rootNode);
-    }
-    else
-        count = getField(typeArgs.count, rootNode);
-    for (var i = 0; i < count; i++) {
-        var readResults = read(buffer, offset, { type: typeArgs.type, typeArgs: typeArgs.typeArgs }, rootNode);
-        results.size += readResults.size;
-        offset += readResults.size;
-        results.value.push(readResults.value);
-    }
-    return results;
-}
-
-function writeArray(value, buffer, offset, typeArgs, rootNode) {
-    for (var index in value) {
-        offset = write(value[index], buffer, offset, { type: typeArgs.type, typeArgs: typeArgs.typeArgs }, rootNode);
-    }
-    return offset;
-}
-
-function sizeOfArray(value, typeArgs, rootNode) {
-    var size = 0;
-    for (var index in value) {
-        size += sizeOf(value[index], { type: typeArgs.type, typeArgs: typeArgs.typeArgs }, rootNode);
-    }
-    return size;
-}
-// end array
-
-function readCount(buffer, offset, typeArgs, rootNode) {
-    return read(buffer, offset, { type: typeArgs.type }, rootNode);
-}
-
-function writeCount(value, buffer, offset, typeArgs, rootNode) {
-    // Actually gets the required field, and writes its length. Value is unused.
-    // TODO : a bit hackityhack.
-    return write(getField(typeArgs.countFor, rootNode).length, buffer, offset, { type: typeArgs.type }, rootNode);
-}
-
-function sizeOfCount(value, typeArgs, rootNode) {
-    // TODO : should I use value or getField().length ?
-    return sizeOf(getField(typeArgs.countFor, rootNode).length, { type: typeArgs.type }, rootNode);
-}
-
-function read(buffer, cursor, fieldInfo, rootNodes) {
+NMProtocols.prototype.read = function(buffer, cursor, fieldInfo, rootNodes) {
   var type = types[fieldInfo.type];
   if (!type) {
     return {
       error: new Error("missing data type: " + fieldInfo.type)
     };
   }
-  var readResults = type[0](buffer, cursor, fieldInfo.typeArgs, rootNodes);
+  var readResults = type[0].call(this,buffer, cursor, fieldInfo.typeArgs, rootNodes);
   if (readResults == null) {
     throw new Error("Reader returned null : " + JSON.stringify(fieldInfo));
   }
   if (readResults && readResults.error) return { error: readResults.error };
   return readResults;
-}
+};
 
-function write(value, buffer, offset, fieldInfo, rootNode) {
+NMProtocols.prototype.write = function(value, buffer, offset, fieldInfo, rootNode) {
   var type = types[fieldInfo.type];
   if (!type) {
     return {
       error: new Error("missing data type: " + fieldInfo.type)
     };
   }
-  return type[1](value, buffer, offset, fieldInfo.typeArgs, rootNode);
-}
+  return type[1].call(this,value, buffer, offset, fieldInfo.typeArgs, rootNode);
+};
 
-function sizeOf(value, fieldInfo, rootNode) {
+NMProtocols.prototype.sizeOf = function(value, fieldInfo, rootNode) {
   var type = types[fieldInfo.type];
   if (!type) {
     throw new Error("missing data type: " + fieldInfo.type);
   }
   if (typeof type[2] === 'function') {
-    return type[2](value, fieldInfo.typeArgs, rootNode);
+    return type[2].call(this,value, fieldInfo.typeArgs, rootNode);
   } else {
     return type[2];
   }
-}
+};
+
+var proto=new NMProtocols();
 
 function get(packetId, state, toServer) {
   var direction = toServer ? "toServer" : "toClient";
@@ -385,7 +288,7 @@ function createPacketBuffer(packetId, state, params, isServer) {
   assert.notEqual(packet, null);
   packet.forEach(function(fieldInfo) {
     try {
-    length += sizeOf(params[fieldInfo.name], fieldInfo, params);
+    length += proto.sizeOf(params[fieldInfo.name], fieldInfo, params);
     } catch (e) {
       console.log("fieldInfo : " + JSON.stringify(fieldInfo));
       console.log("params : " + JSON.stringify(params));
@@ -402,7 +305,7 @@ function createPacketBuffer(packetId, state, params, isServer) {
     // TODO : A better check is probably needed
     if(typeof value === "undefined" && fieldInfo.type != "count" && (fieldInfo.type !="condition" || evalCondition(fieldInfo.typeArgs,params)))
       debug(new Error("Missing Property " + fieldInfo.name).stack);
-    offset = write(value, buffer, offset, fieldInfo, params);
+    offset = proto.write(value, buffer, offset, fieldInfo, params);
   });
   return buffer;
 }
@@ -468,8 +371,8 @@ function parsePacketData(buffer, state, isServer, packetsToParse) {
   var i, fieldInfo, readResults;
   for (i = 0; i < packetInfo.length; ++i) {
     fieldInfo = packetInfo[i];
-    readResults = read(buffer, cursor, fieldInfo, results);
-    /* A deserializer cannot return null anymore. Besides, read() returns
+    readResults = proto.read(buffer, cursor, fieldInfo, results);
+    /* A deserializer cannot return null anymore. Besides, proto.read() returns
      * null when the condition is not fulfilled.
      if (!!!readResults) {
         var error = new Error("A deserializer returned null");
