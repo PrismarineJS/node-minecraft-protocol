@@ -1,4 +1,5 @@
 var getField= require("../utils").getField;
+var debug = require("../debug");
 
 module.exports = {
   'array':[readArray,writeArray,sizeOfArray], 

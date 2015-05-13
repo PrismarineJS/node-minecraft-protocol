@@ -1,51 +1,10 @@
 var assert = require('assert');
 var zlib = require('zlib');
 
-var evalCondition= require("./utils").evalCondition;
+var evalCondition = require("./utils").evalCondition;
+var readPackets = require("./packets").readPackets;
+var debug = require("./debug");
 
-var STRING_MAX_LENGTH = 240;
-
-
-function readPackets(packets,states)
-{
-    var packetFields = {};
-    var packetNames = {};
-    var packetIds = {};
-    var packetStates = {toClient: {}, toServer: {}};
-    for (var stateName in states) {
-        var state = states[stateName];
-
-        packetFields[state] = {toClient: [], toServer: []};
-        packetNames[state] = {toClient: [], toServer: []};
-        packetIds[state] = {toClient: [], toServer: []};
-
-        ['toClient', 'toServer'].forEach(function(direction) {
-            for (var name in packets[state][direction]) {
-                var info = packets[state][direction][name];
-                var id = parseInt(info.id);
-                var fields = info.fields;
-
-                assert(id !== undefined, 'missing id for packet '+name);
-                assert(fields !== undefined, 'missing fields for packet '+name);
-                assert(!packetNames[state][direction].hasOwnProperty(id), 'duplicate packet id '+id+' for '+name);
-                assert(!packetIds[state][direction].hasOwnProperty(name), 'duplicate packet name '+name+' for '+id);
-                assert(!packetFields[state][direction].hasOwnProperty(id), 'duplicate packet id '+id+' for '+name);
-                assert(!packetStates[direction].hasOwnProperty(name), 'duplicate packet name '+name+' for '+id+', must be unique across all states');
-
-                packetNames[state][direction][id] = name;
-                packetIds[state][direction][name] = id;
-                packetFields[state][direction][id] = fields;
-                packetStates[direction][name] = state;
-            }
-        });
-    }
-    return {
-        packetFields:packetFields,
-        packetNames:packetNames,
-        packetIds:packetIds,
-        packetStates:packetStates
-    };
-}
 
 // This is really just for the client.
 var states = {
@@ -79,7 +38,6 @@ NMProtocols.prototype.addTypes = function(types)
        self.addType(name,types[name]);
     });
 };
-
 
 NMProtocols.prototype.read = function(buffer, cursor, fieldInfo, rootNodes) {
   var type = this.types[fieldInfo.type];
@@ -268,19 +226,6 @@ function parsePacketData(buffer, state, isServer, packetsToParse) {
   };
 }
 
-function parsePacket(buffer, state, isServer, packetsToParse) {
-  if (state == null) state = states.PLAY;
-  var cursor = 0;
-  var lengthField = utils.varint[0](buffer, 0);
-  if (!lengthField) return null;
-  var length = lengthField.value;
-  cursor += lengthField.size;
-  if (length + lengthField.size > buffer.length) return null; // fail early
-  var result = parsePacketData(buffer.slice(cursor, length + cursor), state, isServer, packetsToParse);
-  result.size = lengthField.size + length;
-  return result;
-}
-
 function parseNewStylePacket(buffer, state, isServer, packetsToParse, cb) {
   var dataLengthField = utils.varint[0](buffer, 0);
   var buf = buffer.slice(dataLengthField.size);
@@ -302,14 +247,12 @@ module.exports = {
   version: 47,
   minecraftVersion: '1.8.1',
   sessionVersion: 13,
-  parsePacket: parsePacket,
   parsePacketData: parsePacketData,
   parseNewStylePacket: parseNewStylePacket,
   createPacketBuffer: createPacketBuffer,
   compressPacketBuffer: compressPacketBuffer,
   oldStylePacket: oldStylePacket,
   newStylePacket: newStylePacket,
-  STRING_MAX_LENGTH: STRING_MAX_LENGTH,
   packetIds: packetIds,
   packetNames: packetNames,
   packetFields: packetFields,
