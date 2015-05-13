@@ -6,7 +6,6 @@ var nbt = require('prismarine-nbt');
 var getField= require("./utils").getField;
 
 var STRING_MAX_LENGTH = 240;
-var SRV_STRING_MAX_LENGTH = 32767;
 
 // This is really just for the client.
 var states = {
@@ -53,6 +52,7 @@ var packetStates = {toClient: {}, toServer: {}};
 })();
 
 var numeric=require("./datatypes/numeric");
+var utils=require("./datatypes/utils");
 
 var types = {
   'byte': numeric.byte,
@@ -61,22 +61,22 @@ var types = {
   'ushort': numeric.ushort,
   'int': numeric.int,
   'long': numeric.long,
-  'varint': [readVarInt, writeVarInt, sizeOfVarInt],
+  'varint': utils.varint,
   'float': numeric.float,
   'double': numeric.double,
-  'bool': [readBool, writeBool, 1],
-  'string': [readString, writeString, sizeOfString],
-  'ustring': [readString, writeString, sizeOfUString], // TODO : remove ustring
+  'bool': utils.bool,
+  'string': utils.string,
+  'ustring': utils.ustring, // TODO : remove ustring
   'UUID': [readUUID, writeUUID, 16],
   'container': [readContainer, writeContainer, sizeOfContainer],
   'array': [readArray, writeArray, sizeOfArray],
-  'buffer': [readBuffer, writeBuffer, sizeOfBuffer],
-  'restBuffer': [readRestBuffer, writeBuffer, sizeOfBuffer],
+  'buffer': utils.buffer,
+  'restBuffer': [readRestBuffer, utils.buffer[1], utils.buffer[2]],
   'count': [readCount, writeCount, sizeOfCount],
   // TODO : remove type-specific, replace with generic containers and arrays.
   'position': [readPosition, writePosition, 8],
   'slot': [readSlot, writeSlot, sizeOfSlot],
-  'nbt': [readNbt, writeBuffer, sizeOfBuffer],
+  'nbt': [readNbt, utils.buffer[1], utils.buffer[2]],
   'entityMetadata': [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata],
   'condition': [readCondition, writeCondition, sizeOfCondition]
 };
@@ -234,23 +234,6 @@ function sizeOfNbt(value) {
   return nbt.writeUncompressed(value).length;
 }
 
-function readString (buffer, offset) {
-  var length = readVarInt(buffer, offset);
-  if (!!!length) return null;
-  var cursor = offset + length.size;
-  var stringLength = length.value;
-  var strEnd = cursor + stringLength;
-  if (strEnd > buffer.length) return null;
-
-  var value = buffer.toString('utf8', cursor, strEnd);
-  cursor = strEnd;
-
-  return {
-    value: value,
-    size: cursor - offset,
-  };
-}
-
 function readUUID(buffer, offset) {
   return {
     value: [
@@ -260,15 +243,6 @@ function readUUID(buffer, offset) {
       buffer.readUInt32BE(offset + 12),
     ],
     size: 16,
-  };
-}
-
-function readBool(buffer, offset) {
-  if (offset + 1 > buffer.length) return null;
-  var value = buffer.readInt8(offset);
-  return {
-    value: !!value,
-    size: 1,
   };
 }
 
@@ -360,70 +334,6 @@ function writeSlot(value, buffer, offset) {
   return offset + 5 + nbtDataLen;
 }
 
-function sizeOfString(value) {
-  var length = Buffer.byteLength(value, 'utf8');
-  assert.ok(length < STRING_MAX_LENGTH, "string greater than max length");
-  return sizeOfVarInt(length) + length;
-}
-
-function sizeOfUString(value) {
-  var length = Buffer.byteLength(value, 'utf8');
-  assert.ok(length < SRV_STRING_MAX_LENGTH, "string greater than max length");
-  return sizeOfVarInt(length) + length;
-}
-
-function writeString(value, buffer, offset) {
-  var length = Buffer.byteLength(value, 'utf8');
-  offset = writeVarInt(length, buffer, offset);
-  buffer.write(value, offset, length, 'utf8');
-  return offset + length;
-}
-
-function writeBool(value, buffer, offset) {
-  buffer.writeInt8(+value, offset);
-  return offset + 1;
-}
-
-function readVarInt(buffer, offset) {
-  var result = 0;
-  var shift = 0;
-  var cursor = offset;
-
-  while (true) {
-    if (cursor + 1 > buffer.length) return null;
-    var b = buffer.readUInt8(cursor);
-    result |= ((b & 0x7f) << shift); // Add the bits to our number, except MSB
-    cursor++;
-    if (!(b & 0x80)) { // If the MSB is not set, we return the number
-      return {
-        value: result,
-        size: cursor - offset
-      };
-    }
-    shift += 7; // we only have 7 bits, MSB being the return-trigger
-    assert.ok(shift < 64, "varint is too big"); // Make sure our shift don't overflow.
-  }
-}
-
-function sizeOfVarInt(value) {
-  var cursor = 0;
-  while (value & ~0x7F) {
-    value >>>= 7;
-    cursor++;
-  }
-  return cursor + 1;
-}
-
-function writeVarInt(value, buffer, offset) {
-  var cursor = 0;
-  while (value & ~0x7F) {
-    buffer.writeUInt8((value & 0xFF) | 0x80, offset + cursor);
-    cursor++;
-    value >>>= 7;
-  }
-  buffer.writeUInt8(value, offset + cursor);
-  return offset + cursor + 1;
-}
 
 function readContainer(buffer, offset, typeArgs, rootNode) {
     var results = {
@@ -472,22 +382,6 @@ function sizeOfContainer(value, typeArgs, rootNode) {
     return size;
 }
 
-function readBuffer(buffer, offset, typeArgs, rootNode) {
-    var count = getField(typeArgs.count, rootNode);
-    return {
-        value: buffer.slice(offset, offset + count),
-        size: count
-    };
-}
-
-function writeBuffer(value, buffer, offset) {
-    value.copy(buffer, offset);
-    return offset + value.length;
-}
-
-function sizeOfBuffer(value) {
-    return value.length;
-}
 
 function readRestBuffer(buffer, offset, typeArgs, rootNode) {
     return {
@@ -623,11 +517,11 @@ function createPacketBuffer(packetId, state, params, isServer) {
       throw e;
     }
   });
-  length += sizeOfVarInt(packetId);
-  var size = length;// + sizeOfVarInt(length);
+  length += utils.varint[2](packetId);
+  var size = length;// + utils.varint[2](length);
   var buffer = new Buffer(size);
-  var offset = 0;//writeVarInt(length, buffer, 0);
-  offset = writeVarInt(packetId, buffer, offset);
+  var offset = 0;//utils.varint[1](length, buffer, 0);
+  offset = utils.varint[1](packetId, buffer, offset);
   packet.forEach(function(fieldInfo) {
     var value = params[fieldInfo.name];
     // TODO : A better check is probably needed
@@ -649,26 +543,26 @@ function compressPacketBuffer(buffer, callback) {
 }
 
 function oldStylePacket(buffer, callback) {
-  var packet = new Buffer(sizeOfVarInt(buffer.length) + buffer.length);
-  var cursor = writeVarInt(buffer.length, packet, 0);
-  writeBuffer(buffer, packet, cursor);
+  var packet = new Buffer(utils.varint[2](buffer.length) + buffer.length);
+  var cursor = utils.varint[1](buffer.length, packet, 0);
+  utils.buffer[1](buffer, packet, cursor);
   callback(null, packet);
 }
 
 function newStylePacket(buffer, callback) {
-  var sizeOfDataLength = sizeOfVarInt(0);
-  var sizeOfLength = sizeOfVarInt(buffer.length + sizeOfDataLength);
+  var sizeOfDataLength = utils.varint[2](0);
+  var sizeOfLength = utils.varint[2](buffer.length + sizeOfDataLength);
   var size = sizeOfLength + sizeOfDataLength + buffer.length;
   var packet = new Buffer(size);
-  var cursor = writeVarInt(size - sizeOfLength, packet, 0);
-  cursor = writeVarInt(0, packet, cursor);
-  writeBuffer(buffer, packet, cursor);
+  var cursor = utils.varint[1](size - sizeOfLength, packet, 0);
+  cursor = utils.varint[1](0, packet, cursor);
+  utils.buffer[1](buffer, packet, cursor);
   callback(null, packet);
 }
 
 function parsePacketData(buffer, state, isServer, packetsToParse) {
   var cursor = 0;
-  var packetIdField = readVarInt(buffer, cursor);
+  var packetIdField = utils.varint[0](buffer, cursor);
   var packetId = packetIdField.value;
   cursor += packetIdField.size;
 
@@ -731,7 +625,7 @@ function parsePacketData(buffer, state, isServer, packetsToParse) {
 function parsePacket(buffer, state, isServer, packetsToParse) {
   if (state == null) state = states.PLAY;
   var cursor = 0;
-  var lengthField = readVarInt(buffer, 0);
+  var lengthField = utils.varint[0](buffer, 0);
   if (!!!lengthField) return null;
   var length = lengthField.value;
   cursor += lengthField.size;
@@ -742,7 +636,7 @@ function parsePacket(buffer, state, isServer, packetsToParse) {
 }
 
 function parseNewStylePacket(buffer, state, isServer, packetsToParse, cb) {
-  var dataLengthField = readVarInt(buffer, 0);
+  var dataLengthField = utils.varint[0](buffer, 0);
   var buf = buffer.slice(dataLengthField.size);
   if(dataLengthField.value != 0) {
     zlib.inflate(buf, function(err, newbuf) {
