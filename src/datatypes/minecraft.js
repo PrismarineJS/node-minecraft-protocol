@@ -2,6 +2,7 @@ var nbt = require('prismarine-nbt');
 var utils = require("./utils");
 var numeric = require("./numeric");
 
+// TODO : remove type-specific, replace with generic containers and arrays.
 module.exports = {
     'UUID': [readUUID, writeUUID, 16],
     'position': [readPosition, writePosition, 8],

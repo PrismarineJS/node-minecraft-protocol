@@ -1,110 +1,88 @@
 var assert = require('assert');
-var util = require('util');
 var zlib = require('zlib');
 
 var evalCondition= require("./utils").evalCondition;
 
 var STRING_MAX_LENGTH = 240;
 
+
+function readPackets(packets,states)
+{
+    var packetFields = {};
+    var packetNames = {};
+    var packetIds = {};
+    var packetStates = {toClient: {}, toServer: {}};
+    for (var stateName in states) {
+        var state = states[stateName];
+
+        packetFields[state] = {toClient: [], toServer: []};
+        packetNames[state] = {toClient: [], toServer: []};
+        packetIds[state] = {toClient: [], toServer: []};
+
+        ['toClient', 'toServer'].forEach(function(direction) {
+            for (var name in packets[state][direction]) {
+                var info = packets[state][direction][name];
+                var id = parseInt(info.id);
+                var fields = info.fields;
+
+                assert(id !== undefined, 'missing id for packet '+name);
+                assert(fields !== undefined, 'missing fields for packet '+name);
+                assert(!packetNames[state][direction].hasOwnProperty(id), 'duplicate packet id '+id+' for '+name);
+                assert(!packetIds[state][direction].hasOwnProperty(name), 'duplicate packet name '+name+' for '+id);
+                assert(!packetFields[state][direction].hasOwnProperty(id), 'duplicate packet id '+id+' for '+name);
+                assert(!packetStates[direction].hasOwnProperty(name), 'duplicate packet name '+name+' for '+id+', must be unique across all states');
+
+                packetNames[state][direction][id] = name;
+                packetIds[state][direction][name] = id;
+                packetFields[state][direction][id] = fields;
+                packetStates[direction][name] = state;
+            }
+        });
+    }
+    return {
+        packetFields:packetFields,
+        packetNames:packetNames,
+        packetIds:packetIds,
+        packetStates:packetStates
+    };
+}
+
 // This is really just for the client.
 var states = {
-  "HANDSHAKING": "handshaking",
-  "STATUS": "status",
-  "LOGIN": "login",
-  "PLAY": "play"
+    "HANDSHAKING": "handshaking",
+    "STATUS": "status",
+    "LOGIN": "login",
+    "PLAY": "play"
 };
-
 var packets=require("../protocol/protocol");
+var packetIndexes=readPackets(packets,states);
 
-var packetFields = {};
-var packetNames = {};
-var packetIds = {};
-var packetStates = {toClient: {}, toServer: {}};
-(function() {
-  for (var stateName in states) {
-    var state = states[stateName];
-
-    packetFields[state] = {toClient: [], toServer: []};
-    packetNames[state] = {toClient: [], toServer: []};
-    packetIds[state] = {toClient: [], toServer: []};
-
-    ['toClient', 'toServer'].forEach(function(direction) {
-      for (var name in packets[state][direction]) {
-        var info = packets[state][direction][name];
-        var id = parseInt(info.id);
-        var fields = info.fields;
-
-        assert(id !== undefined, 'missing id for packet '+name);
-        assert(fields !== undefined, 'missing fields for packet '+name);
-        assert(!packetNames[state][direction].hasOwnProperty(id), 'duplicate packet id '+id+' for '+name);
-        assert(!packetIds[state][direction].hasOwnProperty(name), 'duplicate packet name '+name+' for '+id);
-        assert(!packetFields[state][direction].hasOwnProperty(id), 'duplicate packet id '+id+' for '+name);
-        assert(!packetStates[direction].hasOwnProperty(name), 'duplicate packet name '+name+' for '+id+', must be unique across all states');
-
-        packetNames[state][direction][id] = name;
-        packetIds[state][direction][name] = id;
-        packetFields[state][direction][id] = fields;
-        packetStates[direction][name] = state;
-      }
-    });
-  }
-})();
-
-var numeric=require("./datatypes/numeric");
-var utils=require("./datatypes/utils");
-var minecraft=require("./datatypes/minecraft");
-var structures=require("./datatypes/structures");
-var conditional=require("./datatypes/conditional");
-
-var types = {
-  'byte': numeric.byte,
-  'ubyte':numeric.ubyte,
-  'short': numeric.short,
-  'ushort': numeric.ushort,
-  'int': numeric.int,
-  'long': numeric.long,
-  'varint': utils.varint,
-  'float': numeric.float,
-  'double': numeric.double,
-  'bool': utils.bool,
-  'string': utils.string,
-  'ustring': utils.ustring,
-  'container': structures.container,
-  'array':structures.array,
-  'buffer': utils.buffer,
-  'count': structures.count,
-  'condition': conditional.condition,
-  // TODO : remove type-specific, replace with generic containers and arrays.
-  'restBuffer': minecraft.restBuffer,
-  'UUID': minecraft.UUID,
-  'position': minecraft.position,
-  'slot': minecraft.slot,
-  'nbt': minecraft.nbt,
-  'entityMetadata': minecraft.entityMetadata
-};
-
-
-var debug;
-if (process.env.NODE_DEBUG && /(minecraft-protocol|mc-proto)/.test(process.env.NODE_DEBUG)) {
-  var pid = process.pid;
-  debug = function(x) {
-    // if console is not set up yet, then skip this.
-    if (!console.error)
-      return;
-    console.error('MC-PROTO: %d', pid,
-                  util.format.apply(util, arguments).slice(0, 500));
-  };
-} else {
-  debug = function() { };
-}
+var packetFields = packetIndexes.packetFields;
+var packetNames = packetIndexes.packetNames;
+var packetIds = packetIndexes.packetIds;
+var packetStates = packetIndexes.packetStates;
 
 function NMProtocols()
 {
-
+  this.types={};
 }
 
+NMProtocols.prototype.addType = function(name,functions)
+{
+    this.types[name]=functions;
+};
+
+NMProtocols.prototype.addTypes = function(types)
+{
+    var self=this;
+    Object.keys(types).forEach(function(name){
+       self.addType(name,types[name]);
+    });
+};
+
+
 NMProtocols.prototype.read = function(buffer, cursor, fieldInfo, rootNodes) {
-  var type = types[fieldInfo.type];
+  var type = this.types[fieldInfo.type];
   if (!type) {
     return {
       error: new Error("missing data type: " + fieldInfo.type)
@@ -119,7 +97,7 @@ NMProtocols.prototype.read = function(buffer, cursor, fieldInfo, rootNodes) {
 };
 
 NMProtocols.prototype.write = function(value, buffer, offset, fieldInfo, rootNode) {
-  var type = types[fieldInfo.type];
+  var type = this.types[fieldInfo.type];
   if (!type) {
     return {
       error: new Error("missing data type: " + fieldInfo.type)
@@ -129,7 +107,7 @@ NMProtocols.prototype.write = function(value, buffer, offset, fieldInfo, rootNod
 };
 
 NMProtocols.prototype.sizeOf = function(value, fieldInfo, rootNode) {
-  var type = types[fieldInfo.type];
+  var type = this.types[fieldInfo.type];
   if (!type) {
     throw new Error("missing data type: " + fieldInfo.type);
   }
@@ -140,7 +118,19 @@ NMProtocols.prototype.sizeOf = function(value, fieldInfo, rootNode) {
   }
 };
 
+
+var numeric=require("./datatypes/numeric");
+var utils=require("./datatypes/utils");
+var minecraft=require("./datatypes/minecraft");
+var structures=require("./datatypes/structures");
+var conditional=require("./datatypes/conditional");
+
 var proto=new NMProtocols();
+proto.addTypes(numeric);
+proto.addTypes(utils);
+proto.addTypes(minecraft);
+proto.addTypes(structures);
+proto.addTypes(conditional);
 
 function get(packetId, state, toServer) {
   var direction = toServer ? "toServer" : "toClient";
@@ -282,7 +272,7 @@ function parsePacket(buffer, state, isServer, packetsToParse) {
   if (state == null) state = states.PLAY;
   var cursor = 0;
   var lengthField = utils.varint[0](buffer, 0);
-  if (!!!lengthField) return null;
+  if (!lengthField) return null;
   var length = lengthField.value;
   cursor += lengthField.size;
   if (length + lengthField.size > buffer.length) return null; // fail early
@@ -324,9 +314,8 @@ module.exports = {
   packetNames: packetNames,
   packetFields: packetFields,
   packetStates: packetStates,
-  types: types,
+  types: proto.types,
   states: states,
   get: get,
-  debug: debug,
   evalCondition:evalCondition
 };

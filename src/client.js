@@ -11,7 +11,7 @@ var EventEmitter = require('events').EventEmitter
   , packetIds = protocol.packetIds
   , packetNames = protocol.packetNames
   , states = protocol.states
-  , debug = protocol.debug
+  , debug = require('./debug')
 ;
 
 module.exports = Client;
