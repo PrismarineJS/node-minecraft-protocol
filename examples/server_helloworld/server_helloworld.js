@@ -8,10 +8,10 @@ var server = mc.createServer(options);
 
 server.on('login', function(client) {
   var addr = client.socket.remoteAddress;
-  console.log('Incoming connection', '('+addr+')');
+  console.log('Incoming connection', '(' + addr + ')');
 
   client.on('end', function() {
-    console.log('Connection closed', '('+addr+')');
+    console.log('Connection closed', '(' + addr + ')');
   });
 
   // send init data so client will start rendering world
@@ -41,7 +41,7 @@ server.on('login', function(client) {
       'Hello, world!'
     ]
   };
-  client.write('chat', { message: JSON.stringify(msg), position: 0 });
+  client.write('chat', {message: JSON.stringify(msg), position: 0});
 });
 
 server.on('error', function(error) {

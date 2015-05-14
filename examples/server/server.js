@@ -11,13 +11,13 @@ var options = {
 var server = mc.createServer(options);
 
 server.on('login', function(client) {
-  broadcast(client.username+' joined the game.');
+  broadcast(client.username + ' joined the game.');
   var addr = client.socket.remoteAddress + ':' + client.socket.remotePort;
-  console.log(client.username+' connected', '('+addr+')');
+  console.log(client.username + ' connected', '(' + addr + ')');
 
   client.on('end', function() {
-    broadcast(client.username+' left the game.', client);
-    console.log(client.username+' disconnected', '('+addr+')');
+    broadcast(client.username + ' left the game.', client);
+    console.log(client.username + ' disconnected', '(' + addr + ')');
   });
 
   // send init data so client will start rendering world
@@ -39,7 +39,7 @@ server.on('login', function(client) {
   });
 
   client.on('chat', function(data) {
-    var message = '<'+client.username+'>' + ' ' + data.message;
+    var message = '<' + client.username + '>' + ' ' + data.message;
     broadcast(message, client, client.username);
     console.log(message);
   });
@@ -57,11 +57,11 @@ function broadcast(message, exclude, username) {
   var client, translate;
   translate = username ? 'chat.type.announcement' : 'chat.type.text';
   username = username || 'Server';
-  for (var clientId in server.clients) {
-    if (!server.clients.hasOwnProperty(clientId)) continue;
+  for(var clientId in server.clients) {
+    if(!server.clients.hasOwnProperty(clientId)) continue;
 
     client = server.clients[clientId];
-    if (client !== exclude) {
+    if(client !== exclude) {
       var msg = {
         translate: translate,
         "with": [
@@ -69,7 +69,7 @@ function broadcast(message, exclude, username) {
           message
         ]
       };
-      client.write('chat', { message: JSON.stringify(msg) });
+      client.write('chat', {message: JSON.stringify(msg)});
     }
   }
 }

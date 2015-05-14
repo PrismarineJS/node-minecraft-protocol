@@ -8,82 +8,79 @@ var debug = require("./debug");
 
 // This is really just for the client.
 var states = {
-    "HANDSHAKING": "handshaking",
-    "STATUS": "status",
-    "LOGIN": "login",
-    "PLAY": "play"
+  "HANDSHAKING": "handshaking",
+  "STATUS": "status",
+  "LOGIN": "login",
+  "PLAY": "play"
 };
-var packets=require("../protocol/protocol");
-var packetIndexes=readPackets(packets,states);
+var packets = require("../protocol/protocol");
+var packetIndexes = readPackets(packets, states);
 
 var packetFields = packetIndexes.packetFields;
 var packetNames = packetIndexes.packetNames;
 var packetIds = packetIndexes.packetIds;
 var packetStates = packetIndexes.packetStates;
 
-function NMProtocols()
-{
-  this.types={};
+function NMProtocols() {
+  this.types = {};
 }
 
-NMProtocols.prototype.addType = function(name,functions)
-{
-    this.types[name]=functions;
+NMProtocols.prototype.addType = function(name, functions) {
+  this.types[name] = functions;
 };
 
-NMProtocols.prototype.addTypes = function(types)
-{
-    var self=this;
-    Object.keys(types).forEach(function(name){
-       self.addType(name,types[name]);
-    });
+NMProtocols.prototype.addTypes = function(types) {
+  var self = this;
+  Object.keys(types).forEach(function(name) {
+    self.addType(name, types[name]);
+  });
 };
 
 NMProtocols.prototype.read = function(buffer, cursor, fieldInfo, rootNodes) {
   var type = this.types[fieldInfo.type];
-  if (!type) {
+  if(!type) {
     return {
       error: new Error("missing data type: " + fieldInfo.type)
     };
   }
-  var readResults = type[0].call(this,buffer, cursor, fieldInfo.typeArgs, rootNodes);
-  if (readResults == null) {
+  var readResults = type[0].call(this, buffer, cursor, fieldInfo.typeArgs, rootNodes);
+  if(readResults == null) {
     throw new Error("Reader returned null : " + JSON.stringify(fieldInfo));
   }
-  if (readResults && readResults.error) return { error: readResults.error };
+  if(readResults && readResults.error) return {error: readResults.error};
   return readResults;
 };
 
 NMProtocols.prototype.write = function(value, buffer, offset, fieldInfo, rootNode) {
   var type = this.types[fieldInfo.type];
-  if (!type) {
+  if(!type) {
     return {
       error: new Error("missing data type: " + fieldInfo.type)
     };
   }
-  return type[1].call(this,value, buffer, offset, fieldInfo.typeArgs, rootNode);
+  return type[1].call(this, value, buffer, offset, fieldInfo.typeArgs, rootNode);
 };
 
 NMProtocols.prototype.sizeOf = function(value, fieldInfo, rootNode) {
   var type = this.types[fieldInfo.type];
-  if (!type) {
+  if(!type) {
     throw new Error("missing data type: " + fieldInfo.type);
   }
-  if (typeof type[2] === 'function') {
-    return type[2].call(this,value, fieldInfo.typeArgs, rootNode);
+  if(typeof type[2] === 'function') {
+    return type[2].call(this, value, fieldInfo.typeArgs, rootNode);
   } else {
     return type[2];
   }
 };
 
 
-var numeric=require("./datatypes/numeric");
-var utils=require("./datatypes/utils");
-var minecraft=require("./datatypes/minecraft");
-var structures=require("./datatypes/structures");
-var conditional=require("./datatypes/conditional");
+var numeric = require("./datatypes/numeric");
+var utils = require("./datatypes/utils");
+var minecraft = require("./datatypes/minecraft");
+var structures = require("./datatypes/structures");
+var conditional = require("./datatypes/conditional");
 
-var proto=new NMProtocols();
+var proto = new NMProtocols();
 proto.addTypes(numeric);
 proto.addTypes(utils);
 proto.addTypes(minecraft);
@@ -93,7 +90,7 @@ proto.addTypes(conditional);
 function get(packetId, state, toServer) {
   var direction = toServer ? "toServer" : "toClient";
   var packetInfo = packetFields[state][direction][packetId];
-  if (!packetInfo) {
+  if(!packetInfo) {
     return null;
   }
   return packetInfo;
@@ -102,20 +99,20 @@ function get(packetId, state, toServer) {
 // TODO : This does NOT contain the length prefix anymore.
 function createPacketBuffer(packetId, state, params, isServer) {
   var length = 0;
-  if (typeof packetId === 'string' && typeof state !== 'string' && !params) {
+  if(typeof packetId === 'string' && typeof state !== 'string' && !params) {
     // simplified two-argument usage, createPacketBuffer(name, params)
     params = state;
     state = packetStates[!isServer ? 'toServer' : 'toClient'][packetId];
   }
-  if (typeof packetId === 'string') packetId = packetIds[state][!isServer ? 'toServer' : 'toClient'][packetId];
+  if(typeof packetId === 'string') packetId = packetIds[state][!isServer ? 'toServer' : 'toClient'][packetId];
   assert.notEqual(packetId, undefined);
 
   var packet = get(packetId, state, !isServer);
   assert.notEqual(packet, null);
   packet.forEach(function(fieldInfo) {
     try {
-    length += proto.sizeOf(params[fieldInfo.name], fieldInfo, params);
-    } catch (e) {
+      length += proto.sizeOf(params[fieldInfo.name], fieldInfo, params);
+    } catch(e) {
       console.log("fieldInfo : " + JSON.stringify(fieldInfo));
       console.log("params : " + JSON.stringify(params));
       throw e;
@@ -129,7 +126,7 @@ function createPacketBuffer(packetId, state, params, isServer) {
   packet.forEach(function(fieldInfo) {
     var value = params[fieldInfo.name];
     // TODO : A better check is probably needed
-    if(typeof value === "undefined" && fieldInfo.type != "count" && (fieldInfo.type !="condition" || evalCondition(fieldInfo.typeArgs,params)))
+    if(typeof value === "undefined" && fieldInfo.type != "count" && (fieldInfo.type != "condition" || evalCondition(fieldInfo.typeArgs, params)))
       debug(new Error("Missing Property " + fieldInfo.name).stack);
     offset = proto.write(value, buffer, offset, fieldInfo, params);
   });
@@ -139,7 +136,7 @@ function createPacketBuffer(packetId, state, params, isServer) {
 function compressPacketBuffer(buffer, callback) {
   var dataLength = buffer.size;
   zlib.deflate(buffer, function(err, buf) {
-    if (err)
+    if(err)
       callback(err);
     else
       newStylePacket(buffer, callback);
@@ -170,12 +167,12 @@ function parsePacketData(buffer, state, isServer, packetsToParse) {
   var packetId = packetIdField.value;
   cursor += packetIdField.size;
 
-  var results = { id: packetId, state: state };
+  var results = {id: packetId, state: state};
   // Only parse the packet if there is a need for it, AKA if there is a listener attached to it
   var name = packetNames[state][isServer ? "toServer" : "toClient"][packetId];
   var shouldParse = (!packetsToParse.hasOwnProperty(name) || packetsToParse[name] <= 0)
-                    && (!packetsToParse.hasOwnProperty("packet") || packetsToParse["packet"] <= 0);
-  if (shouldParse) {
+    && (!packetsToParse.hasOwnProperty("packet") || packetsToParse["packet"] <= 0);
+  if(shouldParse) {
     return {
       buffer: buffer,
       results: results
@@ -183,7 +180,7 @@ function parsePacketData(buffer, state, isServer, packetsToParse) {
   }
 
   var packetInfo = get(packetId, state, isServer);
-  if (packetInfo === null) {
+  if(packetInfo === null) {
     return {
       error: new Error("Unrecognized packetId: " + packetId + " (0x" + packetId.toString(16) + ")"),
       buffer: buffer,
@@ -195,29 +192,29 @@ function parsePacketData(buffer, state, isServer, packetsToParse) {
   }
 
   var i, fieldInfo, readResults;
-  for (i = 0; i < packetInfo.length; ++i) {
+  for(i = 0; i < packetInfo.length; ++i) {
     fieldInfo = packetInfo[i];
     readResults = proto.read(buffer, cursor, fieldInfo, results);
     /* A deserializer cannot return null anymore. Besides, proto.read() returns
      * null when the condition is not fulfilled.
      if (!!!readResults) {
-        var error = new Error("A deserializer returned null");
-        error.packetId = packetId;
-        error.fieldInfo = fieldInfo.name;
-        return {
-            size: length + lengthField.size,
-            error: error,
-            results: results
-        };
-    }*/
-    if (readResults === null || readResults.value==null) continue;
-    if (readResults.error) {
+     var error = new Error("A deserializer returned null");
+     error.packetId = packetId;
+     error.fieldInfo = fieldInfo.name;
+     return {
+     size: length + lengthField.size,
+     error: error,
+     results: results
+     };
+     }*/
+    if(readResults === null || readResults.value == null) continue;
+    if(readResults.error) {
       return readResults;
     }
     results[fieldInfo.name] = readResults.value;
     cursor += readResults.size;
   }
-  if (buffer.length > cursor)
+  if(buffer.length > cursor)
     debug("Too much data to read for packetId: " + packetId + " (0x" + packetId.toString(16) + ")");
   debug(results);
   return {
@@ -231,7 +228,7 @@ function parseNewStylePacket(buffer, state, isServer, packetsToParse, cb) {
   var buf = buffer.slice(dataLengthField.size);
   if(dataLengthField.value != 0) {
     zlib.inflate(buf, function(err, newbuf) {
-      if (err) {
+      if(err) {
         console.log(err);
         cb(err);
       } else {
@@ -260,5 +257,5 @@ module.exports = {
   types: proto.types,
   states: states,
   get: get,
-  evalCondition:evalCondition
+  evalCondition: evalCondition
 };

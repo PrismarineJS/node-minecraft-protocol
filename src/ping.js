@@ -2,7 +2,7 @@ var net = require('net')
   , Client = require('./client')
   , protocol = require('./protocol')
   , states = protocol.states
-;
+  ;
 
 module.exports = ping;
 
@@ -14,7 +14,7 @@ function ping(options, cb) {
   client.on('error', function(err) {
     cb(err);
   });
-  
+
   client.once([states.STATUS, 0x00], function(packet) {
     var data = JSON.parse(packet.response);
     var start = Date.now();
@@ -23,14 +23,14 @@ function ping(options, cb) {
       cb(null, data);
       client.end();
     });
-    client.write(0x01, { time: [0, 0]});
+    client.write(0x01, {time: [0, 0]});
   });
 
   client.on('state', function(newState) {
-    if (newState === states.STATUS)
+    if(newState === states.STATUS)
       client.write(0x00, {});
   });
-  
+
   client.on('connect', function() {
     client.write(0x00, {
       protocolVersion: 4,
@@ -40,6 +40,6 @@ function ping(options, cb) {
     });
     client.state = states.STATUS;
   });
-  
+
   client.connect(port, host);
 }
