@@ -67,7 +67,7 @@
         "values": {
           "type": "array",
           "items": {
-            "type": ["integer","boolean"]
+            "type": ["integer","boolean","string"]
           },
           "additionalItems": false,
           "minItems": 1

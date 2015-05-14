@@ -1376,7 +1376,7 @@
             "typeArgs": {
               "field": "inventoryType",
               "values": [
-                11
+                "EntityHorse"
               ],
               "type": "int"
             }
