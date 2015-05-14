@@ -1,7 +1,6 @@
 var net = require('net')
   , EventEmitter = require('events').EventEmitter
   , util = require('util')
-  , assert = require('assert')
   , Client = require('./client')
   , states = require('./protocol').states
 ;

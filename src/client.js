@@ -5,13 +5,12 @@ var EventEmitter = require('events').EventEmitter
   , compressPacketBuffer = protocol.compressPacketBuffer
   , oldStylePacket = protocol.oldStylePacket
   , newStylePacket = protocol.newStylePacket
-  , parsePacket = protocol.parsePacket
   , parsePacketData = protocol.parsePacketData
   , parseNewStylePacket = protocol.parseNewStylePacket
   , packetIds = protocol.packetIds
   , packetNames = protocol.packetNames
   , states = protocol.states
-  , debug = protocol.debug
+  , debug = require('./debug')
 ;
 
 module.exports = Client;

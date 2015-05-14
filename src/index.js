@@ -1,9 +1,6 @@
-var EventEmitter = require('events').EventEmitter
-        , util = require('util')
-        , assert = require('assert')
+var     assert = require('assert')
         , crypto = require('crypto')
         , bufferEqual = require('buffer-equal')
-        , superagent = require('superagent')
         , protocol = require('./protocol')
         , Client = require('./client')
         , dns = require('dns')
@@ -14,7 +11,7 @@ var EventEmitter = require('events').EventEmitter
         , validateSession = Yggdrasil.validateSession
         , joinServer = Yggdrasil.joinServer
         , states = protocol.states
-        , debug = protocol.debug
+        , debug = require("./debug")
         ;
 var ursa;
 try {
