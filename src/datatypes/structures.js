@@ -1,5 +1,6 @@
 var getField= require("../utils").getField;
 var debug = require("../debug");
+var evalCondition= require("../utils").evalCondition;
 
 module.exports = {
   'array':[readArray,writeArray,sizeOfArray], 
