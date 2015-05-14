@@ -1,6 +1,5 @@
 var EventEmitter = require('events').EventEmitter
         , util = require('util')
-        , assert = require('assert')
         , crypto = require('crypto')
         , bufferEqual = require('buffer-equal')
         , superagent = require('superagent')
@@ -251,13 +250,15 @@ Client.prototype.connect = function(port, host) {
 };
 
 function createClient(options) {
-  assert.ok(options, "options is required");
+  if(!options)
+    throw(new Error('options object is required'));
   var port = options.port || 25565;
   var host = options.host || 'localhost';
   var clientToken = options.clientToken || Yggdrasil.generateUUID();
   var accessToken = options.accessToken || null;
 
-  assert.ok(options.username, "username is required");
+  if(!options.username)
+    throw(new Error('username is required'));
   var haveCredentials = options.password != null || (clientToken != null && accessToken != null);
   var keepAlive = options.keepAlive == null ? true : options.keepAlive;
 
