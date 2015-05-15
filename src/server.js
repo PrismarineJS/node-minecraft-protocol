@@ -3,7 +3,7 @@ var net = require('net')
   , util = require('util')
   , Client = require('./client')
   , states = require('./protocol').states
-;
+  ;
 
 module.exports = Server;
 
@@ -25,9 +25,9 @@ Server.prototype.listen = function(port, host) {
     var client = new Client(true);
     client._end = client.end;
     client.end = function end(endReason) {
-      if (client.state === states.PLAY) {
+      if(client.state === states.PLAY) {
         client.write(0x40, {reason: endReason});
-      } else if (client.state === states.LOGIN) {
+      } else if(client.state === states.LOGIN) {
         client.write(0x00, {reason: endReason});
       }
       client._end(endReason);
@@ -58,7 +58,7 @@ Server.prototype.listen = function(port, host) {
 Server.prototype.close = function() {
   var client;
   for(var clientId in this.clients) {
-    if (!this.clients.hasOwnProperty(clientId)) continue;
+    if(!this.clients.hasOwnProperty(clientId)) continue;
 
     client = this.clients[clientId];
     client.end('ServerShutdown');

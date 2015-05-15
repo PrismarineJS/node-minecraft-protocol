@@ -1542,9 +1542,9 @@
           },
           {
             "name": "rows",
-            "type":"condition",
-            "typeArgs":{
-              "type":"byte",
+            "type": "condition",
+            "typeArgs": {
+              "type": "byte",
               "field": "columns",
               "values": [
                 0
@@ -1578,7 +1578,7 @@
           },
           {
             "name": "dataLength",
-            "type":"condition",
+            "type": "condition",
             "typeArgs": {
               "type": "count",
               "typeArgs": {
@@ -1595,7 +1595,7 @@
           {
             "name": "data",
             "type": "condition",
-            "typeArgs":{
+            "typeArgs": {
               "type": "buffer",
               "typeArgs": {
                 "count": "dataLength"
@@ -1778,7 +1778,7 @@
                   },
                   {
                     "name": "ping",
-                    "type":"condition",
+                    "type": "condition",
                     "typeArgs": {
                       "type": "varint",
                       "field": "action",
@@ -1790,7 +1790,7 @@
                   },
                   {
                     "name": "hasDisplayName",
-                    "type":"condition",
+                    "type": "condition",
                     "typeArgs": {
                       "type": "bool",
                       "field": "action",
@@ -1880,8 +1880,8 @@
           },
           {
             "name": "type",
-            "type":"condition",
-            "typeArgs":{
+            "type": "condition",
+            "typeArgs": {
               "type": "string",
               "field": "action",
               "values": [
@@ -1910,7 +1910,7 @@
           {
             "name": "value",
             "type": "condition",
-            "typeArgs":{
+            "typeArgs": {
               "type": "varint",
               "field": "action",
               "values": [
@@ -2021,7 +2021,7 @@
             "name": "playerCount",
             "type": "condition",
             "typeArgs": {
-            "type": "count",
+              "type": "count",
               "field": "mode",
               "values": [
                 0,

@@ -7,7 +7,7 @@ var superagent = require("superagent");
 var loginSrv = "https://authserver.mojang.com";
 
 function getSession(username, password, clientToken, refresh, cb) {
-  if (refresh) {
+  if(refresh) {
     var accessToken = password;
     superagent.post(loginSrv + "/refresh")
       .type("json")
@@ -15,8 +15,8 @@ function getSession(username, password, clientToken, refresh, cb) {
         "accessToken": accessToken,
         "clientToken": clientToken
       })
-      .end(function (resp) {
-        if (resp.ok) {
+      .end(function(resp) {
+        if(resp.ok) {
           var session = {
             accessToken: resp.body.accessToken,
             clientToken: resp.body.clientToken,
@@ -43,8 +43,8 @@ function getSession(username, password, clientToken, refresh, cb) {
         "password": password,
         "clientToken": clientToken
       })
-      .end(function (resp) {
-        if (resp.ok) {
+      .end(function(resp) {
+        if(resp.ok) {
           var session = resp.body;
           session.username = resp.body.selectedProfile.name;
           cb(null, session);
@@ -67,7 +67,7 @@ function joinServer(username, serverId, accessToken, selectedProfile, cb) {
       "serverId": serverId
     })
     .end(function(resp) {
-      if (resp.ok) {
+      if(resp.ok) {
         cb(null);
       } else {
         var myErr = new Error(resp.body.error);
@@ -81,9 +81,9 @@ function joinServer(username, serverId, accessToken, selectedProfile, cb) {
 function validateSession(username, serverId, cb) {
   superagent.get("https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" + username + "&serverId=" + serverId)
     .end(function(resp) {
-      if (resp.ok) {
-        if ("id" in resp.body) {
-          cb(null, resp.body.id);          
+      if(resp.ok) {
+        if("id" in resp.body) {
+          cb(null, resp.body.id);
         } else {
           var myErr = new Error("Failed to verify username!");
           cb(myErr);

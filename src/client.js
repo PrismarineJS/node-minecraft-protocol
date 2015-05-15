@@ -11,7 +11,7 @@ var EventEmitter = require('events').EventEmitter
   , packetNames = protocol.packetNames
   , states = protocol.states
   , debug = require('./debug')
-;
+  ;
 
 module.exports = Client;
 
@@ -38,14 +38,14 @@ function Client(isServer) {
   this.packetsToParse = {};
   this.on('newListener', function(event, listener) {
     var direction = this.isServer ? 'toServer' : 'toClient';
-    if (protocol.packetStates[direction].hasOwnProperty(event) || event === "packet") {
-      if (typeof this.packetsToParse[event] === "undefined") this.packetsToParse[event] = 1;
+    if(protocol.packetStates[direction].hasOwnProperty(event) || event === "packet") {
+      if(typeof this.packetsToParse[event] === "undefined") this.packetsToParse[event] = 1;
       else this.packetsToParse[event] += 1;
     }
   });
   this.on('removeListener', function(event, listener) {
     var direction = this.isServer ? 'toServer' : 'toClient';
-    if (protocol.packetStates[direction].hasOwnProperty(event) || event === "packet") {
+    if(protocol.packetStates[direction].hasOwnProperty(event) || event === "packet") {
       this.packetsToParse[event] -= 1;
     }
   });
@@ -55,37 +55,40 @@ util.inherits(Client, EventEmitter);
 
 // Transform weird "packet" types into string representing their type. Should be mostly retro-compatible
 Client.prototype.on = function(type, func) {
-    var direction = this.isServer ? 'toServer' : 'toClient';
-    if (Array.isArray(type)) {
-        arguments[0] = protocol.packetNames[type[0]][direction][type[1]];
-    } else if (typeof type === "number") {
-        arguments[0] = protocol.packetNames[this.state][direction][type];
-    }
-    EventEmitter.prototype.on.apply(this, arguments);
+  var direction = this.isServer ? 'toServer' : 'toClient';
+  if(Array.isArray(type)) {
+    arguments[0] = protocol.packetNames[type[0]][direction][type[1]];
+  } else if(typeof type === "number") {
+    arguments[0] = protocol.packetNames[this.state][direction][type];
+  }
+  EventEmitter.prototype.on.apply(this, arguments);
 };
 
 Client.prototype.onRaw = function(type, func) {
-    var arg = "raw.";
-    if (Array.isArray(type)) {
-        arg += protocol.packetNames[type[0]][direction][type[1]];
-    } else if (typeof type === "number") {
-        arg += protocol.packetNames[this.state][direction][type];
-    } else {
-        arg += type;
-    }
-    arguments[0] = arg;
-    EventEmitter.prototype.on.apply(this, arguments);
+  var arg = "raw.";
+  if(Array.isArray(type)) {
+    arg += protocol.packetNames[type[0]][direction][type[1]];
+  } else if(typeof type === "number") {
+    arg += protocol.packetNames[this.state][direction][type];
+  } else {
+    arg += type;
+  }
+  arguments[0] = arg;
+  EventEmitter.prototype.on.apply(this, arguments);
 };
 
 Client.prototype.setSocket = function(socket) {
   var self = this;
+
   function afterParse(err, parsed) {
-    if (err || (parsed && parsed.error)) {
+    if(err || (parsed && parsed.error)) {
       self.emit('error', err || parsed.error);
       self.end("ProtocolError");
       return;
     }
-    if (! parsed) { return; }
+    if(!parsed) {
+      return;
+    }
     var packet = parsed.results;
     //incomingBuffer = incomingBuffer.slice(parsed.size); TODO: Already removed in prepare
 
@@ -100,13 +103,11 @@ Client.prototype.setSocket = function(socket) {
 
   function prepareParse() {
     var packetLengthField = protocol.types["varint"][0](incomingBuffer, 0);
-    if (packetLengthField && packetLengthField.size + packetLengthField.value <= incomingBuffer.length)
-    {
+    if(packetLengthField && packetLengthField.size + packetLengthField.value <= incomingBuffer.length) {
       var buf = incomingBuffer.slice(packetLengthField.size, packetLengthField.size + packetLengthField.value);
       // TODO : Slice as early as possible to avoid processing same data twice.
       incomingBuffer = incomingBuffer.slice(packetLengthField.size + packetLengthField.value);
-      if (self.compressionThreshold == -2)
-      {
+      if(self.compressionThreshold == -2) {
         afterParse(null, parsePacketData(buf, self.state, self.isServer, self.packetsToParse));
       } else {
         parseNewStylePacket(buf, self.state, self.isServer, self.packetsToParse, afterParse);
@@ -115,11 +116,11 @@ Client.prototype.setSocket = function(socket) {
   }
 
   self.socket = socket;
-  if (self.socket.setNoDelay)
+  if(self.socket.setNoDelay)
     self.socket.setNoDelay(true);
   var incomingBuffer = new Buffer(0);
   self.socket.on('data', function(data) {
-    if (self.encryptionEnabled) data = new Buffer(self.decipher.update(data), 'binary');
+    if(self.encryptionEnabled) data = new Buffer(self.decipher.update(data), 'binary');
     incomingBuffer = Buffer.concat([incomingBuffer, data]);
     prepareParse()
   });
@@ -139,8 +140,9 @@ Client.prototype.setSocket = function(socket) {
   }
 
   var ended = false;
+
   function endSocket() {
-    if (ended) return;
+    if(ended) return;
     ended = true;
     self.socket.removeListener('close', endSocket);
     self.socket.removeListener('end', endSocket);
@@ -155,18 +157,17 @@ Client.prototype.end = function(reason) {
 };
 
 Client.prototype.write = function(packetId, params) {
-  if (Array.isArray(packetId)) {
-     if (packetId[0] !== this.state)
+  if(Array.isArray(packetId)) {
+    if(packetId[0] !== this.state)
       return false;
     packetId = packetId[1];
   }
-  if (typeof packetId === "string")
+  if(typeof packetId === "string")
     packetId = packetIds[this.state][this.isServer ? "toClient" : "toServer"][packetId];
   var that = this;
 
   var finishWriting = function(err, buffer) {
-    if (err)
-    {
+    if(err) {
       console.log(err);
       throw err; // TODO : Handle errors gracefully, if possible
     }
@@ -179,10 +180,10 @@ Client.prototype.write = function(packetId, params) {
   }
 
   var buffer = createPacketBuffer(packetId, this.state, params, this.isServer);
-  if (this.compressionThreshold >= 0 && buffer.length >= this.compressionThreshold) {
+  if(this.compressionThreshold >= 0 && buffer.length >= this.compressionThreshold) {
     debug("Compressing packet");
     compressPacketBuffer(buffer, finishWriting);
-  } else if (this.compressionThreshold >= -1) {
+  } else if(this.compressionThreshold >= -1) {
     debug("New-styling packet");
     newStylePacket(buffer, finishWriting);
   } else {
@@ -195,19 +196,19 @@ Client.prototype.write = function(packetId, params) {
 // handle compression ourself ? Needs to ask peopl who actually use this feature
 // like @deathcap
 Client.prototype.writeRaw = function(buffer) {
-    var self = this;
+  var self = this;
 
-    var finishWriting = function(error, buffer) {
-      if (error)
-        throw error; // TODO : How do we handle this error ?
-        var out = self.encryptionEnabled ? new Buffer(self.cipher.update(buffer), 'binary') : buffer;
-        self.socket.write(out);
-    };
-    if (this.compressionThreshold >= 0 && buffer.length >= this.compressionThreshold) {
-        compressPacketBuffer(buffer, finishWriting);
-    } else if (this.compressionThreshold >= -1) {
-        newStylePacket(buffer, finishWriting);
-    } else {
-        oldStylePacket(buffer, finishWriting);
-    }
+  var finishWriting = function(error, buffer) {
+    if(error)
+      throw error; // TODO : How do we handle this error ?
+    var out = self.encryptionEnabled ? new Buffer(self.cipher.update(buffer), 'binary') : buffer;
+    self.socket.write(out);
+  };
+  if(this.compressionThreshold >= 0 && buffer.length >= this.compressionThreshold) {
+    compressPacketBuffer(buffer, finishWriting);
+  } else if(this.compressionThreshold >= -1) {
+    newStylePacket(buffer, finishWriting);
+  } else {
+    oldStylePacket(buffer, finishWriting);
+  }
 };

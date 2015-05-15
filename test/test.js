@@ -15,7 +15,7 @@ var mc = require('../')
   , MC_SERVER_JAR = process.env.MC_SERVER_JAR
   , SURVIVE_TIME = 10000
   , MC_SERVER_PATH = path.join(__dirname, 'server')
-;
+  ;
 
 var defaultServerProps = {
   'generator-settings': "",
@@ -63,21 +63,21 @@ var values = {
   'ustring': "hi hi this is my server string",
   'buffer': new Buffer(8),
   'array': function(typeArgs) {
-    if (typeof values[typeArgs.type] === "undefined") {
+    if(typeof values[typeArgs.type] === "undefined") {
       throw new Error("No data type for " + typeArgs.type);
     }
-    if (typeof values[typeArgs.type] === "function") {
+    if(typeof values[typeArgs.type] === "function") {
       return [values[typeArgs.type](typeArgs.typeArgs)];
     }
     return [values[typeArgs.type]];
   },
   'container': function(typeArgs) {
     var results = {};
-    for (var index in typeArgs.fields) {
-      if (typeof values[typeArgs.fields[index].type] === "undefined") {
+    for(var index in typeArgs.fields) {
+      if(typeof values[typeArgs.fields[index].type] === "undefined") {
         throw new Error("No data type for " + typeArgs.fields[index].type);
       }
-      if (typeof values[typeArgs.fields[index].type] === "function") {
+      if(typeof values[typeArgs.fields[index].type] === "function") {
         results[typeArgs.fields[index].name] = values[typeArgs.fields[index].type](typeArgs.fields[index].typeArgs);
       } else {
         results[typeArgs.fields[index].name] = values[typeArgs.fields[index].type];
@@ -93,24 +93,26 @@ var values = {
     blockId: 5,
     itemCount: 56,
     itemDamage: 2,
-    nbtData: { root: "test", value: {
-      test1: { type: "int", value: 4 },
-      test2: { type: "long", value: [12,42] },
-      test3: { type: "byteArray", value: new Buffer(32) },
-      test4: { type: "string", value: "ohi" },
-      test5: { type: "list", value: { type: "int", value: [4] } },
-      test6: { type: "compound", value: { test: { type: "int", value: 4 } } },
-      test7: { type: "intArray", value: [12, 42] }
-    } }
+    nbtData: {
+      root: "test", value: {
+        test1: {type: "int", value: 4},
+        test2: {type: "long", value: [12, 42]},
+        test3: {type: "byteArray", value: new Buffer(32)},
+        test4: {type: "string", value: "ohi"},
+        test5: {type: "list", value: {type: "int", value: [4]}},
+        test6: {type: "compound", value: {test: {type: "int", value: 4}}},
+        test7: {type: "intArray", value: [12, 42]}
+      }
+    }
   },
   'long': [0, 1],
   'entityMetadata': [
-    { key: 17, value: 0,   type: 'int'   },
-    { key: 0,  value: 0,   type: 'byte'  },
-    { key: 16, value: 0,   type: 'byte'  },
-    { key: 1,  value: 300, type: 'short' },
-    { key: 19, value: 0,   type: 'int'   },
-    { key: 18, value: 1,   type: 'int'   },
+    {key: 17, value: 0, type: 'int'},
+    {key: 0, value: 0, type: 'byte'},
+    {key: 16, value: 0, type: 'byte'},
+    {key: 1, value: 300, type: 'short'},
+    {key: 19, value: 0, type: 'int'},
+    {key: 18, value: 1, type: 'int'},
   ],
   'objectData': {
     intField: 9,
@@ -119,12 +121,12 @@ var values = {
     velocityZ: 3,
   },
   'UUID': [42, 42, 42, 42],
-  'position': { x: 12, y: 332, z: 4382821 },
+  'position': {x: 12, y: 332, z: 4382821},
   'restBuffer': new Buffer(0),
-  'condition' : function(typeArgs) {
-      // check whether this should return undefined if needed instead ? (using evalCondition)
-      // probably not since we only send values that respect the condition
-      return values[typeArgs.type];
+  'condition': function(typeArgs) {
+    // check whether this should return undefined if needed instead ? (using evalCondition)
+    // probably not since we only send values that respect the condition
+    return values[typeArgs.type];
   }
 };
 
@@ -151,16 +153,16 @@ describe("packets", function() {
   });
   var packetId, packetInfo, field;
   for(state in protocol.packetFields) {
-    if (!protocol.packetFields.hasOwnProperty(state)) continue;
+    if(!protocol.packetFields.hasOwnProperty(state)) continue;
     for(packetId in protocol.packetFields[state].toServer) {
-      if (!protocol.packetFields[state].toServer.hasOwnProperty(packetId)) continue;
+      if(!protocol.packetFields[state].toServer.hasOwnProperty(packetId)) continue;
       packetId = parseInt(packetId, 10);
       packetInfo = protocol.get(packetId, state, true);
       it(state + ",ServerBound,0x" + zfill(parseInt(packetId, 10).toString(16), 2),
         callTestPacket(packetId, packetInfo, state, true));
     }
     for(packetId in protocol.packetFields[state].toClient) {
-      if (!protocol.packetFields[state].toClient.hasOwnProperty(packetId)) continue;
+      if(!protocol.packetFields[state].toClient.hasOwnProperty(packetId)) continue;
       packetId = parseInt(packetId, 10);
       packetInfo = protocol.get(packetId, state, false);
       it(state + ",ClientBound,0x" + zfill(parseInt(packetId, 10).toString(16), 2),
@@ -172,24 +174,25 @@ describe("packets", function() {
       client.state = state;
       serverClient.state = state;
       testPacket(packetId, packetInfo, state, toServer, done);
-     };
+    };
   }
+
   function testPacket(packetId, packetInfo, state, toServer, done) {
     // empty object uses default values
     var packet = {};
     packetInfo.forEach(function(field) {
-      if (field.type!=="condition" || protocol.evalCondition(field.typeArgs,packet)) {
+      if(field.type !== "condition" || protocol.evalCondition(field.typeArgs, packet)) {
         var fieldVal = values[field.type];
-        if (typeof fieldVal === "undefined") {
+        if(typeof fieldVal === "undefined") {
           throw new Error("No value for type " + field.type);
         }
-        if (typeof fieldVal === "function") {
+        if(typeof fieldVal === "function") {
           fieldVal = fieldVal(field.typeArgs);
         }
         packet[field.name] = fieldVal;
       }
     });
-    if (toServer) {
+    if(toServer) {
       serverClient.once([state, packetId], function(receivedPacket) {
         delete receivedPacket.id;
         delete receivedPacket.state;
@@ -207,16 +210,17 @@ describe("packets", function() {
       serverClient.write(packetId, packet);
     }
   }
+
   function assertPacketsMatch(p1, p2) {
     packetInfo.forEach(function(field) {
       assert.deepEqual(p1[field], p2[field]);
     });
     var field;
-    for (field in p1) {
-      assert.ok(field in p2, "field " + field + " missing in p2, in p1 it has value "+JSON.stringify(p1[field]));
+    for(field in p1) {
+      assert.ok(field in p2, "field " + field + " missing in p2, in p1 it has value " + JSON.stringify(p1[field]));
     }
-    for (field in p2) {
-      assert.ok(field in p1, "field " + field + " missing in p1, in p2 it has value "+JSON.stringify(p2[field]));
+    for(field in p2) {
+      assert.ok(field in p1, "field " + field + " missing in p1, in p2 it has value " + JSON.stringify(p2[field]));
     }
   }
 });
@@ -225,25 +229,28 @@ describe("client", function() {
   this.timeout(10 * 60 * 1000);
 
   var mcServer;
+
   function startServer(propOverrides, done) {
     var props = {};
     var prop;
-    for (prop in defaultServerProps) {
-      if (!defaultServerProps.hasOwnProperty(prop)) continue;
+    for(prop in defaultServerProps) {
+      if(!defaultServerProps.hasOwnProperty(prop)) continue;
 
       props[prop] = defaultServerProps[prop];
     }
-    for (prop in propOverrides) {
-      if (!propOverrides.hasOwnProperty(prop)) continue;
+    for(prop in propOverrides) {
+      if(!propOverrides.hasOwnProperty(prop)) continue;
 
       props[prop] = propOverrides[prop];
     }
     var batch = new Batch();
-    batch.push(function(cb) { mkdirp(MC_SERVER_PATH, cb); });
+    batch.push(function(cb) {
+      mkdirp(MC_SERVER_PATH, cb);
+    });
     batch.push(function(cb) {
       var str = "";
-      for (var prop in props) {
-        if (!props.hasOwnProperty(prop)) continue;
+      for(var prop in props) {
+        if(!props.hasOwnProperty(prop)) continue;
 
         str += prop + "=" + props[prop] + "\n";
       }
@@ -253,12 +260,12 @@ describe("client", function() {
       fs.writeFile(path.join(MC_SERVER_PATH, "eula.txt"), "eula=true", cb);
     });
     batch.end(function(err) {
-      if (err) return done(err);
-      if (!fs.existsSync(MC_SERVER_JAR)) {
-          return done(new Error("The file "+MC_SERVER_JAR+" doesn't exist."));
+      if(err) return done(err);
+      if(!fs.existsSync(MC_SERVER_JAR)) {
+        return done(new Error("The file " + MC_SERVER_JAR + " doesn't exist."));
       }
 
-      mcServer = spawn('java', [ '-Dlog4j.configurationFile=server/server_debug.xml', '-jar', MC_SERVER_JAR, 'nogui'], {
+      mcServer = spawn('java', ['-Dlog4j.configurationFile=server/server_debug.xml', '-jar', MC_SERVER_JAR, 'nogui'], {
         stdio: 'pipe',
         cwd: MC_SERVER_PATH,
       });
@@ -272,11 +279,12 @@ describe("client", function() {
         buffer += data;
         var lines = buffer.split("\n");
         var len = lines.length - 1;
-        for (var i = 0; i < len; ++i) {
+        for(var i = 0; i < len; ++i) {
           mcServer.emit('line', lines[i]);
         }
         buffer = lines[lines.length - 1];
       }
+
       mcServer.on('line', onLine);
       mcServer.on('line', function(line) {
         process.stderr.write('.');
@@ -285,7 +293,7 @@ describe("client", function() {
         //console.error("[MC]", line);
       });
       function onLine(line) {
-        if (/\[Server thread\/INFO\]: Done/.test(line)) {
+        if(/\[Server thread\/INFO\]: Done/.test(line)) {
           mcServer.removeListener('line', onLine);
           done();
         }
@@ -294,9 +302,9 @@ describe("client", function() {
       }
     });
   }
+
   afterEach(function(done) {
-    if (mcServer)
-    {
+    if(mcServer) {
       mcServer.stdin.write("stop\n");
       mcServer.on('exit', function() {
         mcServer = null;
@@ -315,31 +323,31 @@ describe("client", function() {
       'max-players': 120,
     }, function() {
       mc.ping({}, function(err, results) {
-        if (err) return done(err);
+        if(err) return done(err);
         assert.ok(results.latency >= 0);
         assert.ok(results.latency <= 1000);
         delete results.latency;
         delete results.favicon; // too lazy to figure it out
-/*        assert.deepEqual(results, {
-          version: {
-            name: '1.7.4',
-            protocol: 4
-          },
-          description: { text: "test1234" }
-        });*/
+        /*        assert.deepEqual(results, {
+         version: {
+         name: '1.7.4',
+         protocol: 4
+         },
+         description: { text: "test1234" }
+         });*/
         done();
       });
     });
   });
   it.skip("connects successfully - online mode (STUBBED)", function(done) {
-    startServer({ 'online-mode': 'true' }, function() {
+    startServer({'online-mode': 'true'}, function() {
       var client = mc.createClient({
         username: process.env.MC_USERNAME,
         password: process.env.MC_PASSWORD,
       });
       mcServer.on('line', function(line) {
         var match = line.match(/\[Server thread\/INFO\]: <(.+?)> (.+)/);
-        if (! match) return;
+        if(!match) return;
         assert.strictEqual(match[1], client.session.username);
         assert.strictEqual(match[2], "hello everyone; I have logged in.");
         mcServer.stdin.write("say hello\n");
@@ -361,32 +369,32 @@ describe("client", function() {
     done();
   });
   it.skip("connects successfully - offline mode (STUBBED)", function(done) {
-    startServer({ 'online-mode': 'false' }, function() {
+    startServer({'online-mode': 'false'}, function() {
       var client = mc.createClient({
         username: 'Player',
       });
       mcServer.on('line', function(line) {
         var match = line.match(/\[Server thread\/INFO\]: <(.+?)> (.+)/);
-        if (! match) return;
+        if(!match) return;
         assert.strictEqual(match[1], 'Player');
         assert.strictEqual(match[2], "hello everyone; I have logged in.");
         mcServer.stdin.write("say hello\n");
       });
       var chatCount = 0;
       client.on('login', function(packet) {
-          assert.strictEqual(packet.levelType, 'default');
-          assert.strictEqual(packet.difficulty, 1);
-          assert.strictEqual(packet.dimension, 0);
-          assert.strictEqual(packet.gameMode, 0);
-          client.write(0x01, {
-            message: "hello everyone; I have logged in."
-          });
+        assert.strictEqual(packet.levelType, 'default');
+        assert.strictEqual(packet.difficulty, 1);
+        assert.strictEqual(packet.dimension, 0);
+        assert.strictEqual(packet.gameMode, 0);
+        client.write(0x01, {
+          message: "hello everyone; I have logged in."
+        });
       });
       client.on('chat', function(packet) {
         chatCount += 1;
         assert.ok(chatCount <= 2);
         var message = JSON.parse(packet.message);
-        if (chatCount === 1) {
+        if(chatCount === 1) {
           assert.strictEqual(message.translate, "chat.type.text");
           assert.deepEqual(message["with"][0], {
             clickEvent: {
@@ -396,10 +404,11 @@ describe("client", function() {
             text: "Player"
           });
           assert.strictEqual(message["with"][1], "hello everyone; I have logged in.");
-        } else if (chatCount === 2) {
+        } else if(chatCount === 2) {
           assert.strictEqual(message.translate, "chat.type.announcement");
           assert.strictEqual(message["with"][0], "Server");
-          assert.deepEqual(message["with"][1], { text: "",
+          assert.deepEqual(message["with"][1], {
+            text: "",
             extra: ["hello"]
           });
           done();
@@ -409,7 +418,7 @@ describe("client", function() {
     done();
   });
   it("gets kicked when no credentials supplied in online mode", function(done) {
-    startServer({ 'online-mode': 'true' }, function() {
+    startServer({'online-mode': 'true'}, function() {
       var client = mc.createClient({
         username: 'Player',
       });
@@ -425,7 +434,7 @@ describe("client", function() {
     });
   });
   it("does not crash for " + SURVIVE_TIME + "ms", function(done) {
-    startServer({ 'online-mode': 'false' }, function() {
+    startServer({'online-mode': 'false'}, function() {
       var client = mc.createClient({
         username: 'Player',
       });
@@ -438,12 +447,12 @@ describe("client", function() {
         var message = JSON.parse(packet.message);
         assert.strictEqual(message.translate, "chat.type.text");
         /*assert.deepEqual(message["with"][0], {
-          clickEvent: {
-            action: "suggest_command",
-            value: "/msg Player "
-          },
-          text: "Player"
-        });*/
+         clickEvent: {
+         action: "suggest_command",
+         value: "/msg Player "
+         },
+         text: "Player"
+         });*/
         assert.strictEqual(message["with"][1], "hello everyone; I have logged in.");
         setTimeout(function() {
           done();
@@ -454,7 +463,7 @@ describe("client", function() {
 });
 describe("mc-server", function() {
   it("starts listening and shuts down cleanly", function(done) {
-    var server = mc.createServer({ 'online-mode': false });
+    var server = mc.createServer({'online-mode': false});
     var listening = false;
     server.on('listening', function() {
       listening = true;
@@ -491,7 +500,7 @@ describe("mc-server", function() {
 
     function resolve() {
       count -= 1;
-      if (count <= 0) done();
+      if(count <= 0) done();
     }
   });
   it("kicks clients that do not send keepalive packets", function(done) {
@@ -523,7 +532,7 @@ describe("mc-server", function() {
     });
     function resolve() {
       count -= 1;
-      if (count <= 0) done();
+      if(count <= 0) done();
     }
   });
   it("responds to ping requests", function(done) {
@@ -534,7 +543,7 @@ describe("mc-server", function() {
     });
     server.on('listening', function() {
       mc.ping({host: '127.0.0.1'}, function(err, results) {
-        if (err) return done(err);
+        if(err) return done(err);
         assert.ok(results.latency >= 0);
         assert.ok(results.latency <= 1000);
         delete results.latency;
@@ -548,7 +557,7 @@ describe("mc-server", function() {
             online: 0,
             sample: []
           },
-          description: { text: "test1234" }
+          description: {text: "test1234"}
         });
         server.close();
       });
@@ -556,7 +565,7 @@ describe("mc-server", function() {
     server.on('close', done);
   });
   it("clients can log in and chat", function(done) {
-    var server = mc.createServer({ 'online-mode': false, });
+    var server = mc.createServer({'online-mode': false,});
     var username = ['player1', 'player2'];
     var index = 0;
     server.on('login', function(client) {
@@ -565,7 +574,7 @@ describe("mc-server", function() {
       broadcast(client.username + ' joined the game.');
       client.on('end', function() {
         broadcast(client.username + ' left the game.', client);
-        if (client.username === 'player2') server.close();
+        if(client.username === 'player2') server.close();
       });
       client.write(0x01, {
         entityId: client.id,
@@ -583,7 +592,7 @@ describe("mc-server", function() {
     });
     server.on('close', done);
     server.on('listening', function() {
-      var player1 = mc.createClient({ username: 'player1', host: '127.0.0.1' });
+      var player1 = mc.createClient({username: 'player1', host: '127.0.0.1'});
       player1.on([states.PLAY, 0x01], function(packet) {
         assert.strictEqual(packet.gameMode, 1);
         assert.strictEqual(packet.levelType, 'default');
@@ -595,7 +604,7 @@ describe("mc-server", function() {
             assert.strictEqual(packet.message, '{"text":"<player2> hi"}');
             player2.once(0x02, fn);
             function fn(packet) {
-              if (/<player2>/.test(packet.message)) {
+              if(/<player2>/.test(packet.message)) {
                 player2.once(0x02, fn);
                 return;
               }
@@ -606,21 +615,22 @@ describe("mc-server", function() {
               });
               player2.end();
             }
-            player1.write(0x01, { message: "hello" } );
+
+            player1.write(0x01, {message: "hello"});
           });
-          player2.write(0x01, { message: "hi" } );
+          player2.write(0x01, {message: "hi"});
         });
-        var player2 = mc.createClient({ username: 'player2', host: '127.0.0.1' });
+        var player2 = mc.createClient({username: 'player2', host: '127.0.0.1'});
       });
     });
 
     function broadcast(message, exclude) {
       var client;
-      for (var clientId in server.clients) {
-        if (!server.clients.hasOwnProperty(clientId)) continue;
+      for(var clientId in server.clients) {
+        if(!server.clients.hasOwnProperty(clientId)) continue;
 
         client = server.clients[clientId];
-        if (client !== exclude) client.write(0x02, { message: JSON.stringify({text: message}), position: 0});
+        if(client !== exclude) client.write(0x02, {message: JSON.stringify({text: message}), position: 0});
       }
     }
   });
@@ -649,11 +659,11 @@ describe("mc-server", function() {
     });
     function resolve() {
       count -= 1;
-      if (count <= 0) done();
+      if(count <= 0) done();
     }
   });
   it("gives correct reason for kicking clients when shutting down", function(done) {
-    var server = mc.createServer({ 'online-mode': false, });
+    var server = mc.createServer({'online-mode': false,});
     var count = 2;
     server.on('login', function(client) {
       client.on('end', function(reason) {
@@ -674,14 +684,14 @@ describe("mc-server", function() {
       resolve();
     });
     server.on('listening', function() {
-      var client = mc.createClient({ username: 'lalalal', host: '127.0.0.1' });
+      var client = mc.createClient({username: 'lalalal', host: '127.0.0.1'});
       client.on([states.PLAY, 0x01], function() {
         server.close();
       });
     });
     function resolve() {
       count -= 1;
-      if (count <= 0) done();
+      if(count <= 0) done();
     }
   });
 });
