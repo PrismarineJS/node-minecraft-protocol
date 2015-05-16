@@ -1806,6 +1806,7 @@
                     "typeArgs": {
                       "type": "string",
                       "field": "hasDisplayName",
+                      "this": true,
                       "values": [
                         true
                       ]
@@ -2029,7 +2030,7 @@
                 4
               ],
               "typeArgs": {
-                "type": "short",
+                "type": "varint",
                 "countFor": "players"
               }
             }
