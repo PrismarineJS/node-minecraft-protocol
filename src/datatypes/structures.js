@@ -59,6 +59,7 @@ function readContainer(buffer, offset, typeArgs, rootNode) {
   // BLEIGH. Huge hack because I have no way of knowing my current name.
   // TODO : either pass fieldInfo instead of typeArgs as argument (bleigh), or send name as argument (verybleigh).
   // TODO : what I do inside of roblabla/Protocols is have each "frame" create a new empty slate with just a "super" object pointing to the parent.
+  var backupThis = rootNode.this;
   rootNode.this = results.value;
   for(var index in typeArgs.fields) {
     var readResults = this.read(buffer, offset, typeArgs.fields[index], rootNode);
@@ -69,12 +70,13 @@ function readContainer(buffer, offset, typeArgs, rootNode) {
     offset += readResults.size;
     results.value[typeArgs.fields[index].name] = readResults.value;
   }
-  delete rootNode.this;
+  rootNode.this = backupThis;
   return results;
 }
 
 function writeContainer(value, buffer, offset, typeArgs, rootNode) {
   var context = value.this ? value.this : value;
+  var backupThis = rootNode.this;
   rootNode.this = value;
   for(var index in typeArgs.fields) {
     if(!context.hasOwnProperty(typeArgs.fields[index].name) && typeArgs.fields[index].type != "count" &&
@@ -84,18 +86,19 @@ function writeContainer(value, buffer, offset, typeArgs, rootNode) {
     }
     offset = this.write(context[typeArgs.fields[index].name], buffer, offset, typeArgs.fields[index], rootNode);
   }
-  delete rootNode.this;
+  rootNode.this = backupThis;;
   return offset;
 }
 
 function sizeOfContainer(value, typeArgs, rootNode) {
   var size = 0;
   var context = value.this ? value.this : value;
+  var backupThis = rootNode.this;
   rootNode.this = value;
   for(var index in typeArgs.fields) {
     size += this.sizeOf(context[typeArgs.fields[index].name], typeArgs.fields[index], rootNode);
   }
-  delete rootNode.this;
+  rootNode.this = backupThis;
   return size;
 }
 
