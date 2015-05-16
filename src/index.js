@@ -13,6 +13,8 @@ var assert = require('assert')
   , states = protocol.states
   , debug = require("./debug")
   ;
+
+require("source-map-support").install();
 var ursa;
 try {
   ursa = require("ursa");
@@ -265,7 +267,7 @@ function createClient(options) {
   client.once([states.LOGIN, 0x01], onEncryptionKeyRequest);
   client.once([states.LOGIN, 0x02], onLogin);
   client.once("compress", onCompressionRequest);
-  client.once("set_compression", onCompressionRequest);
+  client.on("set_compression", onCompressionRequest);
   if(haveCredentials) {
     // make a request to get the case-correct username before connecting.
     var cb = function(err, session) {
