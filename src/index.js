@@ -14,7 +14,6 @@ var assert = require('assert')
   , debug = require("./debug")
   ;
 
-require("source-map-support").install();
 var ursa;
 try {
   ursa = require("ursa");
