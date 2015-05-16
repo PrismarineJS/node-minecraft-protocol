@@ -125,6 +125,8 @@ srv.on('login', function(client) {
       }
       if(!endedClient)
         client.write(packet.id, packet);
+      if (packet.id === 0x46) // Set compression
+        client.compressionThreshold = packet.threshold;
     }
   });
   var buffertools = require('buffertools');
