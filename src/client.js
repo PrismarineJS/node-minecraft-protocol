@@ -185,7 +185,7 @@ Client.prototype.write = function(packetId, params) {
     compressPacketBuffer(buffer, finishWriting);
   } else if(this.compressionThreshold >= -1) {
     debug("New-styling packet");
-    newStylePacket(buffer, finishWriting);
+    newStylePacket(buffer, 0, finishWriting);
   } else {
     debug("Old-styling packet");
     oldStylePacket(buffer, finishWriting);
@@ -207,7 +207,7 @@ Client.prototype.writeRaw = function(buffer) {
   if(this.compressionThreshold >= 0 && buffer.length >= this.compressionThreshold) {
     compressPacketBuffer(buffer, finishWriting);
   } else if(this.compressionThreshold >= -1) {
-    newStylePacket(buffer, finishWriting);
+    newStylePacket(buffer, 0, finishWriting);
   } else {
     oldStylePacket(buffer, finishWriting);
   }

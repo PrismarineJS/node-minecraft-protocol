@@ -139,7 +139,7 @@ function compressPacketBuffer(buffer, callback) {
     if(err)
       callback(err);
     else
-      newStylePacket(buffer, callback);
+      newStylePacket(buf, buffer.length, callback);
   });
 }
 
@@ -150,13 +150,13 @@ function oldStylePacket(buffer, callback) {
   callback(null, packet);
 }
 
-function newStylePacket(buffer, callback) {
-  var sizeOfDataLength = utils.varint[2](0);
+function newStylePacket(buffer, dataSize, callback) {
+  var sizeOfDataLength = utils.varint[2](dataSize);
   var sizeOfLength = utils.varint[2](buffer.length + sizeOfDataLength);
   var size = sizeOfLength + sizeOfDataLength + buffer.length;
   var packet = new Buffer(size);
   var cursor = utils.varint[1](size - sizeOfLength, packet, 0);
-  cursor = utils.varint[1](0, packet, cursor);
+  cursor = utils.varint[1](dataSize, packet, cursor);
   utils.buffer[1](buffer, packet, cursor);
   callback(null, packet);
 }
