@@ -287,8 +287,8 @@ function createClient(options) {
       }
     };
 
-    if(accessToken != null) getSession(options.username, accessToken, options.clientToken, true, cb);
-    else getSession(options.username, options.password, options.clientToken, false, cb);
+    if(accessToken != null) getSession(options.username, accessToken, clientToken, true, cb);
+    else getSession(options.username, options.password, clientToken, false, cb);
   } else {
     // assume the server is in offline mode and just go for it.
     client.username = options.username;
