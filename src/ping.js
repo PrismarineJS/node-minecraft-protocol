@@ -38,8 +38,10 @@ function ping(options, cb) {
       serverPort: port,
       nextState: 1
     },function(err){
-      if(err)
-        throw err;
+      if(err) {
+        client.emit('error',err);
+        return;
+      }
       client.state = states.STATUS;
     });
   });
