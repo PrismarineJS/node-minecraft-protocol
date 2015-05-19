@@ -126,8 +126,10 @@ function createServer(options) {
 
       client.once([states.STATUS, 0x01], function(packet) {
         client.write(0x01, {time: packet.time},function(err){
-          if(err)
-            throw err;
+          if(err) {
+            client.emit('error',err);
+            return;
+          }
           client.end();
         });
       });
@@ -218,8 +220,10 @@ function createServer(options) {
       //client.write('compress', { threshold: 256 }); // Default threshold is 256
       //client.compressionThreshold = 256;
       client.write(0x02, {uuid: client.uuid, username: client.username},function(err){
-        if(err)
-          throw err;
+        if(err) {
+          client.emit('error',err);
+          return;
+        }
         client.state = states.PLAY;
         loggedIn = true;
         startKeepAlive();
@@ -304,8 +308,10 @@ function createClient(options) {
       serverPort: port,
       nextState: 2
     },function(err){
-      if(err)
-        throw err;
+      if(err) {
+        client.emit('error',err);
+        return;
+      }
       client.state = states.LOGIN;
       client.write(0x00, {
         username: client.username
@@ -371,8 +377,10 @@ function createClient(options) {
           sharedSecret: encryptedSharedSecretBuffer,
           verifyToken: encryptedVerifyTokenBuffer,
         },function(err){
-          if(err)
-            throw err;
+          if(err) {
+            client.emit('error',err);
+            return;
+          }
           client.encryptionEnabled = true;
         });
       }

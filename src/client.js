@@ -156,12 +156,9 @@ Client.prototype.end = function(reason) {
   this.socket.end();
 };
 
-function noop(err) {
-  if(err) throw err;
-}
-
 Client.prototype.write = function(packetId, params, cb) {
-  cb = cb || noop;
+  var self=this;
+  cb = cb || function(err){if(err) {self.emit('error',err);}};
   if(Array.isArray(packetId)) {
     if(packetId[0] !== this.state)
       return false;
@@ -174,7 +171,8 @@ Client.prototype.write = function(packetId, params, cb) {
   var finishWriting = function(err, buffer) {
     if(err) {
       console.log(err);
-      throw err; // TODO : Handle errors gracefully, if possible
+      cb(err);
+      return;
     }
     var packetName = packetNames[that.state][that.isServer ? "toClient" : "toServer"][packetId];
     debug("writing packetId " + that.state + "." + packetName + " (0x" + packetId.toString(16) + ")");
