@@ -161,7 +161,8 @@ function newStylePacket(buffer, dataSize, callback) {
   callback(null, packet);
 }
 
-function parsePacketData(buffer, state, isServer, packetsToParse) {
+// By default, parse every packets.
+function parsePacketData(buffer, state, isServer, packetsToParse = {"packet": true}) {
   var cursor = 0;
   var packetIdField = utils.varint[0](buffer, cursor);
   var packetId = packetIdField.value;
@@ -207,6 +208,10 @@ function parsePacketData(buffer, state, isServer, packetsToParse) {
      results: results
      };
      }*/
+    // TODO : investigate readResults returning null : shouldn't happen.
+    // When there is not enough data to read, we should return an error.
+    // As a general rule, it would be a good idea to introduce a whole bunch
+    // of new error classes to differenciate the errors.
     if(readResults === null || readResults.value == null) continue;
     if(readResults.error) {
       return readResults;
