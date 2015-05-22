@@ -108,10 +108,12 @@ Client.prototype.setSocket = function(socket) {
     this.emit('end', this._endReason);
   };
 
-  var onError = (err) => {
+  var onFatalError = (err) => {
     this.emit('error', err);
     endSocket();
   };
+
+  var onError = (err) => this.emit('error', err);
 
   this.socket = socket;
 
@@ -120,10 +122,14 @@ Client.prototype.setSocket = function(socket) {
 
   this.socket.on('connect', () => this.emit('connect'));
 
-  this.socket.on('error', onError);
+  this.socket.on('error', onFatalError);
   this.socket.on('close', endSocket);
   this.socket.on('end', endSocket);
   this.socket.on('timeout', endSocket);
+  this.serializer.on('error', onError);
+  this.deserializer.on('error', onError);
+  this.framer.on('error', onError);
+  this.splitter.on('error', onError);
 
   this.socket.pipe(this.splitter).pipe(this.deserializer);
   this.serializer.pipe(this.framer).pipe(this.socket);
@@ -147,9 +153,11 @@ Client.prototype.setEncryption = function(sharedSecret) {
   if (this.cipher != null)
     throw new Error("Set encryption twice !");
   this.cipher = crypto.createCipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
+  this.cipher.on('error', (err) => this.emit('error', err));
   this.framer.unpipe(this.socket);
   this.framer.pipe(this.cipher).pipe(this.socket);
   this.decipher = crypto.createDecipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
+  this.decipher.on('error', (err) => this.emit('error', err));
   this.socket.unpipe(this.splitter);
   this.socket.pipe(this.decipher).pipe(this.splitter);
 }
@@ -157,9 +165,11 @@ Client.prototype.setEncryption = function(sharedSecret) {
 Client.prototype.setCompressionThreshold = function(threshold) {
   if (this.compressor == null) {
     this.compressor = compression.createCompressor(threshold);
+    this.compressor.on('error', (err) => this.emit('error', err));
     this.serializer.unpipe(this.framer);
     this.serializer.pipe(this.compressor).pipe(this.framer);
     this.decompressor = compression.createDecompressor(threshold);
+    this.decompressor.on('error', (err) => this.emit('error', err));
     this.splitter.unpipe(this.deserializer);
     this.splitter.pipe(this.decompressor).pipe(this.deserializer);
   } else {
