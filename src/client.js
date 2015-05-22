@@ -179,22 +179,9 @@ Client.prototype.write = function(packetId, params, cb = noop) {
   this.serializer.write({ packetId, params }, cb);
 };
 
-// TODO : Write to the correct stream. This is currently broken.
 Client.prototype.writeRaw = function(buffer) {
-  /*var self = this;
-
-  var finishWriting = function(error, buffer) {
-    if(error)
-      throw error; // TODO : How do we handle this error ?
-    var out = self.encryptionEnabled ? new Buffer(self.cipher.update(buffer), 'binary') : buffer;
-    self.socket.write(out);
-  };
-  if(this.compressionThreshold >= 0 && buffer.length >= this.compressionThreshold) {
-    compressPacketBuffer(buffer, finishWriting);
-  } else if(this.compressionThreshold >= -1) {
-    newStylePacket(buffer, 0, finishWriting);
-  } else {
-    oldStylePacket(buffer, finishWriting);
-  }*/
-  throw new Error("Pending refactorisation");
+  if (this.compressor === null)
+    this.framer.write(buffer);
+  else
+    this.compressor.write(buffer);
 };
