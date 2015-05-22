@@ -133,35 +133,8 @@ function createPacketBuffer(packetId, state, params, isServer) {
   return buffer;
 }
 
-function compressPacketBuffer(buffer, callback) {
-  var dataLength = buffer.size;
-  zlib.deflate(buffer, function(err, buf) {
-    if(err)
-      callback(err);
-    else
-      newStylePacket(buf, buffer.length, callback);
-  });
-}
-
-function oldStylePacket(buffer, callback) {
-  var packet = new Buffer(utils.varint[2](buffer.length) + buffer.length);
-  var cursor = utils.varint[1](buffer.length, packet, 0);
-  utils.buffer[1](buffer, packet, cursor);
-  callback(null, packet);
-}
-
-function newStylePacket(buffer, dataSize, callback) {
-  var sizeOfDataLength = utils.varint[2](dataSize);
-  var sizeOfLength = utils.varint[2](buffer.length + sizeOfDataLength);
-  var size = sizeOfLength + sizeOfDataLength + buffer.length;
-  var packet = new Buffer(size);
-  var cursor = utils.varint[1](size - sizeOfLength, packet, 0);
-  cursor = utils.varint[1](dataSize, packet, cursor);
-  utils.buffer[1](buffer, packet, cursor);
-  callback(null, packet);
-}
-
-function parsePacketData(buffer, state, isServer, packetsToParse) {
+// By default, parse every packets.
+function parsePacketData(buffer, state, isServer, packetsToParse = {"packet": true}) {
   var cursor = 0;
   var packetIdField = utils.varint[0](buffer, cursor);
   var packetId = packetIdField.value;
@@ -207,6 +180,10 @@ function parsePacketData(buffer, state, isServer, packetsToParse) {
      results: results
      };
      }*/
+    // TODO : investigate readResults returning null : shouldn't happen.
+    // When there is not enough data to read, we should return an error.
+    // As a general rule, it would be a good idea to introduce a whole bunch
+    // of new error classes to differenciate the errors.
     if(readResults === null || readResults.value == null) continue;
     if(readResults.error) {
       return readResults;
@@ -223,33 +200,12 @@ function parsePacketData(buffer, state, isServer, packetsToParse) {
   };
 }
 
-function parseNewStylePacket(buffer, state, isServer, packetsToParse, cb) {
-  var dataLengthField = utils.varint[0](buffer, 0);
-  var buf = buffer.slice(dataLengthField.size);
-  if(dataLengthField.value != 0) {
-    zlib.inflate(buf, function(err, newbuf) {
-      if(err) {
-        console.log(err);
-        cb(err);
-      } else {
-        cb(null, parsePacketData(newbuf, state, isServer, packetsToParse));
-      }
-    });
-  } else {
-    cb(null, parsePacketData(buf, state, isServer, packetsToParse));
-  }
-}
-
 module.exports = {
   version: 47,
   minecraftVersion: '1.8.1',
   sessionVersion: 13,
   parsePacketData: parsePacketData,
-  parseNewStylePacket: parseNewStylePacket,
   createPacketBuffer: createPacketBuffer,
-  compressPacketBuffer: compressPacketBuffer,
-  oldStylePacket: oldStylePacket,
-  newStylePacket: newStylePacket,
   packetIds: packetIds,
   packetNames: packetNames,
   packetFields: packetFields,

@@ -183,11 +183,9 @@ function createServer(options) {
         client.end('DidNotEncryptVerifyTokenProperly');
         return;
       }
-      client.cipher = crypto.createCipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
-      client.decipher = crypto.createDecipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
+      client.setEncryption(sharedSecret);
       hash.update(sharedSecret);
       hash.update(client.publicKey);
-      client.encryptionEnabled = true;
 
       var isException = !!server.onlineModeExceptions[client.username.toLowerCase()];
       var needToVerify = (onlineMode && !isException) || (!onlineMode && isException);
@@ -365,16 +363,14 @@ function createClient(options) {
         var pubKey = mcPubKeyToURsa(packet.publicKey);
         var encryptedSharedSecretBuffer = pubKey.encrypt(sharedSecret, undefined, undefined, ursa.RSA_PKCS1_PADDING);
         var encryptedVerifyTokenBuffer = pubKey.encrypt(packet.verifyToken, undefined, undefined, ursa.RSA_PKCS1_PADDING);
-        client.cipher = crypto.createCipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
-        client.decipher = crypto.createDecipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
         client.write(0x01, {
           sharedSecret: encryptedSharedSecretBuffer,
           verifyToken: encryptedVerifyTokenBuffer,
         },function(err){
           if(err)
             throw err;
-          client.encryptionEnabled = true;
         });
+        client.setEncryption(sharedSecret);
       }
     }
   }
