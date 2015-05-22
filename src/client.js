@@ -168,11 +168,7 @@ Client.prototype.setCompressionThreshold = function(threshold) {
   }
 }
 
-function noop(err) {
-  if(err) throw err;
-}
-
-Client.prototype.write = function(packetId, params, cb = noop) {
+Client.prototype.write = function(packetId, params) {
   if(Array.isArray(packetId)) {
     if(packetId[0] !== this.state)
       return false;
@@ -183,7 +179,7 @@ Client.prototype.write = function(packetId, params, cb = noop) {
   var packetName = protocol.packetNames[this.state][this.isServer ? "toClient" : "toServer"][packetId];
   debug("writing packetId " + this.state + "." + packetName + " (0x" + packetId.toString(16) + ")");
   debug(params);
-  this.serializer.write({ packetId, params }, cb);
+  this.serializer.write({ packetId, params });
 };
 
 Client.prototype.writeRaw = function(buffer) {

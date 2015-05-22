@@ -37,11 +37,8 @@ function ping(options, cb) {
       serverHost: host,
       serverPort: port,
       nextState: 1
-    },function(err){
-      if(err)
-        throw err;
-      client.state = states.STATUS;
     });
+    client.state = states.STATUS;
   });
 
   client.connect(port, host);
