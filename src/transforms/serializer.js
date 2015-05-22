@@ -34,11 +34,9 @@ class Deserializer extends Transform {
     super({ readableObjectMode: true });
     this.protocolState = state;
     this.isServer = isServer;
-    this.calls = 0;
   }
 
   _transform(chunk, enc, cb) {
-    this.calls++;
     var packet;
     try {
       packet = protocol.parsePacketData(chunk, this.protocolState, this.isServer, this.packetsToParse);
