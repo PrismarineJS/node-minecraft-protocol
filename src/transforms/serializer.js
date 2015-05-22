@@ -1,6 +1,6 @@
 var [readVarInt, writeVarInt, sizeOfVarInt] = require("../datatypes/utils").varint;
 var protocol = require("../protocol");
-var Transform = require("stream").Transform;
+var Transform = require("readable-stream").Transform;
 
 module.exports.createSerializer = function(obj) {
   return new Serializer(obj);

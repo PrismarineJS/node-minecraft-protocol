@@ -1,5 +1,5 @@
 var [readVarInt, writeVarInt, sizeOfVarInt] = require("../datatypes/utils").varint;
-var Transform = require("stream").Transform;
+var Transform = require("readable-stream").Transform;
 
 module.exports.createSplitter = function() {
   return new Splitter();

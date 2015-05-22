@@ -44,6 +44,7 @@
     "buffer-equal": "0.0.0",
     "node-uuid": "~1.4.1",
     "prismarine-nbt": "0.0.1",
+    "readable-stream": "^1.1.0",
     "superagent": "~0.10.0",
     "ursa-purejs": "0.0.3"
   },

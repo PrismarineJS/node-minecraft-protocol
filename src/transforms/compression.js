@@ -1,6 +1,6 @@
 var [readVarInt, writeVarInt, sizeOfVarInt] = require("../datatypes/utils").varint;
 var zlib = require("zlib");
-var Transform = require("stream").Transform;
+var Transform = require("readable-stream").Transform;
 
 module.exports.createCompressor = function(threshold) {
   return new Compressor(threshold);
