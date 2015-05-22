@@ -23,6 +23,7 @@ function Client(isServer) {
   EventEmitter.call(this);
 
   var socket;
+  this.packetsToParse = {};
 
   this.serializer = serializer.createSerializer({ isServer });
   this.compressor = null;
@@ -32,7 +33,7 @@ function Client(isServer) {
   this.decipher = null;
   this.splitter = framing.createSplitter();
   this.decompressor = null;
-  this.deserializer = serializer.createDeserializer({ isServer });
+  this.deserializer = serializer.createDeserializer({ isServer, packetsToParse: this.packetsToParse });
 
   this._state = states.HANDSHAKING;
   Object.defineProperty(this, "state", {
@@ -53,7 +54,6 @@ function Client(isServer) {
 
   this.isServer = !!isServer;
 
-  this.packetsToParse = {};
   this.on('newListener', function(event, listener) {
     var direction = this.isServer ? 'toServer' : 'toClient';
     if(protocol.packetStates[direction].hasOwnProperty(event) || event === "packet") {

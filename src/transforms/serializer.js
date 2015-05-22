@@ -30,10 +30,11 @@ class Serializer extends Transform {
 }
 
 class Deserializer extends Transform {
-  constructor({ state = protocol.states.HANDSHAKING, isServer = false } = {}) {
+  constructor({ state = protocol.states.HANDSHAKING, isServer = false, packetsToParse = {"packet": true} } = {}) {
     super({ readableObjectMode: true });
     this.protocolState = state;
     this.isServer = isServer;
+    this.packetsToParse = packetsToParse;
   }
 
   _transform(chunk, enc, cb) {
