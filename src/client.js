@@ -173,6 +173,13 @@ function noop(err) {
 }
 
 Client.prototype.write = function(packetId, params, cb = noop) {
+  if(Array.isArray(packetId)) {
+    if(packetId[0] !== this.state)
+      return false;
+    packetId = packetId[1];
+  }
+  if(typeof packetId === "string")
+    packetId = protocol.packetIds[this.state][this.isServer ? "toClient" : "toServer"][packetId];
   var packetName = protocol.packetNames[this.state][this.isServer ? "toClient" : "toServer"][packetId];
   debug("writing packetId " + this.state + "." + packetName + " (0x" + packetId.toString(16) + ")");
   debug(params);
