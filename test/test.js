@@ -60,7 +60,6 @@ var values = {
   'byte': -10,
   'ubyte': 8,
   'string': "hi hi this is my client string",
-  'ustring': "hi hi this is my server string",
   'buffer': new Buffer(8),
   'array': function(typeArgs) {
     if(typeof values[typeArgs.type] === "undefined") {
