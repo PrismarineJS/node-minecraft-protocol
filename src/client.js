@@ -1,21 +1,16 @@
 var EventEmitter = require('events').EventEmitter
   , util = require('util')
-  , protocol = require('./protocol')
-  , createPacketBuffer = protocol.createPacketBuffer
-  , compressPacketBuffer = protocol.compressPacketBuffer
-  , oldStylePacket = protocol.oldStylePacket
-  , newStylePacket = protocol.newStylePacket
-  , parsePacketData = protocol.parsePacketData
-  , parseNewStylePacket = protocol.parseNewStylePacket
-  , packetIds = protocol.packetIds
-  , packetNames = protocol.packetNames
-  , states = protocol.states
   , debug = require('./debug')
   , serializer = require('./transforms/serializer')
   , compression = require('./transforms/compression')
   , framing = require('./transforms/framing')
   , crypto = require('crypto')
+  , states = serializer.states
   ;
+
+var packets = require("../protocol/protocol");
+var readPackets = require("./packets").readPackets;
+var packetIndexes = readPackets(packets, states);
 
 module.exports = Client;
 
@@ -56,14 +51,14 @@ function Client(isServer) {
 
   this.on('newListener', function(event, listener) {
     var direction = this.isServer ? 'toServer' : 'toClient';
-    if(protocol.packetStates[direction].hasOwnProperty(event) || event === "packet") {
+    if(packetIndexes.packetStates[direction].hasOwnProperty(event) || event === "packet") {
       if(typeof this.packetsToParse[event] === "undefined") this.packetsToParse[event] = 1;
       else this.packetsToParse[event] += 1;
     }
   });
   this.on('removeListener', function(event, listener) {
     var direction = this.isServer ? 'toServer' : 'toClient';
-    if(protocol.packetStates[direction].hasOwnProperty(event) || event === "packet") {
+    if(packetIndexes.packetStates[direction].hasOwnProperty(event) || event === "packet") {
       this.packetsToParse[event] -= 1;
     }
   });
@@ -75,9 +70,9 @@ util.inherits(Client, EventEmitter);
 Client.prototype.on = function(type, func) {
   var direction = this.isServer ? 'toServer' : 'toClient';
   if(Array.isArray(type)) {
-    arguments[0] = protocol.packetNames[type[0]][direction][type[1]];
+    arguments[0] = packetIndexes.packetNames[type[0]][direction][type[1]];
   } else if(typeof type === "number") {
-    arguments[0] = protocol.packetNames[this.state][direction][type];
+    arguments[0] = packetIndexes.packetNames[this.state][direction][type];
   }
   EventEmitter.prototype.on.apply(this, arguments);
 };
@@ -85,9 +80,9 @@ Client.prototype.on = function(type, func) {
 Client.prototype.onRaw = function(type, func) {
   var arg = "raw.";
   if(Array.isArray(type)) {
-    arg += protocol.packetNames[type[0]][direction][type[1]];
+    arg += packetIndexes.packetNames[type[0]][direction][type[1]];
   } else if(typeof type === "number") {
-    arg += protocol.packetNames[this.state][direction][type];
+    arg += packetIndexes.packetNames[this.state][direction][type];
   } else {
     arg += type;
   }
@@ -136,7 +131,7 @@ Client.prototype.setSocket = function(socket) {
 
   this.deserializer.on('data', (parsed) => {
     var packet = parsed.results;
-    var packetName = protocol.packetNames[packet.state][this.isServer ? 'toServer' : 'toClient'][packet.id];
+    var packetName = packetIndexes.packetNames[packet.state][this.isServer ? 'toServer' : 'toClient'][packet.id];
     this.emit('packet', packet);
     this.emit(packetName, packet);
     this.emit('raw.' + packetName, parsed.buffer, packet.state);
@@ -185,8 +180,8 @@ Client.prototype.write = function(packetId, params) {
     packetId = packetId[1];
   }
   if(typeof packetId === "string")
-    packetId = protocol.packetIds[this.state][this.isServer ? "toClient" : "toServer"][packetId];
-  var packetName = protocol.packetNames[this.state][this.isServer ? "toClient" : "toServer"][packetId];
+    packetId = packetIndexes.packetIds[this.state][this.isServer ? "toClient" : "toServer"][packetId];
+  var packetName = packetIndexes.packetNames[this.state][this.isServer ? "toClient" : "toServer"][packetId];
   debug("writing packetId " + this.state + "." + packetName + " (0x" + packetId.toString(16) + ")");
   debug(params);
   this.serializer.write({ packetId, params });

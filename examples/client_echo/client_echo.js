@@ -1,5 +1,5 @@
 var mc = require('../../')
-  , states = mc.protocol.states
+  , states = mc.states
 
 var client = mc.createClient({
   username: process.env.MC_USERNAME,

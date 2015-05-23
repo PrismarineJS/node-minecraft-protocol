@@ -1,8 +1,8 @@
 var ITERATIONS = 100000;
 
-var protocol = require('../dist/protocol'),
+var mc = require("../");
   util = require('util'),
-  states = protocol.states;
+  states = mc.states;
 
 var testDataWrite = [
   {id: 0x00, params: {keepAliveId: 957759560}},
@@ -18,7 +18,7 @@ console.log('Beginning write test');
 start = Date.now();
 for(i = 0; i < ITERATIONS; i++) {
   for(j = 0; j < testDataWrite.length; j++) {
-    inputData.push(protocol.createPacketBuffer(testDataWrite[j].id, states.PLAY, testDataWrite[j].params, false));
+    inputData.push(mc.createPacketBuffer(testDataWrite[j].id, states.PLAY, testDataWrite[j].params, false));
   }
 }
 console.log('Finished write test in ' + (Date.now() - start) / 1000 + ' seconds');
@@ -26,6 +26,6 @@ console.log('Finished write test in ' + (Date.now() - start) / 1000 + ' seconds'
 console.log('Beginning read test');
 start = Date.now();
 for (j = 0; j < inputData.length; j++) {
-  protocol.parsePacketData(inputData[j], states.PLAY, true);
+  mc.parsePacketData(inputData[j], states.PLAY, true);
 }
 console.log('Finished read test in ' + (Date.now() - start) / 1000 + ' seconds');

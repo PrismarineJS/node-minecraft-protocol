@@ -1,7 +1,7 @@
 var readline = require('readline');
 var color = require("ansi-color").set;
 var mc = require('../../');
-var states = mc.protocol.states;
+var states = mc.states;
 var util = require('util');
 
 var colors = new Array();
