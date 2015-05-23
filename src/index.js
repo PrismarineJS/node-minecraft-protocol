@@ -1,7 +1,6 @@
 var assert = require('assert')
   , crypto = require('crypto')
   , bufferEqual = require('buffer-equal')
-  , protocol = require('./protocol')
   , Client = require('./client')
   , dns = require('dns')
   , net = require('net')
@@ -10,8 +9,10 @@ var assert = require('assert')
   , getSession = Yggdrasil.getSession
   , validateSession = Yggdrasil.validateSession
   , joinServer = Yggdrasil.joinServer
-  , states = protocol.states
+  , serializer = require("./transforms/serializer")
+  , states = serializer.states
   , debug = require("./debug")
+  , utils = require("./utils")
   ;
 
 var ursa;
@@ -23,14 +24,32 @@ try {
   ursa = require("ursa-purejs");
 }
 
+var version = 47;
+var minecraftVersion = '1.8.1';
+
+var packets = require("../protocol/protocol");
+var readPackets = require("./packets").readPackets;
+var packetIndexes = readPackets(packets, states);
+
 module.exports = {
   createClient: createClient,
   createServer: createServer,
   Client: Client,
   Server: Server,
+  states: states,
+  createPacketBuffer: serializer.createPacketBuffer,
+  parsePacketData: serializer.parsePacketData,
+  packetFields: packetIndexes.packetFields,
+  packetNames: packetIndexes.packetNames,
+  packetIds: packetIndexes.packetIds,
+  packetStates: packetIndexes.packetStates,
+  types: serializer.types,
+  get: serializer.get,
+  evalCondition: utils.evalCondition,
   ping: require('./ping'),
-  protocol: protocol,
   yggdrasil: Yggdrasil,
+  version: version,
+  minecraftVersion: minecraftVersion
 };
 
 function createServer(options) {
@@ -108,8 +127,8 @@ function createServer(options) {
     function onPing(packet) {
       var response = {
         "version": {
-          "name": protocol.minecraftVersion,
-          "protocol": protocol.version
+          "name": minecraftVersion,
+          "protocol": version
         },
         "players": {
           "max": server.maxPlayers,
@@ -291,7 +310,7 @@ function createClient(options) {
 
   function onConnect() {
     client.write(0x00, {
-      protocolVersion: protocol.version,
+      protocolVersion: version,
       serverHost: host,
       serverPort: port,
       nextState: 2

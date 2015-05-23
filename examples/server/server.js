@@ -1,5 +1,5 @@
 var mc = require('../../');
-var states = mc.protocol.states;
+var states = mc.states;
 
 var options = {
   motd: 'Vox Industries',

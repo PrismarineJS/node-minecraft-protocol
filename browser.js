@@ -1,4 +1,1 @@
-module.exports = {
-  Client: require('./dist/client'),
-  protocol: require('./dist/protocol')
-};
+module.exports = require('./dist/browser.js');

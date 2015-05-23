@@ -1,6 +1,5 @@
 var mc = require('../')
-  , protocol = mc.protocol
-  , states = protocol.states
+  , states = mc.states
   , Client = mc.Client
   , Server = mc.Server
   , spawn = require('child_process').spawn
@@ -152,19 +151,19 @@ describe("packets", function() {
     client.end();
   });
   var packetId, packetInfo, field;
-  for(state in protocol.packetFields) {
-    if(!protocol.packetFields.hasOwnProperty(state)) continue;
-    for(packetId in protocol.packetFields[state].toServer) {
-      if(!protocol.packetFields[state].toServer.hasOwnProperty(packetId)) continue;
+  for(state in mc.packetFields) {
+    if(!mc.packetFields.hasOwnProperty(state)) continue;
+    for(packetId in mc.packetFields[state].toServer) {
+      if(!mc.packetFields[state].toServer.hasOwnProperty(packetId)) continue;
       packetId = parseInt(packetId, 10);
-      packetInfo = protocol.get(packetId, state, true);
+      packetInfo = mc.get(packetId, state, true);
       it(state + ",ServerBound,0x" + zfill(parseInt(packetId, 10).toString(16), 2),
         callTestPacket(packetId, packetInfo, state, true));
     }
-    for(packetId in protocol.packetFields[state].toClient) {
-      if(!protocol.packetFields[state].toClient.hasOwnProperty(packetId)) continue;
+    for(packetId in mc.packetFields[state].toClient) {
+      if(!mc.packetFields[state].toClient.hasOwnProperty(packetId)) continue;
       packetId = parseInt(packetId, 10);
-      packetInfo = protocol.get(packetId, state, false);
+      packetInfo = mc.get(packetId, state, false);
       it(state + ",ClientBound,0x" + zfill(parseInt(packetId, 10).toString(16), 2),
         callTestPacket(packetId, packetInfo, state, false));
     }
@@ -181,7 +180,7 @@ describe("packets", function() {
     // empty object uses default values
     var packet = {};
     packetInfo.forEach(function(field) {
-      if(field.type !== "condition" || protocol.evalCondition(field.typeArgs, packet)) {
+      if(field.type !== "condition" || mc.evalCondition(field.typeArgs, packet)) {
         var fieldVal = values[field.type];
         if(typeof fieldVal === "undefined") {
           throw new Error("No value for type " + field.type);

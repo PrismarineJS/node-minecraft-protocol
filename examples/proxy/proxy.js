@@ -1,6 +1,6 @@
 var mc = require('../../');
 
-var states = mc.protocol.states;
+var states = mc.states;
 function printHelpAndExit(exitCode) {
   console.log("usage: node proxy.js [<options>...] <target_srv> <user> [<password>]");
   console.log("options:");
@@ -133,9 +133,9 @@ srv.on('login', function(client) {
   targetClient.on('raw', function(buffer, state) {
     if(client.state != states.PLAY || state != states.PLAY)
       return;
-    var packetId = mc.protocol.types.varint[0](buffer, 0);
-    var packetData = mc.protocol.parsePacketData(buffer, state, false, {"packet": 1}).results;
-    var packetBuff = mc.protocol.createPacketBuffer(packetData.id, packetData.state, packetData, true);
+    var packetId = mc.types.varint[0](buffer, 0);
+    var packetData = mc.parsePacketData(buffer, state, false, {"packet": 1}).results;
+    var packetBuff = mc.createPacketBuffer(packetData.id, packetData.state, packetData, true);
     if(buffertools.compare(buffer, packetBuff) != 0) {
       console.log("client<-server: Error in packetId " + state + ".0x" + packetId.value.toString(16));
       console.log(buffer.toString('hex'));
@@ -152,9 +152,9 @@ srv.on('login', function(client) {
   client.on('raw', function(buffer, state) {
     if(state != states.PLAY || targetClient.state != states.PLAY)
       return;
-    var packetId = mc.protocol.types.varint[0](buffer, 0);
-    var packetData = mc.protocol.parsePacketData(buffer, state, true, {"packet": 1}).results;
-    var packetBuff = mc.protocol.createPacketBuffer(packetData.id, packetData.state, packetData, false);
+    var packetId = mc.types.varint[0](buffer, 0);
+    var packetData = mc.parsePacketData(buffer, state, true, {"packet": 1}).results;
+    var packetBuff = mc.createPacketBuffer(packetData.id, packetData.state, packetData, false);
     if(buffertools.compare(buffer, packetBuff) != 0) {
       console.log("client->server: Error in packetId " + state + ".0x" + packetId.value.toString(16));
       console.log(buffer.toString('hex'));

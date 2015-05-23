@@ -2,7 +2,7 @@ var net = require('net')
   , EventEmitter = require('events').EventEmitter
   , util = require('util')
   , Client = require('./client')
-  , states = require('./protocol').states
+  , states = require('./transforms/serializer').states
   ;
 
 module.exports = Server;

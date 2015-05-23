@@ -1,7 +1,6 @@
 var net = require('net')
   , Client = require('./client')
-  , protocol = require('./protocol')
-  , states = protocol.states
+  , states = require('./transforms/serializer').states
   ;
 
 module.exports = ping;
