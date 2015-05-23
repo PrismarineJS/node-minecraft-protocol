@@ -32,7 +32,7 @@
         "fields": [
           {
             "name": "response",
-            "type": "ustring"
+            "type": "string"
           }
         ]
       },
@@ -231,7 +231,7 @@
         "fields": [
           {
             "name": "message",
-            "type": "ustring"
+            "type": "string"
           },
           {
             "name": "position",
@@ -1741,7 +1741,7 @@
                             },
                             {
                               "name": "value",
-                              "type": "ustring"
+                              "type": "string"
                             },
                             {
                               "name": "isSigned",
@@ -1751,7 +1751,7 @@
                               "name": "signature",
                               "type": "condition",
                               "typeArgs": {
-                                "type": "ustring",
+                                "type": "string",
                                 "field": "isSigned",
                                 "values": [
                                   true
