@@ -1,14 +1,11 @@
 var assert = require('assert');
 
-var STRING_MAX_LENGTH = 240;
-var SRV_STRING_MAX_LENGTH = 32767;
 var getField = require("../utils").getField;
 
 module.exports = {
   'varint': [readVarInt, writeVarInt, sizeOfVarInt],
   'bool': [readBool, writeBool, 1],
   'string': [readString, writeString, sizeOfString],
-  'ustring': [readString, writeString, sizeOfUString], // TODO : remove ustring
   'buffer': [readBuffer, writeBuffer, sizeOfBuffer]
 };
 
@@ -81,7 +78,6 @@ function writeString(value, buffer, offset) {
 
 function sizeOfString(value) {
   var length = Buffer.byteLength(value, 'utf8');
-  assert.ok(length < STRING_MAX_LENGTH, "string greater than max length");
   return sizeOfVarInt(length) + length;
 }
 
@@ -115,11 +111,4 @@ function writeBuffer(value, buffer, offset) {
 
 function sizeOfBuffer(value) {
   return value.length;
-}
-
-
-function sizeOfUString(value) {
-  var length = Buffer.byteLength(value, 'utf8');
-  assert.ok(length < SRV_STRING_MAX_LENGTH, "string greater than max length");
-  return sizeOfVarInt(length) + length;
 }
