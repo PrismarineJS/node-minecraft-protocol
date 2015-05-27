@@ -380,6 +380,20 @@ NODE_DEBUG="minecraft-protocol" node [...]
 
 ## History
 
+### 0.14.0
+
+ * Huge rewrite of the internals, using transform streams, which eliminates two
+   classes of problems from node-minecraft-protocol :
+   * Uncatchable errors being triggered inside the protocol parser
+   * Packets ariving out of order, causing several race conditions
+ * All the attributes that were previously exposed via `mc.protocol` are now directly
+   attached to the `mc` object, e.g. `mc.protocol.states` => `mc.states`. This is
+   prone to further changes.
+ * open_window now reports the entityId correctly for horses
+ * Properly handle the set_compression packet
+ * Fix small bug in scoreboard_team and player_info packets causing crashes
+ * Fix the login implementation logging out people from their launchers.
+
 ### 0.13.4
 
  * Added hook to modify server ping (thanks [Brian Schlenker](https://github.com/bschlenk))
