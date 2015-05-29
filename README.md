@@ -173,9 +173,18 @@ The motd that is sent to the player when he is pinging the server
 A base64 data string representing the favicon that will appear next to the server
 on the mojang client's multiplayer list.
 
-### mc.createClient(option)
+### mc.createClient(options)
 
-Returns a `Client` instance and perform login
+Returns a `Client` instance and perform login.
+
+`options` is an object containing the properties :
+ * username
+ * port : default to 25565
+ * password : can be omitted (if the tokens are also omitted then it tries to connect in offline mode)
+ * host : default to localhost
+ * clientToken : generated if a password is given
+ * accessToken : generated if a password is given
+ * keepAlive : send keep alive packets : default to true
 
 ### Client
 
