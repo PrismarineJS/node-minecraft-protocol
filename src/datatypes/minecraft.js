@@ -1,6 +1,7 @@
 var nbt = require('prismarine-nbt');
 var utils = require("./utils");
 var numeric = require("./numeric");
+var uuid = require('node-uuid');
 
 // TODO : remove type-specific, replace with generic containers and arrays.
 module.exports = {
@@ -14,21 +15,13 @@ module.exports = {
 
 function readUUID(buffer, offset) {
   return {
-    value: [
-      buffer.readUInt32BE(offset),
-      buffer.readUInt32BE(offset + 4),
-      buffer.readUInt32BE(offset + 8),
-      buffer.readUInt32BE(offset + 12),
-    ],
+    value: uuid.unparse(buffer, offset),
     size: 16,
   };
 }
 
 function writeUUID(value, buffer, offset) {
-  buffer.writeUInt32BE(value[0], offset);
-  buffer.writeUInt32BE(value[1], offset + 4);
-  buffer.writeUInt32BE(value[2], offset + 8);
-  buffer.writeUInt32BE(value[3], offset + 12);
+  uuid.parse(value, buffer, offset);
   return offset + 16;
 }
 
