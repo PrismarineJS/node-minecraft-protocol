@@ -118,7 +118,7 @@ var values = {
     velocityY: 2,
     velocityZ: 3,
   },
-  'UUID': [42, 42, 42, 42],
+  'UUID': "00112233-4455-6677-8899-aabbccddeeff",
   'position': {x: 12, y: 332, z: 4382821},
   'restBuffer': new Buffer(0),
   'condition': function(typeArgs) {
