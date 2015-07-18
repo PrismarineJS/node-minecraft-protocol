@@ -1,5 +1,9 @@
 # History
 
+## 0.15.0 (Unreleased)
+
+ * UUIDs are now strings instead of arrays. (BREAKING CHANGE)
+
 ## 0.14.0
 
  * Huge rewrite of the internals, using transform streams, which eliminates two
