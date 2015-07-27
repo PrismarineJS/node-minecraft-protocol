@@ -55,7 +55,7 @@ client.on('chat', function(packet) {
     var username = jsonMsg.using[0];
     var msg = jsonMsg.using[1];
     if (username === client.username) return;
-    client.write(0x03, {
+    client.write("chat", {
       message: msg
     });
   }
@@ -95,7 +95,7 @@ server.on('login', function(client) {
     'Server',
     'Hello, ' + client.username
   ]};
-  client.write(0x03, { message: JSON.stringify(msg) });
+  client.write("chat", { message: JSON.stringify(msg) });
 });
 ```
 
