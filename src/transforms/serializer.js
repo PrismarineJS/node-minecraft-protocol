@@ -20,7 +20,7 @@ var states = {
   "HANDSHAKING": Symbol("handshaking"),
   "STATUS": Symbol("status"),
   "LOGIN": Symbol("login"),
-  "PLAY": Sybmol("play")
+  "PLAY": Symbol("play")
 };
 module.exports.states = states;
 
