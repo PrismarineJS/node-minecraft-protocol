@@ -17,10 +17,10 @@ module.exports.parsePacketData=parsePacketData;
 
 // This is really just for the client.
 var states = {
-  "HANDSHAKING": "handshaking",
-  "STATUS": "status",
-  "LOGIN": "login",
-  "PLAY": "play"
+  "HANDSHAKING": Symbol("handshaking"),
+  "STATUS": Symbol("status"),
+  "LOGIN": Symbol("login"),
+  "PLAY": Symol("play")
 };
 module.exports.states = states;
 
