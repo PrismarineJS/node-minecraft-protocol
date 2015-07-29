@@ -2605,7 +2605,7 @@
         "fields": [
           {
             "name": "windowId",
-            "type": "byte"
+            "type": "ubyte"
           }
         ]
       },
@@ -2614,7 +2614,7 @@
         "fields": [
           {
             "name": "windowId",
-            "type": "byte"
+            "type": "ubyte"
           },
           {
             "name": "slot",
