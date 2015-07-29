@@ -546,9 +546,9 @@ describe("mc-server", function() {
         assert.ok(results.latency <= 1000);
         delete results.latency;
         assert.deepEqual(results, {
-          version: { //TODO : Make this dynamic, based on protocol.version
-            name: "1.8.1",
-            protocol: 47
+          version: {
+            name: mc.minecraftVersion,
+            protocol: mc.version
           },
           players: {
             max: 120,
