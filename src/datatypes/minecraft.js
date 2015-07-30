@@ -179,8 +179,6 @@ function findByte(type,value)
 {
   if(type!="container")
     return entityMetadataTypeBytes[type];
-  console.log(JSON.stringify(value));
-  console.log(value["x"]===undefined ? 7 : 6);
     return value["x"]===undefined ? 7 : 6;
 }
 
