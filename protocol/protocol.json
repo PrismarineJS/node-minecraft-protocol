@@ -2517,6 +2517,15 @@
           }
         ]
       },
+      "use_item": {
+        "id": "0x08",
+        "fields": [
+          {
+            "name": "hand",
+            "type":"byte"
+          }
+        ]
+      },
       "block_place": {
         "id": "0x09",
         "fields": [
