@@ -515,6 +515,14 @@
                 }
               ]
             }
+          },
+          {
+            "name": "something1",
+            "type": "double"
+          },
+          {
+            "name":"something2",
+            "type": "double"
           }
         ]
       },
@@ -2525,7 +2533,7 @@
         ]
       },
       "block_place": {
-        "id": "0x08",
+        "id": "0x09",
         "fields": [
           {
             "name": "location",
@@ -2554,7 +2562,7 @@
         ]
       },
       "held_item_slot": {
-        "id": "0x09",
+        "id": "0x0a",
         "fields": [
           {
             "name": "slotId",
@@ -2563,11 +2571,16 @@
         ]
       },
       "arm_animation": {
-        "id": "0x0a",
-        "fields": []
+        "id": "0x0b",
+        "fields": [
+          {
+            "name": "hand",
+            "type": "byte"
+          }
+        ]
       },
       "entity_action": {
-        "id": "0x0b",
+        "id": "0x0c",
         "fields": [
           {
             "name": "entityId",
@@ -2584,7 +2597,7 @@
         ]
       },
       "steer_vehicle": {
-        "id": "0x0c",
+        "id": "0x0d",
         "fields": [
           {
             "name": "sideways",
@@ -2601,7 +2614,7 @@
         ]
       },
       "close_window": {
-        "id": "0x0d",
+        "id": "0x0e",
         "fields": [
           {
             "name": "windowId",
@@ -2610,7 +2623,7 @@
         ]
       },
       "window_click": {
-        "id": "0x0e",
+        "id": "0x0f",
         "fields": [
           {
             "name": "windowId",
@@ -2639,7 +2652,7 @@
         ]
       },
       "transaction": {
-        "id": "0x0f",
+        "id": "0x10",
         "fields": [
           {
             "name": "windowId",
@@ -2656,7 +2669,7 @@
         ]
       },
       "set_creative_slot": {
-        "id": "0x10",
+        "id": "0x11",
         "fields": [
           {
             "name": "slot",
@@ -2669,7 +2682,7 @@
         ]
       },
       "enchant_item": {
-        "id": "0x11",
+        "id": "0x12",
         "fields": [
           {
             "name": "windowId",
@@ -2682,7 +2695,7 @@
         ]
       },
       "update_sign": {
-        "id": "0x12",
+        "id": "0x13",
         "fields": [
           {
             "name": "location",
@@ -2707,7 +2720,7 @@
         ]
       },
       "abilities": {
-        "id": "0x13",
+        "id": "0x14",
         "fields": [
           {
             "name": "flags",
@@ -2724,7 +2737,7 @@
         ]
       },
       "tab_complete": {
-        "id": "0x14",
+        "id": "0x15",
         "fields": [
           {
             "name": "text",
@@ -2748,7 +2761,7 @@
         ]
       },
       "settings": {
-        "id": "0x15",
+        "id": "0x16",
         "fields": [
           {
             "name": "locale",
@@ -2769,11 +2782,15 @@
           {
             "name": "skinParts",
             "type": "ubyte"
+          },
+          {
+            "name":"mainHand",
+            "type":"byte"
           }
         ]
       },
       "client_command": {
-        "id": "0x16",
+        "id": "0x17",
         "fields": [
           {
             "name": "payload",
@@ -2782,7 +2799,7 @@
         ]
       },
       "custom_payload": {
-        "id": "0x17",
+        "id": "0x18",
         "fields": [
           {
             "name": "channel",
@@ -2795,7 +2812,7 @@
         ]
       },
       "spectate": {
-        "id": "0x18",
+        "id": "0x19",
         "fields": [
           {
             "name": "target",
@@ -2804,7 +2821,7 @@
         ]
       },
       "resource_pack_receive": {
-        "id": "0x19",
+        "id": "0x1a",
         "fields": [
           {
             "name": "hash",
