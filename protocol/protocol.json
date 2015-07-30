@@ -2544,10 +2544,6 @@
             "type": "byte"
           },
           {
-            "name": "heldItem",
-            "type": "slot"
-          },
-          {
             "name": "cursorX",
             "type": "byte"
           },
@@ -2557,6 +2553,10 @@
           },
           {
             "name": "cursorZ",
+            "type": "byte"
+          },
+          {
+            "name": "something",
             "type": "byte"
           }
         ]
