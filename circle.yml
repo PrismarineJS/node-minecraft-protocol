@@ -8,4 +8,4 @@ machine:
 dependencies:
   pre:
     - mkdir minecraft-server
-    - wget https://s3.amazonaws.com/Minecraft.Download/versions/15w31a/minecraft_server.15w31a.jar -O $MC_SERVER_JAR
+    - wget https://s3.amazonaws.com/Minecraft.Download/versions/15w31b/minecraft_server.15w31b.jar -O $MC_SERVER_JAR
