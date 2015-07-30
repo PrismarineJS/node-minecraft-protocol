@@ -422,7 +422,7 @@ describe("client", function() {
       });
       var gotKicked = false;
       client.on([states.LOGIN, 0x00], function(packet) {
-        assert.strictEqual(packet.reason, '"Failed to verify username!"');
+        assert.strictEqual(packet.reason, '{"text":"Failed to verify username!"}');
         gotKicked = true;
       });
       client.on('end', function() {
