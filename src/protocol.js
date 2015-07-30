@@ -16,9 +16,7 @@ NMProtocols.prototype.addTypes = function(types) {
 NMProtocols.prototype.read = function(buffer, cursor, fieldInfo, rootNodes) {
   var type = this.types[fieldInfo.type];
   if(!type) {
-    return {
-      error: new Error("missing data type: " + fieldInfo.type)
-    };
+    throw  new Error("missing data type: " + fieldInfo.type);
   }
   var readResults = type[0].call(this, buffer, cursor, fieldInfo.typeArgs, rootNodes);
   if(readResults == null) {
@@ -31,9 +29,7 @@ NMProtocols.prototype.read = function(buffer, cursor, fieldInfo, rootNodes) {
 NMProtocols.prototype.write = function(value, buffer, offset, fieldInfo, rootNode) {
   var type = this.types[fieldInfo.type];
   if(!type) {
-    return {
-      error: new Error("missing data type: " + fieldInfo.type)
-    };
+    throw new Error("missing data type: " + fieldInfo.type);
   }
   return type[1].call(this, value, buffer, offset, fieldInfo.typeArgs, rootNode);
 };
