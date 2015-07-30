@@ -481,7 +481,7 @@ describe("mc-server", function() {
     var count = 2;
     server.on('connection', function(client) {
       client.on('end', function(reason) {
-        assert.strictEqual(reason, "LoginTimeout");
+        assert.strictEqual(reason, '{"text":"LoginTimeout"}');
         server.close();
       });
     });
