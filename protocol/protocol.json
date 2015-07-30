@@ -2518,7 +2518,7 @@
         ]
       },
       "block_place": {
-        "id": "0x08",
+        "id": "0x09",
         "fields": [
           {
             "name": "location",
