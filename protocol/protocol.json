@@ -442,6 +442,10 @@
             "type": "varint"
           },
           {
+            "name": "entityUUID",
+            "type": "UUID"
+          },
+          {
             "name": "type",
             "type": "byte"
           },
@@ -476,53 +480,18 @@
                 },
                 {
                   "name": "velocityX",
-                  "type": "condition",
-                  "typeArgs": {
-                    "type": "short",
-                    "field": "intField",
-                    "values": [
-                      0
-                    ],
-                    "different": true,
-                    "this": true
-                  }
+                  "type": "short"
                 },
                 {
                   "name": "velocityY",
-                  "type": "condition",
-                  "typeArgs": {
-                    "type": "short",
-                    "field": "intField",
-                    "values": [
-                      0
-                    ],
-                    "different": true,
-                    "this": true
-                  }
+                  "type": "short"
                 },
                 {
                   "name": "velocityZ",
-                  "type": "condition",
-                  "typeArgs": {
-                    "type": "short",
-                    "field": "intField",
-                    "values": [
-                      0
-                    ],
-                    "different": true,
-                    "this": true
-                  }
+                  "type": "short"
                 }
               ]
             }
-          },
-          {
-            "name": "something1",
-            "type": "double"
-          },
-          {
-            "name":"something2",
-            "type": "double"
           }
         ]
       },
@@ -532,6 +501,10 @@
           {
             "name": "entityId",
             "type": "varint"
+          },
+          {
+            "name": "entityUUID",
+            "type": "UUID"
           },
           {
             "name": "type",
@@ -2436,6 +2409,18 @@
                 2
               ]
             }
+          },
+          {
+            "name": "hand",
+            "type": "condition",
+            "typeArgs": {
+              "type":"byte",
+              "field": "mouse",
+              "values": [
+                0,
+                2
+              ]
+            }
           }
         ]
       },
@@ -2533,7 +2518,7 @@
         ]
       },
       "block_place": {
-        "id": "0x09",
+        "id": "0x08",
         "fields": [
           {
             "name": "location",
@@ -2541,6 +2526,10 @@
           },
           {
             "name": "direction",
+            "type": "byte"
+          },
+          {
+            "name": "hand",
             "type": "byte"
           },
           {
@@ -2553,10 +2542,6 @@
           },
           {
             "name": "cursorZ",
-            "type": "byte"
-          },
-          {
-            "name": "something",
             "type": "byte"
           }
         ]
