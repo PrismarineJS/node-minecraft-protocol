@@ -261,7 +261,7 @@
           },
           {
             "name": "slot",
-            "type": "short"
+            "type": "varint"
           },
           {
             "name": "item",
@@ -412,10 +412,6 @@
             "type": "byte"
           },
           {
-            "name": "currentItem",
-            "type": "short"
-          },
-          {
             "name": "metadata",
             "type": "entityMetadata"
           }
@@ -470,28 +466,20 @@
             "type": "byte"
           },
           {
-            "name": "objectData",
-            "type": "container",
-            "typeArgs": {
-              "fields": [
-                {
-                  "name": "intField",
-                  "type": "int"
-                },
-                {
-                  "name": "velocityX",
-                  "type": "short"
-                },
-                {
-                  "name": "velocityY",
-                  "type": "short"
-                },
-                {
-                  "name": "velocityZ",
-                  "type": "short"
-                }
-              ]
-            }
+            "name": "intField",
+            "type": "int"
+          },
+          {
+            "name": "velocityX",
+            "type": "short"
+          },
+          {
+            "name": "velocityY",
+            "type": "short"
+          },
+          {
+            "name": "velocityZ",
+            "type": "short"
           }
         ]
       },
@@ -2333,16 +2321,76 @@
           }
         ]
       },
-      "update_entity_nbt": {
+      "boss_bar": {
         "id": "0x49",
         "fields": [
           {
-            "name": "entityId",
+            "name": "entityUUID",
+            "type": "UUID"
+          },
+          {
+            "name": "action",
             "type": "varint"
           },
           {
-            "name": "tag",
-            "type": "restBuffer"
+            "name": "title",
+            "type": "condition",
+            "typeArgs": {
+              "type": "string",
+              "field": "action",
+              "values": [
+                0,
+                3
+              ]
+            }
+          },
+          {
+            "name": "health",
+            "type": "condition",
+            "typeArgs": {
+              "type": "float",
+              "field": "action",
+              "values": [
+                0,
+                2
+              ]
+            }
+          },
+          {
+            "name": "color",
+            "type": "condition",
+            "typeArgs": {
+              "type": "varint",
+              "field": "action",
+              "values": [
+                0,
+                4
+              ]
+            }
+          },
+          {
+            "name": "dividers",
+            "type": "condition",
+            "typeArgs": {
+              "type": "varint",
+              "field": "action",
+              "values": [
+                0,
+                4
+              ]
+            }
+          },
+          {
+            "name": "flags",
+            "type": "condition",
+            "typeArgs": {
+              "type": "ubyte",
+              "field": "action",
+              "values": [
+                0,
+                5
+              ]
+            }
           }
         ]
       }
@@ -2414,7 +2462,7 @@
             "name": "hand",
             "type": "condition",
             "typeArgs": {
-              "type":"byte",
+              "type":"varint",
               "field": "mouse",
               "values": [
                 0,
@@ -2522,7 +2570,7 @@
         "fields": [
           {
             "name": "hand",
-            "type":"byte"
+            "type":"varint"
           }
         ]
       },
@@ -2535,11 +2583,11 @@
           },
           {
             "name": "direction",
-            "type": "byte"
+            "type": "varint"
           },
           {
             "name": "hand",
-            "type": "byte"
+            "type": "varint"
           },
           {
             "name": "cursorX",
@@ -2569,7 +2617,7 @@
         "fields": [
           {
             "name": "hand",
-            "type": "byte"
+            "type": "varint"
           }
         ]
       },
@@ -2779,7 +2827,7 @@
           },
           {
             "name":"mainHand",
-            "type":"byte"
+            "type":"varint"
           }
         ]
       },

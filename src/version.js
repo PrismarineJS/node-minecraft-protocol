@@ -1,4 +1,4 @@
 module.exports={
-  version:50,
-  minecraftVersion:'15w31b'
+  version:51,
+  minecraftVersion:'15w31C'
 };
