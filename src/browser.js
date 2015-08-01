@@ -1,4 +1,4 @@
-var packets = require("../protocol/protocol");
+var packets = require('minecraft-data').protocol;
 var readPackets = require("./packets").readPackets;
 var packetIndexes = readPackets(packets, states);
 var utils = require("./utils");
