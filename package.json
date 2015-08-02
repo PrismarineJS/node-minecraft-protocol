@@ -46,7 +46,7 @@
     "readable-stream": "^1.1.0",
     "superagent": "~0.10.0",
     "ursa-purejs": "0.0.3",
-    "minecraft-data": "0.4.0"
+    "minecraft-data": "git://github.com/PrismarineJS/minecraft-data.git#snapshot-1.9"
   },
   "optionalDependencies": {
     "ursa": "~0.8.0"
