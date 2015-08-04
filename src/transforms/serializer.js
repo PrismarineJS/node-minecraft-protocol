@@ -47,7 +47,7 @@ proto.addTypes(conditional);
 module.exports.types = proto.types;
 
 var evalCondition = require("../utils").evalCondition;
-var packets = require("../../protocol/protocol");
+var packets = require('minecraft-data').protocol;
 var readPackets = require("../packets").readPackets;
 var packetIndexes = readPackets(packets, states);
 
@@ -84,13 +84,25 @@ function createPacketBuffer(packetId, state, params, isServer) {
   var buffer = new Buffer(size);
   var offset = 0;//utils.varint[1](length, buffer, 0);
   offset = utils.varint[1](packetId, buffer, offset);
-  packet.forEach(function(fieldInfo) {
-    var value = params[fieldInfo.name];
-    // TODO : A better check is probably needed
-    if(typeof value === "undefined" && fieldInfo.type != "count" && (fieldInfo.type != "condition" || evalCondition(fieldInfo.typeArgs, params)))
-      debug(new Error("Missing Property " + fieldInfo.name).stack);
-    offset = proto.write(value, buffer, offset, fieldInfo, params);
-  });
+    packet.forEach(function(fieldInfo) {
+      var value = params[fieldInfo.name];
+      // TODO : A better check is probably needed
+      if(typeof value === "undefined" && fieldInfo.type != "count" && (fieldInfo.type != "condition" || evalCondition(fieldInfo.typeArgs, params)))
+        debug(new Error("Missing Property " + fieldInfo.name).stack);
+
+      try {
+        offset = proto.write(value, buffer, offset, fieldInfo, params);
+      }
+      catch(err)
+        {
+          console.log("Error in creating packet 0x"+packetId.toString(16)+" with params "+JSON.stringify(params));
+          console.log("In particular :");
+
+          console.log("fieldInfo : " + JSON.stringify(fieldInfo));
+          console.log("value : " + JSON.stringify(value));
+          throw err;
+        }
+    });
   return buffer;
 }
 
@@ -139,7 +151,16 @@ function parsePacketData(buffer, state, isServer, packetsToParse = {"packet": tr
   var i, fieldInfo, readResults;
   for(i = 0; i < packetInfo.length; ++i) {
     fieldInfo = packetInfo[i];
-    readResults = proto.read(buffer, cursor, fieldInfo, results);
+    try {
+      readResults = proto.read(buffer, cursor, fieldInfo, results);
+    }
+    catch(err) {
+      console.log("Error in parsing packet 0x" + packetId.toString(16));
+      console.log("In particular :");
+
+      console.log("fieldInfo : " + JSON.stringify(fieldInfo));
+      throw err;
+    }
     /* A deserializer cannot return null anymore. Besides, proto.read() returns
      * null when the condition is not fulfilled.
      if (!!!readResults) {

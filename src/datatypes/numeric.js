@@ -24,7 +24,14 @@ function generateFunctions(bufferReader,bufferWriter,size)
     };
   };
   var writer=function(value, buffer, offset) {
-    buffer[bufferWriter](value, offset);
+    try {
+      buffer[bufferWriter](value, offset);
+    }
+    catch(err)
+    {
+      console.log("value:"+ value);
+      throw err;
+    }
     return offset + size;
   };
   return [reader, writer, size];

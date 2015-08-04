@@ -25,6 +25,7 @@ Server.prototype.listen = function(port, host) {
     var client = new Client(true);
     client._end = client.end;
     client.end = function end(endReason) {
+      endReason='{"text":"'+endReason+'"}';
       if(client.state === states.PLAY) {
         client.write(0x40, {reason: endReason});
       } else if(client.state === states.LOGIN) {

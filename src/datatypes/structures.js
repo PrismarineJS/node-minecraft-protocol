@@ -84,7 +84,16 @@ function writeContainer(value, buffer, offset, typeArgs, rootNode) {
       debug(new Error("Missing Property " + typeArgs.fields[index].name).stack);
       console.log(context);
     }
-    offset = this.write(context[typeArgs.fields[index].name], buffer, offset, typeArgs.fields[index], rootNode);
+    try {
+      offset = this.write(context[typeArgs.fields[index].name], buffer, offset, typeArgs.fields[index], rootNode);
+    }
+    catch(err)
+    {
+      console.log("typeArgs : " + JSON.stringify(typeArgs.fields[index]));
+      console.log("context : "+JSON.stringify(context));
+      console.log("value : " + JSON.stringify(context[typeArgs.fields[index].name]));
+      throw err;
+    }
   }
   rootNode.this = backupThis;;
   return offset;

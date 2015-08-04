@@ -174,6 +174,14 @@ for(var n in entityMetadataTypes) {
   entityMetadataTypeBytes[entityMetadataTypes[n].type] = n;
 }
 
+// container is ambiguous
+function findByte(type,value)
+{
+  if(type!="container")
+    return entityMetadataTypeBytes[type];
+    return value["x"]===undefined ? 7 : 6;
+}
+
 
 function readEntityMetadata(buffer, offset) {
   var cursor = offset;
@@ -214,7 +222,7 @@ function readEntityMetadata(buffer, offset) {
 function writeEntityMetadata(value, buffer, offset) {
   var self = this;
   value.forEach(function(item) {
-    var type = entityMetadataTypeBytes[item.type];
+    var type = findByte(item.type,item.value);
     var headerByte = (type << 5) | item.key;
     buffer.writeUInt8(headerByte, offset);
     offset += 1;
@@ -230,7 +238,7 @@ function sizeOfEntityMetadata(value) {
   var item;
   for(var i = 0; i < value.length; ++i) {
     item = value[i];
-    size += this.sizeOf(item.value, entityMetadataTypes[entityMetadataTypeBytes[item.type]], {});
+    size += this.sizeOf(item.value, entityMetadataTypes[findByte(item.type,item.value)], {});
   }
   return size;
 }

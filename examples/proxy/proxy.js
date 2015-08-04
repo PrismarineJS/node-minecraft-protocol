@@ -140,6 +140,8 @@ srv.on('login', function(client) {
       console.log("client<-server: Error in packetId " + state + ".0x" + packetId.value.toString(16));
       console.log(buffer.toString('hex'));
       console.log(packetBuff.toString('hex'));
+      console.log(buffer.length);
+      console.log(packetBuff.length);
     }
     /*if (client.state == states.PLAY && brokenPackets.indexOf(packetId.value) !== -1)
      {
@@ -159,6 +161,8 @@ srv.on('login', function(client) {
       console.log("client->server: Error in packetId " + state + ".0x" + packetId.value.toString(16));
       console.log(buffer.toString('hex'));
       console.log(packetBuff.toString('hex'));
+      console.log(buffer.length);
+      console.log(packetBuff.length);
     }
   });
   targetClient.on('end', function() {
@@ -167,9 +171,10 @@ srv.on('login', function(client) {
     if(!endedClient)
       client.end("End");
   });
-  targetClient.on('error', function() {
+  targetClient.on('error', function(err) {
     endedTargetClient = true;
-    console.log('Connection error by server', '(' + addr + ')');
+    console.log('Connection error by server', '(' + addr + ') ',err);
+    console.log(err.stack);
     if(!endedClient)
       client.end("Error");
   });
