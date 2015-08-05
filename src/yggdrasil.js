@@ -83,7 +83,7 @@ function validateSession(username, serverId, cb) {
     .end(function(resp) {
       if(resp.ok) {
         if("id" in resp.body) {
-          cb(null, resp.body.id);
+          cb(null, resp.body.id, resp.body);
         } else {
           var myErr = new Error("Failed to verify username!");
           cb(myErr);

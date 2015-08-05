@@ -169,7 +169,7 @@ function createServer(options) {
 
       function verifyUsername() {
         var digest = mcHexDigest(hash);
-        validateSession(client.username, digest, function(err, uuid) {
+        validateSession(client.username, digest, function(err, uuid, profile) {
           if(err) {
             client.end("Failed to verify username!");
             return;
@@ -178,6 +178,7 @@ function createServer(options) {
           // Convert to a valid UUID until the session server updates and does
           // it automatically
           client.uuid = client.uuid.replace(/(\w{8})(\w{4})(\w{4})(\w{4})(\w{12})/, "$1-$2-$3-$4-$5");
+          client.profile = profile;
           loginClient();
         });
       }
