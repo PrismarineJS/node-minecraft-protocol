@@ -36,16 +36,14 @@ function createServer(options) {
   server.playerCount = 0;
   server.onlineModeExceptions = {};
   server.on("connection", function(client) {
+    if (enableKeepAlive) require('./modules/keepalive')({}, client);
     client.once([states.HANDSHAKING, 0x00], onHandshake);
     client.once([states.LOGIN, 0x00], onLogin);
     client.once([states.STATUS, 0x00], onPing);
     client.on('end', onEnd);
 
-    var keepAlive = false;
     var loggedIn = false;
-    var lastKeepAlive = null;
 
-    var keepAliveTimer = null;
     var loginKickTimer = setTimeout(kickForNotLoggingIn, kickTimeout);
 
     var hash;
@@ -54,34 +52,7 @@ function createServer(options) {
       client.end('LoginTimeout');
     }
 
-    function keepAliveLoop() {
-      if(!keepAlive)
-        return;
-
-      // check if the last keepAlive was too long ago (kickTimeout)
-      var elapsed = new Date() - lastKeepAlive;
-      if(elapsed > kickTimeout) {
-        client.end('KeepAliveTimeout');
-        return;
-      }
-      client.write(0x00, {
-        keepAliveId: Math.floor(Math.random() * 2147483648)
-      });
-    }
-
-    function onKeepAlive(packet) {
-      lastKeepAlive = new Date();
-    }
-
-    function startKeepAlive() {
-      keepAlive = true;
-      lastKeepAlive = new Date();
-      keepAliveTimer = setInterval(keepAliveLoop, checkTimeoutInterval);
-      client.on(0x00, onKeepAlive);
-    }
-
     function onEnd() {
-      clearInterval(keepAliveTimer);
       clearTimeout(loginKickTimer);
     }
 
@@ -196,7 +167,6 @@ function createServer(options) {
       client.write(0x02, {uuid: client.uuid, username: client.username});
       client.state = states.PLAY;
       loggedIn = true;
-      if(enableKeepAlive) startKeepAlive();
 
       clearTimeout(loginKickTimer);
       loginKickTimer = null;
