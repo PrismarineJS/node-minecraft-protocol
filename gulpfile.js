@@ -10,7 +10,7 @@ var options = {
 var sourcemaps = require('gulp-sourcemaps');
 
 gulp.task('compile', function() {
-  gulp
+  return gulp
     .src('src/**/*.js')
     .pipe(plumber({
       errorHandler: function(err) {
@@ -26,7 +26,7 @@ gulp.task('compile', function() {
 });
 
 gulp.task('watch', function() {
-  gulp.watch('src/**/*.js', ['compile']);
+  return gulp.watch('src/**/*.js', ['compile']);
 });
 
 gulp.task('default', ['compile']);
