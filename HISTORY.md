@@ -3,6 +3,9 @@
 ## 0.15.0 (Unreleased)
 
  * UUIDs are now strings instead of arrays. (BREAKING CHANGE)
+ * Server clients have a new property, client.profile, containing the result
+ of the yggdrasil authentication
+ * Protocol.json now lives in minecraft-data
 
 ## 0.14.0
 
