@@ -146,6 +146,10 @@ function createServer(options) {
       } else if(packet.nextState == 2) {
         client.state = states.LOGIN;
       }
+      if(client.protocolVersion!=version.version)
+      {
+        client.end("Wrong protocol version, expected : "+version.version+" and you are using : "+client.protocolVersion);
+      }
     }
 
     function onEncryptionKeyResponse(packet) {
