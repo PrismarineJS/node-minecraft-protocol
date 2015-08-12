@@ -26,6 +26,8 @@ function createServer(options) {
   // and returning a modified response object.
   var beforePing = options.beforePing || null;
 
+  var enableKeepAlive = options.keepAlive == null ? true : options.keepAlive;
+
   var serverKey = ursa.generatePrivateKey(1024);
 
   var server = new Server(options);
@@ -194,7 +196,7 @@ function createServer(options) {
       client.write(0x02, {uuid: client.uuid, username: client.username});
       client.state = states.PLAY;
       loggedIn = true;
-      startKeepAlive();
+      if(enableKeepAlive) startKeepAlive();
 
       clearTimeout(loginKickTimer);
       loginKickTimer = null;

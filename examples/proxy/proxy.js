@@ -77,7 +77,8 @@ if(host.indexOf(':') != -1) {
 
 var srv = mc.createServer({
   'online-mode': false,
-  port: 25566
+  port: 25566,
+  keepAlive: false
 });
 srv.on('login', function(client) {
   var addr = client.socket.remoteAddress;
@@ -101,7 +102,8 @@ srv.on('login', function(client) {
     port: port,
     username: user,
     password: passwd,
-    'online-mode': passwd != null ? true : false
+    'online-mode': passwd != null ? true : false,
+    keepAlive:false
   });
   var brokenPackets = [/*0x04, 0x2f, 0x30*/];
   client.on('packet', function(packet) {
