@@ -36,10 +36,11 @@ function createServer(options) {
   server.playerCount = 0;
   server.onlineModeExceptions = {};
   server.on("connection", function(client) {
-    if (enableKeepAlive) require('./modules/keepalive')({}, client);
+    if (enableKeepAlive) require('./modules/keepalive')({}, client, server);
+    require('./modules/ping')({}, client, server);
+
     client.once([states.HANDSHAKING, 0x00], onHandshake);
     client.once([states.LOGIN, 0x00], onLogin);
-    client.once([states.STATUS, 0x00], onPing);
     client.on('end', onEnd);
 
     var loggedIn = false;
@@ -54,32 +55,6 @@ function createServer(options) {
 
     function onEnd() {
       clearTimeout(loginKickTimer);
-    }
-
-    function onPing(packet) {
-      var response = {
-        "version": {
-          "name": version.minecraftVersion,
-          "protocol": version.version
-        },
-        "players": {
-          "max": server.maxPlayers,
-          "online": server.playerCount,
-          "sample": []
-        },
-        "description": {"text": server.motd},
-        "favicon": server.favicon
-      };
-
-      if(beforePing) {
-        response = beforePing(response, client) || response;
-      }
-
-      client.once([states.STATUS, 0x01], function(packet) {
-        client.write(0x01, {time: packet.time});
-        client.end();
-      });
-      client.write(0x00, {response: JSON.stringify(response)});
     }
 
     function onLogin(packet) {
@@ -112,9 +87,7 @@ function createServer(options) {
       client.serverHost = packet.serverHost;
       client.serverPort = packet.serverPort;
       client.protocolVersion = packet.protocolVersion;
-      if(packet.nextState == 1) {
-        client.state = states.STATUS;
-      } else if(packet.nextState == 2) {
+      if(packet.nextState == 2) {
         client.state = states.LOGIN;
       }
     }
