@@ -35,6 +35,7 @@ Parse and serialize minecraft packets, plus authentication and encryption.
  * [mcserve](https://github.com/andrewrk/mcserve) - runs and monitors your
    minecraft server, provides real-time web interface, allow your users to
    create bots.
+ * [glados](https://github.com/fwhiffahder/glados) - logs what players are online and where on the [Civcraft](http://reddit.com/r/Civcraft) server to a database with a JSON API. [web interface to primary instance](http://fwhiffahder.github.io/varys)
 
 ## Usage
 
