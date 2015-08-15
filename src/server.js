@@ -34,9 +34,6 @@ Server.prototype.listen = function(port, host) {
     };
     client.id = nextId++;
     self.clients[client.id] = client;
-    client.on('error', function(err) {
-      self.emit('error', err);
-    });
     client.on('end', function() {
       delete self.clients[client.id];
     });
