@@ -8,4 +8,4 @@ machine:
 dependencies:
   pre:
     - mkdir minecraft-server
-    - wget https://s3.amazonaws.com/Minecraft.Download/versions/1.8.3/minecraft_server.1.8.3.jar -O $MC_SERVER_JAR
+    - node downloadServer.js $MC_SERVER_JAR
