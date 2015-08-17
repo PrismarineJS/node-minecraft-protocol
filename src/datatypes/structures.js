@@ -21,11 +21,17 @@ function readArray(buffer, offset, typeArgs, rootNode) {
     size: 0
   };
   var count;
-  if(typeof typeArgs.count === "object") {
+  if(typeof typeArgs.count === "object")
     count = evalCount(typeArgs.count, rootNode);
-  }
-  else
+  else if (typeof typeArgs.count !== "undefined")
     count = getField(typeArgs.count, rootNode);
+  else if (typeof typeArgs.countType !== "undefined") {
+    var countResults = this.read(buffer, offset, { type: typeArgs.countType, typeArgs: typeArgs.countTypeArgs }, rootNode);
+    results.size += countResults.size;
+    offset += countResults.size;
+    count = countResults.value;
+  } else // TODO : broken schema, should probably error out.
+    count = 0;
   for(var i = 0; i < count; i++) {
     var readResults = this.read(buffer, offset, {type: typeArgs.type, typeArgs: typeArgs.typeArgs}, rootNode);
     results.size += readResults.size;
@@ -36,6 +42,11 @@ function readArray(buffer, offset, typeArgs, rootNode) {
 }
 
 function writeArray(value, buffer, offset, typeArgs, rootNode) {
+  if (typeof typeArgs.count === "undefined" &&
+      typeof typeArgs.countType !== "undefined") {
+    offset = this.write(value.length, buffer, offset, { type: typeArgs.countType, typeArgs: typeArgs.countTypeArgs }, rootNode);
+  } else if (typeof typeArgs.count === "undefined") { // Broken schema, should probably error out
+  }
   for(var index in value) {
     offset = this.write(value[index], buffer, offset, {type: typeArgs.type, typeArgs: typeArgs.typeArgs}, rootNode);
   }
@@ -44,6 +55,10 @@ function writeArray(value, buffer, offset, typeArgs, rootNode) {
 
 function sizeOfArray(value, typeArgs, rootNode) {
   var size = 0;
+  if (typeof typeArgs.count === "undefined" &&
+      typeof typeArgs.countType !== "undefined") {
+    size = this.sizeOf(value.length, { type: typeArgs.countType, typeArgs: typeArgs.countTypeArgs }, rootNode);
+  }
   for(var index in value) {
     size += this.sizeOf(value[index], {type: typeArgs.type, typeArgs: typeArgs.typeArgs}, rootNode);
   }

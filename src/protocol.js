@@ -20,7 +20,8 @@ NMProtocols.prototype.read = function(buffer, cursor, fieldInfo, rootNodes) {
       error: new Error("missing data type: " + fieldInfo.type)
     };
   }
-  var readResults = type[0].call(this, buffer, cursor, fieldInfo.typeArgs, rootNodes);
+  var typeArgs = fieldInfo.typeArgs || {};
+  var readResults = type[0].call(this, buffer, cursor, typeArgs, rootNodes);
   if(readResults == null) {
     throw new Error("Reader returned null : " + JSON.stringify(fieldInfo));
   }
@@ -35,7 +36,8 @@ NMProtocols.prototype.write = function(value, buffer, offset, fieldInfo, rootNod
       error: new Error("missing data type: " + fieldInfo.type)
     };
   }
-  return type[1].call(this, value, buffer, offset, fieldInfo.typeArgs, rootNode);
+  var typeArgs = fieldInfo.typeArgs || {};
+  return type[1].call(this, value, buffer, offset, typeArgs, rootNode);
 };
 
 NMProtocols.prototype.sizeOf = function(value, fieldInfo, rootNode) {
@@ -44,7 +46,8 @@ NMProtocols.prototype.sizeOf = function(value, fieldInfo, rootNode) {
     throw new Error("missing data type: " + fieldInfo.type);
   }
   if(typeof type[2] === 'function') {
-    return type[2].call(this, value, fieldInfo.typeArgs, rootNode);
+    var typeArgs = fieldInfo.typeArgs || {};
+    return type[2].call(this, value, typeArgs, rootNode);
   } else {
     return type[2];
   }

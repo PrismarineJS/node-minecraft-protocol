@@ -97,18 +97,37 @@ function writeBool(value, buffer, offset) {
 
 
 function readBuffer(buffer, offset, typeArgs, rootNode) {
-  var count = getField(typeArgs.count, rootNode);
+  var size = 0;
+  var count;
+  if (typeof typeArgs.count !== "undefined")
+    count = getField(typeArgs.count, rootNode);
+  else if (typeof typeArgs.countType !== "undefined") {
+    var countResults = this.read(buffer, offset, { type: typeArgs.countType, typeArgs: typeArgs.countTypeArgs }, rootNode);
+    size += countResults.size;
+    offset += countResults.size;
+    count = countResults.value;
+  }
   return {
     value: buffer.slice(offset, offset + count),
-    size: count
+    size: size + count
   };
 }
 
-function writeBuffer(value, buffer, offset) {
+function writeBuffer(value, buffer, offset, typeArgs, rootNode) {
+  if (typeof typeArgs.count === "undefined" &&
+      typeof typeArgs.countType !== "undefined") {
+    offset = this.write(value.length, buffer, offset, { type: typeArgs.countType, typeArgs: typeArgs.countTypeArgs }, rootNode);
+  } else if (typeof typeArgs.count === "undefined") { // Broken schema, should probably error out
+  }
   value.copy(buffer, offset);
   return offset + value.length;
 }
 
-function sizeOfBuffer(value) {
-  return value.length;
+function sizeOfBuffer(value, typeArgs, rootNode) {
+  var size = 0;
+  if (typeof typeArgs.count === "undefined" &&
+      typeof typeArgs.countType !== "undefined") {
+    size = this.sizeOf(value.length, { type: typeArgs.countType, typeArgs: typeArgs.countTypeArgs }, rootNode);
+  }
+  return size + value.length;
 }
