@@ -47,7 +47,8 @@ proto.addTypes(conditional);
 module.exports.types = proto.types;
 
 var evalCondition = require("../utils").evalCondition;
-var packets = require('minecraft-data').protocol;
+var version = require('../version');
+var packets = require('minecraft-data')(version.majorVersion).protocol;
 var readPackets = require("../packets").readPackets;
 var packetIndexes = readPackets(packets, states);
 
