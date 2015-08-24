@@ -1,3 +1,5 @@
+var { getFieldInfo } = require('./utils');
+
 function NMProtocols() {
   this.types = {};
 }
@@ -13,15 +15,15 @@ NMProtocols.prototype.addTypes = function(types) {
   });
 };
 
-NMProtocols.prototype.read = function(buffer, cursor, fieldInfo, rootNodes) {
+NMProtocols.prototype.read = function(buffer, cursor, _fieldInfo, rootNodes) {
+  let fieldInfo = getFieldInfo(_fieldInfo);
   var type = this.types[fieldInfo.type];
   if(!type) {
     return {
       error: new Error("missing data type: " + fieldInfo.type)
     };
   }
-  var typeArgs = fieldInfo.typeArgs || {};
-  var readResults = type[0].call(this, buffer, cursor, typeArgs, rootNodes);
+  var readResults = type[0].call(this, buffer, cursor, fieldInfo.typeArgs, rootNodes);
   if(readResults == null) {
     throw new Error("Reader returned null : " + JSON.stringify(fieldInfo));
   }
@@ -29,25 +31,25 @@ NMProtocols.prototype.read = function(buffer, cursor, fieldInfo, rootNodes) {
   return readResults;
 };
 
-NMProtocols.prototype.write = function(value, buffer, offset, fieldInfo, rootNode) {
+NMProtocols.prototype.write = function(value, buffer, offset, _fieldInfo, rootNode) {
+  let fieldInfo = getFieldInfo(_fieldInfo);
   var type = this.types[fieldInfo.type];
   if(!type) {
     return {
       error: new Error("missing data type: " + fieldInfo.type)
     };
   }
-  var typeArgs = fieldInfo.typeArgs || {};
-  return type[1].call(this, value, buffer, offset, typeArgs, rootNode);
+  return type[1].call(this, value, buffer, offset, fieldInfo.typeArgs, rootNode);
 };
 
-NMProtocols.prototype.sizeOf = function(value, fieldInfo, rootNode) {
+NMProtocols.prototype.sizeOf = function(value, _fieldInfo, rootNode) {
+  let fieldInfo = getFieldInfo(_fieldInfo);
   var type = this.types[fieldInfo.type];
   if(!type) {
     throw new Error("missing data type: " + fieldInfo.type);
   }
   if(typeof type[2] === 'function') {
-    var typeArgs = fieldInfo.typeArgs || {};
-    return type[2].call(this, value, typeArgs, rootNode);
+    return type[2].call(this, value, fieldInfo.typeArgs, rootNode);
   } else {
     return type[2];
   }

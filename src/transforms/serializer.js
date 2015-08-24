@@ -3,6 +3,7 @@ var protocol = require("../protocol");
 var Transform = require("readable-stream").Transform;
 var debug = require("../debug");
 var assert = require('assert');
+var { getFieldInfo } = require('../utils');
 
 module.exports.createSerializer = function(obj) {
   return new Serializer(obj);
@@ -73,7 +74,7 @@ function createPacketBuffer(packetId, state, params, isServer) {
   assert.notEqual(packet, null);
   packet.forEach(function(fieldInfo) {
     try {
-      length += proto.sizeOf(params[fieldInfo.name], fieldInfo, params);
+      length += proto.sizeOf(params[fieldInfo.name], fieldInfo.type, params);
     } catch(e) {
       console.log("fieldInfo : " + JSON.stringify(fieldInfo));
       console.log("params : " + JSON.stringify(params));
@@ -90,7 +91,7 @@ function createPacketBuffer(packetId, state, params, isServer) {
     // TODO : A better check is probably needed
     if(typeof value === "undefined" && fieldInfo.type != "count" && (fieldInfo.type != "condition" || evalCondition(fieldInfo.typeArgs, params)))
       debug(new Error("Missing Property " + fieldInfo.name).stack);
-    offset = proto.write(value, buffer, offset, fieldInfo, params);
+    offset = proto.write(value, buffer, offset, fieldInfo.type, params);
   });
   return buffer;
 }
@@ -109,9 +110,7 @@ function get(packetId, state, toServer) {
 // By default, parse every packets.
 function parsePacketData(buffer, state, isServer, packetsToParse = {"packet": true}) {
   var cursor = 0;
-  var packetIdField = utils.varint[0](buffer, cursor);
-  var packetId = packetIdField.value;
-  cursor += packetIdField.size;
+  var { value: packetId, size: cursor } = utils.varint[0](buffer, cursor);
 
   var results = {id: packetId, state: state};
   // Only parse the packet if there is a need for it, AKA if there is a listener attached to it
@@ -140,7 +139,7 @@ function parsePacketData(buffer, state, isServer, packetsToParse = {"packet": tr
   var i, fieldInfo, readResults;
   for(i = 0; i < packetInfo.length; ++i) {
     fieldInfo = packetInfo[i];
-    readResults = proto.read(buffer, cursor, fieldInfo, results);
+    readResults = proto.read(buffer, cursor, fieldInfo.type, results);
     /* A deserializer cannot return null anymore. Besides, proto.read() returns
      * null when the condition is not fulfilled.
      if (!!!readResults) {

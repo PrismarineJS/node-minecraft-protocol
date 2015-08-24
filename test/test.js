@@ -14,6 +14,8 @@ var mc = require('../')
   , MC_SERVER_JAR = process.env.MC_SERVER_JAR
   , SURVIVE_TIME = 10000
   , MC_SERVER_PATH = path.join(__dirname, 'server')
+  , getFieldInfo = require('../dist/utils').getFieldInfo
+  , evalCondition = require('../dist/utils').evalCondition
   ;
 
 var defaultServerProps = {
@@ -60,25 +62,29 @@ var values = {
   'ubyte': 8,
   'string': "hi hi this is my client string",
   'buffer': new Buffer(8),
-  'array': function(typeArgs) {
+  'array': function(_typeArgs, packet) {
+    var typeArgs = getFieldInfo(_typeArgs.type)
     if(typeof values[typeArgs.type] === "undefined") {
       throw new Error("No data type for " + typeArgs.type);
     }
     if(typeof values[typeArgs.type] === "function") {
-      return [values[typeArgs.type](typeArgs.typeArgs)];
+      return [values[typeArgs.type](typeArgs.typeArgs, packet)];
     }
     return [values[typeArgs.type]];
   },
-  'container': function(typeArgs) {
+  'container': function(typeArgs, packet) {
     var results = {};
-    for(var index in typeArgs.fields) {
-      if(typeof values[typeArgs.fields[index].type] === "undefined") {
-        throw new Error("No data type for " + typeArgs.fields[index].type);
+    for(var index in typeArgs) {
+      if(typeof values[getFieldInfo(typeArgs[index].type).type] === "undefined") {
+        throw new Error("No data type for " + typeArgs[index].type);
       }
-      if(typeof values[typeArgs.fields[index].type] === "function") {
-        results[typeArgs.fields[index].name] = values[typeArgs.fields[index].type](typeArgs.fields[index].typeArgs);
+      if(typeof values[getFieldInfo(typeArgs[index].type).type] === "function") {
+        var backupThis = packet.this;
+        packet.this = results;
+        results[typeArgs[index].name] = values[getFieldInfo(typeArgs[index].type).type](getFieldInfo(typeArgs[index].type).typeArgs, packet);
+        packet.this = backupThis;
       } else {
-        results[typeArgs.fields[index].name] = values[typeArgs.fields[index].type];
+        results[typeArgs[index].name] = values[getFieldInfo(typeArgs[index].type).type];
       }
     }
     return results;
@@ -121,10 +127,13 @@ var values = {
   'UUID': "00112233-4455-6677-8899-aabbccddeeff",
   'position': {x: 12, y: 332, z: 4382821},
   'restBuffer': new Buffer(0),
-  'condition': function(typeArgs) {
-    // check whether this should return undefined if needed instead ? (using evalCondition)
-    // probably not since we only send values that respect the condition
-    return values[typeArgs.type];
+  'condition': function(typeArgs, packet) {
+    if (evalCondition(typeArgs, packet)) {
+      if (typeof values[getFieldInfo(typeArgs.type).type] === "function")
+        return values[getFieldInfo(typeArgs.type).type](getFieldInfo(typeArgs.type).typeArgs, packet);
+      else
+        return values[getFieldInfo(typeArgs.type).type];
+    }
   }
 };
 
@@ -179,22 +188,25 @@ describe("packets", function() {
     // empty object uses default values
     var packet = {};
     packetInfo.forEach(function(field) {
-      if(field.type !== "condition" || mc.evalCondition(field.typeArgs, packet)) {
-        var fieldVal = values[field.type];
-        if(typeof fieldVal === "undefined") {
-          throw new Error("No value for type " + field.type);
-        }
-        if(typeof fieldVal === "function") {
-          fieldVal = fieldVal(field.typeArgs);
-        }
-        packet[field.name] = fieldVal;
+      var fieldVal = values[getFieldInfo(field.type).type];
+      if(typeof fieldVal === "undefined") {
+        throw new Error("No value for type " + field.type);
       }
+      if(typeof fieldVal === "function") {
+        fieldVal = fieldVal(getFieldInfo(field.type).typeArgs, packet);
+      }
+      packet[field.name] = fieldVal;
     });
     if(toServer) {
       serverClient.once([state, packetId], function(receivedPacket) {
         delete receivedPacket.id;
         delete receivedPacket.state;
+        try {
         assertPacketsMatch(packet, receivedPacket);
+        } catch (e) {
+          console.log(packet, receivedPacket);
+          throw e;
+        }
         done();
       });
       client.write(packetId, packet);
@@ -215,7 +227,8 @@ describe("packets", function() {
     });
     var field;
     for(field in p1) {
-      assert.ok(field in p2, "field " + field + " missing in p2, in p1 it has value " + JSON.stringify(p1[field]));
+      if (p1[field] !== undefined)
+        assert.ok(field in p2, "field " + field + " missing in p2, in p1 it has value " + JSON.stringify(p1[field]));
     }
     for(field in p2) {
       assert.ok(field in p1, "field " + field + " missing in p1, in p2 it has value " + JSON.stringify(p2[field]));

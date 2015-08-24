@@ -1,5 +1,6 @@
 module.exports = {
   getField: getField,
+  getFieldInfo: getFieldInfo,
   evalCondition: evalCondition
 };
 
@@ -12,6 +13,16 @@ function getField(countField, rootNode) {
   return count;
 }
 
+function getFieldInfo(fieldInfo) {
+  if (typeof fieldInfo === "string")
+    return { type: fieldInfo };
+  else if (Array.isArray(fieldInfo))
+    return { type: fieldInfo[0], typeArgs: fieldInfo[1] };
+  else if (typeof fieldInfo.type === "string")
+    return fieldInfo;
+  else
+    throw new Error("Not a fieldinfo");
+}
 
 function evalCondition(condition, field_values) {
   var field_value_to_test = "this" in condition && condition["this"] ? field_values["this"][condition.field] : field_values[condition.field];
