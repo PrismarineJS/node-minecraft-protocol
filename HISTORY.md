@@ -6,6 +6,11 @@
  * Server clients have a new property, client.profile, containing the result
  of the yggdrasil authentication
  * Protocol.json now lives in minecraft-data
+ * Don't bubble up errors from client to server. (BREAKING CHANGE). If you want
+   to catch the client errors, you need to add an error listener on that client.
+   The old behavior was confusing, error-prone and undocumented !
+ * Add keepAlive option to createServer, in order to optionally disable it.
+ * Lots of low-level changes to allow minecraft-data to be more generic.
 
 ## 0.14.0
 
