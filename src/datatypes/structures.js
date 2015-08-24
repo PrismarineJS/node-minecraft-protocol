@@ -33,7 +33,7 @@ function readArray(buffer, offset, typeArgs, rootNode) {
   } else // TODO : broken schema, should probably error out.
     count = 0;
   for(var i = 0; i < count; i++) {
-    var readResults = this.read(buffer, offset, {type: typeArgs.type, typeArgs: typeArgs.typeArgs}, rootNode);
+    var readResults = this.read(buffer, offset, typeArgs.type, rootNode);
     results.size += readResults.size;
     offset += readResults.size;
     results.value.push(readResults.value);
@@ -48,7 +48,7 @@ function writeArray(value, buffer, offset, typeArgs, rootNode) {
   } else if (typeof typeArgs.count === "undefined") { // Broken schema, should probably error out
   }
   for(var index in value) {
-    offset = this.write(value[index], buffer, offset, {type: typeArgs.type, typeArgs: typeArgs.typeArgs}, rootNode);
+    offset = this.write(value[index], buffer, offset, typeArgs.type, rootNode);
   }
   return offset;
 }
@@ -60,7 +60,7 @@ function sizeOfArray(value, typeArgs, rootNode) {
     size = this.sizeOf(value.length, { type: typeArgs.countType, typeArgs: typeArgs.countTypeArgs }, rootNode);
   }
   for(var index in value) {
-    size += this.sizeOf(value[index], {type: typeArgs.type, typeArgs: typeArgs.typeArgs}, rootNode);
+    size += this.sizeOf(value[index], typeArgs.type, rootNode);
   }
   return size;
 }
@@ -76,58 +76,51 @@ function readContainer(buffer, offset, typeArgs, rootNode) {
   // TODO : what I do inside of roblabla/Protocols is have each "frame" create a new empty slate with just a "super" object pointing to the parent.
   var backupThis = rootNode.this;
   rootNode.this = results.value;
-  for(var index in typeArgs.fields) {
-    var readResults = this.read(buffer, offset, typeArgs.fields[index], rootNode);
+  for(var index in typeArgs) {
+    var readResults = this.read(buffer, offset, typeArgs[index].type, rootNode);
     if(readResults == null || readResults.value == null) {
       continue;
     }
     results.size += readResults.size;
     offset += readResults.size;
-    results.value[typeArgs.fields[index].name] = readResults.value;
+    results.value[typeArgs[index].name] = readResults.value;
   }
   rootNode.this = backupThis;
   return results;
 }
 
 function writeContainer(value, buffer, offset, typeArgs, rootNode) {
-  var context = value.this ? value.this : value;
   var backupThis = rootNode.this;
   rootNode.this = value;
-  for(var index in typeArgs.fields) {
-    if(!context.hasOwnProperty(typeArgs.fields[index].name) && typeArgs.fields[index].type != "count" &&
-      (typeArgs.fields[index].type != "condition" || evalCondition(typeArgs.fields[index].typeArgs, rootNode))) {
-      debug(new Error("Missing Property " + typeArgs.fields[index].name).stack);
-      console.log(context);
-    }
-    offset = this.write(context[typeArgs.fields[index].name], buffer, offset, typeArgs.fields[index], rootNode);
+  for(var index in typeArgs) {
+    offset = this.write(value[typeArgs[index].name], buffer, offset, typeArgs[index].type, rootNode);
   }
-  rootNode.this = backupThis;;
+  rootNode.this = backupThis;
   return offset;
 }
 
 function sizeOfContainer(value, typeArgs, rootNode) {
   var size = 0;
-  var context = value.this ? value.this : value;
   var backupThis = rootNode.this;
   rootNode.this = value;
-  for(var index in typeArgs.fields) {
-    size += this.sizeOf(context[typeArgs.fields[index].name], typeArgs.fields[index], rootNode);
+  for(var index in typeArgs) {
+    size += this.sizeOf(value[typeArgs[index].name], typeArgs[index].type, rootNode);
   }
   rootNode.this = backupThis;
   return size;
 }
 
 function readCount(buffer, offset, typeArgs, rootNode) {
-  return this.read(buffer, offset, {type: typeArgs.type}, rootNode);
+  return this.read(buffer, offset, typeArgs.type, rootNode);
 }
 
 function writeCount(value, buffer, offset, typeArgs, rootNode) {
   // Actually gets the required field, and writes its length. Value is unused.
   // TODO : a bit hackityhack.
-  return this.write(getField(typeArgs.countFor, rootNode).length, buffer, offset, {type: typeArgs.type}, rootNode);
+  return this.write(getField(typeArgs.countFor, rootNode).length, buffer, offset, typeArgs.type, rootNode);
 }
 
 function sizeOfCount(value, typeArgs, rootNode) {
   // TODO : should I use value or getField().length ?
-  return this.sizeOf(getField(typeArgs.countFor, rootNode).length, {type: typeArgs.type}, rootNode);
+  return this.sizeOf(getField(typeArgs.countFor, rootNode).length, typeArgs.type, rootNode);
 }

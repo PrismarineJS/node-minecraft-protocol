@@ -9,7 +9,7 @@ module.exports = {
   'position': [readPosition, writePosition, 8],
   'slot': [readSlot, writeSlot, sizeOfSlot],
   'nbt': [readNbt, utils.buffer[1], utils.buffer[2]],
-  'restBuffer': [readRestBuffer, utils.buffer[1], utils.buffer[2]],
+  'restBuffer': [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
   'entityMetadata': [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata]
 };
 
@@ -131,13 +131,21 @@ function sizeOfNbt(value) {
 }
 
 
-function readRestBuffer(buffer, offset, typeArgs, rootNode) {
+function readRestBuffer(buffer, offset) {
   return {
     value: buffer.slice(offset),
     size: buffer.length - offset
   };
 }
 
+function writeRestBuffer(value, buffer, offset) {
+  value.copy(buffer, offset);
+  return offset + value.length;
+}
+
+function sizeOfRestBuffer(value) {
+  return value.length;
+}
 
 var entityMetadataTypes = {
   0: {type: 'byte'},
