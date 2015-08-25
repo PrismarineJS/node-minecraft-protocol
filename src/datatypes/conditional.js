@@ -1,25 +1,41 @@
-var evalCondition = require("../utils").evalCondition;
+var { getField, getFieldInfo } = require('../utils');
 
 module.exports = {
-  'condition': [readCondition, writeCondition, sizeOfCondition]
+  'switch': [readSwitch, writeSwitch, sizeOfSwitch],
 };
 
-function readCondition(buffer, offset, typeArgs, rootNode) {
-  if(!evalCondition(typeArgs, rootNode))
-    return {value: null, size: 0};
-  return this.read(buffer, offset, typeArgs.type, rootNode);
+function readSwitch(buffer, offset, typeArgs, rootNode) {
+  var compareTo = getField(typeArgs.compareTo, rootNode);
+  var fieldInfo;
+  if (typeof typeArgs.fields[compareTo] === 'undefined' && typeof typeArgs.default === "undefined")
+    throw new Error(compareTo + " has no associated fieldInfo in switch");
+  else if (typeof typeArgs.fields[compareTo] === 'undefined')
+    fieldInfo = getFieldInfo(typeArgs.default);
+  else
+    fieldInfo = getFieldInfo(typeArgs.fields[compareTo]);
+  return this.read(buffer, offset, fieldInfo, rootNode);
 }
 
-function writeCondition(value, buffer, offset, typeArgs, rootNode) {
-  if(!evalCondition(typeArgs, rootNode))
-    return offset;
-
-  return this.write(value, buffer, offset, typeArgs.type, rootNode);
+function writeSwitch(value, buffer, offset, typeArgs, rootNode) {
+  var compareTo = getField(typeArgs.compareTo, rootNode);
+  var fieldInfo;
+  if (typeof typeArgs.fields[compareTo] === 'undefined' && typeof typeArgs.default === "undefined")
+    throw new Error(compareTo + " has no associated fieldInfo in switch");
+  else if (typeof typeArgs.fields[compareTo] === 'undefined')
+    fieldInfo = getFieldInfo(typeArgs.default);
+  else
+    fieldInfo = getFieldInfo(typeArgs.fields[compareTo]);
+  return this.write(value, buffer, offset, fieldInfo, rootNode);
 }
 
-function sizeOfCondition(value, typeArgs, rootNode) {
-  if(!evalCondition(typeArgs, rootNode))
-    return 0;
-
-  return this.sizeOf(value, typeArgs.type, rootNode);
+function sizeOfSwitch(value, typeArgs, rootNode) {
+  var compareTo = getField(typeArgs.compareTo, rootNode);
+  var fieldInfo;
+  if (typeof typeArgs.fields[compareTo] === 'undefined' && typeof typeArgs.default === "undefined")
+    throw new Error(compareTo + " has no associated fieldInfo in switch");
+  else if (typeof typeArgs.fields[compareTo] === 'undefined')
+    fieldInfo = getFieldInfo(typeArgs.default);
+  else
+    fieldInfo = getFieldInfo(typeArgs.fields[compareTo]);
+  return this.sizeOf(value, fieldInfo, rootNode);
 }

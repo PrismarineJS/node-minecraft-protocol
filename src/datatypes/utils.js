@@ -6,7 +6,8 @@ module.exports = {
   'varint': [readVarInt, writeVarInt, sizeOfVarInt],
   'bool': [readBool, writeBool, 1],
   'string': [readString, writeString, sizeOfString],
-  'buffer': [readBuffer, writeBuffer, sizeOfBuffer]
+  'buffer': [readBuffer, writeBuffer, sizeOfBuffer],
+  'void': [readVoid, writeVoid, 0],
 };
 
 function readVarInt(buffer, offset) {
@@ -130,4 +131,15 @@ function sizeOfBuffer(value, typeArgs, rootNode) {
     size = this.sizeOf(value.length, { type: typeArgs.countType, typeArgs: typeArgs.countTypeArgs }, rootNode);
   }
   return size + value.length;
+}
+
+function readVoid() {
+  return {
+    value: undefined,
+    size: 0,
+  };
+}
+
+function writeVoid(value, buffer, offset) {
+  return offset;
 }

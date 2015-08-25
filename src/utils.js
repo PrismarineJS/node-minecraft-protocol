@@ -1,7 +1,6 @@
 module.exports = {
   getField: getField,
   getFieldInfo: getFieldInfo,
-  evalCondition: evalCondition
 };
 
 function getField(countField, rootNode) {
@@ -22,15 +21,4 @@ function getFieldInfo(fieldInfo) {
     return fieldInfo;
   else
     throw new Error("Not a fieldinfo");
-}
-
-function evalCondition(condition, field_values) {
-  var field_value_to_test = "this" in condition && condition["this"] ? field_values["this"][condition.field] : field_values[condition.field];
-  var b = condition.values.some(function(value) {
-    return field_value_to_test === value;
-  });
-  if("different" in condition && condition["different"])
-    return !b;
-  else
-    return b;
 }
