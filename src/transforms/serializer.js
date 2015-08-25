@@ -47,7 +47,6 @@ proto.addTypes(conditional);
 
 module.exports.types = proto.types;
 
-var evalCondition = require("../utils").evalCondition;
 var version = require('../version');
 var packets = require('minecraft-data')(version.majorVersion).protocol;
 var readPackets = require("../packets").readPackets;
@@ -88,8 +87,8 @@ function createPacketBuffer(packetId, state, params, isServer) {
   offset = utils.varint[1](packetId, buffer, offset);
   packet.forEach(function(fieldInfo) {
     var value = params[fieldInfo.name];
-    // TODO : A better check is probably needed
-    if(typeof value === "undefined" && fieldInfo.type != "count" && (fieldInfo.type != "condition" || evalCondition(fieldInfo.typeArgs, params)))
+    // TODO : This check belongs to the respective datatype.
+    if(typeof value === "undefined" && fieldInfo.type != "count")
       debug(new Error("Missing Property " + fieldInfo.name).stack);
     offset = proto.write(value, buffer, offset, fieldInfo.type, params);
   });

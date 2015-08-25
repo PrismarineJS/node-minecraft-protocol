@@ -24,7 +24,6 @@ module.exports = {
   packetStates: packetIndexes.packetStates,
   types: serializer.types,
   get: serializer.get,
-  evalCondition: utils.evalCondition,
   ping: require('./ping'),
   yggdrasil: Yggdrasil,
   version: version.version,

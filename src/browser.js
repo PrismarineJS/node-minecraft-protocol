@@ -16,5 +16,4 @@ module.exports = {
   packetStates: packetIndexes.packetStates,
   types: serializer.types,
   get: serializer.get,
-  evalCondition: utils.evalCondition,
 };

@@ -15,7 +15,7 @@ var mc = require('../')
   , SURVIVE_TIME = 10000
   , MC_SERVER_PATH = path.join(__dirname, 'server')
   , getFieldInfo = require('../dist/utils').getFieldInfo
-  , evalCondition = require('../dist/utils').evalCondition
+  , getField = require('../dist/utils').getField
   ;
 
 var defaultServerProps = {
@@ -62,30 +62,16 @@ var values = {
   'ubyte': 8,
   'string': "hi hi this is my client string",
   'buffer': new Buffer(8),
-  'array': function(_typeArgs, packet) {
-    var typeArgs = getFieldInfo(_typeArgs.type)
-    if(typeof values[typeArgs.type] === "undefined") {
-      throw new Error("No data type for " + typeArgs.type);
-    }
-    if(typeof values[typeArgs.type] === "function") {
-      return [values[typeArgs.type](typeArgs.typeArgs, packet)];
-    }
-    return [values[typeArgs.type]];
+  'array': function(typeArgs, packet) {
+    return [getValue(typeArgs.type, packet)];
   },
   'container': function(typeArgs, packet) {
     var results = {};
     for(var index in typeArgs) {
-      if(typeof values[getFieldInfo(typeArgs[index].type).type] === "undefined") {
-        throw new Error("No data type for " + typeArgs[index].type);
-      }
-      if(typeof values[getFieldInfo(typeArgs[index].type).type] === "function") {
-        var backupThis = packet.this;
-        packet.this = results;
-        results[typeArgs[index].name] = values[getFieldInfo(typeArgs[index].type).type](getFieldInfo(typeArgs[index].type).typeArgs, packet);
-        packet.this = backupThis;
-      } else {
-        results[typeArgs[index].name] = values[getFieldInfo(typeArgs[index].type).type];
-      }
+      var backupThis = packet.this;
+      packet.this = results;
+      results[typeArgs[index].name] = getValue(typeArgs[index].type, packet);
+      packet.this = backupThis;
     }
     return results;
   },
@@ -127,15 +113,24 @@ var values = {
   'UUID': "00112233-4455-6677-8899-aabbccddeeff",
   'position': {x: 12, y: 332, z: 4382821},
   'restBuffer': new Buffer(0),
-  'condition': function(typeArgs, packet) {
-    if (evalCondition(typeArgs, packet)) {
-      if (typeof values[getFieldInfo(typeArgs.type).type] === "function")
-        return values[getFieldInfo(typeArgs.type).type](getFieldInfo(typeArgs.type).typeArgs, packet);
-      else
-        return values[getFieldInfo(typeArgs.type).type];
-    }
-  }
+  'switch': function(typeArgs, packet) {
+    var i = typeArgs.fields[getField(typeArgs.compareTo, packet)];
+    if (typeof i === "undefined")
+      return getValue(typeArgs.default, packet);
+    else
+      return getValue(i, packet);
+  },
 };
+
+function getValue(_type, packet) {
+  var fieldInfo = getFieldInfo(_type);
+  if (typeof values[fieldInfo.type] === "function")
+    return values[fieldInfo.type](fieldInfo.typeArgs, packet);
+  else if (values[fieldInfo.type] !== "undefined")
+    return values[fieldInfo.type];
+  else if (fieldInfo.type !== "void")
+    throw new Error("No value for type " + fieldInfo.type);
+}
 
 describe("packets", function() {
   var client, server, serverClient;
@@ -188,14 +183,7 @@ describe("packets", function() {
     // empty object uses default values
     var packet = {};
     packetInfo.forEach(function(field) {
-      var fieldVal = values[getFieldInfo(field.type).type];
-      if(typeof fieldVal === "undefined") {
-        throw new Error("No value for type " + field.type);
-      }
-      if(typeof fieldVal === "function") {
-        fieldVal = fieldVal(getFieldInfo(field.type).typeArgs, packet);
-      }
-      packet[field.name] = fieldVal;
+      packet[field.name] = getValue(field.type, packet);
     });
     if(toServer) {
       serverClient.once([state, packetId], function(receivedPacket) {
