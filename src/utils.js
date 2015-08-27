@@ -1,6 +1,8 @@
 module.exports = {
   getField: getField,
   getFieldInfo: getFieldInfo,
+  addErrorField: addErrorField,
+  tryCatch: tryCatch,
 };
 
 function getField(countField, rootNode) {
@@ -21,4 +23,15 @@ function getFieldInfo(fieldInfo) {
     return fieldInfo;
   else
     throw new Error("Not a fieldinfo");
+}
+
+function addErrorField(e, field) {
+  if (e.field)
+    e.field = field + "." + e.field;
+  else
+    e.field = field;
+}
+
+function tryCatch(tryfn, catchfn) {
+  try { tryfn(); } catch (e) { catchfn(e); }
 }

@@ -1,4 +1,4 @@
-var getField = require("../utils").getField;
+var { getField, tryCatch, addErrorField } = require("../utils");
 var debug = require("../debug");
 
 module.exports = {
@@ -25,14 +25,26 @@ function readArray(buffer, offset, typeArgs, rootNode) {
   else if (typeof typeArgs.count !== "undefined")
     count = getField(typeArgs.count, rootNode);
   else if (typeof typeArgs.countType !== "undefined") {
-    var countResults = this.read(buffer, offset, { type: typeArgs.countType, typeArgs: typeArgs.countTypeArgs }, rootNode);
+    var countResults;
+    tryCatch(() => {
+      countResults = this.read(buffer, offset, { type: typeArgs.countType, typeArgs: typeArgs.countTypeArgs }, rootNode);
+    }, (e) => {
+      addErrorField(e, "$count");
+      throw e;
+    });
     results.size += countResults.size;
     offset += countResults.size;
     count = countResults.value;
   } else // TODO : broken schema, should probably error out.
     count = 0;
   for(var i = 0; i < count; i++) {
-    var readResults = this.read(buffer, offset, typeArgs.type, rootNode);
+    var readResults;
+    tryCatch(() => {
+      readResults = this.read(buffer, offset, typeArgs.type, rootNode);
+    }, (e) => {
+      addErrorField(e, i);
+      throw e;
+    });
     results.size += readResults.size;
     offset += readResults.size;
     results.value.push(readResults.value);
@@ -43,11 +55,21 @@ function readArray(buffer, offset, typeArgs, rootNode) {
 function writeArray(value, buffer, offset, typeArgs, rootNode) {
   if (typeof typeArgs.count === "undefined" &&
       typeof typeArgs.countType !== "undefined") {
-    offset = this.write(value.length, buffer, offset, { type: typeArgs.countType, typeArgs: typeArgs.countTypeArgs }, rootNode);
+    tryCatch(() => {
+      offset = this.write(value.length, buffer, offset, { type: typeArgs.countType, typeArgs: typeArgs.countTypeArgs }, rootNode);
+    }, (e) => {
+      addErrorField(e, "$count");
+      throw e;
+    });
   } else if (typeof typeArgs.count === "undefined") { // Broken schema, should probably error out
   }
   for(var index in value) {
-    offset = this.write(value[index], buffer, offset, typeArgs.type, rootNode);
+    tryCatch(() => {
+      offset = this.write(value[index], buffer, offset, typeArgs.type, rootNode);
+    }, (e) => {
+      addErrorField(e, i);
+      throw e;
+    });
   }
   return offset;
 }
@@ -56,10 +78,20 @@ function sizeOfArray(value, typeArgs, rootNode) {
   var size = 0;
   if (typeof typeArgs.count === "undefined" &&
       typeof typeArgs.countType !== "undefined") {
-    size = this.sizeOf(value.length, { type: typeArgs.countType, typeArgs: typeArgs.countTypeArgs }, rootNode);
+    tryCatch(() => {
+      size = this.sizeOf(value.length, { type: typeArgs.countType, typeArgs: typeArgs.countTypeArgs }, rootNode);
+    }, (e) => {
+      addErrorField(e, "$count");
+      throw e;
+    });
   }
   for(var index in value) {
-    size += this.sizeOf(value[index], typeArgs.type, rootNode);
+    tryCatch(() => {
+      size += this.sizeOf(value[index], typeArgs.type, rootNode);
+    }, (e) => {
+      addErrorField(e, i);
+      throw e;
+    });
   }
   return size;
 }
@@ -70,16 +102,16 @@ function readContainer(buffer, offset, typeArgs, rootNode) {
     value: {},
     size: 0
   };
-  // BLEIGH. Huge hack because I have no way of knowing my current name.
-  // TODO : either pass fieldInfo instead of typeArgs as argument (bleigh), or send name as argument (verybleigh).
-  // TODO : what I do inside of roblabla/Protocols is have each "frame" create a new empty slate with just a "super" object pointing to the parent.
   var backupThis = rootNode.this;
   rootNode.this = results.value;
   for(var index in typeArgs) {
-    var readResults = this.read(buffer, offset, typeArgs[index].type, rootNode);
-    if(readResults == null || readResults.value == null) {
-      continue;
-    }
+    var readResults;
+    tryCatch(() => {
+      readResults = this.read(buffer, offset, typeArgs[index].type, rootNode);
+    }, (e) => {
+      addErrorField(e, index);
+      throw e;
+    });
     results.size += readResults.size;
     offset += readResults.size;
     results.value[typeArgs[index].name] = readResults.value;
@@ -92,7 +124,12 @@ function writeContainer(value, buffer, offset, typeArgs, rootNode) {
   var backupThis = rootNode.this;
   rootNode.this = value;
   for(var index in typeArgs) {
-    offset = this.write(value[typeArgs[index].name], buffer, offset, typeArgs[index].type, rootNode);
+    tryCatch(() => {
+      offset = this.write(value[typeArgs[index].name], buffer, offset, typeArgs[index].type, rootNode);
+    }, (e) => {
+      addErrorField(e, index);
+      throw e;
+    });
   }
   rootNode.this = backupThis;
   return offset;
@@ -103,7 +140,12 @@ function sizeOfContainer(value, typeArgs, rootNode) {
   var backupThis = rootNode.this;
   rootNode.this = value;
   for(var index in typeArgs) {
-    size += this.sizeOf(value[typeArgs[index].name], typeArgs[index].type, rootNode);
+    tryCatch(() => {
+      size += this.sizeOf(value[typeArgs[index].name], typeArgs[index].type, rootNode);
+    }, (e) => {
+      addErrorField(e, index);
+      throw e;
+    });
   }
   rootNode.this = backupThis;
   return size;
