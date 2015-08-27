@@ -115,12 +115,14 @@ var values = {
   },
   'long': [0, 1],
   'entityMetadata': [
-    {key: 17, value: 0, type: 'int'},
-    {key: 0, value: 0, type: 'byte'},
-    {key: 16, value: 0, type: 'byte'},
-    {key: 1, value: 300, type: 'short'},
-    {key: 19, value: 0, type: 'int'},
-    {key: 18, value: 1, type: 'int'},
+    {key: 17, value: 0, type: 0},
+    {key: 0, value: 257, type: 1},
+    {key: 16, value: 626, type: 2},
+    {key: 1, value: 0.15, type: 3},
+    {key: 19, value: "Some string", type: 4},
+    //{key: 18, value: {}, type: 5}, Slot is a pain, I'll do it later
+    {key: 18, value: { x: 0, y: 0, z: 0 }, type: 6},
+    {key: 18, value: { pitch: 0.5, yaw: 0.7, roll: 12.4 }, type: 7},
   ],
   'objectData': {
     intField: 9,
