@@ -53,6 +53,12 @@ var defaultServerProps = {
   'motd': 'A Minecraft Server',
 };
 
+function evalCount(count, fields) {
+  if(fields[count["field"]] in count["map"])
+    return count["map"][fields[count["field"]]];
+  return count["default"];
+}
+
 var values = {
   'int': 123456,
   'short': -123,
@@ -63,7 +69,19 @@ var values = {
   'string': "hi hi this is my client string",
   'buffer': new Buffer(8),
   'array': function(typeArgs, packet) {
-    return [getValue(typeArgs.type, packet)];
+    var count;
+    if (typeof typeArgs.count === "object")
+      count = evalCount(typeArgs.count, packet);
+    else if (typeof typeArgs.count !== "undefined")
+      count = getField(typeArgs.count, rootNode);
+    else if (typeof typeArgs.countType !== "undefined")
+      count = 1;
+    var arr = [];
+    while (count > 0) {
+      arr.push(getValue(typeArgs.type, packet));
+      count--;
+    }
+    return arr;
   },
   'container': function(typeArgs, packet) {
     var results = {};

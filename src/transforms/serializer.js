@@ -3,7 +3,7 @@ var protocol = require("../protocol");
 var Transform = require("readable-stream").Transform;
 var debug = require("../debug");
 var assert = require('assert');
-var { getFieldInfo } = require('../utils');
+var { getFieldInfo, tryCatch, addErrorField } = require('../utils');
 
 module.exports.createSerializer = function(obj) {
   return new Serializer(obj);
@@ -72,13 +72,12 @@ function createPacketBuffer(packetId, state, params, isServer) {
   var packet = get(packetId, state, !isServer);
   assert.notEqual(packet, null);
   packet.forEach(function(fieldInfo) {
-    try {
+    tryCatch(() => {
       length += proto.sizeOf(params[fieldInfo.name], fieldInfo.type, params);
-    } catch(e) {
-      console.log("fieldInfo : " + JSON.stringify(fieldInfo));
-      console.log("params : " + JSON.stringify(params));
+    }, (e) => {
+      e.message = "sizeOf error for " + e.field + " : " + e.message;
       throw e;
-    }
+    });
   });
   length += utils.varint[2](packetId);
   var size = length;// + utils.varint[2](length);
@@ -90,7 +89,12 @@ function createPacketBuffer(packetId, state, params, isServer) {
     // TODO : This check belongs to the respective datatype.
     if(typeof value === "undefined" && fieldInfo.type != "count")
       debug(new Error("Missing Property " + fieldInfo.name).stack);
-    offset = proto.write(value, buffer, offset, fieldInfo.type, params);
+    tryCatch(() => {
+      offset = proto.write(value, buffer, offset, fieldInfo.type, params);
+    }, (e) => {
+      e.message = "Write error for " + e.field + " : " + e.message;
+      throw e;
+    });
   });
   return buffer;
 }
@@ -125,11 +129,7 @@ function parsePacketData(buffer, state, isServer, packetsToParse = {"packet": tr
 
   var packetInfo = get(packetId, state, isServer);
   if(packetInfo === null) {
-    return {
-      error: new Error("Unrecognized packetId: " + packetId + " (0x" + packetId.toString(16) + ")"),
-      buffer: buffer,
-      results: results
-    };
+    throw new Error("Unrecognized packetId: " + packetId + " (0x" + packetId.toString(16) + ")")
   } else {
     var packetName = packetNames[state][isServer ? "toServer" : "toClient"][packetId];
     debug("read packetId " + state + "." + packetName + " (0x" + packetId.toString(16) + ")");
@@ -139,31 +139,16 @@ function parsePacketData(buffer, state, isServer, packetsToParse = {"packet": tr
   for(i = 0; i < packetInfo.length; ++i) {
     fieldInfo = packetInfo[i];
     readResults = proto.read(buffer, cursor, fieldInfo.type, results);
-    /* A deserializer cannot return null anymore. Besides, proto.read() returns
-     * null when the condition is not fulfilled.
-     if (!!!readResults) {
-     var error = new Error("A deserializer returned null");
-     error.packetId = packetId;
-     error.fieldInfo = fieldInfo.name;
-     return {
-     size: length + lengthField.size,
-     error: error,
-     results: results
-     };
-     }*/
-    // TODO : investigate readResults returning null : shouldn't happen.
-    // When there is not enough data to read, we should return an error.
-    // As a general rule, it would be a good idea to introduce a whole bunch
-    // of new error classes to differenciate the errors.
-    if(readResults === null || readResults.value == null) continue;
-    if(readResults.error) {
-      return readResults;
-    }
-    results[fieldInfo.name] = readResults.value;
+    if(readResults === null)
+      throw new Error("A reader returned null. This is _not_ normal");
+    if(readResults.error)
+      throw new Error("A reader returned an error using the old method.");
+    if (readResults.value != null)
+      results[fieldInfo.name] = readResults.value;
     cursor += readResults.size;
   }
   if(buffer.length > cursor)
-    debug("Too much data to read for packetId: " + packetId + " (0x" + packetId.toString(16) + ")");
+    throw new Error("Packet data not entirely read");
   debug(results);
   return {
     results: results,
