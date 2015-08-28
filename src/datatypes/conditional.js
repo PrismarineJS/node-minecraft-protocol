@@ -2,6 +2,7 @@ var { getField, getFieldInfo } = require('../utils');
 
 module.exports = {
   'switch': [readSwitch, writeSwitch, sizeOfSwitch],
+  'option': [readOption, writeOption, sizeOfOption],
 };
 
 function readSwitch(buffer, offset, typeArgs, rootNode) {
@@ -38,4 +39,31 @@ function sizeOfSwitch(value, typeArgs, rootNode) {
   else
     fieldInfo = getFieldInfo(typeArgs.fields[compareTo]);
   return this.sizeOf(value, fieldInfo, rootNode);
+}
+
+function readOption(buffer, offset, typeArgs, context) {
+  var val = buffer.readUInt8(offset++);
+  if (val !== 0) {
+    var retVal = this.read(buffer, offset, typeArgs, context);
+    retval.size++;
+    return retval;
+  } else {
+    return {
+      size: 1
+    };
+  }
+}
+
+function writeOption(value, buffer, offset, typeArgs, context) {
+  if (value != null) {
+    buffer.writeUInt8(1, offset++);
+    this.write(value, buffer, offset, typeArgs, context);
+  } else {
+    buffer.writeUInt8(0, offset++);
+  }
+  return offset;
+}
+
+function sizeOfOption(value, typeArgs, context) {
+  return value == null ? 1 : this.sizeOf(value, typeArgs, context) + 1;
 }
