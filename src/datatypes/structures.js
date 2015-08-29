@@ -67,7 +67,7 @@ function writeArray(value, buffer, offset, typeArgs, rootNode) {
     tryCatch(() => {
       offset = this.write(value[index], buffer, offset, typeArgs.type, rootNode);
     }, (e) => {
-      addErrorField(e, i);
+      addErrorField(e, index);
       throw e;
     });
   }
@@ -89,7 +89,7 @@ function sizeOfArray(value, typeArgs, rootNode) {
     tryCatch(() => {
       size += this.sizeOf(value[index], typeArgs.type, rootNode);
     }, (e) => {
-      addErrorField(e, i);
+      addErrorField(e, index);
       throw e;
     });
   }
