@@ -138,6 +138,9 @@ var values = {
     else
       return getValue(i, packet);
   },
+  'option': function(typeArgs, packet) {
+    return getValue(typeArgs, packet);
+  }
 };
 
 function getValue(_type, packet) {
