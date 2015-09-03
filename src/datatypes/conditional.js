@@ -44,7 +44,7 @@ function sizeOfSwitch(value, typeArgs, rootNode) {
 function readOption(buffer, offset, typeArgs, context) {
   var val = buffer.readUInt8(offset++);
   if (val !== 0) {
-    var retVal = this.read(buffer, offset, typeArgs, context);
+    var retval = this.read(buffer, offset, typeArgs, context);
     retval.size++;
     return retval;
   } else {

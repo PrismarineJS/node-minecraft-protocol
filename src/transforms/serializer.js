@@ -44,13 +44,14 @@ proto.addTypes(minecraft);
 proto.addTypes(structures);
 proto.addTypes(conditional);
 
-
 module.exports.types = proto.types;
 
 var version = require('../version');
 var packets = require('minecraft-data')(version.majorVersion).protocol;
+proto.addTypes(packets.types);
+
 var readPackets = require("../packets").readPackets;
-var packetIndexes = readPackets(packets, states);
+var packetIndexes = readPackets(packets.states, states);
 
 var packetFields = packetIndexes.packetFields;
 var packetNames = packetIndexes.packetNames;

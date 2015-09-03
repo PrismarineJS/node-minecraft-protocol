@@ -8,7 +8,7 @@ var EventEmitter = require('events').EventEmitter
   , states = serializer.states
   ;
 var version = require('./version');
-var packets = require('minecraft-data')(version.majorVersion).protocol;
+var packets = require('minecraft-data')(version.majorVersion).protocol.states;
 var readPackets = require("./packets").readPackets;
 var packetIndexes = readPackets(packets, states);
 

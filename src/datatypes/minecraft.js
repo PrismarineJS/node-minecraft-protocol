@@ -147,56 +147,11 @@ function sizeOfRestBuffer(value) {
   return value.length;
 }
 
-var entityMetadataTypes = {
-  0: {type: 'byte'},
-  1: {type: 'short'},
-  2: {type: 'int'},
-  3: {type: 'float'},
-  4: {type: 'string'},
-  5: {type: 'slot'},
-  6: {
-    type: 'container', typeArgs: {
-      fields: [
-        {name: 'x', type: 'int'},
-        {name: 'y', type: 'int'},
-        {name: 'z', type: 'int'}
-      ]
-    }
-  },
-  7: {
-    type: 'container', typeArgs: {
-      fields: [
-        {name: 'pitch', type: 'float'},
-        {name: 'yaw', type: 'float'},
-        {name: 'roll', type: 'float'}
-      ]
-    }
-  }
-};
-
-// maps string type name to number
-var entityMetadataTypeBytes = {};
-for(var n in entityMetadataTypes) {
-  if(!entityMetadataTypes.hasOwnProperty(n)) continue;
-
-  entityMetadataTypeBytes[entityMetadataTypes[n].type] = n;
-}
-
-// container is ambiguous
-function findByte(type,value)
-{
-  if(type!="container")
-    return entityMetadataTypeBytes[type];
-    return value["x"]===undefined ? 7 : 6;
-}
-
-
-function readEntityMetadata(buffer, offset) {
+function readEntityMetadata(buffer, offset, typeArgs, context) {
   var cursor = offset;
   var metadata = [];
   var item, key, type, results, reader, typeName, dataType;
   while(true) {
-    if(cursor + 1 > buffer.length) return null;
     item = buffer.readUInt8(cursor);
     cursor += 1;
     if(item === 0x7f) {
@@ -207,46 +162,33 @@ function readEntityMetadata(buffer, offset) {
     }
     key = item & 0x1f;
     type = item >> 5;
-    dataType = entityMetadataTypes[type];
-    typeName = dataType.type;
-    //debug("Reading entity metadata type " + dataType + " (" + ( typeName || "unknown" ) + ")");
-    if(!dataType) {
-      return {
-        error: new Error("unrecognized entity metadata type " + type)
-      }
-    }
-    results = this.read(buffer, cursor, dataType, {});
-    if(!results) return null;
+    var results = this.read(buffer, cursor, ["entityMetadataItem", { "compareTo": "type" }], { type });
     metadata.push({
-      key: key,
+      key,
+      type,
       value: results.value,
-      type: typeName,
     });
     cursor += results.size;
   }
 }
 
-
 function writeEntityMetadata(value, buffer, offset) {
   var self = this;
   value.forEach(function(item) {
-    var type = findByte(item.type,item.value);
-    var headerByte = (type << 5) | item.key;
-    buffer.writeUInt8(headerByte, offset);
+    buffer.writeUInt8(item.type << 5 | item.key, offset);
     offset += 1;
-    offset = self.write(item.value, buffer, offset, entityMetadataTypes[type], {});
+    offset = self.write(item.value, buffer, offset, ["entityMetadataItem", { "compareTo": "type" }], item);
   });
   buffer.writeUInt8(0x7f, offset);
   return offset + 1;
 }
-
 
 function sizeOfEntityMetadata(value) {
   var size = 1 + value.length;
   var item;
   for(var i = 0; i < value.length; ++i) {
     item = value[i];
-    size += this.sizeOf(item.value, entityMetadataTypes[findByte(item.type,item.value)], {});
+    size += this.sizeOf(item.value, ["entityMetadataItem", { "compareTo": "type" }], item);
   }
   return size;
 }
