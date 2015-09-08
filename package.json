@@ -9,7 +9,7 @@
   },
   "scripts": {
     "prepublish": "gulp",
-    "test": "mocha --require source-map-support/register --reporter spec"
+    "test": "mocha --recursive --require source-map-support/register --reporter spec"
   },
   "keywords": [
     "minecraft",
@@ -29,6 +29,7 @@
   "browser": "browser.js",
   "devDependencies": {
     "batch": "~0.3.1",
+    "chai": "^2.3.0",
     "gulp": "^3.8.11",
     "gulp-babel": "^5.1.0",
     "gulp-plumber": "^1.0.1",
