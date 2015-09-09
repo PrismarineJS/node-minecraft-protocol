@@ -8,6 +8,7 @@ module.exports = {
   'string': [readString, writeString, sizeOfString],
   'buffer': [readBuffer, writeBuffer, sizeOfBuffer],
   'void': [readVoid, writeVoid, 0],
+  'bitfield': [readBitField, writeBitField, sizeOfBitField]
 };
 
 function readVarInt(buffer, offset) {
@@ -142,4 +143,70 @@ function readVoid() {
 
 function writeVoid(value, buffer, offset) {
   return offset;
+}
+
+function generateBitMask(n) {
+  return (1 << n) - 1;
+}
+
+function readBitField(buffer, offset, typeArgs, context) {
+  var beginOffset = offset;
+  var curVal = null;
+  var bits = 0;
+  var results = {};
+  results.value = typeArgs.reduce(function(acc, item) {
+    var size = item.size;
+    var val = 0;
+    while (size > 0) {
+      if (bits == 0) {
+        curVal = buffer[offset++];
+        bits = 8;
+      }
+      var bitsToRead = Math.min(size, bits);
+      val = (val << bitsToRead) | (curVal & generateBitMask(bits)) >> (bits - bitsToRead);
+      bits -= bitsToRead;
+      size -= bitsToRead;
+    }
+    if (item.signed && val >= 1 << (item.size - 1))
+      val -= 1 << item.size;
+    acc[item.name] = val;
+    return acc;
+  }, {});
+  results.size = offset - beginOffset;
+  return results;
+}
+function writeBitField(value, buffer, offset, typeArgs, context) {
+  var toWrite = 0;
+  var bits = 0;
+  typeArgs.forEach(function(item) {
+    var val = value[item.name];
+    var size = item.size;
+    var signed = item.signed;
+    if ((!item.signed && val < 0) || (item.signed && val < -(1 << (size - 1))))
+      throw new Error(value + " < " + item.signed ? (-(1 << (size - 1))) : 0);
+    else if ((!item.signed && val >= 1 << size)
+        || (item.signed && val >= (1 << (size - 1)) - 1))
+      throw new Error(value + " >= " + iteme.signed ? (1 << size) : ((1 << (size - 1)) - 1));
+    while (size > 0) {
+      var writeBits = Math.min(8 - bits, size);
+      toWrite = toWrite << writeBits |
+        ((val >> (size - writeBits)) & generateBitMask(writeBits));
+      size -= writeBits;
+      bits += writeBits;
+      if (bits === 8) {
+        buffer[offset++] = toWrite;
+        bits = 0;
+        toWrite = 0;
+      }
+    }
+  });
+  if (bits != 0)
+    buffer[offset++] = toWrite << (8 - bits);
+  return offset;
+}
+
+function sizeOfBitField(value, typeArgs, context) {
+  return Math.ceil(typeArgs.reduce(function(acc, item) {
+    return acc + item.size;
+  }, 0) / 8);
 }
