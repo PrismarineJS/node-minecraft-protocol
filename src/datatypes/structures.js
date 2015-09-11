@@ -147,10 +147,7 @@ function sizeOfContainer(value, typeArgs, rootNode) {
   rootNode.this = value;
   for(var index in typeArgs) {
     tryCatch(() => {
-      if (typeArgs[index].anon)
-        size += this.sizeOf(value, typeArgs[index].type, rootNode);
-      else
-        size += this.sizeOf(value[typeArgs[index].name], typeArgs[index].type, rootNode);
+      size += this.sizeOf(value[typeArgs[index].name], typeArgs[index].type, rootNode);
     }, (e) => {
       if (typeArgs && typeArgs[index] && typeArgs[index].name)
         addErrorField(e, typeArgs[index].name);
