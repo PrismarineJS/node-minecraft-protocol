@@ -109,7 +109,10 @@ function readContainer(buffer, offset, typeArgs, rootNode) {
     tryCatch(() => {
       readResults = this.read(buffer, offset, typeArgs[index].type, rootNode);
     }, (e) => {
-      addErrorField(e, index);
+      if (typeArgs && typeArgs[index] && typeArgs[index].name)
+        addErrorField(e, typeArgs[index].name);
+      else
+        addErrorField(e, "unknown");
       throw e;
     });
     results.size += readResults.size;
@@ -127,7 +130,10 @@ function writeContainer(value, buffer, offset, typeArgs, rootNode) {
     tryCatch(() => {
       offset = this.write(value[typeArgs[index].name], buffer, offset, typeArgs[index].type, rootNode);
     }, (e) => {
-      addErrorField(e, index);
+      if (typeArgs && typeArgs[index] && typeArgs[index].name)
+        addErrorField(e, typeArgs[index].name);
+      else
+        addErrorField(e, "unknown");
       throw e;
     });
   }
@@ -146,7 +152,10 @@ function sizeOfContainer(value, typeArgs, rootNode) {
       else
         size += this.sizeOf(value[typeArgs[index].name], typeArgs[index].type, rootNode);
     }, (e) => {
-      addErrorField(e, index);
+      if (typeArgs && typeArgs[index] && typeArgs[index].name)
+        addErrorField(e, typeArgs[index].name);
+      else
+        addErrorField(e, "unknown");
       throw e;
     });
   }

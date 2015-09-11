@@ -71,12 +71,13 @@ function createPacketBuffer(packetId, state, params, isServer) {
   assert.notEqual(packetId, undefined);
 
   var packet = get(packetId, state, !isServer);
+  var packetName = packetNames[state][!isServer ? 'toServer' : 'toClient'][packetId];
   assert.notEqual(packet, null);
   packet.forEach(function(fieldInfo) {
     tryCatch(() => {
       length += proto.sizeOf(params[fieldInfo.name], fieldInfo.type, params);
     }, (e) => {
-      e.message = "sizeOf error for " + e.field + " : " + e.message;
+      e.message = "sizeOf error for " + packetName + "." + e.field + " : " + e.message;
       throw e;
     });
   });
@@ -93,7 +94,7 @@ function createPacketBuffer(packetId, state, params, isServer) {
     tryCatch(() => {
       offset = proto.write(value, buffer, offset, fieldInfo.type, params);
     }, (e) => {
-      e.message = "Write error for " + e.field + " : " + e.message;
+      e.message = "Write error for " + packetName + "." + e.field + " : " + e.message;
       throw e;
     });
   });
@@ -136,10 +137,16 @@ function parsePacketData(buffer, state, isServer, packetsToParse = {"packet": tr
     debug("read packetId " + state + "." + packetName + " (0x" + packetId.toString(16) + ")");
   }
 
+  var packetName = packetNames[state][!isServer ? 'toClient' : 'toServer'][packetId];
   var i, fieldInfo, readResults;
   for(i = 0; i < packetInfo.length; ++i) {
     fieldInfo = packetInfo[i];
-    readResults = proto.read(buffer, cursor, fieldInfo.type, results);
+    tryCatch(() => {
+      readResults = proto.read(buffer, cursor, fieldInfo.type, results);
+    }, (e) => {
+      e.message = "Read error for " + packetName + "." + e.field + " : " + e.message;
+      throw e;
+    });
     if(readResults === null)
       throw new Error("A reader returned null. This is _not_ normal");
     if(readResults.error)
