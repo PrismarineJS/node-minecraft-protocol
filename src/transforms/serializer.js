@@ -77,6 +77,7 @@ function createPacketBuffer(packetId, state, params, isServer) {
     tryCatch(() => {
       length += proto.sizeOf(params[fieldInfo.name], fieldInfo.type, params);
     }, (e) => {
+      addErrorField(e, fieldInfo.name);
       e.message = "sizeOf error for " + packetName + "." + e.field + " : " + e.message;
       throw e;
     });
