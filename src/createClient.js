@@ -92,7 +92,7 @@ function createClient(options) {
   }
 
   function onKeepAlive(packet) {
-    client.write(0x00, {
+    client.write('keep_alive', {
       keepAliveId: packet.keepAliveId
     });
   }
