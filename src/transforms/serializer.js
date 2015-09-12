@@ -62,16 +62,17 @@ var packetStates = packetIndexes.packetStates;
 // TODO : This does NOT contain the length prefix anymore.
 function createPacketBuffer(packetId, state, params, isServer) {
   var length = 0;
+  var direction=!isServer ? 'toServer' : 'toClient';
   if(typeof packetId === 'string' && typeof state !== 'string' && !params) {
     // simplified two-argument usage, createPacketBuffer(name, params)
     params = state;
-    state = packetStates[!isServer ? 'toServer' : 'toClient'][packetId];
+    state = packetStates[direction][packetId];
   }
-  if(typeof packetId === 'string') packetId = packetIds[state][!isServer ? 'toServer' : 'toClient'][packetId];
+  if(typeof packetId === 'string') packetId = packetIds[state][direction][packetId];
   assert.notEqual(packetId, undefined);
 
   var packet = get(packetId, state, !isServer);
-  var packetName = packetNames[state][!isServer ? 'toServer' : 'toClient'][packetId];
+  var packetName = packetNames[state][direction][packetId];
   assert.notEqual(packet, null);
   packet.forEach(function(fieldInfo) {
     tryCatch(() => {
