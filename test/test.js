@@ -115,14 +115,7 @@ var values = {
   },
   'long': [0, 1],
   'entityMetadata': [
-    {key: 17, value: 0, type: 0},
-    {key: 0, value: 257, type: 1},
-    {key: 16, value: 626, type: 2},
-    {key: 1, value: 0.15, type: 3},
-    {key: 19, value: "Some string", type: 4},
-    //{key: 18, value: {}, type: 5}, Slot is a pain, I'll do it later
-    {key: 18, value: { x: 0, y: 0, z: 0 }, type: 6},
-    {key: 18, value: { pitch: 0.5, yaw: 0.7, roll: 12.4 }, type: 7},
+    {key: 17, value: 0, type: 0}
   ],
   'objectData': {
     intField: 9,
@@ -408,7 +401,7 @@ describe("client", function() {
         assert.strictEqual(packet.difficulty, 1);
         assert.strictEqual(packet.dimension, 0);
         assert.strictEqual(packet.gameMode, 0);
-        client.write(0x01, {
+        client.write('chat', {
           message: "hello everyone; I have logged in."
         });
       });
@@ -460,12 +453,12 @@ describe("client", function() {
       var client = mc.createClient({
         username: 'Player',
       });
-      client.on([states.PLAY, 0x01], function(packet) {
-        client.write(0x01, {
+      client.on("login", function(packet) {
+        client.write("chat", {
           message: "hello everyone; I have logged in."
         });
       });
-      client.on([states.PLAY, 0x02], function(packet) {
+      client.on("chat", function(packet) {
         var message = JSON.parse(packet.message);
         assert.strictEqual(message.translate, "chat.type.text");
         /*assert.deepEqual(message["with"][0], {
@@ -598,7 +591,7 @@ describe("mc-server", function() {
         broadcast(client.username + ' left the game.', client);
         if(client.username === 'player2') server.close();
       });
-      client.write(0x01, {
+      client.write('login', {
         entityId: client.id,
         levelType: 'default',
         gameMode: 1,
@@ -607,7 +600,7 @@ describe("mc-server", function() {
         maxPlayers: server.maxPlayers,
         reducedDebugInfo: 0
       });
-      client.on([states.PLAY, 0x01], function(packet) {
+      client.on('chat', function(packet) {
         var message = '<' + client.username + '>' + ' ' + packet.message;
         broadcast(message);
       });
@@ -615,32 +608,32 @@ describe("mc-server", function() {
     server.on('close', done);
     server.on('listening', function() {
       var player1 = mc.createClient({username: 'player1', host: '127.0.0.1'});
-      player1.on([states.PLAY, 0x01], function(packet) {
+      player1.on('login', function(packet) {
         assert.strictEqual(packet.gameMode, 1);
         assert.strictEqual(packet.levelType, 'default');
         assert.strictEqual(packet.dimension, 0);
         assert.strictEqual(packet.difficulty, 2);
-        player1.once(0x02, function(packet) {
+        player1.once('chat', function(packet) {
           assert.strictEqual(packet.message, '{"text":"player2 joined the game."}');
-          player1.once(0x02, function(packet) {
+          player1.once('chat', function(packet) {
             assert.strictEqual(packet.message, '{"text":"<player2> hi"}');
-            player2.once(0x02, fn);
+            player2.once('chat', fn);
             function fn(packet) {
               if(/<player2>/.test(packet.message)) {
-                player2.once(0x02, fn);
+                player2.once('chat', fn);
                 return;
               }
               assert.strictEqual(packet.message, '{"text":"<player1> hello"}');
-              player1.once(0x02, function(packet) {
+              player1.once('chat', function(packet) {
                 assert.strictEqual(packet.message, '{"text":"player2 left the game."}');
                 player1.end();
               });
               player2.end();
             }
 
-            player1.write(0x01, {message: "hello"});
+            player1.write('chat', {message: "hello"});
           });
-          player2.write(0x01, {message: "hi"});
+          player2.write('chat', {message: "hi"});
         });
         var player2 = mc.createClient({username: 'player2', host: '127.0.0.1'});
       });
@@ -652,7 +645,7 @@ describe("mc-server", function() {
         if(!server.clients.hasOwnProperty(clientId)) continue;
 
         client = server.clients[clientId];
-        if(client !== exclude) client.write(0x02, {message: JSON.stringify({text: message}), position: 0});
+        if(client !== exclude) client.write('chat', {message: JSON.stringify({text: message}), position: 0});
       }
     }
   });
@@ -692,7 +685,7 @@ describe("mc-server", function() {
         assert.strictEqual(reason, 'ServerShutdown');
         resolve();
       });
-      client.write(0x01, {
+      client.write('login', {
         entityId: client.id,
         levelType: 'default',
         gameMode: 1,
@@ -707,7 +700,7 @@ describe("mc-server", function() {
     });
     server.on('listening', function() {
       var client = mc.createClient({username: 'lalalal', host: '127.0.0.1'});
-      client.on([states.PLAY, 0x01], function() {
+      client.on('login', function() {
         server.close();
       });
     });
