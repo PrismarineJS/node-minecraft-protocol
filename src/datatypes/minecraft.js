@@ -6,11 +6,10 @@ var uuid = require('node-uuid');
 // TODO : remove type-specific, replace with generic containers and arrays.
 module.exports = {
   'UUID': [readUUID, writeUUID, 16],
-  'position': [readPosition, writePosition, 8],
   'slot': [readSlot, writeSlot, sizeOfSlot],
   'nbt': [readNbt, utils.buffer[1], utils.buffer[2]],
   'restBuffer': [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
-  'entityMetadata': [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata]
+  'entityMetadataLoop': [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata]
 };
 
 function readUUID(buffer, offset) {
@@ -24,35 +23,6 @@ function writeUUID(value, buffer, offset) {
   uuid.parse(value, buffer, offset);
   return offset + 16;
 }
-
-
-function readPosition(buffer, offset) {
-  var longVal = numeric.long[0](buffer, offset).value;
-  var x = signExtend26(longVal[0] >> 6);
-  var y = signExtend12(((longVal[0] & 0x3f) << 6) | ((longVal[1] >> 26) & 0x3f));
-  var z = signExtend26(longVal[1] & 0x3FFFFFF);
-  return {
-    value: {x: x, y: y, z: z},
-    size: 8
-  };
-}
-function signExtend26(value) {
-  if(value > 0x2000000) value -= 0x4000000;
-  return value;
-}
-function signExtend12(value) {
-  if(value > 0x800) value -= 0x1000;
-  return value;
-}
-
-
-function writePosition(value, buffer, offset) {
-  var longVal = [];
-  longVal[0] = ((value.x & 0x3FFFFFF) << 6) | ((value.y & 0xFFF) >> 6);
-  longVal[1] = ((value.y & 0x3F) << 26) | (value.z & 0x3FFFFFF);
-  return numeric.long[1](longVal, buffer, offset);
-}
-
 
 function readSlot(buffer, offset) {
   var value = {};
@@ -153,42 +123,31 @@ function readEntityMetadata(buffer, offset, typeArgs, context) {
   var item, key, type, results, reader, typeName, dataType;
   while(true) {
     item = buffer.readUInt8(cursor);
-    cursor += 1;
-    if(item === 0x7f) {
+    if(item === typeArgs.endVal) {
       return {
         value: metadata,
-        size: cursor - offset,
+        size: cursor + 1 - offset,
       };
     }
-    key = item & 0x1f;
-    type = item >> 5;
-    var results = this.read(buffer, cursor, ["entityMetadataItem", { "compareTo": "type" }], { type });
-    metadata.push({
-      key,
-      type,
-      value: results.value,
-    });
+    var results = this.read(buffer, cursor, typeArgs.type, {});
+    metadata.push(results.value);
     cursor += results.size;
   }
 }
 
-function writeEntityMetadata(value, buffer, offset) {
+function writeEntityMetadata(value, buffer, offset, typeArgs, context) {
   var self = this;
   value.forEach(function(item) {
-    buffer.writeUInt8(item.type << 5 | item.key, offset);
-    offset += 1;
-    offset = self.write(item.value, buffer, offset, ["entityMetadataItem", { "compareTo": "type" }], item);
+    offset = self.write(item, buffer, offset, typeArgs.type, {});
   });
-  buffer.writeUInt8(0x7f, offset);
+  buffer.writeUInt8(typeArgs.endVal, offset);
   return offset + 1;
 }
 
-function sizeOfEntityMetadata(value) {
-  var size = 1 + value.length;
-  var item;
+function sizeOfEntityMetadata(value, typeArgs, context) {
+  var size = 1;
   for(var i = 0; i < value.length; ++i) {
-    item = value[i];
-    size += this.sizeOf(item.value, ["entityMetadataItem", { "compareTo": "type" }], item);
+    size += this.sizeOf(value[i], typeArgs.type, {});
   }
   return size;
 }
