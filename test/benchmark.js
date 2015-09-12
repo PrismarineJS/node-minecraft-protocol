@@ -5,9 +5,9 @@ var mc = require("../");
   states = mc.states;
 
 var testDataWrite = [
-  {id: 0x00, params: {keepAliveId: 957759560}},
-  {id: 0x01, params: {message: '<Bob> Hello World!'}},
-  {id: 0x06, params: {x: 6.5, y: 65.62, stance: 67.24, z: 7.5, yaw: 0, pitch: 0, onGround: true}},
+  {name: 'keep_alive', params: {keepAliveId: 957759560}},
+  {name: 'chat', params: {message: '<Bob> Hello World!'}},
+  {name: 'position_look', params: {x: 6.5, y: 65.62, stance: 67.24, z: 7.5, yaw: 0, pitch: 0, onGround: true}},
   // TODO: add more packets for better quality data
 ];
 
@@ -18,7 +18,8 @@ console.log('Beginning write test');
 start = Date.now();
 for(i = 0; i < ITERATIONS; i++) {
   for(j = 0; j < testDataWrite.length; j++) {
-    inputData.push(mc.createPacketBuffer(testDataWrite[j].id, states.PLAY, testDataWrite[j].params, false));
+    var id=mc.packetIds['play']['toServer'][testDataWrite[j].name];
+    inputData.push(mc.createPacketBuffer(id, states.PLAY, testDataWrite[j].params, false));
   }
 }
 console.log('Finished write test in ' + (Date.now() - start) / 1000 + ' seconds');
