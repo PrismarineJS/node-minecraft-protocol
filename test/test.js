@@ -2,14 +2,10 @@ var mc = require('../')
   , states = mc.states
   , Client = mc.Client
   , Server = mc.Server
-  , spawn = require('child_process').spawn
   , path = require('path')
   , fs = require('fs')
   , net = require('net')
   , assert = require('power-assert')
-  , mkdirp = require('mkdirp')
-  , rimraf = require('rimraf')
-  , Batch = require('batch')
   , zfill = require('zfill')
   , MC_SERVER_JAR = process.env.MC_SERVER_JAR
   , SURVIVE_TIME = 10000
@@ -18,40 +14,8 @@ var mc = require('../')
   , getField = require('../dist/utils').getField
   ;
 
-var defaultServerProps = {
-  'generator-settings': "",
-  'op-permission-level': '4',
-  'allow-nether': 'true',
-  'level-name': 'world',
-  'enable-query': 'false',
-  'allow-flight': 'false',
-  'announce-player-achievements': true,
-  'server-port': '25565',
-  'level-type': 'DEFAULT',
-  'enable-rcon': 'false',
-  'force-gamemode': 'false',
-  'level-seed': "",
-  'server-ip': "",
-  'max-build-height': '256',
-  'spawn-npcs': 'true',
-  'white-list': 'false',
-  'spawn-animals': 'true',
-  'hardcore': 'false',
-  'snooper-enabled': 'true',
-  'online-mode': 'true',
-  'resource-pack': '',
-  'pvp': 'true',
-  'difficulty': '1',
-  'enable-command-block': 'false',
-  'gamemode': '0',
-  'player-idle-timeout': '0',
-  'max-players': '20',
-  'spawn-monsters': 'true',
-  'generate-structures': 'true',
-  'view-distance': '10',
-  'spawn-protection': '16',
-  'motd': 'A Minecraft Server',
-};
+var Wrap = require('minecraft-wrap').Wrap;
+var wrap=new Wrap(MC_SERVER_JAR,MC_SERVER_PATH);
 
 function evalCount(count, fields) {
   if(fields[count["field"]] in count["map"])
@@ -243,97 +207,22 @@ describe("packets", function() {
 describe("client", function() {
   this.timeout(10 * 60 * 1000);
 
-  var mcServer;
-
-  function startServer(propOverrides, done) {
-    var props = {};
-    var prop;
-    for(prop in defaultServerProps) {
-      if(!defaultServerProps.hasOwnProperty(prop)) continue;
-
-      props[prop] = defaultServerProps[prop];
-    }
-    for(prop in propOverrides) {
-      if(!propOverrides.hasOwnProperty(prop)) continue;
-
-      props[prop] = propOverrides[prop];
-    }
-    var batch = new Batch();
-    batch.push(function(cb) {
-      mkdirp(MC_SERVER_PATH, cb);
-    });
-    batch.push(function(cb) {
-      var str = "";
-      for(var prop in props) {
-        if(!props.hasOwnProperty(prop)) continue;
-
-        str += prop + "=" + props[prop] + "\n";
-      }
-      fs.writeFile(path.join(MC_SERVER_PATH, "server.properties"), str, cb);
-    });
-    batch.push(function(cb) {
-      fs.writeFile(path.join(MC_SERVER_PATH, "eula.txt"), "eula=true", cb);
-    });
-    batch.end(function(err) {
-      if(err) return done(err);
-      if(!fs.existsSync(MC_SERVER_JAR)) {
-        return done(new Error("The file " + MC_SERVER_JAR + " doesn't exist."));
-      }
-
-      mcServer = spawn('java', ['-Dlog4j.configurationFile=server/server_debug.xml', '-jar', MC_SERVER_JAR, 'nogui'], {
-        stdio: 'pipe',
-        cwd: MC_SERVER_PATH,
-      });
-      mcServer.stdin.setEncoding('utf8');
-      mcServer.stdout.setEncoding('utf8');
-      mcServer.stderr.setEncoding('utf8');
-      var buffer = "";
-      mcServer.stdout.on('data', onData);
-      mcServer.stderr.on('data', onData);
-      function onData(data) {
-        buffer += data;
-        var lines = buffer.split("\n");
-        var len = lines.length - 1;
-        for(var i = 0; i < len; ++i) {
-          mcServer.emit('line', lines[i]);
-        }
-        buffer = lines[lines.length - 1];
-      }
-
-      mcServer.on('line', onLine);
-      mcServer.on('line', function(line) {
-        process.stderr.write('.');
-        // uncomment this line when debugging for more insight as to what is
-        // happening on the minecraft server
-        //console.error("[MC]", line);
-      });
-      function onLine(line) {
-        if(/\[Server thread\/INFO\]: Done/.test(line)) {
-          mcServer.removeListener('line', onLine);
-          done();
-        }
-        //else
-        //  console.log(line);
-      }
-    });
-  }
-
   afterEach(function(done) {
-    if(mcServer) {
-      mcServer.stdin.write("stop\n");
-      mcServer.on('exit', function() {
-        mcServer = null;
-        done();
-      });
-    }
-    else
-      done();
+    wrap.stopServer(function(err){
+      if(err)
+        console.log(err);
+      done(err);
+    });
   });
   after(function(done) {
-    rimraf(MC_SERVER_PATH, done);
+    wrap.deleteServerData(function(err){
+      if(err)
+        console.log(err);
+      done(err);
+    });
   });
   it("pings the server", function(done) {
-    startServer({
+    wrap.startServer({
       motd: 'test1234',
       'max-players': 120,
     }, function() {
@@ -355,17 +244,17 @@ describe("client", function() {
     });
   });
   it.skip("connects successfully - online mode (STUBBED)", function(done) {
-    startServer({'online-mode': 'true'}, function() {
+    wrap.startServer({'online-mode': 'true'}, function() {
       var client = mc.createClient({
         username: process.env.MC_USERNAME,
         password: process.env.MC_PASSWORD,
       });
-      mcServer.on('line', function(line) {
+      wrap.on('line', function(line) {
         var match = line.match(/\[Server thread\/INFO\]: <(.+?)> (.+)/);
         if(!match) return;
         assert.strictEqual(match[1], client.session.username);
         assert.strictEqual(match[2], "hello everyone; I have logged in.");
-        mcServer.stdin.write("say hello\n");
+        wrap.writeServer("say hello\n");
       });
       var chatCount = 0;
       client.on('login', function(packet) {
@@ -384,16 +273,16 @@ describe("client", function() {
     done();
   });
   it.skip("connects successfully - offline mode (STUBBED)", function(done) {
-    startServer({'online-mode': 'false'}, function() {
+    wrap.startServer({'online-mode': 'false'}, function() {
       var client = mc.createClient({
         username: 'Player',
       });
-      mcServer.on('line', function(line) {
+      wrap.on('line', function(line) {
         var match = line.match(/\[Server thread\/INFO\]: <(.+?)> (.+)/);
         if(!match) return;
         assert.strictEqual(match[1], 'Player');
         assert.strictEqual(match[2], "hello everyone; I have logged in.");
-        mcServer.stdin.write("say hello\n");
+        wrap.writeServer("say hello\n");
       });
       var chatCount = 0;
       client.on('login', function(packet) {
@@ -433,7 +322,7 @@ describe("client", function() {
     done();
   });
   it("gets kicked when no credentials supplied in online mode", function(done) {
-    startServer({'online-mode': 'true'}, function() {
+    wrap.startServer({'online-mode': 'true'}, function() {
       var client = mc.createClient({
         username: 'Player',
       });
@@ -449,7 +338,7 @@ describe("client", function() {
     });
   });
   it("does not crash for " + SURVIVE_TIME + "ms", function(done) {
-    startServer({'online-mode': 'false'}, function() {
+    wrap.startServer({'online-mode': 'false'}, function() {
       var client = mc.createClient({
         username: 'Player',
       });
