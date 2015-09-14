@@ -64,7 +64,7 @@ function createServer(options) {
         client.end('KeepAliveTimeout');
         return;
       }
-      client.write(0x00, {
+      client.write('keep_alive', {
         keepAliveId: Math.floor(Math.random() * 2147483648)
       });
     }
@@ -77,7 +77,7 @@ function createServer(options) {
       keepAlive = true;
       lastKeepAlive = new Date();
       keepAliveTimer = setInterval(keepAliveLoop, checkTimeoutInterval);
-      client.on(0x00, onKeepAlive);
+      client.on('keep_alive', onKeepAlive);
     }
 
     function onEnd() {

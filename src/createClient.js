@@ -45,7 +45,7 @@ function createClient(options) {
 
   var client = new Client(false);
   client.on('connect', onConnect);
-  if(keepAlive) client.on([states.PLAY, 0x00], onKeepAlive);
+  if(keepAlive) client.on('keep_alive', onKeepAlive);
   client.once([states.LOGIN, 0x01], onEncryptionKeyRequest);
   client.once([states.LOGIN, 0x02], onLogin);
   client.once("compress", onCompressionRequest);
@@ -92,7 +92,7 @@ function createClient(options) {
   }
 
   function onKeepAlive(packet) {
-    client.write(0x00, {
+    client.write('keep_alive', {
       keepAliveId: packet.keepAliveId
     });
   }
