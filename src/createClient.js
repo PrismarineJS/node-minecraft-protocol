@@ -46,8 +46,8 @@ function createClient(options) {
   var client = new Client(false);
   client.on('connect', onConnect);
   if(keepAlive) client.on('keep_alive', onKeepAlive);
-  client.once([states.LOGIN, 0x01], onEncryptionKeyRequest);
-  client.once([states.LOGIN, 0x02], onLogin);
+  client.once('encryption_begin', onEncryptionKeyRequest);
+  client.once('success', onLogin);
   client.once("compress", onCompressionRequest);
   client.on("set_compression", onCompressionRequest);
   if(haveCredentials) {
@@ -75,14 +75,14 @@ function createClient(options) {
   return client;
 
   function onConnect() {
-    client.write(0x00, {
+    client.write('set_protocol', {
       protocolVersion: version.version,
       serverHost: host,
       serverPort: port,
       nextState: 2
     });
     client.state = states.LOGIN;
-    client.write(0x00, {
+    client.write('login_start', {
       username: client.username
     });
   }
@@ -139,7 +139,7 @@ function createClient(options) {
         var pubKey = mcPubKeyToURsa(packet.publicKey);
         var encryptedSharedSecretBuffer = pubKey.encrypt(sharedSecret, undefined, undefined, ursa.RSA_PKCS1_PADDING);
         var encryptedVerifyTokenBuffer = pubKey.encrypt(packet.verifyToken, undefined, undefined, ursa.RSA_PKCS1_PADDING);
-        client.write(0x01, {
+        client.write('encryption_begin', {
           sharedSecret: encryptedSharedSecretBuffer,
           verifyToken: encryptedVerifyTokenBuffer,
         });
