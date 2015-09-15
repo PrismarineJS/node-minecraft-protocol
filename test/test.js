@@ -439,7 +439,7 @@ describe("client", function() {
       });
       var gotKicked = false;
       client.on([states.LOGIN, 0x00], function(packet) {
-        assert.strictEqual(packet.reason, '"Failed to verify username!"');
+        assert.ok(packet.reason.indexOf('"Failed to verify username!"')!=-1);
         gotKicked = true;
       });
       client.on('end', function() {
@@ -498,7 +498,7 @@ describe("mc-server", function() {
     var count = 2;
     server.on('connection', function(client) {
       client.on('end', function(reason) {
-        assert.strictEqual(reason, "LoginTimeout");
+        assert.strictEqual(reason, '{"text":"LoginTimeout"}');
         server.close();
       });
     });
@@ -527,7 +527,7 @@ describe("mc-server", function() {
     var count = 2;
     server.on('connection', function(client) {
       client.on('end', function(reason) {
-        assert.strictEqual(reason, "KeepAliveTimeout");
+        assert.strictEqual(reason, '{"text":"KeepAliveTimeout"}');
         server.close();
       });
     });
@@ -682,7 +682,7 @@ describe("mc-server", function() {
     var count = 2;
     server.on('login', function(client) {
       client.on('end', function(reason) {
-        assert.strictEqual(reason, 'ServerShutdown');
+        assert.strictEqual(reason, '{"text":"ServerShutdown"}');
         resolve();
       });
       client.write('login', {
