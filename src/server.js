@@ -29,7 +29,7 @@ Server.prototype.listen = function(port, host) {
       if(client.state === states.PLAY) {
         client.write('kick_disconnect', {reason: endReason});
       } else if(client.state === states.LOGIN) {
-        client.write(0x00, {reason: endReason});
+        client.write('disconnect', {reason: endReason});
       }
       client._end(endReason);
     };

@@ -14,24 +14,24 @@ function ping(options, cb) {
     cb(err);
   });
 
-  client.once([states.STATUS, 0x00], function(packet) {
+  client.once('server_info', function(packet) {
     var data = JSON.parse(packet.response);
     var start = Date.now();
-    client.once(0x01, function(packet) {
+    client.once('ping', function(packet) {
       data.latency = Date.now() - start;
       cb(null, data);
       client.end();
     });
-    client.write(0x01, {time: [0, 0]});
+    client.write('ping', {time: [0, 0]});
   });
 
   client.on('state', function(newState) {
     if(newState === states.STATUS)
-      client.write(0x00, {});
+      client.write('ping_start', {});
   });
 
   client.on('connect', function() {
-    client.write(0x00, {
+    client.write('set_protocol', {
       protocolVersion: 4,
       serverHost: host,
       serverPort: port,

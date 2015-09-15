@@ -36,9 +36,9 @@ function createServer(options) {
   server.playerCount = 0;
   server.onlineModeExceptions = {};
   server.on("connection", function(client) {
-    client.once([states.HANDSHAKING, 0x00], onHandshake);
-    client.once([states.LOGIN, 0x00], onLogin);
-    client.once([states.STATUS, 0x00], onPing);
+    client.once('set_protocol', onHandshake);
+    client.once('login_start', onLogin);
+    client.once('ping_start', onPing);
     client.on('end', onEnd);
 
     var keepAlive = false;
@@ -104,11 +104,11 @@ function createServer(options) {
         response = beforePing(response, client) || response;
       }
 
-      client.once([states.STATUS, 0x01], function(packet) {
-        client.write(0x01, {time: packet.time});
+      client.once('ping', function(packet) {
+        client.write('ping', {time: packet.time});
         client.end();
       });
-      client.write(0x00, {response: JSON.stringify(response)});
+      client.write('server_info', {response: JSON.stringify(response)});
     }
 
     function onLogin(packet) {
@@ -126,8 +126,8 @@ function createServer(options) {
         client.publicKey = new Buffer(publicKeyStr, 'base64');
         hash = crypto.createHash("sha1");
         hash.update(serverId);
-        client.once([states.LOGIN, 0x01], onEncryptionKeyResponse);
-        client.write(0x01, {
+        client.once('encryption_begin', onEncryptionKeyResponse);
+        client.write('encryption_begin', {
           serverId: serverId,
           publicKey: client.publicKey,
           verifyToken: client.verifyToken
@@ -193,7 +193,7 @@ function createServer(options) {
       }
       //client.write('compress', { threshold: 256 }); // Default threshold is 256
       //client.compressionThreshold = 256;
-      client.write(0x02, {uuid: client.uuid, username: client.username});
+      client.write('success', {uuid: client.uuid, username: client.username});
       client.state = states.PLAY;
       loggedIn = true;
       if(enableKeepAlive) startKeepAlive();
