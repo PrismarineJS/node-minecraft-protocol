@@ -5,7 +5,8 @@ machine:
     version: 0.10.28
   java:
     version: openjdk7
-dependencies:
-  pre:
-    - mkdir minecraft-server
-    - node downloadServer.js $MC_SERVER_JAR
+test:
+  override:
+    - mkdir -p /home/ubuntu/node-minecraft-protocol/minecraft-server/
+    - node_modules/.bin/downloadMinecraft `node -e 'console.log(require("./src/version").minecraftVersion)'` $MC_SERVER_JAR
+    - npm test
