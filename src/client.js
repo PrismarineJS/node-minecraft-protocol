@@ -66,30 +66,6 @@ function Client(isServer) {
 
 util.inherits(Client, EventEmitter);
 
-// Transform weird "packet" types into string representing their type. Should be mostly retro-compatible
-Client.prototype.on = function(type, func) {
-  var direction = this.isServer ? 'toServer' : 'toClient';
-  if(Array.isArray(type)) {
-    arguments[0] = packetIndexes.packetNames[type[0]][direction][type[1]];
-  } else if(typeof type === "number") {
-    arguments[0] = packetIndexes.packetNames[this.state][direction][type];
-  }
-  EventEmitter.prototype.on.apply(this, arguments);
-};
-
-Client.prototype.onRaw = function(type, func) {
-  var arg = "raw.";
-  if(Array.isArray(type)) {
-    arg += packetIndexes.packetNames[type[0]][direction][type[1]];
-  } else if(typeof type === "number") {
-    arg += packetIndexes.packetNames[this.state][direction][type];
-  } else {
-    arg += type;
-  }
-  arguments[0] = arg;
-  EventEmitter.prototype.on.apply(this, arguments);
-};
-
 Client.prototype.setSocket = function(socket) {
   var ended = false;
 
