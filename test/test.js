@@ -222,6 +222,9 @@ describe("client", function() {
     });
   });
   it("pings the server", function(done) {
+    wrap.on('line',function(line){
+      console.log(line);
+    });
     wrap.startServer({
       motd: 'test1234',
       'max-players': 120,
