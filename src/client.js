@@ -130,12 +130,10 @@ Client.prototype.setSocket = function(socket) {
   this.serializer.pipe(this.framer).pipe(this.socket);
 
   this.deserializer.on('data', (parsed) => {
-    var packet = parsed.results;
-    var packetName = packetIndexes.packetNames[packet.state][this.isServer ? 'toServer' : 'toClient'][packet.id];
-    this.emit('packet', packet);
-    this.emit(packetName, packet);
-    this.emit('raw.' + packetName, parsed.buffer, packet.state);
-    this.emit('raw', parsed.buffer, packet.state);
+    this.emit('packet', parsed.data, parsed.metadata);
+    this.emit(parsed.metadata.name, parsed.data, parsed.metadata);
+    this.emit('raw.' + parsed.metadata.name, parsed.buffer, parsed.metadata);
+    this.emit('raw', parsed.buffer, parsed.metadata);
   });
 };
 
@@ -173,18 +171,10 @@ Client.prototype.setCompressionThreshold = function(threshold) {
   }
 }
 
-Client.prototype.write = function(packetId, params) {
-  if(Array.isArray(packetId)) {
-    if(packetId[0] !== this.state)
-      return false;
-    packetId = packetId[1];
-  }
-  if(typeof packetId === "string")
-    packetId = packetIndexes.packetIds[this.state][this.isServer ? "toClient" : "toServer"][packetId];
-  var packetName = packetIndexes.packetNames[this.state][this.isServer ? "toClient" : "toServer"][packetId];
-  debug("writing packetId " + this.state + "." + packetName + " (0x" + packetId.toString(16) + ")");
+Client.prototype.write = function(packetName, params) {
+  debug("writing packet " + this.state + "." + packetName);
   debug(params);
-  this.serializer.write({ packetId, params });
+  this.serializer.write({ packetName, params });
 };
 
 Client.prototype.writeRaw = function(buffer) {

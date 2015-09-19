@@ -18,8 +18,7 @@ console.log('Beginning write test');
 start = Date.now();
 for(i = 0; i < ITERATIONS; i++) {
   for(j = 0; j < testDataWrite.length; j++) {
-    var id=mc.packetIds['play']['toServer'][testDataWrite[j].name];
-    inputData.push(mc.createPacketBuffer(id, states.PLAY, testDataWrite[j].params, false));
+    inputData.push(mc.createPacketBuffer(testDataWrite[j].name, states.PLAY, testDataWrite[j].params, false));
   }
 }
 console.log('Finished write test in ' + (Date.now() - start) / 1000 + ' seconds');
