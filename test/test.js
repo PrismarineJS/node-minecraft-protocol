@@ -133,42 +133,38 @@ describe("packets", function() {
     });
     client.end();
   });
-  var packetId, packetInfo, field;
+  var packetName, packetInfo, field;
   for(state in mc.packetFields) {
     if(!mc.packetFields.hasOwnProperty(state)) continue;
-    for(packetId in mc.packetFields[state].toServer) {
-      if(!mc.packetFields[state].toServer.hasOwnProperty(packetId)) continue;
-      packetId = parseInt(packetId, 10);
-      packetInfo = mc.get(packetId, state, true);
-      it(state + ",ServerBound,0x" + zfill(parseInt(packetId, 10).toString(16), 2),
-        callTestPacket(packetId, packetInfo, state, true));
+    for(packetName in mc.packetFields[state].toServer) {
+      if(!mc.packetFields[state].toServer.hasOwnProperty(packetName)) continue;
+      packetInfo = mc.get(packetName, state, true);
+      it(state + ",ServerBound," + packetName,
+        callTestPacket(packetName, packetInfo, state, true));
     }
-    for(packetId in mc.packetFields[state].toClient) {
-      if(!mc.packetFields[state].toClient.hasOwnProperty(packetId)) continue;
-      packetId = parseInt(packetId, 10);
-      packetInfo = mc.get(packetId, state, false);
-      it(state + ",ClientBound,0x" + zfill(parseInt(packetId, 10).toString(16), 2),
-        callTestPacket(packetId, packetInfo, state, false));
+    for(packetName in mc.packetFields[state].toClient) {
+      if(!mc.packetFields[state].toClient.hasOwnProperty(packetName)) continue;
+      packetInfo = mc.get(packetName, state, false);
+      it(state + ",ClientBound," + packetName,
+        callTestPacket(packetName, packetInfo, state, false));
     }
   }
-  function callTestPacket(packetId, packetInfo, state, toServer) {
+  function callTestPacket(packetName, packetInfo, state, toServer) {
     return function(done) {
       client.state = state;
       serverClient.state = state;
-      testPacket(packetId, packetInfo, state, toServer, done);
+      testPacket(packetName, packetInfo, state, toServer, done);
     };
   }
 
-  function testPacket(packetId, packetInfo, state, toServer, done) {
+  function testPacket(packetName, packetInfo, state, toServer, done) {
     // empty object uses default values
     var packet = {};
     packetInfo.forEach(function(field) {
       packet[field.name] = getValue(field.type, packet);
     });
     if(toServer) {
-      serverClient.once([state, packetId], function(receivedPacket) {
-        delete receivedPacket.id;
-        delete receivedPacket.state;
+      serverClient.once(packetName, function(receivedPacket) {
         try {
         assertPacketsMatch(packet, receivedPacket);
         } catch (e) {
@@ -177,15 +173,13 @@ describe("packets", function() {
         }
         done();
       });
-      client.write(packetId, packet);
+      client.write(packetName, packet);
     } else {
-      client.once([state, packetId], function(receivedPacket) {
-        delete receivedPacket.id;
-        delete receivedPacket.state;
+      client.once(packetName, function(receivedPacket) {
         assertPacketsMatch(packet, receivedPacket);
         done();
       });
-      serverClient.write(packetId, packet);
+      serverClient.write(packetName, packet);
     }
   }
 
@@ -327,7 +321,7 @@ describe("client", function() {
         username: 'Player',
       });
       var gotKicked = false;
-      client.on([states.LOGIN, 0x00], function(packet) {
+      client.on('disconnect', function(packet) {
         assert.ok(packet.reason.indexOf('"Failed to verify username!"')!=-1);
         gotKicked = true;
       });

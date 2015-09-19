@@ -71,8 +71,8 @@ function createPacketBuffer(packetId, state, params, isServer) {
   if(typeof packetId === 'string') packetId = packetIds[state][direction][packetId];
   assert.notEqual(packetId, undefined);
 
-  var packet = get(packetId, state, !isServer);
   var packetName = packetNames[state][direction][packetId];
+  var packet = get(packetName, state, !isServer);
   assert.notEqual(packet, null);
   packet.forEach(function(fieldInfo) {
     tryCatch(() => {
@@ -106,9 +106,9 @@ function createPacketBuffer(packetId, state, params, isServer) {
 }
 
 
-function get(packetId, state, toServer) {
+function get(packetName, state, toServer) {
   var direction = toServer ? "toServer" : "toClient";
-  var packetInfo = packetFields[state][direction][packetId];
+  var packetInfo = packetFields[state][direction][packetName];
   if(!packetInfo) {
     return null;
   }
@@ -123,7 +123,7 @@ function parsePacketData(buffer, state, isServer, packetsToParse = {"packet": tr
 
   var results = {id: packetId, state: state};
   // Only parse the packet if there is a need for it, AKA if there is a listener attached to it
-  var name = packetNames[state][isServer ? "toServer" : "toClient"][packetId];
+  var packetName = packetNames[state][isServer ? "toServer" : "toClient"][packetId];
   var shouldParse = (!packetsToParse.hasOwnProperty(name) || packetsToParse[name] <= 0)
     && (!packetsToParse.hasOwnProperty("packet") || packetsToParse["packet"] <= 0);
   if(shouldParse) {
@@ -133,15 +133,13 @@ function parsePacketData(buffer, state, isServer, packetsToParse = {"packet": tr
     };
   }
 
-  var packetInfo = get(packetId, state, isServer);
+  var packetInfo = get(packetName, state, isServer);
   if(packetInfo === null) {
     throw new Error("Unrecognized packetId: " + packetId + " (0x" + packetId.toString(16) + ")")
   } else {
-    var packetName = packetNames[state][isServer ? "toServer" : "toClient"][packetId];
     debug("read packetId " + state + "." + packetName + " (0x" + packetId.toString(16) + ")");
   }
 
-  var packetName = packetNames[state][!isServer ? 'toClient' : 'toServer'][packetId];
   var i, fieldInfo, readResults;
   for(i = 0; i < packetInfo.length; ++i) {
     fieldInfo = packetInfo[i];

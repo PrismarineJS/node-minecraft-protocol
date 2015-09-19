@@ -24,12 +24,12 @@ function readPackets(packets, states) {
         assert(fields !== undefined, 'missing fields for packet ' + name);
         assert(!packetNames[state][direction].hasOwnProperty(id), 'duplicate packet id ' + id + ' for ' + name);
         assert(!packetIds[state][direction].hasOwnProperty(name), 'duplicate packet name ' + name + ' for ' + id);
-        assert(!packetFields[state][direction].hasOwnProperty(id), 'duplicate packet id ' + id + ' for ' + name);
+        assert(!packetFields[state][direction].hasOwnProperty(name), 'duplicate packet id ' + id + ' for ' + name);
         assert(!packetStates[direction].hasOwnProperty(name), 'duplicate packet name ' + name + ' for ' + id + ', must be unique across all states');
 
         packetNames[state][direction][id] = name;
         packetIds[state][direction][name] = id;
-        packetFields[state][direction][id] = fields;
+        packetFields[state][direction][name] = fields;
         packetStates[direction][name] = state;
       }
     });
