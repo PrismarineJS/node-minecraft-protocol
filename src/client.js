@@ -66,30 +66,6 @@ function Client(isServer) {
 
 util.inherits(Client, EventEmitter);
 
-// Transform weird "packet" types into string representing their type. Should be mostly retro-compatible
-Client.prototype.on = function(type, func) {
-  var direction = this.isServer ? 'toServer' : 'toClient';
-  if(Array.isArray(type)) {
-    arguments[0] = packetIndexes.packetNames[type[0]][direction][type[1]];
-  } else if(typeof type === "number") {
-    arguments[0] = packetIndexes.packetNames[this.state][direction][type];
-  }
-  EventEmitter.prototype.on.apply(this, arguments);
-};
-
-Client.prototype.onRaw = function(type, func) {
-  var arg = "raw.";
-  if(Array.isArray(type)) {
-    arg += packetIndexes.packetNames[type[0]][direction][type[1]];
-  } else if(typeof type === "number") {
-    arg += packetIndexes.packetNames[this.state][direction][type];
-  } else {
-    arg += type;
-  }
-  arguments[0] = arg;
-  EventEmitter.prototype.on.apply(this, arguments);
-};
-
 Client.prototype.setSocket = function(socket) {
   var ended = false;
 
@@ -130,12 +106,10 @@ Client.prototype.setSocket = function(socket) {
   this.serializer.pipe(this.framer).pipe(this.socket);
 
   this.deserializer.on('data', (parsed) => {
-    var packet = parsed.results;
-    var packetName = packetIndexes.packetNames[packet.state][this.isServer ? 'toServer' : 'toClient'][packet.id];
-    this.emit('packet', packet);
-    this.emit(packetName, packet);
-    this.emit('raw.' + packetName, parsed.buffer, packet.state);
-    this.emit('raw', parsed.buffer, packet.state);
+    this.emit('packet', parsed.data, parsed.metadata);
+    this.emit(parsed.metadata.name, parsed.data, parsed.metadata);
+    this.emit('raw.' + parsed.metadata.name, parsed.buffer, parsed.metadata);
+    this.emit('raw', parsed.buffer, parsed.metadata);
   });
 };
 
@@ -173,18 +147,10 @@ Client.prototype.setCompressionThreshold = function(threshold) {
   }
 }
 
-Client.prototype.write = function(packetId, params) {
-  if(Array.isArray(packetId)) {
-    if(packetId[0] !== this.state)
-      return false;
-    packetId = packetId[1];
-  }
-  if(typeof packetId === "string")
-    packetId = packetIndexes.packetIds[this.state][this.isServer ? "toClient" : "toServer"][packetId];
-  var packetName = packetIndexes.packetNames[this.state][this.isServer ? "toClient" : "toServer"][packetId];
-  debug("writing packetId " + this.state + "." + packetName + " (0x" + packetId.toString(16) + ")");
+Client.prototype.write = function(packetName, params) {
+  debug("writing packet " + this.state + "." + packetName);
   debug(params);
-  this.serializer.write({ packetId, params });
+  this.serializer.write({ packetName, params });
 };
 
 Client.prototype.writeRaw = function(buffer) {

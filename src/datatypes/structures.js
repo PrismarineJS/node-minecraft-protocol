@@ -104,26 +104,26 @@ function readContainer(buffer, offset, typeArgs, rootNode) {
   };
   var backupThis = rootNode.this;
   rootNode.this = results.value;
-  for(var index in typeArgs) {
+  typeArgs.forEach((typeArg) => {
     var readResults;
     tryCatch(() => {
-      readResults = this.read(buffer, offset, typeArgs[index].type, rootNode);
+      readResults = this.read(buffer, offset, typeArg.type, rootNode);
+      results.size += readResults.size;
+      offset += readResults.size;
+      if (typeArg.anon) {
+        Object.keys(readResults.value).forEach(function(key) {
+          results.value[key] = readResults.value[key];
+        });
+      } else
+        results.value[typeArg.name] = readResults.value;
     }, (e) => {
-      if (typeArgs && typeArgs[index] && typeArgs[index].name)
-        addErrorField(e, typeArgs[index].name);
+      if (typeArgs && typeArg && typeArg.name)
+        addErrorField(e, typeArg.name);
       else
         addErrorField(e, "unknown");
       throw e;
     });
-    results.size += readResults.size;
-    offset += readResults.size;
-    if (typeArgs[index].anon) {
-      Object.keys(readResults.value).forEach(function(key) {
-        results.value[key] = readResults.value[key];
-      });
-    } else
-      results.value[typeArgs[index].name] = readResults.value;
-  }
+  });
   rootNode.this = backupThis;
   return results;
 }
@@ -131,20 +131,20 @@ function readContainer(buffer, offset, typeArgs, rootNode) {
 function writeContainer(value, buffer, offset, typeArgs, rootNode) {
   var backupThis = rootNode.this;
   rootNode.this = value;
-  for(var index in typeArgs) {
+  typeArgs.forEach((typeArg) => {
     tryCatch(() => {
-      if (typeArgs[index].anon)
-        offset = this.write(value, buffer, offset, typeArgs[index].type, rootNode);
+      if (typeArg.anon)
+        offset = this.write(value, buffer, offset, typeArg.type, rootNode);
       else
-        offset = this.write(value[typeArgs[index].name], buffer, offset, typeArgs[index].type, rootNode);
+        offset = this.write(value[typeArg.name], buffer, offset, typeArg.type, rootNode);
     }, (e) => {
-      if (typeArgs && typeArgs[index] && typeArgs[index].name)
-        addErrorField(e, typeArgs[index].name);
+      if (typeArgs && typeArg && typeArg.name)
+        addErrorField(e, typeArg.name);
       else
         addErrorField(e, "unknown");
       throw e;
     });
-  }
+  });
   rootNode.this = backupThis;
   return offset;
 }
@@ -153,20 +153,20 @@ function sizeOfContainer(value, typeArgs, rootNode) {
   var size = 0;
   var backupThis = rootNode.this;
   rootNode.this = value;
-  for(var index in typeArgs) {
+  typeArgs.forEach((typeArg) => {
     tryCatch(() => {
-      if (typeArgs[index].anon)
-        size += this.sizeOf(value, typeArgs[index].type, rootNode);
+      if (typeArg.anon)
+        size += this.sizeOf(value, typeArg.type, rootNode);
       else
-        size += this.sizeOf(value[typeArgs[index].name], typeArgs[index].type, rootNode);
+        size += this.sizeOf(value[typeArg.name], typeArg.type, rootNode);
     }, (e) => {
-      if (typeArgs && typeArgs[index] && typeArgs[index].name)
-        addErrorField(e, typeArgs[index].name);
+      if (typeArgs && typeArg && typeArg.name)
+        addErrorField(e, typeArg.name);
       else
         addErrorField(e, "unknown");
       throw e;
     });
-  }
+  });
   rootNode.this = backupThis;
   return size;
 }

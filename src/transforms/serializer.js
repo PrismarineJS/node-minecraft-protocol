@@ -60,112 +60,89 @@ var packetStates = packetIndexes.packetStates;
 
 
 // TODO : This does NOT contain the length prefix anymore.
-function createPacketBuffer(packetId, state, params, isServer) {
-  var length = 0;
-  var direction=!isServer ? 'toServer' : 'toClient';
-  if(typeof packetId === 'string' && typeof state !== 'string' && !params) {
-    // simplified two-argument usage, createPacketBuffer(name, params)
-    params = state;
-    state = packetStates[direction][packetId];
-  }
-  if(typeof packetId === 'string') packetId = packetIds[state][direction][packetId];
+function createPacketBuffer(packetName, state, params, isServer) {
+  var direction = !isServer ? 'toServer' : 'toClient';
+  var packetId = packetIds[state][direction][packetName];
   assert.notEqual(packetId, undefined);
-
-  var packet = get(packetId, state, !isServer);
-  var packetName = packetNames[state][direction][packetId];
+  var packet = get(packetName, state, !isServer);
   assert.notEqual(packet, null);
-  packet.forEach(function(fieldInfo) {
-    tryCatch(() => {
-      length += proto.sizeOf(params[fieldInfo.name], fieldInfo.type, params);
-    }, (e) => {
-      addErrorField(e, fieldInfo.name);
-      e.message = "sizeOf error for "+[state,direction,packetName,e.field].join(".")+"\n"+
-        " in packet 0x" + packetId.toString(16)+" "+JSON.stringify(params)+"\n"
-        + e.message;
-      throw e;
-    });
+
+  var length = utils.varint[2](packetId);
+  tryCatch(() => {
+    length += structures.container[2].call(proto, params, packet, {});
+    //length += proto.sizeOf(params, ["container", packet], {});
+  }, (e) => {
+    e.field = [state, direction, packetName, e.field].join(".");
+    e.message = `SizeOf error for ${e.field} : ${e.message}`;
+    throw e;
   });
-  length += utils.varint[2](packetId);
-  var size = length;// + utils.varint[2](length);
-  var buffer = new Buffer(size);
-  var offset = 0;//utils.varint[1](length, buffer, 0);
-  offset = utils.varint[1](packetId, buffer, offset);
-  packet.forEach(function(fieldInfo) {
-    var value = params[fieldInfo.name];
-    // TODO : This check belongs to the respective datatype.
-    if(typeof value === "undefined" && fieldInfo.type != "count")
-      debug(new Error("Missing Property " + fieldInfo.name).stack);
-    tryCatch(() => {
-      offset = proto.write(value, buffer, offset, fieldInfo.type, params);
-    }, (e) => {
-      e.message = "Write error for " + packetName + "." + e.field + " : " + e.message;
-      throw e;
-    });
+
+  var buffer = new Buffer(length);
+  var offset = utils.varint[1](packetId, buffer, 0);
+  tryCatch(() => {
+    offset = structures.container[1].call(proto, params, buffer, offset, packet, {});
+    //offset = proto.write(params, buffer, offset, ["container", packet], {});
+  }, (e) => {
+    e.field = [state, direction, packetName, e.field].join(".");
+    e.message = `Write error for ${e.field} : ${e.message}`;
+    throw e;
   });
   return buffer;
 }
 
 
-function get(packetId, state, toServer) {
+function get(packetName, state, toServer) {
   var direction = toServer ? "toServer" : "toClient";
-  var packetInfo = packetFields[state][direction][packetId];
+  var packetInfo = packetFields[state][direction][packetName];
   if(!packetInfo) {
     return null;
   }
   return packetInfo;
 }
 
-
-// By default, parse every packets.
 function parsePacketData(buffer, state, isServer, packetsToParse = {"packet": true}) {
-  var cursor = 0;
-  var { value: packetId, size: cursor } = utils.varint[0](buffer, cursor);
+  var { value: packetId, size: cursor } = utils.varint[0](buffer, 0);
 
-  var results = {id: packetId, state: state};
-  // Only parse the packet if there is a need for it, AKA if there is a listener attached to it
-  var name = packetNames[state][isServer ? "toServer" : "toClient"][packetId];
-  var shouldParse = (!packetsToParse.hasOwnProperty(name) || packetsToParse[name] <= 0)
-    && (!packetsToParse.hasOwnProperty("packet") || packetsToParse["packet"] <= 0);
-  if(shouldParse) {
-    return {
-      buffer: buffer,
-      results: results
-    };
-  }
-
-  var packetInfo = get(packetId, state, isServer);
-  if(packetInfo === null) {
-    throw new Error("Unrecognized packetId: " + packetId + " (0x" + packetId.toString(16) + ")")
-  } else {
-    var packetName = packetNames[state][isServer ? "toServer" : "toClient"][packetId];
-    debug("read packetId " + state + "." + packetName + " (0x" + packetId.toString(16) + ")");
-  }
-
-  var packetName = packetNames[state][!isServer ? 'toClient' : 'toServer'][packetId];
-  var i, fieldInfo, readResults;
-  for(i = 0; i < packetInfo.length; ++i) {
-    fieldInfo = packetInfo[i];
-    tryCatch(() => {
-      readResults = proto.read(buffer, cursor, fieldInfo.type, results);
-    }, (e) => {
-      e.message = "Read error for " + packetName + "." + e.field + " : " + e.message;
-      throw e;
-    });
-    if(readResults === null)
-      throw new Error("A reader returned null. This is _not_ normal");
-    if(readResults.error)
-      throw new Error("A reader returned an error using the old method.");
-    if (readResults.value != null)
-      results[fieldInfo.name] = readResults.value;
-    cursor += readResults.size;
-  }
-  if(buffer.length > cursor)
-    throw new Error("Packet data not entirely read");
-  debug(results);
-  return {
-    results: results,
-    buffer: buffer
+  var direction = isServer ? "toServer" : "toClient";
+  var packetName = packetNames[state][direction][packetId];
+  var results = {
+    metadata: {
+      name: packetName,
+      id: packetId,
+      state
+    },
+    data: {},
+    buffer
   };
+
+  // Only parse the packet if there is a need for it, AKA if there is a listener
+  // attached to it.
+  var shouldParse =
+    (packetsToParse.hasOwnProperty(packetName) && packetsToParse[packetName] > 0) ||
+    (packetsToParse.hasOwnProperty("packet") && packetsToParse["packet"] > 0);
+  if (!shouldParse)
+    return results;
+
+  var packetInfo = get(packetName, state, isServer);
+  if(packetInfo === null)
+    throw new Error("Unrecognized packetId: " + packetId + " (0x" + packetId.toString(16) + ")")
+  else
+    debug("read packetId " + state + "." + packetName + " (0x" + packetId.toString(16) + ")");
+
+  var res;
+  tryCatch(() => {
+    res = proto.read(buffer, cursor, ["container", packetInfo], {});
+  }, (e) => {
+    e.field = [state, direction, packetName, e.field].join(".");
+    e.message = `Read error for ${e.field} : ${e.message}`;
+    throw e;
+  });
+  results.data = res.value;
+  cursor += res.size;
+  if(buffer.length > cursor)
+    throw new Error(`Read error for ${packetName} : Packet data not entirely read`);
+  debug(results);
+  return results;
 }
 
 class Serializer extends Transform {
@@ -175,10 +152,9 @@ class Serializer extends Transform {
     this.isServer = isServer;
   }
 
-  // TODO : Might make sense to make createPacketBuffer async.
   _transform(chunk, enc, cb) {
     try {
-      var buf = createPacketBuffer(chunk.packetId, this.protocolState, chunk.params, this.isServer);
+      var buf = createPacketBuffer(chunk.packetName, this.protocolState, chunk.params, this.isServer);
       this.push(buf);
       return cb();
     } catch (e) {
@@ -202,15 +178,7 @@ class Deserializer extends Transform {
     } catch (e) {
       return cb(e);
     }
-    if (packet.error)
-    {
-      packet.error.packet = packet;
-      return cb(packet.error)
-    }
-    else
-    {
-      this.push(packet);
-      return cb();
-    }
+    this.push(packet);
+    return cb();
   }
 }
