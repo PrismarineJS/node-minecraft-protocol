@@ -38,7 +38,7 @@
     "power-assert": "^1.0.0",
     "source-map-support": "^0.3.2",
     "zfill": "0.0.1",
-    "minecraft-wrap": "0.5.3"
+    "minecraft-wrap": "~0.5.4"
   },
   "dependencies": {
     "babel-runtime": "^5.4.4",
