@@ -11,6 +11,11 @@
    The old behavior was confusing, error-prone and undocumented !
  * Add keepAlive option to createServer, in order to optionally disable it.
  * Lots of low-level changes to allow minecraft-data to be more generic.
+ * NMP code is able to work with both 1.8 and 1.9 data with the same code,
+   opening a path for cross-versioning.
+ * The packet events now take two parameters : `function (packetData, packetMetadata)`
+   * `packetMetadata` contains the packet name, id and state (more may be added later)
+   * `packetData` contains the actual data content
 
 ## 0.14.0
 
