@@ -27,7 +27,8 @@ server.on('login', function(client) {
     gameMode: 1,
     dimension: 0,
     difficulty: 2,
-    maxPlayers: server.maxPlayers
+    maxPlayers: server.maxPlayers,
+    reducedDebugInfo:false
   });
   client.write('position', {
     x: 0,
@@ -35,7 +36,7 @@ server.on('login', function(client) {
     z: 0,
     yaw: 0,
     pitch: 0,
-    onGround: true
+    flags: 0x00
   });
 
   client.on('chat', function(data) {
@@ -69,7 +70,10 @@ function broadcast(message, exclude, username) {
           message
         ]
       };
-      client.write('chat', {message: JSON.stringify(msg)});
+      client.write('chat', {
+        message: JSON.stringify(msg),
+        position:0
+      });
     }
   }
 }
