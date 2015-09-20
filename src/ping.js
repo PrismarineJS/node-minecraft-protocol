@@ -1,7 +1,7 @@
 var net = require('net')
   , Client = require('./client')
-  , states = require('./transforms/serializer').states
-  ;
+  , states = require('./transforms/serializer').states;
+var version = require('./version');
 
 module.exports = ping;
 
@@ -32,7 +32,7 @@ function ping(options, cb) {
 
   client.on('connect', function() {
     client.write('set_protocol', {
-      protocolVersion: 4,
+      protocolVersion: version.version,
       serverHost: host,
       serverPort: port,
       nextState: 1
