@@ -13,39 +13,41 @@ var packetIndexes = readPackets(packets, states);
 
 class Client extends EventEmitter
 {
+  packetsToParse={};
+  serializer;
+  compressor=null;
+  framer=framing.createFramer();
+  cipher=null;
+  decipher=null;
+  splitter=framing.createSplitter();
+  decompressor=null;
+  deserializer;
+  isServer;
+
+  get state(){
+    return this.serializer.protocolState;
+  }
+
+  set state(newProperty) {
+    var oldProperty = this.serializer.protocolState;
+    this.serializer.protocolState = newProperty;
+    this.deserializer.protocolState = newProperty;
+    this.emit('state', newProperty, oldProperty);
+  }
+
+  get compressionThreshold() {
+    return this.compressor == null ? -2 : this.compressor.compressionThreshold;
+  }
+
+  set compressionThreshold(threshold) {
+    this.setCompressionThreshold(threshold);
+  }
+
   constructor(isServer) {
     super();
 
-    var socket;
-    this.packetsToParse = {};
-
     this.serializer = serializer.createSerializer({ isServer });
-    this.compressor = null;
-    this.framer = framing.createFramer();
-    this.cipher = null;
-
-    this.decipher = null;
-    this.splitter = framing.createSplitter();
-    this.decompressor = null;
     this.deserializer = serializer.createDeserializer({ isServer, packetsToParse: this.packetsToParse });
-
-    this._state = states.HANDSHAKING;
-    Object.defineProperty(this, "state", {
-      get: function() {
-        return this.serializer.protocolState;
-      },
-      set: function(newProperty) {
-        var oldProperty = this.serializer.protocolState;
-        this.serializer.protocolState = newProperty;
-        this.deserializer.protocolState = newProperty;
-        this.emit('state', newProperty, oldProperty);
-      }
-    });
-    Object.defineProperty(this, "compressionThreshold", {
-      get: () => this.compressor == null ? -2 : this.compressor.compressionThreshold,
-      set: (threshold) => this.setCompressionThreshold(threshold)
-    });
-
     this.isServer = !!isServer;
 
     this.on('newListener', function(event, listener) {
