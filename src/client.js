@@ -24,25 +24,6 @@ class Client extends EventEmitter
   deserializer;
   isServer;
 
-  get state(){
-    return this.serializer.protocolState;
-  }
-
-  set state(newProperty) {
-    var oldProperty = this.serializer.protocolState;
-    this.serializer.protocolState = newProperty;
-    this.deserializer.protocolState = newProperty;
-    this.emit('state', newProperty, oldProperty);
-  }
-
-  get compressionThreshold() {
-    return this.compressor == null ? -2 : this.compressor.compressionThreshold;
-  }
-
-  set compressionThreshold(threshold) {
-    this.setCompressionThreshold(threshold);
-  }
-
   constructor(isServer) {
     super();
 
@@ -63,6 +44,25 @@ class Client extends EventEmitter
         this.packetsToParse[event] -= 1;
       }
     });
+  }
+
+  get state(){
+    return this.serializer.protocolState;
+  }
+
+  set state(newProperty) {
+    var oldProperty = this.serializer.protocolState;
+    this.serializer.protocolState = newProperty;
+    this.deserializer.protocolState = newProperty;
+    this.emit('state', newProperty, oldProperty);
+  }
+
+  get compressionThreshold() {
+    return this.compressor == null ? -2 : this.compressor.compressionThreshold;
+  }
+
+  set compressionThreshold(threshold) {
+    this.setCompressionThreshold(threshold);
   }
 
   setSocket(socket) {
