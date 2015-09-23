@@ -5,13 +5,13 @@ var states = require('./transforms/serializer').states;
 
 class Server extends EventEmitter
 {
+  socketServer=null;
+  cipher=null;
+  decipher=null;
+  clients={};
+
   constructor() {
     super();
-
-    this.socketServer = null;
-    this.cipher = null;
-    this.decipher = null;
-    this.clients = {};
   }
 
   listen(port, host) {
