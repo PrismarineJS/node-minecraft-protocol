@@ -221,7 +221,9 @@ describe("client", function() {
     wrap.startServer({
       motd: 'test1234',
       'max-players': 120,
-    }, function() {
+    }, function(err) {
+      if(err)
+        return done(err);
       mc.ping({}, function(err, results) {
         if(err) return done(err);
         assert.ok(results.latency >= 0);
@@ -240,7 +242,9 @@ describe("client", function() {
     });
   });
   it.skip("connects successfully - online mode (STUBBED)", function(done) {
-    wrap.startServer({'online-mode': 'true'}, function() {
+    wrap.startServer({'online-mode': 'true'}, function(err) {
+      if(err)
+        return done(err);
       var client = mc.createClient({
         username: process.env.MC_USERNAME,
         password: process.env.MC_PASSWORD,
@@ -269,7 +273,9 @@ describe("client", function() {
     done();
   });
   it.skip("connects successfully - offline mode (STUBBED)", function(done) {
-    wrap.startServer({'online-mode': 'false'}, function() {
+    wrap.startServer({'online-mode': 'false'}, function(err) {
+      if(err)
+        return done(err);
       var client = mc.createClient({
         username: 'Player',
       });
@@ -318,7 +324,9 @@ describe("client", function() {
     done();
   });
   it("gets kicked when no credentials supplied in online mode", function(done) {
-    wrap.startServer({'online-mode': 'true'}, function() {
+    wrap.startServer({'online-mode': 'true'}, function(err) {
+      if(err)
+        return done(err);
       var client = mc.createClient({
         username: 'Player',
       });
@@ -334,7 +342,9 @@ describe("client", function() {
     });
   });
   it("does not crash for " + SURVIVE_TIME + "ms", function(done) {
-    wrap.startServer({'online-mode': 'false'}, function() {
+    wrap.startServer({'online-mode': 'false'}, function(err) {
+      if(err)
+        return done(err);
       var client = mc.createClient({
         username: 'Player',
       });
