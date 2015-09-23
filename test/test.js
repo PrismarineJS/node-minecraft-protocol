@@ -6,7 +6,6 @@ var mc = require('../')
   , fs = require('fs')
   , net = require('net')
   , assert = require('power-assert')
-  , zfill = require('zfill')
   , MC_SERVER_JAR = process.env.MC_SERVER_JAR
   , SURVIVE_TIME = 10000
   , MC_SERVER_PATH = path.join(__dirname, 'server')
