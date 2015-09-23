@@ -97,17 +97,14 @@ function sizeOfArray(value, typeArgs, rootNode) {
 }
 
 
-function readContainer(buffer, offset, typeArgs, rootNode) {
+function readContainer(buffer, offset, typeArgs, context) {
   var results = {
-    value: {},
+    value: { "..": context },
     size: 0
   };
-  var backupThis = rootNode.this;
-  rootNode.this = results.value;
   typeArgs.forEach((typeArg) => {
-    var readResults;
     tryCatch(() => {
-      readResults = this.read(buffer, offset, typeArg.type, rootNode);
+      var readResults = this.read(buffer, offset, typeArg.type, results.value);
       results.size += readResults.size;
       offset += readResults.size;
       if (typeArg.anon) {
@@ -124,19 +121,18 @@ function readContainer(buffer, offset, typeArgs, rootNode) {
       throw e;
     });
   });
-  rootNode.this = backupThis;
+  delete results.value[".."];
   return results;
 }
 
-function writeContainer(value, buffer, offset, typeArgs, rootNode) {
-  var backupThis = rootNode.this;
-  rootNode.this = value;
+function writeContainer(value, buffer, offset, typeArgs, context) {
+  value[".."] = context;
   typeArgs.forEach((typeArg) => {
     tryCatch(() => {
       if (typeArg.anon)
-        offset = this.write(value, buffer, offset, typeArg.type, rootNode);
+        offset = this.write(value, buffer, offset, typeArg.type, value);
       else
-        offset = this.write(value[typeArg.name], buffer, offset, typeArg.type, rootNode);
+        offset = this.write(value[typeArg.name], buffer, offset, typeArg.type, value);
     }, (e) => {
       if (typeArgs && typeArg && typeArg.name)
         addErrorField(e, typeArg.name);
@@ -145,20 +141,19 @@ function writeContainer(value, buffer, offset, typeArgs, rootNode) {
       throw e;
     });
   });
-  rootNode.this = backupThis;
+  delete value[".."];
   return offset;
 }
 
-function sizeOfContainer(value, typeArgs, rootNode) {
+function sizeOfContainer(value, typeArgs, context) {
+  value[".."] = context;
   var size = 0;
-  var backupThis = rootNode.this;
-  rootNode.this = value;
   typeArgs.forEach((typeArg) => {
     tryCatch(() => {
       if (typeArg.anon)
-        size += this.sizeOf(value, typeArg.type, rootNode);
+        size += this.sizeOf(value, typeArg.type, value);
       else
-        size += this.sizeOf(value[typeArg.name], typeArg.type, rootNode);
+        size += this.sizeOf(value[typeArg.name], typeArg.type, value);
     }, (e) => {
       if (typeArgs && typeArg && typeArg.name)
         addErrorField(e, typeArg.name);
@@ -167,7 +162,7 @@ function sizeOfContainer(value, typeArgs, rootNode) {
       throw e;
     });
   });
-  rootNode.this = backupThis;
+  delete value[".."];
   return size;
 }
 
