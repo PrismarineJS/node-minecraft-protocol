@@ -1,26 +1,11 @@
 var { getFieldInfo } = require('./utils');
 var reduce = require('lodash.reduce');
 
-function NMProtocols() {
-  this.types = {};
-}
-
 function isFieldInfo(type) {
   return typeof type === "string"
     || (Array.isArray(type) && typeof type[0] === "string")
     || type.type;
 }
-
-NMProtocols.prototype.addType = function(name, functions) {
-  if (functions === "native")
-    return;
-  else if (isFieldInfo(functions)) {
-    var fieldInfo = getFieldInfo(functions);
-    this.types[name] = extendType(this.types[fieldInfo.type], fieldInfo.typeArgs);
-  }
-  else
-    this.types[name] = functions;
-};
 
 function findArgs(acc, v, k) {
   if (typeof v === "string" && v.charAt(0) === '$')
@@ -29,6 +14,7 @@ function findArgs(acc, v, k) {
     acc = acc.concat(reduce(v, findArgs, []).map((v) => ({ "path": k + "." + v.path, "val": v.val })));
   return acc;
 }
+
 
 function setField(path, val, into) {
   var c = path.split('.').reverse();
@@ -64,53 +50,71 @@ function extendType(functions, defaultTypeArgs) {
   }];
 }
 
-NMProtocols.prototype.addTypes = function(types) {
-  var self = this;
-  Object.keys(types).forEach(function(name) {
-    self.addType(name, types[name]);
-  });
-};
+class NMProtocols
+{
+  types={};
 
-NMProtocols.prototype.read = function(buffer, cursor, _fieldInfo, rootNodes) {
-  let fieldInfo = getFieldInfo(_fieldInfo);
-  var type = this.types[fieldInfo.type];
-  if(!type) {
-    return {
-      error: new Error("missing data type: " + fieldInfo.type)
-    };
-  }
-  var readResults = type[0].call(this, buffer, cursor, fieldInfo.typeArgs, rootNodes);
-  if(readResults == null) {
-    throw new Error("Reader returned null : " + JSON.stringify(fieldInfo));
-  }
-  if(readResults && readResults.error) return {error: readResults.error};
-  return readResults;
-};
+  constructor() {
 
-NMProtocols.prototype.write = function(value, buffer, offset, _fieldInfo, rootNode) {
-  let fieldInfo = getFieldInfo(_fieldInfo);
-  var type = this.types[fieldInfo.type];
-  if(!type) {
-    return {
-      error: new Error("missing data type: " + fieldInfo.type)
-    };
   }
-  return type[1].call(this, value, buffer, offset, fieldInfo.typeArgs, rootNode);
-};
 
-NMProtocols.prototype.sizeOf = function(value, _fieldInfo, rootNode) {
-  let fieldInfo = getFieldInfo(_fieldInfo);
-  var type = this.types[fieldInfo.type];
-  if(!type) {
-    throw new Error("missing data type: " + fieldInfo.type);
+  addType(name, functions) {
+    if (functions === "native")
+      return;
+    else if (isFieldInfo(functions)) {
+      var fieldInfo = getFieldInfo(functions);
+      this.types[name] = extendType(this.types[fieldInfo.type], fieldInfo.typeArgs);
+    }
+    else
+      this.types[name] = functions;
   }
-  if(typeof type[2] === 'function') {
-    return type[2].call(this, value, fieldInfo.typeArgs, rootNode);
-  } else {
-    return type[2];
+
+  addTypes(types) {
+    var self = this;
+    Object.keys(types).forEach(function(name) {
+      self.addType(name, types[name]);
+    });
   }
-};
 
+  read(buffer, cursor, _fieldInfo, rootNodes) {
+    let fieldInfo = getFieldInfo(_fieldInfo);
+    var type = this.types[fieldInfo.type];
+    if(!type) {
+      return {
+        error: new Error("missing data type: " + fieldInfo.type)
+      };
+    }
+    var readResults = type[0].call(this, buffer, cursor, fieldInfo.typeArgs, rootNodes);
+    if(readResults == null) {
+      throw new Error("Reader returned null : " + JSON.stringify(fieldInfo));
+    }
+    if(readResults && readResults.error) return {error: readResults.error};
+    return readResults;
+  }
 
+  write(value, buffer, offset, _fieldInfo, rootNode) {
+    let fieldInfo = getFieldInfo(_fieldInfo);
+    var type = this.types[fieldInfo.type];
+    if(!type) {
+      return {
+        error: new Error("missing data type: " + fieldInfo.type)
+      };
+    }
+    return type[1].call(this, value, buffer, offset, fieldInfo.typeArgs, rootNode);
+  }
+
+  sizeOf(value, _fieldInfo, rootNode) {
+    let fieldInfo = getFieldInfo(_fieldInfo);
+    var type = this.types[fieldInfo.type];
+    if(!type) {
+      throw new Error("missing data type: " + fieldInfo.type);
+    }
+    if(typeof type[2] === 'function') {
+      return type[2].call(this, value, fieldInfo.typeArgs, rootNode);
+    } else {
+      return type[2];
+    }
+  }
+}
 
 module.exports = NMProtocols;
