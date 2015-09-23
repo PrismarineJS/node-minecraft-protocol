@@ -32,29 +32,29 @@ var values = {
   'ubyte': 8,
   'string': "hi hi this is my client string",
   'buffer': new Buffer(8),
-  'array': function(typeArgs, packet) {
+  'array': function(typeArgs, context) {
     var count;
     if (typeof typeArgs.count === "object")
-      count = evalCount(typeArgs.count, packet);
+      count = evalCount(typeArgs.count, context);
     else if (typeof typeArgs.count !== "undefined")
-      count = getField(typeArgs.count, rootNode);
+      count = getField(typeArgs.count, context);
     else if (typeof typeArgs.countType !== "undefined")
       count = 1;
     var arr = [];
     while (count > 0) {
-      arr.push(getValue(typeArgs.type, packet));
+      arr.push(getValue(typeArgs.type, context));
       count--;
     }
     return arr;
   },
-  'container': function(typeArgs, packet) {
-    var results = {};
+  'container': function(typeArgs, context) {
+    var results = {
+      "..": context;
+    };
     for(var index in typeArgs) {
-      var backupThis = packet.this;
-      packet.this = results;
-      results[typeArgs[index].name] = getValue(typeArgs[index].type, packet);
-      packet.this = backupThis;
+      results[typeArgs[index].name] = getValue(typeArgs[index].type, results);
     }
+    delete context[".."];
     return results;
   },
   'count': 1, // TODO : might want to set this to a correct value
@@ -90,15 +90,15 @@ var values = {
   'UUID': "00112233-4455-6677-8899-aabbccddeeff",
   'position': {x: 12, y: 332, z: 4382821},
   'restBuffer': new Buffer(0),
-  'switch': function(typeArgs, packet) {
-    var i = typeArgs.fields[getField(typeArgs.compareTo, packet)];
+  'switch': function(typeArgs, context) {
+    var i = typeArgs.fields[getField(typeArgs.compareTo, context)];
     if (typeof i === "undefined")
-      return getValue(typeArgs.default, packet);
+      return getValue(typeArgs.default, context);
     else
-      return getValue(i, packet);
+      return getValue(i, context);
   },
-  'option': function(typeArgs, packet) {
-    return getValue(typeArgs, packet);
+  'option': function(typeArgs, context) {
+    return getValue(typeArgs, context);
   }
 };
 
