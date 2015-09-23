@@ -4,19 +4,18 @@ var states = mc.states;
 function printHelpAndExit(exitCode) {
   console.log("usage: node proxy.js [<options>...] <target_srv> <user> [<password>]");
   console.log("options:");
-  console.log("  --dump ID");
-  console.log("    print to stdout messages with the specified ID.");
+  console.log("  --dump name");
+  console.log("    print to stdout messages with the specified name.");
   console.log("  --dump-all");
   console.log("    print to stdout all messages, except those specified with -x.");
-  console.log("  -x ID");
-  console.log("    do not print messages with this ID.");
-  console.log("  ID");
-  console.log("    an integer in decimal or hex (given to JavaScript's parseInt())");
-  console.log("    optionally prefixed with o for client->server or i for client<-server.");
+  console.log("  -x name");
+  console.log("    do not print messages with this name.");
+  console.log("  name");
+  console.log("    a packet name as defined in protocol.json");
   console.log("examples:");
-  console.log("  node proxy.js --dump-all -x 0x0 -x 0x3 -x 0x12 -x 0x015 -x 0x16 -x 0x17 -x 0x18 -x 0x19 localhost Player");
+  console.log("  node proxy.js --dump-all -x keep_alive -x update_time -x entity_velocity -x rel_entity_move -x entity_look -x entity_move_look -x entity_teleport -x entity_head_rotation -x position -x localhost Player");
   console.log("    print all messages except for some of the most prolific.");
-  console.log("  node examples/proxy.js --dump i0x2d --dump i0x2e --dump i0x2f dump i0x30 --dump i0x31 --dump i0x32 --dump o0x0d --dump o0x0e --dump o0x0f --dump o0x10 --dump o0x11 localhost Player");
+  console.log("  node examples/proxy.js --dump open_window --dump close_window --dump set_slot --dump window_items --dump craft_progress_bar --dump transaction --dump close_window --dump window_click --dump set_creative_slot --dump enchant_item localhost Player");
   console.log("    print messages relating to inventory management.");
 
   process.exit(exitCode);
@@ -39,27 +38,23 @@ var port = 25565;
 var user;
 var passwd;
 
-var printAllIds = false;
-var printIdWhitelist = {};
-var printIdBlacklist = {};
+var printAllNames = false;
+var printNameWhitelist = {};
+var printNameBlacklist = {};
 (function() {
   for(var i = 0; i < args.length; i++) {
     var option = args[i];
     if(!/^-/.test(option)) break;
     if(option == "--dump-all") {
-      printAllIds = true;
+      printAllNames = true;
       continue;
     }
     i++;
-    var match = /^([io]?)(.*)/.exec(args[i]);
-    var prefix = match[1];
-    if(prefix === "") prefix = "io";
-    var number = parseInt(match[2]);
-    if(isNaN(number)) printHelpAndExit(1);
+    var name = args[i];
     if(option == "--dump") {
-      printIdWhitelist[number] = prefix;
+      printNameWhitelist[name] = "io";
     } else if(option == "-x") {
-      printIdBlacklist[number] = prefix;
+      printNameBlacklist[name] = "io";
     } else {
       printHelpAndExit(1);
     }
@@ -105,41 +100,38 @@ srv.on('login', function(client) {
     'online-mode': passwd != null ? true : false,
     keepAlive:false
   });
-  var brokenPackets = [/*0x04, 0x2f, 0x30*/];
-  client.on('packet', function(packet) {
-    if(targetClient.state == states.PLAY && packet.state == states.PLAY) {
-      if(shouldDump(packet.id, "o")) {
+  client.on('packet', function(data, meta) {
+    if(targetClient.state == states.PLAY && meta.state == states.PLAY) {
+      if(shouldDump(meta.name, "o")) {
         console.log("client->server:",
-          client.state + ".0x" + packet.id.toString(16) + " :",
-          JSON.stringify(packet));
+          client.state + ".0x" + meta.id.toString(16) + " :",
+          JSON.stringify(data));
       }
       if(!endedTargetClient)
-        targetClient.write(packet.id, packet);
+        targetClient.write(meta.name, data);
     }
   });
-  targetClient.on('packet', function(packet) {
-    if(packet.state == states.PLAY && client.state == states.PLAY &&
-      brokenPackets.indexOf(packet.id) === -1) {
-      if(shouldDump(packet.id, "i")) {
+  targetClient.on('packet', function(data, meta) {
+    if(meta.state == states.PLAY && client.state == states.PLAY) {
+      if(shouldDump(meta.name, "i")) {
         console.log("client<-server:",
-          targetClient.state + ".0x" + packet.id.toString(16) + " :",
-          (packet.id != 38 ? JSON.stringify(packet) : "Packet too big"));
+          targetClient.state + "." + meta.name + " :" +
+          JSON.stringify(data));
       }
       if(!endedClient)
-        client.write(packet.id, packet);
-      if (packet.id === 0x46) // Set compression
-        client.compressionThreshold = packet.threshold;
+        client.write(meta.name, data);
+      if (meta.name === 'set_compression' || meta.name === 'compression') // Set compression
+        client.compressionThreshold = data.threshold;
     }
   });
   var buffertools = require('buffertools');
-  targetClient.on('raw', function(buffer, state) {
-    if(client.state != states.PLAY || state != states.PLAY)
+  targetClient.on('raw', function(buffer, meta) {
+    if(client.state != states.PLAY || meta.state != states.PLAY)
       return;
-    var packetId = mc.types.varint[0](buffer, 0);
-    var packetData = mc.parsePacketData(buffer, state, false, {"packet": 1}).results;
-    var packetBuff = mc.createPacketBuffer(packetData.id, packetData.state, packetData, true);
+    var packetData = mc.parsePacketData(buffer, meta.state, false, {"packet": 1}).data;
+    var packetBuff = mc.createPacketBuffer(meta.name, meta.state, packetData, true);
     if(buffertools.compare(buffer, packetBuff) != 0) {
-      console.log("client<-server: Error in packetId " + state + ".0x" + packetId.value.toString(16));
+      console.log("client<-server: Error in packet " + state + "." + meta.name);
       console.log(buffer.toString('hex'));
       console.log(packetBuff.toString('hex'));
       console.log(buffer.length);
@@ -153,14 +145,13 @@ srv.on('login', function(client) {
      client.writeRaw(buffer);
      }*/
   });
-  client.on('raw', function(buffer, state) {
-    if(state != states.PLAY || targetClient.state != states.PLAY)
+  client.on('raw', function(buffer, meta) {
+    if(meta.state != states.PLAY || targetClient.state != states.PLAY)
       return;
-    var packetId = mc.types.varint[0](buffer, 0);
-    var packetData = mc.parsePacketData(buffer, state, true, {"packet": 1}).results;
-    var packetBuff = mc.createPacketBuffer(packetData.id, packetData.state, packetData, false);
+    var packetData = mc.parsePacketData(buffer, meta.state, true, {"packet": 1}).data;
+    var packetBuff = mc.createPacketBuffer(meta.name, meta.state, packetData, false);
     if(buffertools.compare(buffer, packetBuff) != 0) {
-      console.log("client->server: Error in packetId " + state + ".0x" + packetId.value.toString(16));
+      console.log("client->server: Error in packet " + state + "." + meta.name);
       console.log(buffer.toString('hex'));
       console.log(packetBuff.toString('hex'));
       console.log(buffer.length);
@@ -182,10 +173,10 @@ srv.on('login', function(client) {
   });
 });
 
-function shouldDump(id, direction) {
-  if(matches(printIdBlacklist[id])) return false;
-  if(printAllIds) return true;
-  if(matches(printIdWhitelist[id])) return true;
+function shouldDump(name, direction) {
+  if(matches(printNameBlacklist[name])) return false;
+  if(printAllNames) return true;
+  if(matches(printNameWhitelist[name])) return true;
   return false;
   function matches(result) {
     return result != null && result.indexOf(direction) !== -1;
