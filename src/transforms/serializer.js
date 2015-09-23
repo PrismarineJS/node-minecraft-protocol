@@ -63,7 +63,7 @@ var packetStates = packetIndexes.packetStates;
 function createPacketBuffer(packetName, state, params, isServer) {
   var direction = !isServer ? 'toServer' : 'toClient';
   var packetId = packetIds[state][direction][packetName];
-  assert.notEqual(packetId, undefined);
+  assert.notEqual(packetId, undefined, `${state}.${isServer}.${packetName} : ${packetId}`);
   var packet = get(packetName, state, !isServer);
   assert.notEqual(packet, null);
 
@@ -140,7 +140,8 @@ function parsePacketData(buffer, state, isServer, packetsToParse = {"packet": tr
   results.data = res.value;
   cursor += res.size;
   if(buffer.length > cursor)
-    throw new Error(`Read error for ${packetName} : Packet data not entirely read`);
+    throw new Error(`Read error for ${packetName} : Packet data not entirely read :
+        ${JSON.stringify(results)}`);
   debug(results);
   return results;
 }

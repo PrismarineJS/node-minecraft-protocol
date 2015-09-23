@@ -5,13 +5,18 @@ module.exports = {
   tryCatch: tryCatch,
 };
 
-function getField(countField, rootNode) {
-  var countFieldArr = countField.split(".");
-  var count = rootNode;
-  for(var index = 0; index < countFieldArr.length; index++) {
-    count = count[countFieldArr[index]];
+function getField(countField, context) {
+  var countFieldArr = countField.split("/");
+  var i = 0;
+  if (countFieldArr[i] === "") {
+    while (context.hasOwnProperty(".."))
+      context = context[".."];
+    i++;
   }
-  return count;
+  for(; i < countFieldArr.length; i++) {
+    context = context[countFieldArr[i]];
+  }
+  return context;
 }
 
 function getFieldInfo(fieldInfo) {
