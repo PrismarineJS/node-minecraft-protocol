@@ -52,8 +52,10 @@ function extendType(functions, defaultTypeArgs) {
 
 class NMProtocols
 {
+  types={};
+
   constructor() {
-    this.types = {};
+
   }
 
   addType(name, functions) {
