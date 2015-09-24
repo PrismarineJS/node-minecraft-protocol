@@ -114,7 +114,7 @@ class Client extends EventEmitter
 
   end(reason) {
     this._endReason = reason;
-    this.socket.end();
+    if(this.socket) this.socket.end();
   }
 
   setEncryption(sharedSecret) {
