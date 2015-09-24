@@ -25,7 +25,7 @@ Parse and serialize minecraft packets, plus authentication and encryption.
    - Handshake
    - Keep-alive checking
    - Ping status
- * Robust test coverage. See Test Coverage section below.
+ * Robust test coverage.
  * Optimized for rapidly staying up to date with Minecraft protocol updates.
 
 ## Projects Using node-minecraft-protocol
@@ -53,13 +53,11 @@ var client = mc.createClient({
 client.on('chat', function(packet) {
   // Listen for chat messages and echo them back.
   var jsonMsg = JSON.parse(packet.message);
-  if (jsonMsg.translate == 'chat.type.announcement' || jsonMsg.translate == 'chat.type.text') {
-    var username = jsonMsg.using[0];
-    var msg = jsonMsg.using[1];
-    if (username === client.username) return;
-    client.write("chat", {
-      message: msg
-    });
+  if(jsonMsg.translate == 'chat.type.announcement' || jsonMsg.translate == 'chat.type.text') {
+    var username = jsonMsg.with[0].text;
+    var msg = jsonMsg.with[1];
+    if(username === client.username) return;
+    client.write('chat', {message: msg});
   }
 });
 ```
@@ -83,7 +81,8 @@ server.on('login', function(client) {
     gameMode: 0,
     dimension: 0,
     difficulty: 2,
-    maxPlayers: server.maxPlayers
+    maxPlayers: server.maxPlayers,
+    reducedDebugInfo: false
   });
   client.write('position', {
     x: 0,
@@ -91,13 +90,16 @@ server.on('login', function(client) {
     z: 0,
     yaw: 0,
     pitch: 0,
-    onGround: true
+    flags: 0x00
   });
-  var msg = { translate: 'chat.type.announcement', using: [
-    'Server',
-    'Hello, ' + client.username
-  ]};
-  client.write("chat", { message: JSON.stringify(msg) });
+  var msg = {
+    translate: 'chat.type.announcement',
+    "with": [
+      'Server',
+      'Hello, world!'
+    ]
+  };
+  client.write("chat", { message: JSON.stringify(msg), position: 0 });
 });
 ```
 
