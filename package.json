@@ -5,7 +5,7 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/andrewrk/node-minecraft-protocol.git"
+    "url": "git://github.com/PrismarineJS/node-minecraft-protocol.git"
   },
   "scripts": {
     "prepublish": "gulp",
