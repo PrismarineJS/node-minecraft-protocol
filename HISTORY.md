@@ -1,6 +1,6 @@
 # History
 
-## 0.15.0 (Unreleased)
+## 0.15.0
 
  * UUIDs are now strings instead of arrays. (BREAKING CHANGE)
  * Server clients have a new property, client.profile, containing the result
