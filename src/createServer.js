@@ -148,7 +148,7 @@ function createServer(options) {
       }
       if(client.protocolVersion!=version.version)
       {
-        client.end("Wrong protocol version, expected : "+version.version+" and you are using : "+client.protocolVersion);
+        client.end("Wrong protocol version, expected: "+version.version+" and you are using: "+client.protocolVersion);
       }
     }
 
