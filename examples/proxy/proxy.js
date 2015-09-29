@@ -2,7 +2,7 @@ var mc = require('../../');
 
 var states = mc.states;
 function printHelpAndExit(exitCode) {
-  console.log("usage: node proxy.js [<options>...] <target_srv> <user> [<password>]");
+  console.log("usage: node proxy.js [<options>...] <target_srv> <user> [<password>] [<version>]");
   console.log("options:");
   console.log("  --dump name");
   console.log("    print to stdout messages with the specified name.");
@@ -37,6 +37,7 @@ var host;
 var port = 25565;
 var user;
 var passwd;
+var version;
 
 var printAllNames = false;
 var printNameWhitelist = {};
@@ -59,10 +60,11 @@ var printNameBlacklist = {};
       printHelpAndExit(1);
     }
   }
-  if(!(i + 2 <= args.length && args.length <= i + 3)) printHelpAndExit(1);
+  if(!(i + 2 <= args.length && args.length <= i + 4)) printHelpAndExit(1);
   host = args[i++];
   user = args[i++];
   passwd = args[i++];
+  version = args[i++];
 })();
 
 if(host.indexOf(':') != -1) {
@@ -73,7 +75,8 @@ if(host.indexOf(':') != -1) {
 var srv = mc.createServer({
   'online-mode': false,
   port: 25566,
-  keepAlive: false
+  keepAlive: false,
+  version:version
 });
 srv.on('login', function(client) {
   var addr = client.socket.remoteAddress;
@@ -98,7 +101,8 @@ srv.on('login', function(client) {
     username: user,
     password: passwd,
     'online-mode': passwd != null ? true : false,
-    keepAlive:false
+    keepAlive:false,
+    version:version
   });
   client.on('packet', function(data, meta) {
     if(targetClient.state == states.PLAY && meta.state == states.PLAY) {
