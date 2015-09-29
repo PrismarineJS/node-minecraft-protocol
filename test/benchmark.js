@@ -11,21 +11,24 @@ var testDataWrite = [
   // TODO: add more packets for better quality data
 ];
 
-var inputData = [];
-
-var start, i, j;
-console.log('Beginning write test');
-start = Date.now();
-for(i = 0; i < ITERATIONS; i++) {
-  for(j = 0; j < testDataWrite.length; j++) {
-    inputData.push(mc.createPacketBuffer(testDataWrite[j].name, states.PLAY, testDataWrite[j].params, false));
+mc.supportedVersions.forEach(function(supportedVersion){
+  var inputData = [];
+  var serializer=new mc.createSerializer({state:states.PLAY,isServer:false,version:supportedVersion});
+  var start, i, j;
+  console.log('Beginning write test for '+supportedVersion);
+  start = Date.now();
+  for(i = 0; i < ITERATIONS; i++) {
+    for(j = 0; j < testDataWrite.length; j++) {
+      inputData.push(serializer.createPacketBuffer(testDataWrite[j].name, testDataWrite[j].params));
+    }
   }
-}
-console.log('Finished write test in ' + (Date.now() - start) / 1000 + ' seconds');
+  console.log('Finished write test in ' + (Date.now() - start) / 1000 + ' seconds');
 
-console.log('Beginning read test');
-start = Date.now();
-for (j = 0; j < inputData.length; j++) {
-  mc.parsePacketData(inputData[j], states.PLAY, true);
-}
-console.log('Finished read test in ' + (Date.now() - start) / 1000 + ' seconds');
+  var deserializer=new mc.createDeserializer({state:states.PLAY,isServer:true,version:supportedVersion});
+  console.log('Beginning read test for '+supportedVersion);
+  start = Date.now();
+  for (j = 0; j < inputData.length; j++) {
+    deserializer.parsePacketData(inputData[j]);
+  }
+  console.log('Finished read test in ' + (Date.now() - start) / 1000 + ' seconds');
+});

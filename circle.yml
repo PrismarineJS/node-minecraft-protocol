@@ -1,12 +1,10 @@
 machine:
   environment:
-    MC_SERVER_JAR: /home/ubuntu/node-minecraft-protocol/minecraft-server/minecraft_server.jar
+    MC_SERVER_JAR_DIR: /home/ubuntu/node-minecraft-protocol/minecraft-server/
   node:
     version: 0.10.28
   java:
     version: openjdk7
-test:
-  override:
-    - mkdir -p /home/ubuntu/node-minecraft-protocol/minecraft-server/
-    - node_modules/.bin/downloadMinecraft `node -e 'console.log(require("./src/version").minecraftVersion)'` $MC_SERVER_JAR
-    - npm test
+dependencies:
+  pre:
+    - mkdir minecraft-server

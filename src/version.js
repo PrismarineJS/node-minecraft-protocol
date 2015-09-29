@@ -1,3 +1,4 @@
-var majorVersion='1.8';
-var mcData=require("minecraft-data")(majorVersion);
-module.exports=mcData.version;
+module.exports={
+  defaultVersion:'1.8',
+  supportedVersions:['1.8','1.9']
+};

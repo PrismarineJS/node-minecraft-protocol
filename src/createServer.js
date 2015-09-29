@@ -1,6 +1,5 @@
 var mcHexDigest=require("./mcHexDigest");
 var ursa=require("./ursa");
-var version = require("./version");
 var crypto = require('crypto');
 var Yggdrasil = require('./yggdrasil.js');
 var validateSession = Yggdrasil.validateSession;
@@ -28,9 +27,13 @@ function createServer(options) {
 
   var enableKeepAlive = options.keepAlive == null ? true : options.keepAlive;
 
+  var optVersion = options.version || require("./version").defaultVersion;
+  var mcData=require("minecraft-data")(optVersion);
+  var version = mcData.version;
+
   var serverKey = ursa.generatePrivateKey(1024);
 
-  var server = new Server(options);
+  var server = new Server(version.majorVersion);
   server.motd = options.motd || "A Minecraft server";
   server.maxPlayers = options['max-players'] || 20;
   server.playerCount = 0;

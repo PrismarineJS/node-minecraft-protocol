@@ -84,6 +84,7 @@ Returns a `Client` instance and perform login.
  * clientToken : generated if a password is given
  * accessToken : generated if a password is given
  * keepAlive : send keep alive packets : default to true
+ * version : 1.8 or 1.9
 
 ## Client
 

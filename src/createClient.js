@@ -1,6 +1,5 @@
 var mcHexDigest=require("./mcHexDigest");
 var ursa=require("./ursa");
-var version = require("./version");
 var net = require('net');
 var dns = require('dns');
 var Client = require('./client');
@@ -42,8 +41,12 @@ function createClient(options) {
   var haveCredentials = options.password != null || (clientToken != null && accessToken != null);
   var keepAlive = options.keepAlive == null ? true : options.keepAlive;
 
+  var optVersion = options.version || require("./version").defaultVersion;
+  var mcData=require("minecraft-data")(optVersion);
+  var version = mcData.version;
 
-  var client = new Client(false);
+
+  var client = new Client(false,version.majorVersion);
   client.on('connect', onConnect);
   if(keepAlive) client.on('keep_alive', onKeepAlive);
   client.once('encryption_begin', onEncryptionKeyRequest);

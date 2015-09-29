@@ -5,10 +5,6 @@ var compression = require('./transforms/compression');
 var framing = require('./transforms/framing');
 var crypto = require('crypto');
 var states = serializer.states;
-var version = require('./version');
-var packets = require('minecraft-data')(version.majorVersion).protocol.states;
-var readPackets = require("./packets").readPackets;
-var packetIndexes = readPackets(packets, states);
 
 
 class Client extends EventEmitter
@@ -24,11 +20,16 @@ class Client extends EventEmitter
   deserializer;
   isServer;
 
-  constructor(isServer) {
+  constructor(isServer,version) {
     super();
 
-    this.serializer = serializer.createSerializer({ isServer });
-    this.deserializer = serializer.createDeserializer({ isServer, packetsToParse: this.packetsToParse });
+    var mcData=require("minecraft-data")(version);
+    var packets = mcData.protocol.states;
+    var readPackets = require("./packets").readPackets;
+    var packetIndexes = readPackets(packets, states);
+
+    this.serializer = serializer.createSerializer({ isServer, version:version});
+    this.deserializer = serializer.createDeserializer({ isServer, packetsToParse: this.packetsToParse, version:version});
     this.isServer = !!isServer;
 
     this.on('newListener', function(event, listener) {

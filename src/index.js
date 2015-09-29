@@ -3,10 +3,7 @@ var Server = require('./server');
 var Yggdrasil = require('./yggdrasil.js');
 var serializer = require("./transforms/serializer");
 var utils = require("./utils");
-var version = require("./version");
-var packets = require('minecraft-data')(version.majorVersion).protocol.states;
 var readPackets = require("./packets").readPackets;
-var packetIndexes = readPackets(packets, serializer.states);
 var createClient = require("./createClient");
 var createServer = require("./createServer");
 
@@ -16,16 +13,10 @@ module.exports = {
   Client: Client,
   Server: Server,
   states: serializer.states,
-  createPacketBuffer: serializer.createPacketBuffer,
-  parsePacketData: serializer.parsePacketData,
-  packetFields: packetIndexes.packetFields,
-  packetNames: packetIndexes.packetNames,
-  packetIds: packetIndexes.packetIds,
-  packetStates: packetIndexes.packetStates,
-  types: serializer.types,
-  get: serializer.get,
+  createSerializer:serializer.createSerializer,
+  createDeserializer:serializer.createDeserializer,
+  readPackets:readPackets,
   ping: require('./ping'),
   yggdrasil: Yggdrasil,
-  version: version.version,
-  minecraftVersion: version.minecraftVersion
+  supportedVersions:require("./version").supportedVersions
 };
