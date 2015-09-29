@@ -128,8 +128,8 @@ srv.on('login', function(client) {
   targetClient.on('raw', function(buffer, meta) {
     if(client.state != states.PLAY || meta.state != states.PLAY)
       return;
-    var packetData = mc.parsePacketData(buffer, meta.state, false, {"packet": 1}).data;
-    var packetBuff = mc.createPacketBuffer(meta.name, meta.state, packetData, true);
+    var packetData = targetClient.deserializer.parsePacketData(buffer).data;
+    var packetBuff = client.serializer.createPacketBuffer(meta.name, packetData);
     if(buffertools.compare(buffer, packetBuff) != 0) {
       console.log("client<-server: Error in packet " + state + "." + meta.name);
       console.log(buffer.toString('hex'));
@@ -148,8 +148,8 @@ srv.on('login', function(client) {
   client.on('raw', function(buffer, meta) {
     if(meta.state != states.PLAY || targetClient.state != states.PLAY)
       return;
-    var packetData = mc.parsePacketData(buffer, meta.state, true, {"packet": 1}).data;
-    var packetBuff = mc.createPacketBuffer(meta.name, meta.state, packetData, false);
+    var packetData = client.deserializer.parsePacketData(buffer).data;
+    var packetBuff = targetClient.serializer.createPacketBuffer(meta.name, packetData);
     if(buffertools.compare(buffer, packetBuff) != 0) {
       console.log("client->server: Error in packet " + state + "." + meta.name);
       console.log(buffer.toString('hex'));

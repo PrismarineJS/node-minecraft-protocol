@@ -65,7 +65,7 @@ class Serializer extends Transform {
   createPacketBuffer(packetName, params) {
     var direction = !this.isServer ? 'toServer' : 'toClient';
     var packetId = this.packetIds[this.protocolState][direction][packetName];
-    assert.notEqual(packetId, undefined, `${this.protocolState}.${this.isServer}.${packetName} : ${packetId}`);
+    assert.notEqual(packetId, undefined, `${this.protocolState}.${direction}.${packetName} : ${packetId}`);
     var packet = this.packetFields[this.protocolState][direction][packetName];
     packet=packet ? packet : null;
 
