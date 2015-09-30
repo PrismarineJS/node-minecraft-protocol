@@ -1,6 +1,5 @@
 var Client = require('./client');
 var Server = require('./server');
-var Yggdrasil = require('./yggdrasil.js');
 var serializer = require("./transforms/serializer");
 var utils = require("./utils");
 var readPackets = require("./packets").readPackets;
@@ -17,6 +16,5 @@ module.exports = {
   createDeserializer:serializer.createDeserializer,
   readPackets:readPackets,
   ping: require('./ping'),
-  yggdrasil: Yggdrasil,
   supportedVersions:require("./version").supportedVersions
 };

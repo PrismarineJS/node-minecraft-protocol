@@ -48,7 +48,9 @@
     "prismarine-nbt": "0.0.1",
     "readable-stream": "^1.1.0",
     "superagent": "~0.10.0",
-    "ursa-purejs": "0.0.3"
+    "ursa-purejs": "0.0.3",
+    "uuid": "^2.0.1",
+    "yggdrasil": "0.1.0"
   },
   "optionalDependencies": {
     "ursa": "~0.8.0"

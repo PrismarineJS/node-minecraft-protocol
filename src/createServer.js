@@ -1,8 +1,6 @@
-var mcHexDigest=require("./mcHexDigest");
 var ursa=require("./ursa");
 var crypto = require('crypto');
-var Yggdrasil = require('./yggdrasil.js');
-var validateSession = Yggdrasil.validateSession;
+var yggserver = require('yggdrasil').server({});
 var serializer = require("./transforms/serializer");
 var states = serializer.states;
 var bufferEqual = require('buffer-equal');
@@ -51,7 +49,7 @@ function createServer(options) {
     var keepAliveTimer = null;
     var loginKickTimer = setTimeout(kickForNotLoggingIn, kickTimeout);
 
-    var hash;
+    var serverId;
 
     function kickForNotLoggingIn() {
       client.end('LoginTimeout');
@@ -119,7 +117,7 @@ function createServer(options) {
       var isException = !!server.onlineModeExceptions[client.username.toLowerCase()];
       var needToVerify = (onlineMode && !isException) || (!onlineMode && isException);
       if(needToVerify) {
-        var serverId = crypto.randomBytes(4).toString('hex');
+        serverId = crypto.randomBytes(4).toString('hex');
         client.verifyToken = crypto.randomBytes(4);
         var publicKeyStrArr = serverKey.toPublicPem("utf8").split("\n");
         var publicKeyStr = "";
@@ -127,8 +125,6 @@ function createServer(options) {
           publicKeyStr += publicKeyStrArr[i]
         }
         client.publicKey = new Buffer(publicKeyStr, 'base64');
-        hash = crypto.createHash("sha1");
-        hash.update(serverId);
         client.once('encryption_begin', onEncryptionKeyResponse);
         client.write('encryption_begin', {
           serverId: serverId,
@@ -168,8 +164,6 @@ function createServer(options) {
         return;
       }
       client.setEncryption(sharedSecret);
-      hash.update(sharedSecret);
-      hash.update(client.publicKey);
 
       var isException = !!server.onlineModeExceptions[client.username.toLowerCase()];
       var needToVerify = (onlineMode && !isException) || (!onlineMode && isException);
@@ -177,8 +171,7 @@ function createServer(options) {
       nextStep();
 
       function verifyUsername() {
-        var digest = mcHexDigest(hash);
-        validateSession(client.username, digest, function(err, uuid, profile) {
+        yggserver.hasJoined(client.username, serverId, sharedSecret, client.publicKey, function(err, uuid, profile) {
           if(err) {
             client.end("Failed to verify username!");
             return;
