@@ -15,6 +15,7 @@ mc.supportedVersions.forEach(function(supportedVersion){
   var mcData=require("minecraft-data")(supportedVersion);
   var version=mcData.version;
   describe("benchmark "+version.minecraftVersion,function(){
+    this.timeout(20 * 1000);
     var inputData = [];
     it("bench serializing",function(done){
       var serializer=new mc.createSerializer({state:states.PLAY,isServer:false,version:version.majorVersion});
