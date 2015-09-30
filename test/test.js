@@ -48,7 +48,7 @@ var values = {
   },
   'container': function(typeArgs, context) {
     var results = {
-      "..": context;
+      "..": context
     };
     for(var index in typeArgs) {
       results[typeArgs[index].name] = getValue(typeArgs[index].type, results);
