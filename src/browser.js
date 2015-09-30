@@ -5,8 +5,6 @@ var serializer = require("./transforms/serializer");
 module.exports = {
   Client: require('./client'),
   protocol: require('./protocol'),
-  types: serializer.types,
-  get: serializer.get,
   readPackets:readPackets,
   supportedVersions:require("./version").supportedVersions
 };
