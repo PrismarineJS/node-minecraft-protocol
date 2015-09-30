@@ -266,7 +266,7 @@ mc.supportedVersions.forEach(function(supportedVersion){
         });
       });
     });
-    it.skip("connects successfully - online mode (STUBBED)", function(done) {
+    it("connects successfully - online mode", function(done) {
       wrap.startServer({'online-mode': 'true'}, function(err) {
         if(err)
           return done(err);
@@ -293,10 +293,10 @@ mc.supportedVersions.forEach(function(supportedVersion){
           });
         });
         client.on('chat', function(packet) {
+          client.removeAllListeners('chat');
           done();
         });
       });
-      done();
     });
     it("connects successfully - offline mode", function(done) {
       wrap.startServer({'online-mode': 'false'}, function(err) {
