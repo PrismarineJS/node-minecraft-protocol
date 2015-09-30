@@ -1,15 +1,17 @@
-var net = require('net')
-  , Client = require('./client')
-  , states = require('./transforms/serializer').states;
-var version = require('./version');
+var net = require('net');
+var Client = require('./client');
+var states = require('./transforms/serializer').states;
 
 module.exports = ping;
 
 function ping(options, cb) {
   var host = options.host || 'localhost';
   var port = options.port || 25565;
+  var optVersion = options.version || require("./version").defaultVersion;
+  var mcData=require("minecraft-data")(optVersion);
+  var version = mcData.version;
 
-  var client = new Client();
+  var client = new Client(false,version.majorVersion);
   client.on('error', function(err) {
     cb(err);
   });

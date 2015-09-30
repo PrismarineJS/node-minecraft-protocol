@@ -10,16 +10,17 @@ class Server extends EventEmitter
   decipher=null;
   clients={};
 
-  constructor() {
+  constructor(version) {
     super();
+    this.version=version;
   }
 
   listen(port, host) {
     var self = this;
     var nextId = 0;
     self.socketServer = net.createServer();
-    self.socketServer.on('connection', function(socket) {
-      var client = new Client(true);
+    self.socketServer.on('connection', socket => {
+      var client = new Client(true,this.version);
       client._end = client.end;
       client.end = function end(endReason) {
         endReason='{"text":"'+endReason+'"}';

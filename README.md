@@ -7,7 +7,7 @@ Parse and serialize minecraft packets, plus authentication and encryption.
 
 ## Features
 
- * Supports Minecraft version 1.8.8
+ * Supports Minecraft version 1.8.8 and 1.9
  * Parses all packets and emits events with packet fields as JavaScript
    objects.
  * Send a packet by supplying fields as a JavaScript object.
@@ -121,8 +121,7 @@ See [doc](doc/README.md)
 ## Testing
 
 * Ensure your system has the `java` executable in `PATH`.
-* Download the appropriate version of `minecraft_server.jar`.
-* `MC_SERVER_JAR=path/to/minecraft_server.jar MC_USERNAME=email@example.com MC_PASSWORD=password npm test`
+* `MC_SERVER_JAR_DIR=some/path/to/store/minecraft/server/ MC_USERNAME=email@example.com MC_PASSWORD=password npm test`
 
 ## Debugging
 
