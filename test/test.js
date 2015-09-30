@@ -275,14 +275,14 @@ mc.supportedVersions.forEach(function(supportedVersion){
           password: process.env.MC_PASSWORD,
           version: version.majorVersion
         });
-        wrap.on('line', function(line) {
+        var lineListener=function(line) {
           var match = line.match(/\[Server thread\/INFO\]: <(.+?)> (.+)/);
           if(!match) return;
           assert.strictEqual(match[1], client.session.username);
           assert.strictEqual(match[2], "hello everyone; I have logged in.");
           wrap.writeServer("say hello\n");
-        });
-        var chatCount = 0;
+        };
+        wrap.on('line', lineListener);
         client.on('login', function(packet) {
           assert.strictEqual(packet.levelType, 'default');
           assert.strictEqual(packet.difficulty, 1);
@@ -292,9 +292,15 @@ mc.supportedVersions.forEach(function(supportedVersion){
             message: "hello everyone; I have logged in."
           });
         });
+        var chatCount = 0;
         client.on('chat', function(packet) {
-          client.removeAllListeners('chat');
-          done();
+          chatCount += 1;
+          assert.ok(chatCount <= 2);
+          if(chatCount==2) {
+            client.removeAllListeners('chat');
+            wrap.removeListener('line',lineListener);
+            done();
+          }
         });
       });
     });
@@ -306,13 +312,14 @@ mc.supportedVersions.forEach(function(supportedVersion){
           username: 'Player',
           version: version.majorVersion
         });
-        wrap.on('line', function(line) {
+        var lineListener=function(line) {
           var match = line.match(/\[Server thread\/INFO\]: <(.+?)> (.+)/);
           if(!match) return;
           assert.strictEqual(match[1], 'Player');
           assert.strictEqual(match[2], "hello everyone; I have logged in.");
           wrap.writeServer("say hello\n");
-        });
+        };
+        wrap.on('line', lineListener);
         var chatCount = 0;
         client.on('login', function(packet) {
           assert.strictEqual(packet.levelType, 'default');
@@ -338,7 +345,9 @@ mc.supportedVersions.forEach(function(supportedVersion){
           } else if(chatCount === 2) {
             assert.strictEqual(message.translate, "chat.type.announcement");
             assert.strictEqual(message["with"][0].text ? message["with"][0].text : message["with"][0], "Server");
-            assert.deepEqual(message["with"][1].extra[0].text ? message["with"][1].extra[0].text : message["with"][1].extra[0], "hello");
+            assert.deepEqual(message["with"][1].extra[0].text ?
+              message["with"][1].extra[0].text : message["with"][1].extra[0], "hello");
+            wrap.removeListener('line',lineListener);
             done();
           }
         });
