@@ -298,7 +298,7 @@ mc.supportedVersions.forEach(function(supportedVersion){
       });
       done();
     });
-    it.skip("connects successfully - offline mode (STUBBED)", function(done) {
+    it("connects successfully - offline mode", function(done) {
       wrap.startServer({'online-mode': 'false'}, function(err) {
         if(err)
           return done(err);
@@ -329,26 +329,20 @@ mc.supportedVersions.forEach(function(supportedVersion){
           var message = JSON.parse(packet.message);
           if(chatCount === 1) {
             assert.strictEqual(message.translate, "chat.type.text");
-            assert.deepEqual(message["with"][0], {
-              clickEvent: {
-                action: "suggest_command",
-                value: "/msg Player "
-              },
-              text: "Player"
+            assert.deepEqual(message["with"][0].clickEvent, {
+              action: "suggest_command",
+              value: "/msg Player "
             });
+            assert.deepEqual(message["with"][0].text, "Player");
             assert.strictEqual(message["with"][1], "hello everyone; I have logged in.");
           } else if(chatCount === 2) {
             assert.strictEqual(message.translate, "chat.type.announcement");
-            assert.strictEqual(message["with"][0], "Server");
-            assert.deepEqual(message["with"][1], {
-              text: "",
-              extra: ["hello"]
-            });
+            assert.strictEqual(message["with"][0].text ? message["with"][0].text : message["with"][0], "Server");
+            assert.deepEqual(message["with"][1].extra[0].text ? message["with"][1].extra[0].text : message["with"][1].extra[0], "hello");
             done();
           }
         });
       });
-      done();
     });
     it("gets kicked when no credentials supplied in online mode", function(done) {
       wrap.startServer({'online-mode': 'true'}, function(err) {
