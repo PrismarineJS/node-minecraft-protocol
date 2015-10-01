@@ -213,15 +213,7 @@ mc.supportedVersions.forEach(function(supportedVersion){
   describe("client "+version.minecraftVersion, function() {
     this.timeout(10 * 60 * 1000);
 
-    before(function(done){
-      console.log(MC_SERVER_JAR);
-      fs.exists(MC_SERVER_JAR,function(exists){
-        if(exists)
-          done();
-        else
-          download(version.minecraftVersion,MC_SERVER_JAR,done);
-      });
-    });
+    before(download.bind(null,version.minecraftVersion,MC_SERVER_JAR));
 
     afterEach(function(done) {
       wrap.stopServer(function(err){
