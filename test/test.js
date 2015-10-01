@@ -270,7 +270,7 @@ mc.supportedVersions.forEach(function(supportedVersion){
         var lineListener=function(line) {
           var match = line.match(/\[Server thread\/INFO\]: <(.+?)> (.+)/);
           if(!match) return;
-          assert.strictEqual(match[1], client.session.username);
+          assert.strictEqual(match[1], client.username);
           assert.strictEqual(match[2], "hello everyone; I have logged in.");
           wrap.writeServer("say hello\n");
         };
