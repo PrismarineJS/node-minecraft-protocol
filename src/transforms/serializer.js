@@ -15,10 +15,10 @@ module.exports.createDeserializer = function(obj) {
 
 // This is really just for the client.
 var states = {
-  "HANDSHAKING": "handshaking",
-  "STATUS": "status",
-  "LOGIN": "login",
-  "PLAY": "play"
+  "HANDSHAKING": Symbol("handshaking"),
+  "STATUS": Symbol("status"),
+  "LOGIN": Symbol("login"),
+  "PLAY": Symbol("play")
 };
 module.exports.states = states;
 
