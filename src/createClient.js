@@ -1,19 +1,17 @@
-var mcHexDigest=require("./mcHexDigest");
 var ursa=require("./ursa");
 var net = require('net');
 var dns = require('dns');
 var Client = require('./client');
 var assert = require('assert');
 var crypto = require('crypto');
-var Yggdrasil = require('./yggdrasil.js');
-var getSession = Yggdrasil.getSession;
-var joinServer = Yggdrasil.joinServer;
+var yggdrasil = require('yggdrasil')({});
+var yggserver = require('yggdrasil').server({});
 var serializer = require("./transforms/serializer");
 var states = serializer.states;
 var debug = require("./debug");
+var uuid = require('uuid');
 
 module.exports=createClient;
-
 
 Client.prototype.connect = function(port, host) {
   var self = this;
@@ -34,11 +32,11 @@ function createClient(options) {
   assert.ok(options, "options is required");
   var port = options.port || 25565;
   var host = options.host || 'localhost';
-  var clientToken = options.clientToken || Yggdrasil.generateUUID();
-  var accessToken = options.accessToken || null;
+  var clientToken = options.clientToken || uuid.v4();
+  var accessToken;
 
   assert.ok(options.username, "username is required");
-  var haveCredentials = options.password != null || (clientToken != null && accessToken != null);
+  var haveCredentials = options.password != null || (clientToken != null && options.session != null);
   var keepAlive = options.keepAlive == null ? true : options.keepAlive;
 
   var optVersion = options.version || require("./version").defaultVersion;
@@ -60,15 +58,28 @@ function createClient(options) {
         client.emit('error', err);
       } else {
         client.session = session;
-        client.username = session.username;
+        client.username = session.selectedProfile.name;
         accessToken = session.accessToken;
         client.emit('session');
         client.connect(port, host);
       }
     };
 
-    if(accessToken != null) getSession(options.username, accessToken, clientToken, true, cb);
-    else getSession(options.username, options.password, clientToken, false, cb);
+    if (options.session) {
+      yggdrasil.validate(options.session.accessToken, function(ok) {
+        if (ok)
+          cb(null, options.sesson);
+        else
+          yggdrasil.refresh(options.session.accessToken, options.session.clientToken, function(err, _, data) {
+            cb(err, data);
+          });
+      });
+    }
+    else yggdrasil.auth({
+      user: options.username,
+      pass: options.password,
+      token: clientToken
+    }, cb);
   } else {
     // assume the server is in offline mode and just go for it.
     client.username = options.username;
@@ -129,13 +140,8 @@ function createClient(options) {
       }
 
       function joinServerRequest(cb) {
-        var hash = crypto.createHash('sha1');
-        hash.update(packet.serverId);
-        hash.update(sharedSecret);
-        hash.update(packet.publicKey);
-
-        var digest = mcHexDigest(hash);
-        joinServer(client.username, digest, accessToken, client.session.selectedProfile.id, cb);
+        yggserver.join(accessToken, client.session.selectedProfile.id,
+            packet.serverId, sharedSecret, packet.publicKey, cb);
       }
 
       function sendEncryptionKeyResponse() {
