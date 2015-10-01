@@ -22,28 +22,18 @@ class Client extends EventEmitter
 
   constructor(isServer,version) {
     super();
-
-    var mcData=require("minecraft-data")(version);
-    var packets = mcData.protocol.states;
-    var readPackets = require("./packets").readPackets;
-    var packetIndexes = readPackets(packets, states);
-
     this.serializer = serializer.createSerializer({ isServer, version:version});
     this.deserializer = serializer.createDeserializer({ isServer, packetsToParse: this.packetsToParse, version:version});
     this.isServer = !!isServer;
 
     this.on('newListener', function(event, listener) {
       var direction = this.isServer ? 'toServer' : 'toClient';
-      if(packetIndexes.packetStates[direction].hasOwnProperty(event) || event === "packet") {
-        if(typeof this.packetsToParse[event] === "undefined") this.packetsToParse[event] = 1;
-        else this.packetsToParse[event] += 1;
-      }
+      if(typeof this.packetsToParse[event] === "undefined") this.packetsToParse[event] = 1;
+      else this.packetsToParse[event] += 1;
     });
     this.on('removeListener', function(event, listener) {
       var direction = this.isServer ? 'toServer' : 'toClient';
-      if(packetIndexes.packetStates[direction].hasOwnProperty(event) || event === "packet") {
-        this.packetsToParse[event] -= 1;
-      }
+      this.packetsToParse[event] -= 1;
     });
   }
 
