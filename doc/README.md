@@ -119,12 +119,12 @@ The user's session, as returned by the Yggdrasil system.
 ### `packet` event
 
 Called with every packet parsed. Takes two params, the JSON data we parsed,
-and the packet metadata (name, id, state)
+and the packet metadata (name, state)
 
 ### `raw` event
 
 Called with every packet, but as a buffer. Takes two params, the buffer
-and the packet metadata (name, id, state)
+and the packet metadata (name, state)
 
 ### `state` event
 

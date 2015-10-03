@@ -107,8 +107,6 @@ mc.supportedVersions.forEach(function(supportedVersion){
   var mcData=require("minecraft-data")(supportedVersion);
   var version=mcData.version;
   var packets = mcData.protocol.states;
-  var packetIndexes = mc.readPackets(packets, states);
-  var packetFields = packetIndexes.packetFields;
 
   describe("packets "+version.minecraftVersion, function() {
     var client, server, serverClient;
@@ -132,18 +130,18 @@ mc.supportedVersions.forEach(function(supportedVersion){
       client.end();
     });
     var packetName, packetInfo, field;
-    for(state in packetFields) {
-      if(!packetFields.hasOwnProperty(state)) continue;
-      for(packetName in packetFields[state].toServer) {
-        if(!packetFields[state].toServer.hasOwnProperty(packetName)) continue;
-        packetInfo = packetFields[state]["toServer"][packetName];
+    for(state in packets) {
+      if(!packets.hasOwnProperty(state)) continue;
+      for(packetName in packets[state].toServer) {
+        if(!packets[state].toServer.hasOwnProperty(packetName)) continue;
+        packetInfo = packets[state]["toServer"][packetName].fields;
         packetInfo=packetInfo ? packetInfo : null;
         it(state + ",ServerBound," + packetName,
           callTestPacket(packetName, packetInfo, state, true));
       }
-      for(packetName in packetFields[state].toClient) {
-        if(!packetFields[state].toClient.hasOwnProperty(packetName)) continue;
-        packetInfo = packetFields[state]["toClient"][packetName];
+      for(packetName in packets[state].toClient) {
+        if(!packets[state].toClient.hasOwnProperty(packetName)) continue;
+        packetInfo = packets[state]["toClient"][packetName].fields;
         packetInfo=packetInfo ? packetInfo : null;
         it(state + ",ClientBound," + packetName,
           callTestPacket(packetName, packetInfo, state, false));

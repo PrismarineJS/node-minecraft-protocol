@@ -14,6 +14,10 @@ server.on('login', function(client) {
     console.log('Connection closed', '(' + addr + ')');
   });
 
+  client.on('error', function(error) {
+    console.log('Error:', error);
+  });
+
   // send init data so client will start rendering world
   client.write('login', {
     entityId: client.id,

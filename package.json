@@ -50,7 +50,8 @@
     "superagent": "~0.10.0",
     "ursa-purejs": "0.0.3",
     "uuid": "^2.0.1",
-    "yggdrasil": "0.1.0"
+    "yggdrasil": "0.1.0",
+    "protodef":"0.2.0"
   },
   "optionalDependencies": {
     "ursa": "~0.9.1"

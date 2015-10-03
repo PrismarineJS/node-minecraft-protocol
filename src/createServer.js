@@ -1,8 +1,7 @@
 var ursa=require("./ursa");
 var crypto = require('crypto');
 var yggserver = require('yggdrasil').server({});
-var serializer = require("./transforms/serializer");
-var states = serializer.states;
+var states = require("./states");
 var bufferEqual = require('buffer-equal');
 var Server = require('./server');
 

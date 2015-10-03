@@ -1,4 +1,4 @@
-var [readVarInt, writeVarInt, sizeOfVarInt] = require("../datatypes/utils").varint;
+var [readVarInt, writeVarInt, sizeOfVarInt] = require("protodef").types.varint;
 var Transform = require("readable-stream").Transform;
 
 module.exports.createSplitter = function() {
