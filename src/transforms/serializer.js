@@ -1,5 +1,3 @@
-var [readVarInt, writeVarInt, sizeOfVarInt] = require("../datatypes/utils").varint;
-var protocol = require("../protocol");
 var Transform = require("readable-stream").Transform;
 var debug = require("../debug");
 var assert = require('assert');
@@ -22,27 +20,20 @@ var states = {
 };
 module.exports.states = states;
 
-var NMProtocols = require("../protocol");
-var numeric = require("../datatypes/numeric");
-var utils = require("../datatypes/utils");
+var Protocols = require("protocols");
+var proto = new Protocols();
 var minecraft = require("../datatypes/minecraft");
-var structures = require("../datatypes/structures");
-var conditional = require("../datatypes/conditional");
 var readPackets = require("../packets").readPackets;
+var [readVarInt, writeVarInt, sizeOfVarInt] = proto.types["varint"];
 
 
 function createProtocol(types)
 {
-  var proto = new NMProtocols();
-  proto.addTypes(numeric);
-  proto.addTypes(utils);
+  var proto = new Protocols();
   proto.addTypes(minecraft);
-  proto.addTypes(structures);
-  proto.addTypes(conditional);
   proto.addTypes(types);
   return proto;
 }
-
 
 class Serializer extends Transform {
   constructor({ state = states.HANDSHAKING, isServer = false , version} = {}) {
@@ -71,9 +62,9 @@ class Serializer extends Transform {
 
     assert.notEqual(packet, null);
 
-    var length = utils.varint[2](packetId);
+    var length = this.proto.types.varint[2](packetId);
     tryCatch(() => {
-      length += structures.container[2].call(this.proto, params, packet, {});
+      length += this.proto.types.container[2].call(this.proto, params, packet, {});
       //length += proto.sizeOf(params, ["container", packet], {});
     }, (e) => {
       e.field = [this.protocolState, direction, packetName, e.field].join(".");
@@ -82,9 +73,9 @@ class Serializer extends Transform {
     });
 
     var buffer = new Buffer(length);
-    var offset = utils.varint[1](packetId, buffer, 0);
+    var offset = this.proto.types.varint[1](packetId, buffer, 0);
     tryCatch(() => {
-      offset = structures.container[1].call(this.proto, params, buffer, offset, packet, {});
+      offset = this.proto.types.container[1].call(this.proto, params, buffer, offset, packet, {});
       //offset = proto.write(params, buffer, offset, ["container", packet], {});
     }, (e) => {
       e.field = [this.protocolState, direction, packetName, e.field].join(".");
@@ -125,7 +116,7 @@ class Deserializer extends Transform {
   }
 
   parsePacketData(buffer) {
-    var { value: packetId, size: cursor } = utils.varint[0](buffer, 0);
+    var { value: packetId, size: cursor } = this.proto.types.varint[0](buffer, 0);
 
     var direction = this.isServer ? "toServer" : "toClient";
     var packetName = this.packetNames[this.protocolState][direction][packetId];
