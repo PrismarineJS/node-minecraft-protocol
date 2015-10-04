@@ -101,15 +101,25 @@ function createServer(options) {
         "favicon": server.favicon
       };
 
+      function answerToPing(err, response) {
+        if ( err ) return;
+        client.write('server_info', {response: JSON.stringify(response)});
+      }
+
       if(beforePing) {
-        response = beforePing(response, client) || response;
+        if ( beforePing.length > 2 ) {
+          beforePing(response, client, answerToPing);
+        } else {
+          answerToPing(null, beforePing(response, client) || response);
+        }
+      } else {
+        answerToPing(null, response);
       }
 
       client.once('ping', function(packet) {
         client.write('ping', {time: packet.time});
         client.end();
       });
-      client.write('server_info', {response: JSON.stringify(response)});
     }
 
     function onLogin(packet) {
