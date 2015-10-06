@@ -56,7 +56,7 @@ var values = {
     itemCount: 56,
     itemDamage: 2,
     nbtData: {
-      root: "test", value: {
+      name: "test", value: {
         test1: {type: "int", value: 4},
         test2: {type: "long", value: [12, 42]},
         test3: {type: "byteArray", value: new Buffer(32)},
