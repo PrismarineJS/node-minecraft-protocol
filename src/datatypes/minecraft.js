@@ -1,4 +1,4 @@
-var nbt = require('prismarine-nbt');
+var nbt = require('nbt');
 var utils = require("./utils");
 var numeric = require("./numeric");
 var uuid = require('node-uuid');
