@@ -68,7 +68,7 @@ function createClient(options) {
     if (options.session) {
       yggdrasil.validate(options.session.accessToken, function(ok) {
         if (ok)
-          cb(null, options.sesson);
+          cb(null, options.session);
         else
           yggdrasil.refresh(options.session.accessToken, options.session.clientToken, function(err, _, data) {
             cb(err, data);

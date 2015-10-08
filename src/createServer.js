@@ -181,15 +181,14 @@ function createServer(options) {
       nextStep();
 
       function verifyUsername() {
-        yggserver.hasJoined(client.username, serverId, sharedSecret, client.publicKey, function(err, uuid, profile) {
+        yggserver.hasJoined(client.username, serverId, sharedSecret, client.publicKey, function(err, profile) {
           if(err) {
             client.end("Failed to verify username!");
             return;
           }
-          client.uuid = uuid;
           // Convert to a valid UUID until the session server updates and does
           // it automatically
-          client.uuid = client.uuid.replace(/(\w{8})(\w{4})(\w{4})(\w{4})(\w{12})/, "$1-$2-$3-$4-$5");
+          client.uuid = profile.id.replace(/(\w{8})(\w{4})(\w{4})(\w{4})(\w{12})/, "$1-$2-$3-$4-$5");
           client.profile = profile;
           loginClient();
         });
