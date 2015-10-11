@@ -1,5 +1,5 @@
-var Protocols = require("protocols");
-var proto = new Protocols();
+var Protodef = require("protodef");
+var proto = new Protodef();
 
 var [readVarInt, writeVarInt, sizeOfVarInt] = proto.types.varint;
 var zlib = require("zlib");

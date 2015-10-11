@@ -1,6 +1,6 @@
 var nbt = require('prismarine-nbt');
-var Protocols = require("protocols");
-var proto = new Protocols();
+var Protodef = require("protodef");
+var proto = new Protodef();
 var uuid = require('node-uuid');
 
 // TODO : remove type-specific, replace with generic containers and arrays.
