@@ -200,8 +200,8 @@ function createServer(options) {
       if(onlineMode == false || isException) {
         client.uuid = "0-0-0-0-0";
       }
-      //client.write('compress', { threshold: 256 }); // Default threshold is 256
-      //client.compressionThreshold = 256;
+      client.write('compress', { threshold: 256 }); // Default threshold is 256
+      client.compressionThreshold = 256;
       client.write('success', {uuid: client.uuid, username: client.username});
       client.state = states.PLAY;
       loggedIn = true;
