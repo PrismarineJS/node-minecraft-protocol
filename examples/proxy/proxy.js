@@ -1,4 +1,5 @@
 var mc = require('../../');
+var bufferEqual = require('buffer-equal');
 
 var states = mc.states;
 function printHelpAndExit(exitCode) {
@@ -128,7 +129,6 @@ srv.on('login', function(client) {
         client.compressionThreshold = data.threshold;
     }
   });
-  var bufferEqual = require('buffer-equal');
   targetClient.on('raw', function(buffer, meta) {
     if(client.state != states.PLAY || meta.state != states.PLAY)
       return;
