@@ -128,13 +128,13 @@ srv.on('login', function(client) {
         client.compressionThreshold = data.threshold;
     }
   });
-  var buffertools = require('buffertools');
+  var bufferEqual = require('buffer-equal');
   targetClient.on('raw', function(buffer, meta) {
     if(client.state != states.PLAY || meta.state != states.PLAY)
       return;
     var packetData = targetClient.deserializer.parsePacketData(buffer).data;
     var packetBuff = client.serializer.createPacketBuffer(meta.name, packetData);
-    if(buffertools.compare(buffer, packetBuff) != 0) {
+    if(!bufferEqual(buffer, packetBuff)) {
       console.log("client<-server: Error in packet " + state + "." + meta.name);
       console.log(buffer.toString('hex'));
       console.log(packetBuff.toString('hex'));
@@ -154,7 +154,7 @@ srv.on('login', function(client) {
       return;
     var packetData = client.deserializer.parsePacketData(buffer).data;
     var packetBuff = targetClient.serializer.createPacketBuffer(meta.name, packetData);
-    if(buffertools.compare(buffer, packetBuff) != 0) {
+    if(!bufferEqual(buffer, packetBuff)) {
       console.log("client->server: Error in packet " + state + "." + meta.name);
       console.log(buffer.toString('hex'));
       console.log(packetBuff.toString('hex'));
