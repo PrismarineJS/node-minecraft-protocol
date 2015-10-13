@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "babel-runtime": "^5.4.4",
-    "buffer-equal": "0.0.0",
+    "buffer-equal": "0.0.1",
     "lodash.reduce": "^3.1.2",
     "minecraft-data": "^0.13.0",
     "node-uuid": "~1.4.1",
