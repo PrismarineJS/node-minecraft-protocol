@@ -96,42 +96,28 @@ class Client extends EventEmitter
 
     if(!this.compressor)
     {
-      console.log("unpiping "+oldProperty);
       this.serializer.unpipe(this.framer);
-      this.framer.unpipe(this.socket);
-
-      this.socket.unpipe(this.splitter);
       this.splitter.unpipe(this.deserializer);
     }
     else
     {
-      console.log("unpiping compressed "+oldProperty);
       this.serializer.unpipe(this.compressor);
-      this.compressor.unpipe(this.framer);
-      this.framer.unpipe(this.socket);
-
-      this.socket.unpipe(this.splitter);
-      this.splitter.unpipe(this.decompressor);
       this.decompressor.unpipe(this.deserializer);
-
     }
 
     this.serializer.removeAllListeners();
     this.deserializer.removeAllListeners();
     this.setSerializer(this.protocolState);
 
-
     if(!this.compressor)
     {
-      console.log("piping uncompressed "+this.state);
-      this.serializer.pipe(this.framer).pipe(this.socket);
-      this.socket.pipe(this.splitter).pipe(this.deserializer);
+      this.serializer.pipe(this.framer);
+      this.splitter.pipe(this.deserializer);
     }
     else
     {
-      console.log("piping compressed "+this.state);
-      this.serializer.pipe(this.compressor).pipe(this.framer).pipe(this.socket);
-      this.socket.pipe(this.splitter).pipe(this.decompressor).pipe(this.deserializer);
+      this.serializer.pipe(this.compressor);
+      this.decompressor.pipe(this.deserializer);
     }
 
     this.emit('state', newProperty, oldProperty);
