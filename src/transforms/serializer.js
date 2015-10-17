@@ -20,8 +20,8 @@ var states = {
 };
 module.exports.states = states;
 
-var Protodef = require("protodef");
-var proto = new Protodef();
+var ProtoDef = require("protodef").ProtoDef;
+var proto = new ProtoDef();
 var minecraft = require("../datatypes/minecraft");
 var readPackets = require("../packets").readPackets;
 var [readVarInt, writeVarInt, sizeOfVarInt] = proto.types["varint"];
@@ -29,7 +29,7 @@ var [readVarInt, writeVarInt, sizeOfVarInt] = proto.types["varint"];
 
 function createProtocol(types)
 {
-  var proto = new Protodef();
+  var proto = new ProtoDef();
   proto.addTypes(minecraft);
   proto.addTypes(types);
   return proto;
