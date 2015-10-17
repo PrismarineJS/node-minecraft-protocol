@@ -38,7 +38,8 @@
     "mocha": "~2.3.3",
     "power-assert": "^1.0.0",
     "source-map-support": "^0.3.2",
-    "minecraft-wrap": "~0.6.5"
+    "minecraft-wrap": "~0.6.5",
+    "babel": "5.8.23"
   },
   "dependencies": {
     "babel-runtime": "^5.4.4",
