@@ -4,7 +4,7 @@ var serializer = require('./transforms/serializer');
 var compression = require('./transforms/compression');
 var framing = require('./transforms/framing');
 var crypto = require('crypto');
-var states = serializer.states;
+var states = require("./states");
 
 
 class Client extends EventEmitter

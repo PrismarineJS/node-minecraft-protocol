@@ -1,6 +1,6 @@
 var net = require('net');
 var Client = require('./client');
-var states = require('./transforms/serializer').states;
+var states = require("./states");
 
 module.exports = ping;
 
