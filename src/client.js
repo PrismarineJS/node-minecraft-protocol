@@ -1,11 +1,41 @@
 var EventEmitter = require('events').EventEmitter;
 var debug = require('./debug');
-var serializer = require('./transforms/serializer');
 var compression = require('./transforms/compression');
 var framing = require('./transforms/framing');
 var crypto = require('crypto');
-var states = serializer.states;
+var states = require("./states");
+var ProtoDef = require("protodef").ProtoDef;
+var Serializer = require("protodef").Serializer;
+var Parser = require("protodef").Parser;
 
+var minecraft = require("./datatypes/minecraft");
+
+function createProtocol(types)
+{
+  var proto = new ProtoDef();
+  proto.addTypes(minecraft);
+  proto.addTypes(types);
+  return proto;
+}
+
+function createSerializer({ state = states.HANDSHAKING, isServer = false , version} = {})
+{
+  var mcData=require("minecraft-data")(version);
+  var direction = !isServer ? 'toServer' : 'toClient';
+  var packets = mcData.protocol.states[state][direction];
+  var proto=createProtocol(mcData.protocol.types);
+  return new Serializer(proto,packets);
+}
+
+function createDeserializer({ state = states.HANDSHAKING, isServer = false,
+  packetsToParse = {"packet": true}, version } = {})
+{
+  var mcData=require("minecraft-data")(version);
+  var direction = isServer ? "toServer" : "toClient";
+  var packets = mcData.protocol.states[state][direction];
+  var proto=createProtocol(mcData.protocol.types);
+  return new Parser(proto,packets,packetsToParse);
+}
 
 class Client extends EventEmitter
 {
@@ -19,12 +49,14 @@ class Client extends EventEmitter
   decompressor=null;
   deserializer;
   isServer;
+  version;
+  protocolState=states.HANDSHAKING;
 
   constructor(isServer,version) {
     super();
-    this.serializer = serializer.createSerializer({ isServer, version:version});
-    this.deserializer = serializer.createDeserializer({ isServer, packetsToParse: this.packetsToParse, version:version});
+    this.version=version;
     this.isServer = !!isServer;
+    this.setSerializer(states.HANDSHAKING);
 
     this.on('newListener', function(event, listener) {
       var direction = this.isServer ? 'toServer' : 'toClient';
@@ -38,13 +70,56 @@ class Client extends EventEmitter
   }
 
   get state(){
-    return this.serializer.protocolState;
+    return this.protocolState;
+  }
+
+
+  setSerializer(state) {
+    this.serializer = createSerializer({ isServer:this.isServer, version:this.version, state: state});
+    this.deserializer = createDeserializer({ isServer:this.isServer, version:this.version, state: state, packetsToParse:
+      this.packetsToParse});
+    var onError = (err) => this.emit('error', err);
+    this.serializer.on('error', onError);
+    this.deserializer.on('error', onError);
+
+    this.deserializer.on('data', (parsed) => {
+      this.emit('packet', parsed.data, parsed.metadata);
+      this.emit(parsed.metadata.name, parsed.data, parsed.metadata);
+      this.emit('raw.' + parsed.metadata.name, parsed.buffer, parsed.metadata);
+      this.emit('raw', parsed.buffer, parsed.metadata);
+    });
   }
 
   set state(newProperty) {
-    var oldProperty = this.serializer.protocolState;
-    this.serializer.protocolState = newProperty;
-    this.deserializer.protocolState = newProperty;
+    var oldProperty = this.protocolState;
+    this.protocolState = newProperty;
+
+    if(!this.compressor)
+    {
+      this.serializer.unpipe(this.framer);
+      this.splitter.unpipe(this.deserializer);
+    }
+    else
+    {
+      this.serializer.unpipe(this.compressor);
+      this.decompressor.unpipe(this.deserializer);
+    }
+
+    this.serializer.removeAllListeners();
+    this.deserializer.removeAllListeners();
+    this.setSerializer(this.protocolState);
+
+    if(!this.compressor)
+    {
+      this.serializer.pipe(this.framer);
+      this.splitter.pipe(this.deserializer);
+    }
+    else
+    {
+      this.serializer.pipe(this.compressor);
+      this.decompressor.pipe(this.deserializer);
+    }
+
     this.emit('state', newProperty, oldProperty);
   }
 
@@ -87,20 +162,11 @@ class Client extends EventEmitter
     this.socket.on('close', endSocket);
     this.socket.on('end', endSocket);
     this.socket.on('timeout', endSocket);
-    this.serializer.on('error', onError);
-    this.deserializer.on('error', onError);
     this.framer.on('error', onError);
     this.splitter.on('error', onError);
 
     this.socket.pipe(this.splitter).pipe(this.deserializer);
     this.serializer.pipe(this.framer).pipe(this.socket);
-
-    this.deserializer.on('data', (parsed) => {
-      this.emit('packet', parsed.data, parsed.metadata);
-      this.emit(parsed.metadata.name, parsed.data, parsed.metadata);
-      this.emit('raw.' + parsed.metadata.name, parsed.buffer, parsed.metadata);
-      this.emit('raw', parsed.buffer, parsed.metadata);
-    });
   }
 
   end(reason) {

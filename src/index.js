@@ -11,7 +11,7 @@ module.exports = {
   createServer: createServer,
   Client: Client,
   Server: Server,
-  states: serializer.states,
+  states: require("./states"),
   createSerializer:serializer.createSerializer,
   createDeserializer:serializer.createDeserializer,
   readPackets:readPackets,
