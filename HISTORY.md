@@ -9,6 +9,7 @@
  * use node-yggdrasil : index.js now doesn't expose yggdrasil, use node-yggdrasil directly if needed (BREAKING CHANGE)
  * createServers's beforePing option can now takes an async function
  * enable compression by default in createServer
+ * update ursa to get node4 (and node5) compatibility
 
 ## 0.15.0
 
