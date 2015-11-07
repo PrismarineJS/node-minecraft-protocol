@@ -2,7 +2,7 @@ var mc = require('../../');
 
 var states = mc.states;
 function printHelpAndExit(exitCode) {
-  console.log("usage: node proxy.js [<options>...] <target_srv> <user> [<password>] [<version>]");
+  console.log("usage: node proxy.js [<options>...] <target_srv> [<version>]");
   console.log("options:");
   console.log("  --dump name");
   console.log("    print to stdout messages with the specified name.");
@@ -35,8 +35,6 @@ process.argv.forEach(function(val, index, array) {
 var args = process.argv.slice(2);
 var host;
 var port = 25565;
-var user;
-var passwd;
 var version;
 
 var printAllNames = false;
@@ -62,8 +60,6 @@ var printNameBlacklist = {};
   }
   if(!(i + 2 <= args.length && args.length <= i + 4)) printHelpAndExit(1);
   host = args[i++];
-  user = args[i++];
-  passwd = args[i++];
   version = args[i++];
 })();
 
@@ -98,9 +94,7 @@ srv.on('login', function(client) {
   var targetClient = mc.createClient({
     host: host,
     port: port,
-    username: user,
-    password: passwd,
-    'online-mode': passwd != null ? true : false,
+    username: client.username,
     keepAlive:false,
     version:version
   });
