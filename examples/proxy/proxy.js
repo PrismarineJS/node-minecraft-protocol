@@ -122,10 +122,11 @@ srv.on('login', function(client) {
           targetClient.state + "." + meta.name + " :" +
           JSON.stringify(data));
       }
-      if(!endedClient)
+      if(!endedClient) {
         client.write(meta.name, data);
-      if (meta.name === 'set_compression' || meta.name === 'compression') // Set compression
-        client.compressionThreshold = data.threshold;
+        if (meta.name === 'set_compression') // Set compression
+          client.compressionThreshold = data.threshold;
+      }
     }
   });
   var bufferEqual = require('buffer-equal');
