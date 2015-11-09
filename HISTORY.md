@@ -10,6 +10,10 @@
  * createServers's beforePing option can now takes an async function
  * enable compression by default in createServer
  * update ursa to get node4 (and node5) compatibility
+ * lot of internal changes : using the new general serializing/parsing library ProtoDef
+ * fix compression in proxy example
+ * fix gamemode3 in proxy
+ * generate the same uuidv3 than the vanilla server does in offline mode
 
 ## 0.15.0
 
