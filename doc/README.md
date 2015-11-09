@@ -1,39 +1,27 @@
 # Documentation
 
-## mc.ping(options, callback)
-
-`callback(err, pingResults)`
-
-`pingResults`:
-
-## Old version
- * `prefix`
- * `protocol`
- * `version`
- * `motd`
- * `playerCount`
- * `maxPlayers`
-
-## New version
- * `description`
- * `players`
-    * `max`
-    * `online`
-    * `sample`
-       * `id`
-       * `name`
- * `version`
-    * `name`
-    * `protocol`
- * `favicon`
- * `latency`
-
 ## mc.createServer(options)
 
 Returns a `Server` instance and starts listening. All clients will be
 automatically logged in and validated against mojang's auth.
 
-## Server
+`options` is an object containing the properties :
+ * port : default to 25565
+ * host : default to localhost
+ * kickTimeout : default to `10*1000` (10s), kick client that doesn't answer to keepalive after that time
+ * checkTimeoutInterval : default to `4*1000` (4s), send keepalive packet at that period
+ * online-mode : default to true
+ * beforePing : allow customisation of the answer to ping the server does. 
+ It takes a function with argument response and client, response is the default json response, and client is client who sent a ping.
+ It can take as third argument a callback. If the callback is passed, the function should pass its result to the callback, if not it should return.
+ * motd : default to "A Minecraft server"
+ * maxPlayers : default to 20
+ * keepAlive : send keep alive packets : default to true
+ * version : 1.8 or 1.9 : default to 1.8
+
+## mc.Server(version)
+
+Create a server instance for `version` of minecraft.
 
 ### server.onlineModeExceptions
 
@@ -84,9 +72,12 @@ Returns a `Client` instance and perform login.
  * clientToken : generated if a password is given
  * accessToken : generated if a password is given
  * keepAlive : send keep alive packets : default to true
- * version : 1.8 or 1.9
+ * version : 1.8 or 1.9 : default to 1.8
 
-## Client
+## mc.Client(isServer,version)
+
+Create a new client, if `isServer` is true then it is a server-side client, otherwise it's a client-side client.
+Takes a minecraft `version` as second argument.
 
 ### client.state
 
@@ -114,7 +105,11 @@ The user's username.
 
 ### client.session
 
-The user's session, as returned by the Yggdrasil system. 
+The user's session, as returned by the Yggdrasil system. (only client-side)
+
+### client.profile
+
+The player's profile, as returned by the Yggdrasil system. (only server-side)
 
 ### `packet` event
 
@@ -137,10 +132,11 @@ Check out the [minecraft-data docs](https://prismarinejs.github.io/minecraft-dat
 
 ## Not Immediately Obvious Data Type Formats
 
-Note : almost all data formats can be understood by looking at the packet 
-structure in lib/protocol.js
+Note : almost all data formats can be understood by looking at
+ [minecraft-data docs](https://prismarinejs.github.io/minecraft-data/?v=1.8&d=protocol)
+ or [minecraft-data protocol.json](https://github.com/PrismarineJS/minecraft-data/blob/master/data/1.8/protocol.json)
 
-## entityMetadata
+### entityMetadata
 
 Value looks like this:
 
@@ -154,3 +150,52 @@ Value looks like this:
 
 Where the key is the numeric metadata key and the value is the value of the
 correct data type. You can figure out the types [here](http://wiki.vg/Entities#Entity_Metadata_Format)
+
+
+## mc.ping(options, callback)
+
+`callback(err, pingResults)`
+
+`pingResults`:
+
+## Old version
+ * `prefix`
+ * `protocol`
+ * `version`
+ * `motd`
+ * `playerCount`
+ * `maxPlayers`
+
+## New version
+ * `description`
+ * `players`
+    * `max`
+    * `online`
+    * `sample`
+       * `id`
+       * `name`
+ * `version`
+    * `name`
+    * `protocol`
+ * `favicon`
+ * `latency`
+
+
+## mc.states
+
+The minecraft protocol states.
+
+## mc.supportedVersions
+
+The supported minecraft versions.
+
+## mc.createSerializer({ state = states.HANDSHAKING, isServer = false , version})
+
+Returns a minecraft protocol [serializer](https://github.com/roblabla/ProtoDef#serializerprotomaintype) for these parameters.
+
+
+## mc.createDeserializer({ state = states.HANDSHAKING, isServer = false, packetsToParse = {"packet": true}, version })
+
+Returns a minecraft protocol [deserializer](https://github.com/roblabla/ProtoDef#parserprotomaintype) for these parameters.
+
+
