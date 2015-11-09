@@ -1,13 +1,12 @@
 var nbt = require('prismarine-nbt');
-var utils = require("./utils");
-var numeric = require("./numeric");
+var types=require("protodef").types;
 var uuid = require('node-uuid');
 
 // TODO : remove type-specific, replace with generic containers and arrays.
 module.exports = {
   'UUID': [readUUID, writeUUID, 16],
   'slot': [readSlot, writeSlot, sizeOfSlot],
-  'nbt': [readNbt, utils.buffer[1], utils.buffer[2]],
+  'nbt': [readNbt, types.buffer[1], types.buffer[2]],
   'restBuffer': [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
   'entityMetadataLoop': [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata]
 };
@@ -26,7 +25,7 @@ function writeUUID(value, buffer, offset) {
 
 function readSlot(buffer, offset) {
   var value = {};
-  var results = numeric.short[0](buffer, offset);
+  var results = types.short[0](buffer, offset);
   if(!results) return null;
   value.blockId = results.value;
 

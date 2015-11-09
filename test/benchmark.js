@@ -1,4 +1,4 @@
-var ITERATIONS = 100000;
+var ITERATIONS = 10000;
 
 var mc = require("../");
 var util = require('util');
@@ -15,7 +15,7 @@ mc.supportedVersions.forEach(function(supportedVersion){
   var mcData=require("minecraft-data")(supportedVersion);
   var version=mcData.version;
   describe("benchmark "+version.minecraftVersion,function(){
-    this.timeout(20 * 1000);
+    this.timeout(60 * 1000);
     var inputData = [];
     it("bench serializing",function(done){
       var serializer=new mc.createSerializer({state:states.PLAY,isServer:false,version:version.majorVersion});
@@ -24,7 +24,7 @@ mc.supportedVersions.forEach(function(supportedVersion){
       start = Date.now();
       for(i = 0; i < ITERATIONS; i++) {
         for(j = 0; j < testDataWrite.length; j++) {
-          inputData.push(serializer.createPacketBuffer(testDataWrite[j].name, testDataWrite[j].params));
+          inputData.push(serializer.createPacketBuffer(testDataWrite[j]));
         }
       }
       var result=(Date.now() - start) / 1000;
@@ -37,7 +37,7 @@ mc.supportedVersions.forEach(function(supportedVersion){
       console.log('Beginning read test');
       start = Date.now();
       for (j = 0; j < inputData.length; j++) {
-        deserializer.parsePacketData(inputData[j]);
+        deserializer.parsePacketBuffer(inputData[j]);
       }
       console.log('Finished read test in ' + (Date.now() - start) / 1000 + ' seconds');
       done();

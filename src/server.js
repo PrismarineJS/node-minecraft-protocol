@@ -1,7 +1,7 @@
 var net = require('net');
 var EventEmitter = require('events').EventEmitter;
 var Client = require('./client');
-var states = require('./transforms/serializer').states;
+var states = require("./states");
 
 class Server extends EventEmitter
 {

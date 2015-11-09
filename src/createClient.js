@@ -6,8 +6,7 @@ var assert = require('assert');
 var crypto = require('crypto');
 var yggdrasil = require('yggdrasil')({});
 var yggserver = require('yggdrasil').server({});
-var serializer = require("./transforms/serializer");
-var states = serializer.states;
+var states = require("./states");
 var debug = require("./debug");
 var uuid = require('uuid');
 

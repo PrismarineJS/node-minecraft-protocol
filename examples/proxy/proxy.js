@@ -2,7 +2,7 @@ var mc = require('../../');
 
 var states = mc.states;
 function printHelpAndExit(exitCode) {
-  console.log("usage: node proxy.js [<options>...] <target_srv> <user> [<password>] [<version>]");
+  console.log("usage: node proxy.js [<options>...] <target_srv> [<version>]");
   console.log("options:");
   console.log("  --dump name");
   console.log("    print to stdout messages with the specified name.");
@@ -35,8 +35,6 @@ process.argv.forEach(function(val, index, array) {
 var args = process.argv.slice(2);
 var host;
 var port = 25565;
-var user;
-var passwd;
 var version;
 
 var printAllNames = false;
@@ -62,8 +60,6 @@ var printNameBlacklist = {};
   }
   if(!(i + 2 <= args.length && args.length <= i + 4)) printHelpAndExit(1);
   host = args[i++];
-  user = args[i++];
-  passwd = args[i++];
   version = args[i++];
 })();
 
@@ -98,9 +94,7 @@ srv.on('login', function(client) {
   var targetClient = mc.createClient({
     host: host,
     port: port,
-    username: user,
-    password: passwd,
-    'online-mode': passwd != null ? true : false,
+    username: client.username,
     keepAlive:false,
     version:version
   });
@@ -108,7 +102,7 @@ srv.on('login', function(client) {
     if(targetClient.state == states.PLAY && meta.state == states.PLAY) {
       if(shouldDump(meta.name, "o")) {
         console.log("client->server:",
-          client.state + ".0x" + meta.id.toString(16) + " :",
+          client.state + " "+ meta.name + " :",
           JSON.stringify(data));
       }
       if(!endedTargetClient)
@@ -122,18 +116,19 @@ srv.on('login', function(client) {
           targetClient.state + "." + meta.name + " :" +
           JSON.stringify(data));
       }
-      if(!endedClient)
+      if(!endedClient) {
         client.write(meta.name, data);
-      if (meta.name === 'set_compression' || meta.name === 'compression') // Set compression
-        client.compressionThreshold = data.threshold;
+        if (meta.name === 'set_compression') // Set compression
+          client.compressionThreshold = data.threshold;
+      }
     }
   });
   var bufferEqual = require('buffer-equal');
   targetClient.on('raw', function(buffer, meta) {
     if(client.state != states.PLAY || meta.state != states.PLAY)
       return;
-    var packetData = targetClient.deserializer.parsePacketData(buffer).data;
-    var packetBuff = client.serializer.createPacketBuffer(meta.name, packetData);
+    var packetData = targetClient.deserializer.parsePacketBuffer(buffer).data.params;
+    var packetBuff = client.serializer.createPacketBuffer({name:meta.name, params:packetData});
     if(!bufferEqual(buffer, packetBuff)) {
       console.log("client<-server: Error in packet " + state + "." + meta.name);
       console.log(buffer.toString('hex'));
@@ -152,8 +147,8 @@ srv.on('login', function(client) {
   client.on('raw', function(buffer, meta) {
     if(meta.state != states.PLAY || targetClient.state != states.PLAY)
       return;
-    var packetData = client.deserializer.parsePacketData(buffer).data;
-    var packetBuff = targetClient.serializer.createPacketBuffer(meta.name, packetData);
+    var packetData = client.deserializer.parsePacketBuffer(buffer).data.params;
+    var packetBuff = targetClient.serializer.createPacketBuffer({name:meta.name, params:packetData});
     if(!bufferEqual(buffer, packetBuff)) {
       console.log("client->server: Error in packet " + state + "." + meta.name);
       console.log(buffer.toString('hex'));
