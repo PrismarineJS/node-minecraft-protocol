@@ -1,5 +1,20 @@
 # History
 
+## 0.16.0 (unreleased)
+
+ * cross version support exposed : version option in createClient and createServer
+ * expose createSerializer and createDeserializer, createPacketBuffer and parsePacketData are now available in serializer/parser instances (BREAKING CHANGE)
+ * stop exposing packetFields, packetNames, packetIds, packetStates. That data is available by requiring minecraft-data package (BREAKING CHANGE)
+ * don't expose version anymore but supportedVersions (BREAKING CHANGE)
+ * use node-yggdrasil : index.js now doesn't expose yggdrasil, use node-yggdrasil directly if needed (BREAKING CHANGE)
+ * createServers's beforePing option can now takes an async function
+ * enable compression by default in createServer
+ * update ursa to get node4 (and node5) compatibility
+ * lot of internal changes : using the new general serializing/parsing library ProtoDef
+ * fix compression in proxy example
+ * fix gamemode3 in proxy
+ * generate the same uuidv3 than the vanilla server does in offline mode
+
 ## 0.15.0
 
  * UUIDs are now strings instead of arrays. (BREAKING CHANGE)
