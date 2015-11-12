@@ -4,8 +4,8 @@ var Client = mc.Client;
 var Server = mc.Server;
 var net = require('net');
 var assert = require('power-assert');
-var getFieldInfo = require('../dist/utils').getFieldInfo;
-var getField = require('../dist/utils').getField;
+var getFieldInfo = require('protodef').utils.getFieldInfo;
+var getField = require('protodef').utils.getField;
 
 function evalCount(count, fields) {
   if(fields[count["field"]] in count["map"])

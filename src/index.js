@@ -1,7 +1,6 @@
 var Client = require('./client');
 var Server = require('./server');
 var serializer = require("./transforms/serializer");
-var utils = require("./utils");
 var createClient = require("./createClient");
 var createServer = require("./createServer");
 
