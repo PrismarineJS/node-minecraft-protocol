@@ -1,6 +1,6 @@
 # History
 
-## 0.16.0 (unreleased)
+## 0.16.0
 
  * cross version support exposed : version option in createClient and createServer
  * expose createSerializer and createDeserializer, createPacketBuffer and parsePacketData are now available in serializer/parser instances (BREAKING CHANGE)
