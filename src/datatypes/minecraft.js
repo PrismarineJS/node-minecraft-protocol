@@ -6,7 +6,7 @@ var uuid = require('node-uuid');
 module.exports = {
   'UUID': [readUUID, writeUUID, 16],
   'slot': [readSlot, writeSlot, sizeOfSlot],
-  'nbt': [readNbt, types.buffer[1], types.buffer[2]],
+  'nbt': [readNbt, writeNbt, sizeOfNbt],
   'restBuffer': [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
   'entityMetadataLoop': [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata]
 };
