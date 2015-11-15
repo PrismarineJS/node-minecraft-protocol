@@ -85,18 +85,15 @@ function sizeOfSlot(value) {
 
 
 function readNbt(buffer, offset) {
-  buffer = buffer.slice(offset);
-  return nbt.parseUncompressed(buffer);
+  return nbt.proto.read(buffer,offset,"nbt");
 }
 
 function writeNbt(value, buffer, offset) {
-  var newbuf = nbt.writeUncompressed(value);
-  newbuf.copy(buffer, offset);
-  return offset + newbuf.length;
+  return nbt.proto.write(value,buffer,offset,"nbt");
 }
 
 function sizeOfNbt(value) {
-  return nbt.writeUncompressed(value).length;
+  return nbt.proto.sizeOf(value,"nbt");
 }
 
 
