@@ -56,10 +56,11 @@ var values = {
     itemCount: 56,
     itemDamage: 2,
     nbtData: {
-      root: "test", value: {
+      type:"compound",
+      name: "test", value: {
         test1: {type: "int", value: 4},
         test2: {type: "long", value: [12, 42]},
-        test3: {type: "byteArray", value: new Buffer(32)},
+        test3: {type: "byteArray", value: [32]},
         test4: {type: "string", value: "ohi"},
         test5: {type: "list", value: {type: "int", value: [4]}},
         test6: {type: "compound", value: {test: {type: "int", value: 4}}},
