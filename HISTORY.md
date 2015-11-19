@@ -1,5 +1,9 @@
 # History
 
+## 0.16.1 (unreleased)
+
+ * add checkTimeoutInterval to createClient
+
 ## 0.16.0
 
  * cross version support exposed : version option in createClient and createServer
