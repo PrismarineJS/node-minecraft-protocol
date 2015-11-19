@@ -1,5 +1,8 @@
 # History
 
+## 0.16.2
+ * update protodef version which fix a bug in writeOption
+
 ## 0.16.1
 
  * add checkTimeoutInterval to createClient
