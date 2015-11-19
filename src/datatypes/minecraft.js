@@ -71,16 +71,16 @@ function sizeOfRestBuffer(value) {
   return value.length;
 }
 
-function readEntityMetadata(buffer, offset, typeArgs, context) {
+function readEntityMetadata(buffer, offset, typeArgs) {
   var cursor = offset;
   var metadata = [];
-  var item, key, type, results, reader, typeName, dataType;
+  var item;
   while(true) {
     item = buffer.readUInt8(cursor);
     if(item === typeArgs.endVal) {
       return {
         value: metadata,
-        size: cursor + 1 - offset,
+        size: cursor + 1 - offset
       };
     }
     var results = this.read(buffer, cursor, typeArgs.type, {});
@@ -89,7 +89,7 @@ function readEntityMetadata(buffer, offset, typeArgs, context) {
   }
 }
 
-function writeEntityMetadata(value, buffer, offset, typeArgs, context) {
+function writeEntityMetadata(value, buffer, offset, typeArgs) {
   var self = this;
   value.forEach(function(item) {
     offset = self.write(item, buffer, offset, typeArgs.type, {});
@@ -98,7 +98,7 @@ function writeEntityMetadata(value, buffer, offset, typeArgs, context) {
   return offset + 1;
 }
 
-function sizeOfEntityMetadata(value, typeArgs, context) {
+function sizeOfEntityMetadata(value, typeArgs) {
   var size = 1;
   for(var i = 0; i < value.length; ++i) {
     size += this.sizeOf(value[i], typeArgs.type, {});
