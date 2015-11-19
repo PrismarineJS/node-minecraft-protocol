@@ -37,6 +37,7 @@ function createClient(options) {
   assert.ok(options.username, "username is required");
   var haveCredentials = options.password != null || (clientToken != null && options.session != null);
   var keepAlive = options.keepAlive == null ? true : options.keepAlive;
+  var checkTimeoutInterval = options.checkTimeoutInterval || 10 * 1000;
 
   var optVersion = options.version || require("./version").defaultVersion;
   var mcData=require("minecraft-data")(optVersion);
@@ -103,8 +104,11 @@ function createClient(options) {
   function onCompressionRequest(packet) {
     client.compressionThreshold = packet.threshold;
   }
-
+  var timeout = null;
   function onKeepAlive(packet) {
+    if (timeout)
+      clearTimeout(timeout);
+    timeout = setTimeout(() => client.end(), checkTimeoutInterval);
     client.write('keep_alive', {
       keepAliveId: packet.keepAliveId
     });

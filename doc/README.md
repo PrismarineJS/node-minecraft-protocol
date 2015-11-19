@@ -72,6 +72,7 @@ Returns a `Client` instance and perform login.
  * clientToken : generated if a password is given
  * accessToken : generated if a password is given
  * keepAlive : send keep alive packets : default to true
+ * checkTimeoutInterval : default to `10*1000` (10s), check if keepalive received at that period, disconnect otherwise.
  * version : 1.8 or 1.9 : default to 1.8
 
 ## mc.Client(isServer,version)
