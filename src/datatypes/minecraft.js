@@ -5,8 +5,8 @@ var uuid = require('node-uuid');
 // TODO : remove type-specific, replace with generic containers and arrays.
 module.exports = {
   'UUID': [readUUID, writeUUID, 16],
-  'slot': [readSlot, writeSlot, sizeOfSlot],
   'nbt': [readNbt, writeNbt, sizeOfNbt],
+  'optionalNbt':[readOptionalNbt,writeOptionalNbt,sizeOfOptionalNbt],
   'restBuffer': [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
   'entityMetadataLoop': [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata]
 };
@@ -23,67 +23,6 @@ function writeUUID(value, buffer, offset) {
   return offset + 16;
 }
 
-function readSlot(buffer, offset) {
-  var value = {};
-  var results = types.short[0](buffer, offset);
-  if(!results) return null;
-  value.blockId = results.value;
-
-  if(value.blockId === -1) {
-    return {
-      value: value,
-      size: 2,
-    };
-  }
-
-  var cursorEnd = offset + 6;
-  if(cursorEnd > buffer.length) return null;
-  value.itemCount = buffer.readInt8(offset + 2);
-  value.itemDamage = buffer.readInt16BE(offset + 3);
-  var nbtData = buffer.readInt8(offset + 5);
-  if(nbtData == 0) {
-    return {
-      value: value,
-      size: 6
-    }
-  }
-  var nbtData = readNbt(buffer, offset + 5);
-  value.nbtData = nbtData.value;
-  return {
-    value: value,
-    size: nbtData.size + 5
-  };
-}
-
-function writeSlot(value, buffer, offset) {
-  buffer.writeInt16BE(value.blockId, offset);
-  if(value.blockId === -1) return offset + 2;
-  buffer.writeInt8(value.itemCount, offset + 2);
-  buffer.writeInt16BE(value.itemDamage, offset + 3);
-  var nbtDataLen;
-  if(value.nbtData) {
-    var newbuf = nbt.writeUncompressed(value.nbtData);
-    newbuf.copy(buffer, offset + 5);
-    nbtDataLen = newbuf.length;
-  }
-  else {
-    buffer.writeInt8(0, offset + 5);
-    nbtDataLen = 1;
-  }
-  return offset + 5 + nbtDataLen;
-}
-
-function sizeOfSlot(value) {
-  if(value.blockId === -1)
-    return (2);
-  else if(!value.nbtData) {
-    return (6);
-  } else {
-    return (5 + sizeOfNbt(value.nbtData));
-  }
-}
-
-
 function readNbt(buffer, offset) {
   return nbt.proto.read(buffer,offset,"nbt");
 }
@@ -96,6 +35,25 @@ function sizeOfNbt(value) {
   return nbt.proto.sizeOf(value,"nbt");
 }
 
+
+function readOptionalNbt(buffer, offset) {
+  if(buffer.readInt8(offset) == 0) return {size:1};
+  return nbt.proto.read(buffer,offset,"nbt");
+}
+
+function writeOptionalNbt(value, buffer, offset) {
+  if(value==undefined) {
+    buffer.writeInt8(0,offset);
+    return offset+1;
+  }
+  return nbt.proto.write(value,buffer,offset,"nbt");
+}
+
+function sizeOfOptionalNbt(value) {
+  if(value==undefined)
+    return 1;
+  return nbt.proto.sizeOf(value,"nbt");
+}
 
 function readRestBuffer(buffer, offset) {
   return {

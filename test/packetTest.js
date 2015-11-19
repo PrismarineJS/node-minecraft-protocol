@@ -68,6 +68,30 @@ var values = {
       }
     }
   },
+  'nbt':{
+    type:"compound",
+    name: "test", value: {
+      test1: {type: "int", value: 4},
+      test2: {type: "long", value: [12, 42]},
+      test3: {type: "byteArray", value: [32]},
+      test4: {type: "string", value: "ohi"},
+      test5: {type: "list", value: {type: "int", value: [4]}},
+      test6: {type: "compound", value: {test: {type: "int", value: 4}}},
+      test7: {type: "intArray", value: [12, 42]}
+    }
+  },
+  'optionalNbt':{
+    type:"compound",
+    name: "test", value: {
+      test1: {type: "int", value: 4},
+      test2: {type: "long", value: [12, 42]},
+      test3: {type: "byteArray", value: [32]},
+      test4: {type: "string", value: "ohi"},
+      test5: {type: "list", value: {type: "int", value: [4]}},
+      test6: {type: "compound", value: {test: {type: "int", value: 4}}},
+      test7: {type: "intArray", value: [12, 42]}
+    }
+  },
   'long': [0, 1],
   'entityMetadata': [
     {key: 17, value: 0, type: 0}
