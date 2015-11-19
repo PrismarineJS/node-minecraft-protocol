@@ -47,7 +47,7 @@
     "minecraft-data": "^0.16.1",
     "node-uuid": "~1.4.1",
     "prismarine-nbt": "0.1.0",
-    "protodef": "0.2.0",
+    "protodef": "0.2.1",
     "readable-stream": "^1.1.0",
     "superagent": "~0.10.0",
     "ursa-purejs": "0.0.3",
