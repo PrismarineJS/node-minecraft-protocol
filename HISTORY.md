@@ -1,8 +1,9 @@
 # History
 
-## 0.16.1 (unreleased)
+## 0.16.1
 
  * add checkTimeoutInterval to createClient
+ * parse nbt in all packets (in particular tile_entity_data and update_entity_nbt)
 
 ## 0.16.0
 
