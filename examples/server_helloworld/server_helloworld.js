@@ -1,4 +1,4 @@
-var mc = require('../../');
+var mc = require('minecraft-protocol');
 
 var options = {
   'online-mode': true,

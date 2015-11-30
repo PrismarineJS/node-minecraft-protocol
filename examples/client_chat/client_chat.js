@@ -1,6 +1,6 @@
 var readline = require('readline');
 var color = require("ansi-color").set;
-var mc = require('../../');
+var mc = require('minecraft-protocol');
 var states = mc.states;
 var util = require('util');
 

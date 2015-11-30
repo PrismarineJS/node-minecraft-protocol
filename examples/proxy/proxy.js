@@ -1,4 +1,4 @@
-var mc = require('../../');
+var mc = require('minecraft-protocol');
 
 var states = mc.states;
 function printHelpAndExit(exitCode) {
