@@ -43,7 +43,7 @@ mc.supportedVersions.forEach(function(supportedVersion) {
       });
       wrap.startServer({
         motd: 'test1234',
-        'max-players': 120,
+        'max-players': 120
       }, function(err) {
         if(err)
           return done(err);

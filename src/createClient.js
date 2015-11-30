@@ -86,6 +86,7 @@ function createClient(options) {
     client.connect(port, host);
   }
 
+  var timeout = null;
   return client;
 
   function onConnect() {
@@ -104,7 +105,6 @@ function createClient(options) {
   function onCompressionRequest(packet) {
     client.compressionThreshold = packet.threshold;
   }
-  var timeout = null;
   function onKeepAlive(packet) {
     if (timeout)
       clearTimeout(timeout);
@@ -153,7 +153,7 @@ function createClient(options) {
         var encryptedVerifyTokenBuffer = pubKey.encrypt(packet.verifyToken, undefined, undefined, ursa.RSA_PKCS1_PADDING);
         client.write('encryption_begin', {
           sharedSecret: encryptedSharedSecretBuffer,
-          verifyToken: encryptedVerifyTokenBuffer,
+          verifyToken: encryptedVerifyTokenBuffer
         });
         client.setEncryption(sharedSecret);
       }

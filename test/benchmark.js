@@ -7,7 +7,7 @@ var states = mc.states;
 var testDataWrite = [
   {name: 'keep_alive', params: {keepAliveId: 957759560}},
   {name: 'chat', params: {message: '<Bob> Hello World!'}},
-  {name: 'position_look', params: {x: 6.5, y: 65.62, stance: 67.24, z: 7.5, yaw: 0, pitch: 0, onGround: true}},
+  {name: 'position_look', params: {x: 6.5, y: 65.62, stance: 67.24, z: 7.5, yaw: 0, pitch: 0, onGround: true}}
   // TODO: add more packets for better quality data
 ];
 
@@ -36,7 +36,7 @@ mc.supportedVersions.forEach(function(supportedVersion){
       var deserializer=new mc.createDeserializer({state:states.PLAY,isServer:true,version:version.majorVersion});
       console.log('Beginning read test');
       start = Date.now();
-      for (j = 0; j < inputData.length; j++) {
+      for (var j = 0; j < inputData.length; j++) {
         deserializer.parsePacketBuffer(inputData[j]);
       }
       console.log('Finished read test in ' + (Date.now() - start) / 1000 + ' seconds');

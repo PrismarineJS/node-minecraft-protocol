@@ -3,11 +3,11 @@ var Transform = require("readable-stream").Transform;
 
 module.exports.createSplitter = function() {
   return new Splitter();
-}
+};
 
 module.exports.createFramer = function() {
   return new Framer();
-}
+};
 
 class Framer extends Transform {
   constructor() {
@@ -30,10 +30,9 @@ class Splitter extends Transform {
   }
   _transform(chunk, enc, cb) {
     this.buffer = Buffer.concat([this.buffer, chunk]);
-    var value, size, error;
     var offset = 0;
 
-    ({ value, size, error } = readVarInt(this.buffer, offset) || { error: "Not enough data" });
+    var { value, size, error } = readVarInt(this.buffer, offset) || { error: "Not enough data" };
     while (!error && this.buffer.length >= offset + size + value)
     {
       this.push(this.buffer.slice(offset + size, offset + size + value));

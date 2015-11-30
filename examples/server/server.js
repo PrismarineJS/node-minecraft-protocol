@@ -1,11 +1,10 @@
 var mc = require('minecraft-protocol');
-var states = mc.states;
 
 var options = {
   motd: 'Vox Industries',
   'max-players': 127,
   port: 25565,
-  'online-mode': false,
+  'online-mode': false
 };
 
 var server = mc.createServer(options);

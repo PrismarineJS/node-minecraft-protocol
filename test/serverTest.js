@@ -1,5 +1,4 @@
 var mc = require('../');
-var Client = mc.Client;
 var assert = require('power-assert');
 
 mc.supportedVersions.forEach(function(supportedVersion){
@@ -271,4 +270,4 @@ mc.supportedVersions.forEach(function(supportedVersion){
       }
     });
   });
-})
+});

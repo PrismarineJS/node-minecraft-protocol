@@ -55,7 +55,7 @@ if(process.argv.length < 5) {
   process.exit(1);
 }
 
-process.argv.forEach(function(val, index, array) {
+process.argv.forEach(function(val) {
   if(val == "-h") {
     print_help();
     process.exit(0);
@@ -167,9 +167,9 @@ function parseChat(chatObj, parentState) {
 
       chat += color(util.format.apply(this, args), getColorize(parentState));
     }
-    for(var i in chatObj.extra) {
+    chatObj.extra.forEach(function(i) {
       chat += parseChat(chatObj.extra[i], parentState);
-    }
+    });
     return chat;
   }
 }

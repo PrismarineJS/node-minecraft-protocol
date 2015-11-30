@@ -1,8 +1,6 @@
 var nbt = require('prismarine-nbt');
-var types=require("protodef").types;
 var uuid = require('node-uuid');
 
-// TODO : remove type-specific, replace with generic containers and arrays.
 module.exports = {
   'UUID': [readUUID, writeUUID, 16],
   'nbt': [readNbt, writeNbt, sizeOfNbt],
@@ -14,7 +12,7 @@ module.exports = {
 function readUUID(buffer, offset) {
   return {
     value: uuid.unparse(buffer, offset),
-    size: 16,
+    size: 16
   };
 }
 
@@ -71,37 +69,37 @@ function sizeOfRestBuffer(value) {
   return value.length;
 }
 
-function readEntityMetadata(buffer, offset, typeArgs) {
+function readEntityMetadata(buffer, offset, {type,endVal}) {
   var cursor = offset;
   var metadata = [];
   var item;
   while(true) {
     item = buffer.readUInt8(cursor);
-    if(item === typeArgs.endVal) {
+    if(item === endVal) {
       return {
         value: metadata,
         size: cursor + 1 - offset
       };
     }
-    var results = this.read(buffer, cursor, typeArgs.type, {});
+    var results = this.read(buffer, cursor, type, {});
     metadata.push(results.value);
     cursor += results.size;
   }
 }
 
-function writeEntityMetadata(value, buffer, offset, typeArgs) {
+function writeEntityMetadata(value, buffer, offset, {type,endVal}) {
   var self = this;
   value.forEach(function(item) {
-    offset = self.write(item, buffer, offset, typeArgs.type, {});
+    offset = self.write(item, buffer, offset, type, {});
   });
-  buffer.writeUInt8(typeArgs.endVal, offset);
+  buffer.writeUInt8(endVal, offset);
   return offset + 1;
 }
 
-function sizeOfEntityMetadata(value, typeArgs) {
+function sizeOfEntityMetadata(value, {type}) {
   var size = 1;
   for(var i = 0; i < value.length; ++i) {
-    size += this.sizeOf(value[i], typeArgs.type, {});
+    size += this.sizeOf(value[i], type, {});
   }
   return size;
 }

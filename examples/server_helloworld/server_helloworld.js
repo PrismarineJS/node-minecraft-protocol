@@ -1,7 +1,7 @@
 var mc = require('minecraft-protocol');
 
 var options = {
-  'online-mode': true,
+  'online-mode': true
 };
 
 var server = mc.createServer(options);

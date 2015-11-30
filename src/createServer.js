@@ -70,7 +70,7 @@ function createServer(options) {
       });
     }
 
-    function onKeepAlive(packet) {
+    function onKeepAlive() {
       lastKeepAlive = new Date();
     }
 
@@ -86,7 +86,7 @@ function createServer(options) {
       clearTimeout(loginKickTimer);
     }
 
-    function onPing(packet) {
+    function onPing() {
       var response = {
         "version": {
           "name": version.minecraftVersion,

@@ -1,4 +1,4 @@
-var util = require('util')
+var util = require('util');
 
 var debug;
 if(process.env.NODE_DEBUG && /(minecraft-protocol|mc-proto)/.test(process.env.NODE_DEBUG)) {

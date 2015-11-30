@@ -41,9 +41,9 @@ var values = {
     var results = {
       "..": context
     };
-    for(var index in typeArgs) {
+    Object.keys(typeArgs).forEach(function(index){
       results[typeArgs[index].name] = getValue(typeArgs[index].type, results);
-    }
+    });
     delete context[".."];
     return results;
   },
@@ -100,7 +100,7 @@ var values = {
     intField: 9,
     velocityX: 1,
     velocityY: 2,
-    velocityZ: 3,
+    velocityZ: 3
   },
   'UUID': "00112233-4455-6677-8899-aabbccddeeff",
   'position': {x: 12, y: 332, z: 4382821},
@@ -155,7 +155,7 @@ mc.supportedVersions.forEach(function(supportedVersion){
       client.end();
     });
     var packetName, packetInfo, field;
-    for(state in packets) {
+    for(var state in packets) {
       if(!packets.hasOwnProperty(state)) continue;
       for(packetName in packets[state].toServer) {
         if(!packets[state].toServer.hasOwnProperty(packetName)) continue;
@@ -210,14 +210,13 @@ mc.supportedVersions.forEach(function(supportedVersion){
       packetInfo.forEach(function(field) {
         assert.deepEqual(p1[field], p2[field]);
       });
-      var field;
-      for(field in p1) {
+      Object.keys(p1).forEach(function(field){
         if (p1[field] !== undefined)
           assert.ok(field in p2, "field " + field + " missing in p2, in p1 it has value " + JSON.stringify(p1[field]));
-      }
-      for(field in p2) {
+      });
+      Object.keys(p2).forEach(function(field){
         assert.ok(field in p1, "field " + field + " missing in p1, in p2 it has value " + JSON.stringify(p2[field]));
-      }
+      });
     }
   });
 

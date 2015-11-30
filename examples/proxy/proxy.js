@@ -26,7 +26,7 @@ if(process.argv.length < 4) {
   printHelpAndExit(1);
 }
 
-process.argv.forEach(function(val, index, array) {
+process.argv.forEach(function(val) {
   if(val == "-h") {
     printHelpAndExit(0);
   }
@@ -175,8 +175,8 @@ srv.on('login', function(client) {
 function shouldDump(name, direction) {
   if(matches(printNameBlacklist[name])) return false;
   if(printAllNames) return true;
-  if(matches(printNameWhitelist[name])) return true;
-  return false;
+  return matches(printNameWhitelist[name]);
+
   function matches(result) {
     return result != null && result.indexOf(direction) !== -1;
   }

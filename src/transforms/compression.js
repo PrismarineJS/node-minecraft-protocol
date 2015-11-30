@@ -4,11 +4,11 @@ var Transform = require("readable-stream").Transform;
 
 module.exports.createCompressor = function(threshold) {
   return new Compressor(threshold);
-}
+};
 
 module.exports.createDecompressor = function(threshold) {
   return new Decompressor(threshold);
-}
+};
 
 class Compressor extends Transform {
   constructor(compressionThreshold = -1) {
@@ -47,8 +47,7 @@ class Decompressor extends Transform {
   }
 
   _transform(chunk, enc, cb) {
-    var size, value, error;
-    ({ size, value, error } = readVarInt(chunk, 0));
+    var { size, value, error } = readVarInt(chunk, 0);
     if (error)
       return cb(error);
     if (value === 0)
