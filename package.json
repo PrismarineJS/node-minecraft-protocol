@@ -8,7 +8,7 @@
     "url": "git://github.com/PrismarineJS/node-minecraft-protocol.git"
   },
   "scripts": {
-    "prepublish": "gulp",
+    "prepublish": "gulp && require-self",
     "test": "mocha --recursive --require intelli-espower-loader --require source-map-support/register --reporter spec"
   },
   "keywords": [
@@ -29,16 +29,17 @@
   "browser": "browser.js",
   "devDependencies": {
     "chai": "^2.3.0",
+    "espower-loader": "^1.0.0",
     "gulp": "^3.8.11",
     "gulp-babel": "^5.1.0",
     "gulp-plumber": "^1.0.1",
     "gulp-sourcemaps": "^1.3.0",
-    "espower-loader":"^1.0.0",
     "intelli-espower-loader": "^1.0.0",
+    "minecraft-wrap": "~0.6.5",
     "mocha": "~2.3.3",
     "power-assert": "^1.0.0",
-    "source-map-support": "^0.3.2",
-    "minecraft-wrap": "~0.6.5"
+    "require-self": "^0.1.0",
+    "source-map-support": "^0.3.2"
   },
   "dependencies": {
     "babel-runtime": "^5.4.4",
