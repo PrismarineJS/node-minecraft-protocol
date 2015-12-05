@@ -1,4 +1,4 @@
-var [readVarInt, writeVarInt, sizeOfVarInt] = require("protodef").types.varint;
+
 var Transform = require("readable-stream").Transform;
 
 module.exports.createSplitter = function() {
@@ -9,38 +9,53 @@ module.exports.createFramer = function() {
   return new Framer();
 };
 
+var [readVarInt,writeVarIntOri] = require("protodef").types.varint;
+var DataGetter = require('protodef').DataGetter;
+
+
+var writeVarInt=(value) => {
+  var transformedBuffer=new Buffer(0);
+  writeVarIntOri(value,(size,f)=> {
+    var buffer=new Buffer(size);
+    f(buffer);
+    transformedBuffer=Buffer.concat([transformedBuffer,buffer]);
+  });
+  return transformedBuffer;
+};
+
 class Framer extends Transform {
   constructor() {
     super();
   }
 
   _transform(chunk, enc, cb) {
-    var buffer = new Buffer(sizeOfVarInt(chunk.length));
-    writeVarInt(chunk.length, buffer, 0);
-    this.push(buffer);
+    // can probably push the small buffers
+    this.push(writeVarInt(chunk.length));
     this.push(chunk);
     return cb();
   }
 }
 
 class Splitter extends Transform {
+  dataGetter = new DataGetter();
   constructor() {
     super();
-    this.buffer = new Buffer(0);
+    this.gettingData();
   }
-  _transform(chunk, enc, cb) {
-    this.buffer = Buffer.concat([this.buffer, chunk]);
-    var offset = 0;
 
-    var { value, size, error } = readVarInt(this.buffer, offset) || { error: "Not enough data" };
-    while (!error && this.buffer.length >= offset + size + value)
-    {
-      this.push(this.buffer.slice(offset + size, offset + size + value));
-      offset += size + value;
-      ({ value, size, error } = readVarInt(this.buffer, offset) || { error: "Not enough data" });
-    }
-    this.buffer = this.buffer.slice(offset);
-    return cb();
+  gettingData()
+  {
+    return readVarInt(this.dataGetter.get.bind(this.dataGetter))
+      .then(this.dataGetter.get.bind(this.dataGetter))
+    .then(value => {
+      this.push(value);
+    })
+    .then(() => this.gettingData());
+  }
+
+  _transform(chunk, enc, cb) {
+    this.dataGetter.push(chunk);
+    this.dataGetter.asker.once('needMoreData',cb);
   }
 }
 

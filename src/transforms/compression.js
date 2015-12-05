@@ -1,4 +1,3 @@
-var [readVarInt, writeVarInt, sizeOfVarInt] = require("protodef").types.varint;
 var zlib = require("zlib");
 var Transform = require("readable-stream").Transform;
 
@@ -8,6 +7,19 @@ module.exports.createCompressor = function(threshold) {
 
 module.exports.createDecompressor = function(threshold) {
   return new Decompressor(threshold);
+};
+
+var [readVarInt,writeVarIntOri] = require("protodef").types.varint;
+var DataGetter = require('protodef').DataGetter;
+
+var writeVarInt=(value) => {
+  var transformedBuffer=new Buffer(0);
+  writeVarIntOri(value,(size,f)=> {
+    var buffer=new Buffer(size);
+    f(buffer);
+    transformedBuffer=Buffer.concat([transformedBuffer,buffer]);
+  });
+  return transformedBuffer;
 };
 
 class Compressor extends Transform {
@@ -22,19 +34,15 @@ class Compressor extends Transform {
       zlib.deflate(chunk, (err, newChunk) => {
         if (err)
           return cb(err);
-        var buf = new Buffer(sizeOfVarInt(chunk.length) + newChunk.length);
-        var offset = writeVarInt(chunk.length, buf, 0);
-        newChunk.copy(buf, offset);
-        this.push(buf);
+        var buf=writeVarInt(chunk.length);
+        this.push(Buffer.concat([buf,newChunk]));
         return cb();
       });
     }
     else
     {
-      var buf = new Buffer(sizeOfVarInt(0) + chunk.length);
-      var offset = writeVarInt(0, buf, 0);
-      chunk.copy(buf, offset);
-      this.push(buf);
+      var buf=writeVarInt(0);
+      this.push(Buffer.concat([buf,chunk]));
       return cb();
     }
   }
@@ -47,22 +55,27 @@ class Decompressor extends Transform {
   }
 
   _transform(chunk, enc, cb) {
-    var { size, value, error } = readVarInt(chunk, 0);
-    if (error)
-      return cb(error);
-    if (value === 0)
-    {
-      this.push(chunk.slice(size));
-      return cb();
-    }
-    else
-    {
-      zlib.inflate(chunk.slice(size), (err, newBuf) => {
-        if (err)
-          return cb(err);
-        this.push(newBuf);
+
+    var dataGetter=new DataGetter();
+    dataGetter.push(chunk);
+
+    readVarInt(dataGetter.get.bind(this.dataGetter))
+    .then(value => {
+      if (value === 0)
+      {
+        this.push(dataGetter.incomingBuffer);
         return cb();
-      });
-    }
+      }
+      else
+      {
+        zlib.inflate(dataGetter.incomingBuffer, (err, newBuf) => {
+          if (err)
+            return cb(err);
+          this.push(newBuf);
+          return cb();
+        });
+      }
+    })
+    .catch(cb);
   }
 }
