@@ -22,6 +22,7 @@ class Client extends EventEmitter
   isServer;
   version;
   protocolState=states.HANDSHAKING;
+  ended=true;
 
   constructor(isServer,version) {
     super();
@@ -123,12 +124,12 @@ class Client extends EventEmitter
   }
 
   setSocket(socket) {
-    var ended = false;
+    this.ended = false;
 
     // TODO : A lot of other things needs to be done.
     var endSocket = () => {
-      if(ended) return;
-      ended = true;
+      if(this.ended) return;
+      this.ended = true;
       this.socket.removeListener('close', endSocket);
       this.socket.removeListener('end', endSocket);
       this.socket.removeListener('timeout', endSocket);
@@ -162,6 +163,8 @@ class Client extends EventEmitter
 
   end(reason) {
     this._endReason = reason;
+    if(this.cipher) this.cipher.unpipe();
+    if(this.framer) this.framer.unpipe();
     if(this.socket) this.socket.end();
   }
 
@@ -195,12 +198,16 @@ class Client extends EventEmitter
   }
 
   write(name, params) {
+    if(this.ended)
+      return;
     debug("writing packet " + this.state + "." + name);
     debug(params);
     this.serializer.write({ name, params });
   }
 
   writeRaw(buffer) {
+    if(this.ended)
+      return;
     if (this.compressor === null)
       this.framer.write(buffer);
     else
