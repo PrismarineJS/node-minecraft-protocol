@@ -1,6 +1,12 @@
 # History
 
+## 0.16.3
+
+ * update protodef : fix bug in switch
+ * don't write after end and unpipe everything when ending
+
 ## 0.16.2
+
  * update protodef version which fix a bug in writeOption
 
 ## 0.16.1
