@@ -2,55 +2,40 @@ var nbt = require('prismarine-nbt');
 var uuid = require('node-uuid');
 
 module.exports = {
-  'UUID': [readUUID, writeUUID, 16],
-  'nbt': [readNbt, writeNbt, sizeOfNbt],
-  'optionalNbt':[readOptionalNbt,writeOptionalNbt,sizeOfOptionalNbt],
-  'restBuffer': [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
-  'entityMetadataLoop': [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata]
+  'UUID': [readUUID, writeUUID],
+  'nbt': [readNbt, writeNbt],
+  'optionalNbt':[readOptionalNbt,writeOptionalNbt],
+  'restBuffer': [readRestBuffer, writeRestBuffer],
+  'entityMetadataLoop': [readEntityMetadata, writeEntityMetadata]
 };
 
-function readUUID(buffer, offset) {
-  return {
-    value: uuid.unparse(buffer, offset),
-    size: 16
-  };
+function readUUID(read) {
+  read(16).then(buffer => uuid.unparse(buffer, 0));
 }
 
-function writeUUID(value, buffer, offset) {
-  uuid.parse(value, buffer, offset);
-  return offset + 16;
+function writeUUID(value, write) {
+  write(16,buffer => uuid.parse(value, buffer, 0));
 }
 
-function readNbt(buffer, offset) {
-  return nbt.proto.read(buffer,offset,"nbt");
+function readNbt(read) {
+  return nbt.proto.read(read,"nbt");
 }
 
-function writeNbt(value, buffer, offset) {
-  return nbt.proto.write(value,buffer,offset,"nbt");
+function writeNbt(value, write) {
+  return nbt.proto.write(value,write,"nbt");
 }
 
-function sizeOfNbt(value) {
-  return nbt.proto.sizeOf(value,"nbt");
+function readOptionalNbt(read) {
+  return read(1)
+    .then(buffer => buffer.readInt8(0))
+    .then(value => value==0 ? undefined : nbt.proto.read(read,"nbt"));
 }
 
-
-function readOptionalNbt(buffer, offset) {
-  if(buffer.readInt8(offset) == 0) return {size:1};
-  return nbt.proto.read(buffer,offset,"nbt");
-}
-
-function writeOptionalNbt(value, buffer, offset) {
-  if(value==undefined) {
-    buffer.writeInt8(0,offset);
-    return offset+1;
-  }
-  return nbt.proto.write(value,buffer,offset,"nbt");
-}
-
-function sizeOfOptionalNbt(value) {
+function writeOptionalNbt(value, write) {
   if(value==undefined)
-    return 1;
-  return nbt.proto.sizeOf(value,"nbt");
+    write(1,buffer => buffer.writeInt8(0,0));
+  else
+   nbt.proto.write(value,write,"nbt");
 }
 
 function readRestBuffer(buffer, offset) {
@@ -65,41 +50,20 @@ function writeRestBuffer(value, buffer, offset) {
   return offset + value.length;
 }
 
-function sizeOfRestBuffer(value) {
-  return value.length;
-}
-
-function readEntityMetadata(buffer, offset, {type,endVal}) {
-  var cursor = offset;
+async function readEntityMetadata(read, {type,endVal}) {
   var metadata = [];
   var item;
   while(true) {
-    item = buffer.readUInt8(cursor);
+    item = (await read(1)).readUInt8(cursor);
     if(item === endVal) {
-      return {
-        value: metadata,
-        size: cursor + 1 - offset
-      };
+      return metadata;
     }
-    var results = this.read(buffer, cursor, type, {});
+    var results = await this.read(read, type, {});
     metadata.push(results.value);
-    cursor += results.size;
   }
 }
 
-function writeEntityMetadata(value, buffer, offset, {type,endVal}) {
-  var self = this;
-  value.forEach(function(item) {
-    offset = self.write(item, buffer, offset, type, {});
-  });
-  buffer.writeUInt8(endVal, offset);
-  return offset + 1;
-}
-
-function sizeOfEntityMetadata(value, {type}) {
-  var size = 1;
-  for(var i = 0; i < value.length; ++i) {
-    size += this.sizeOf(value[i], type, {});
-  }
-  return size;
+function writeEntityMetadata(value, write, {type,endVal}) {
+  value.forEach(item => this.write(item, write, type, {}));
+  write(1,buffer => buffer.writeUInt8(endVal, 0));
 }
