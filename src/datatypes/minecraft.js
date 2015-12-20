@@ -10,7 +10,7 @@ module.exports = {
 };
 
 function readUUID(read) {
-  read(16).then(buffer => uuid.unparse(buffer, 0));
+  return read(16).then(buffer => uuid.unparse(buffer, 0));
 }
 
 function writeUUID(value, write) {
@@ -26,9 +26,9 @@ function writeNbt(value, write) {
 }
 
 function readOptionalNbt(read) {
-  return read(1)
+  return read(1,true)
     .then(buffer => buffer.readInt8(0))
-    .then(value => value==0 ? undefined : nbt.proto.read(read,"nbt"));
+    .then(value => value==0 ? read(1).then(() => undefined) : nbt.proto.read(read,"nbt"));
 }
 
 function writeOptionalNbt(value, write) {
@@ -38,26 +38,21 @@ function writeOptionalNbt(value, write) {
    nbt.proto.write(value,write,"nbt");
 }
 
-function readRestBuffer(buffer, offset) {
-  return {
-    value: buffer.slice(offset),
-    size: buffer.length - offset
-  };
+function readRestBuffer(read) {
+  return read(-1);
 }
 
-function writeRestBuffer(value, buffer, offset) {
-  value.copy(buffer, offset);
-  return offset + value.length;
+function writeRestBuffer(value, write) {
+  write(value.length,buffer => value.copy(buffer,0));
 }
 
 async function readEntityMetadata(read, {type,endVal}) {
   var metadata = [];
   var item;
   while(true) {
-    item = (await read(1)).readUInt8(cursor);
-    if(item === endVal) {
-      return metadata;
-    }
+    item = (await read(1,true)).readUInt8(0);
+    if(item === endVal)
+      return read(1).then(()=>metadata);
     var results = await this.read(read, type, {});
     metadata.push(results.value);
   }

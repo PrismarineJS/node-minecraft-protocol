@@ -59,7 +59,7 @@ class Decompressor extends Transform {
     var dataGetter=new DataGetter();
     dataGetter.push(chunk);
 
-    readVarInt(dataGetter.get.bind(this.dataGetter))
+    readVarInt(dataGetter.get.bind(dataGetter))
     .then(value => {
       if (value === 0)
       {
