@@ -1,5 +1,9 @@
 # History
 
+## 0.16.4
+
+ * add client.latency (thanks @netraameht)
+
 ## 0.16.3
 
  * update protodef : fix bug in switch
