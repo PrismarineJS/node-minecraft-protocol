@@ -50,6 +50,7 @@ class Splitter extends Transform {
     .then(value => {
       this.push(value);
     })
+      .catch(err => this.emit('error',err))
     .then(() => this.gettingData());
   }
 

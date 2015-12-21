@@ -62,6 +62,7 @@ class Client extends EventEmitter
 
 
     this.deserializer.on('error', (e) => {
+      e.field=e.field==undefined ? "" : e.field;
       var parts=e.field.split(".");
       parts.shift();
       var deserializerDirection = this.isServer ? 'toServer' : 'toClient';
