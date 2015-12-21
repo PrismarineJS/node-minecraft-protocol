@@ -50,6 +50,8 @@ function createServer(options) {
     var loginKickTimer = setTimeout(kickForNotLoggingIn, kickTimeout);
 
     var serverId;
+    
+    var sendKeepAliveTime;
 
     function kickForNotLoggingIn() {
       client.end('LoginTimeout');
@@ -65,12 +67,14 @@ function createServer(options) {
         client.end('KeepAliveTimeout');
         return;
       }
+      sendKeepAliveTime = new Date();
       client.write('keep_alive', {
         keepAliveId: Math.floor(Math.random() * 2147483648)
       });
     }
 
     function onKeepAlive() {
+      client.latency = (new Date()) - sendKeepAliveTime;
       lastKeepAlive = new Date();
     }
 
