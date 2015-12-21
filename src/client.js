@@ -23,6 +23,7 @@ class Client extends EventEmitter
   version;
   protocolState=states.HANDSHAKING;
   ended=true;
+  latency=0;
 
   constructor(isServer,version) {
     super();
