@@ -1,5 +1,9 @@
 # History
 
+## 0.16.5
+
+* initialize latency to 0
+
 ## 0.16.4
 
  * add client.latency (thanks @netraameht)
