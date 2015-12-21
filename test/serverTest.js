@@ -27,14 +27,17 @@ mc.supportedVersions.forEach(function(supportedVersion){
             nextState: 2
           });
           client.state='login'; // at that point the client-side client knows about the change of state
-          client.write('login',{uuid:'12345-12345-12345-12345',username:'superpants'}); // and send some packet of the new state
+          client.write('login_start',{username:'superpants'}); // and send some packet of the new state
           // putting that line ^ in a setTimeout "fixes" this test, but the other servers aren't that nice, so this needs to be handled
 
           serverClient.on('set_protocol',function(){  // but the server-side client only knows about it at that point
             // which might be one tick too late with an async parser
             serverClient.state='login';
           });
-          done();
+
+          serverClient.on('login_start',function(){
+            done();
+          });
 
 
         });
