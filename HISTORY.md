@@ -1,5 +1,9 @@
 # History
 
+## 0.16.6
+
+* fix latency before the first keep alive
+
 ## 0.16.5
 
 * initialize latency to 0
