@@ -74,7 +74,7 @@ function createServer(options) {
     }
 
     function onKeepAlive() {
-      client.latency = (new Date()) - sendKeepAliveTime;
+      if(sendKeepAliveTime) client.latency = (new Date()) - sendKeepAliveTime;
       lastKeepAlive = new Date();
     }
 
