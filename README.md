@@ -30,12 +30,12 @@ Parse and serialize minecraft packets, plus authentication and encryption.
 
 ## Projects Using node-minecraft-protocol
 
- * [mineflayer](https://github.com/andrewrk/mineflayer/) - create minecraft
+ * [mineflayer](https://github.com/PrismarineJS/mineflayer/) - create minecraft
    bots with a stable, high level API.
  * [mcserve](https://github.com/andrewrk/mcserve) - runs and monitors your
    minecraft server, provides real-time web interface, allow your users to
    create bots.
- * [flying-squid](https://github.com/mhsjlw/flying-squid) create minecraft
+ * [flying-squid](https://github.com/PrismarineJS/flying-squid) create minecraft
    servers with a high level API, also a minecraft server by itself.
 
 ## Usage
