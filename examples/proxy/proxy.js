@@ -2,7 +2,7 @@ var mc = require('minecraft-protocol');
 
 var states = mc.states;
 function printHelpAndExit(exitCode) {
-  console.log("usage: node proxy.js [<options>...] <target_srv> [<version>]");
+  console.log("usage: node proxy.js [<options>...] <target_srv> <version>");
   console.log("options:");
   console.log("  --dump name");
   console.log("    print to stdout messages with the specified name.");
@@ -13,9 +13,9 @@ function printHelpAndExit(exitCode) {
   console.log("  name");
   console.log("    a packet name as defined in protocol.json");
   console.log("examples:");
-  console.log("  node proxy.js --dump-all -x keep_alive -x update_time -x entity_velocity -x rel_entity_move -x entity_look -x entity_move_look -x entity_teleport -x entity_head_rotation -x position -x localhost Player");
+  console.log("  node proxy.js --dump-all -x keep_alive -x update_time -x entity_velocity -x rel_entity_move -x entity_look -x entity_move_look -x entity_teleport -x entity_head_rotation -x position -x localhost 1.8");
   console.log("    print all messages except for some of the most prolific.");
-  console.log("  node examples/proxy.js --dump open_window --dump close_window --dump set_slot --dump window_items --dump craft_progress_bar --dump transaction --dump close_window --dump window_click --dump set_creative_slot --dump enchant_item localhost Player");
+  console.log("  node examples/proxy.js --dump open_window --dump close_window --dump set_slot --dump window_items --dump craft_progress_bar --dump transaction --dump close_window --dump window_click --dump set_creative_slot --dump enchant_item localhost 1.8");
   console.log("    print messages relating to inventory management.");
 
   process.exit(exitCode);
