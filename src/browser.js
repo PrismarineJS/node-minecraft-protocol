@@ -1,4 +1,12 @@
+var Client = require('./client');
+var Server = require('./server');
+var serializer = require("./transforms/serializer");
+
 module.exports = {
-  Client: require('./client'),
+  Client: Client,
+  Server: Server,
+  states: require("./states"),
+  createSerializer:serializer.createSerializer,
+  createDeserializer:serializer.createDeserializer,
   supportedVersions:require("./version").supportedVersions
 };
