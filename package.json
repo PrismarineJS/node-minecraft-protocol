@@ -24,7 +24,7 @@
   "author": "Andrew Kelley",
   "license": "BSD-3-Clause",
   "engines": {
-    "node": ">=0.8.16"
+    "node": ">=4"
   },
   "browser": "browser.js",
   "devDependencies": {
