@@ -7,7 +7,6 @@ module.exports=createClientStream;
 
 function createClientStream(options) {
   assert.ok(options, "options is required");
-  var stream = options.stream;
 
   assert.ok(options.username, "username is required");
   var keepAlive = options.keepAlive == null ? true : options.keepAlive;
@@ -31,7 +30,6 @@ function createClientStream(options) {
   client.on("set_compression", onCompressionRequest);
 
   client.username = options.username;
-  if (stream) client.setSocket(stream);
 
   var timeout = null;
   return client;
