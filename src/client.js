@@ -10,26 +10,25 @@ var createDeserializer=require("./transforms/serializer").createDeserializer;
 
 class Client extends EventEmitter
 {
-  packetsToParse={};
-  serializer;
-  compressor=null;
-  framer=framing.createFramer();
-  cipher=null;
-  decipher=null;
-  splitter=framing.createSplitter();
-  decompressor=null;
-  deserializer;
-  isServer;
-  version;
-  protocolState=states.HANDSHAKING;
-  ended=true;
-  latency=0;
-
   constructor(isServer,version) {
     super();
     this.version=version;
     this.isServer = !!isServer;
     this.setSerializer(states.HANDSHAKING);
+    this.packetsToParse={};
+    this.serializer;
+    this.compressor=null;
+    this.framer=framing.createFramer();
+    this.cipher=null;
+    this.decipher=null;
+    this.splitter=framing.createSplitter();
+    this.decompressor=null;
+    this.deserializer;
+    this.isServer;
+    this.version;
+    this.protocolState=states.HANDSHAKING;
+    this.ended=true;
+    this.latency=0;
 
     this.on('newListener', function(event, listener) {
       var direction = this.isServer ? 'toServer' : 'toClient';
