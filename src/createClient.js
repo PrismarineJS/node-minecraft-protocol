@@ -2,6 +2,7 @@ var ursa=require("./ursa");
 var net = require('net');
 var dns = require('dns');
 var Client = require('./client');
+var createClientStream = require('./createClientStream');
 var assert = require('assert');
 var crypto = require('crypto');
 var yggdrasil = require('yggdrasil')({});
@@ -36,21 +37,14 @@ function createClient(options) {
 
   assert.ok(options.username, "username is required");
   var haveCredentials = options.password != null || (clientToken != null && options.session != null);
-  var keepAlive = options.keepAlive == null ? true : options.keepAlive;
-  var checkTimeoutInterval = options.checkTimeoutInterval || 10 * 1000;
 
   var optVersion = options.version || require("./version").defaultVersion;
   var mcData=require("minecraft-data")(optVersion);
   var version = mcData.version;
 
-
-  var client = new Client(false,version.majorVersion);
+  var client = createClientStream(options);
   client.on('connect', onConnect);
-  if(keepAlive) client.on('keep_alive', onKeepAlive);
   client.once('encryption_begin', onEncryptionKeyRequest);
-  client.once('success', onLogin);
-  client.once("compress", onCompressionRequest);
-  client.on("set_compression", onCompressionRequest);
   if(haveCredentials) {
     // make a request to get the case-correct username before connecting.
     var cb = function(err, session) {
@@ -102,18 +96,6 @@ function createClient(options) {
     });
   }
 
-  function onCompressionRequest(packet) {
-    client.compressionThreshold = packet.threshold;
-  }
-  function onKeepAlive(packet) {
-    if (timeout)
-      clearTimeout(timeout);
-    timeout = setTimeout(() => client.end(), checkTimeoutInterval);
-    client.write('keep_alive', {
-      keepAliveId: packet.keepAliveId
-    });
-  }
-
   function onEncryptionKeyRequest(packet) {
     crypto.randomBytes(16, gotSharedSecret);
 
@@ -158,12 +140,6 @@ function createClient(options) {
         client.setEncryption(sharedSecret);
       }
     }
-  }
-
-  function onLogin(packet) {
-    client.state = states.PLAY;
-    client.uuid = packet.uuid;
-    client.username = packet.username;
   }
 }
 
