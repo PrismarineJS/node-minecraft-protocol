@@ -28,7 +28,6 @@
   },
   "browser": "browser.js",
   "devDependencies": {
-    "chai": "^2.3.0",
     "espower-loader": "^1.0.0",
     "gulp": "^3.8.11",
     "gulp-babel": "^5.1.0",
