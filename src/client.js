@@ -64,6 +64,7 @@ class Client extends EventEmitter
 
 
     this.deserializer.on('error', (e) => {
+      e.field=e.field==undefined ? "" : e.field;
       var parts=e.field.split(".");
       parts.shift();
       var deserializerDirection = this.isServer ? 'toServer' : 'toClient';
@@ -73,8 +74,9 @@ class Client extends EventEmitter
     });
 
     this.deserializer.on('data', (parsed) => {
-      parsed.metadata.name=parsed.data.name;
-      parsed.data=parsed.data.params;
+      parsed.metadata={};
+      parsed.metadata.name=parsed.name;
+      parsed.data=parsed.params;
       parsed.metadata.state=state;
       this.emit('packet', parsed.data, parsed.metadata);
       this.emit(parsed.metadata.name, parsed.data, parsed.metadata);

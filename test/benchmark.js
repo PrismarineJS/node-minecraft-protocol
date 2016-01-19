@@ -1,6 +1,6 @@
-var ITERATIONS = 10000;
+var ITERATIONS = 1000;
 
-var mc = require("../");
+var mc = require("minecraft-protocol");
 var util = require('util');
 var states = mc.states;
 
@@ -24,23 +24,30 @@ mc.supportedVersions.forEach(function(supportedVersion){
       start = Date.now();
       for(i = 0; i < ITERATIONS; i++) {
         for(j = 0; j < testDataWrite.length; j++) {
-          inputData.push(serializer.createPacketBuffer(testDataWrite[j]));
+          serializer.write(testDataWrite[j]);
         }
       }
-      var result=(Date.now() - start) / 1000;
-      console.log('Finished write test in ' + result + ' seconds');
-      done();
+      serializer.end();
+      serializer.on("data",function(data) {
+        inputData.push(data);
+      });
+      serializer.on('finish',function(){
+        console.log('Finished write test in ' + (Date.now() - start) / 1000 + ' seconds');
+        done();
+      });
     });
 
     it("bench parsing",function(done){
       var deserializer=new mc.createDeserializer({state:states.PLAY,isServer:true,version:version.majorVersion});
       console.log('Beginning read test');
-      start = Date.now();
-      for (var j = 0; j < inputData.length; j++) {
-        deserializer.parsePacketBuffer(inputData[j]);
-      }
-      console.log('Finished read test in ' + (Date.now() - start) / 1000 + ' seconds');
-      done();
+      var start = Date.now();
+
+      inputData.forEach(function(data) {deserializer.write(data)});
+      deserializer.end();
+      deserializer.on('finish',function(){
+        console.log('Finished read test in ' + (Date.now() - start) / 1000 + ' seconds');
+        done();
+      });
     });
   });
 });

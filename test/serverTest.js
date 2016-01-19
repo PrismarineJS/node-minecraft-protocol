@@ -1,11 +1,52 @@
 var mc = require('../');
 var assert = require('power-assert');
+var net = require('net');
+var Client = mc.Client;
+var Server = mc.Server;
 
 mc.supportedVersions.forEach(function(supportedVersion){
   var mcData=require("minecraft-data")(supportedVersion);
   var version=mcData.version;
 
   describe("mc-server "+version.minecraftVersion, function() {
+    it("checks whether state changing is properly supported",function(done){
+
+      var server = new Server(version.majorVersion);
+      var serverClient;
+      var client;
+      server.once('listening', function() {
+        server.once('connection', function(c) {
+          serverClient = c;
+          serverClient.state='handshaking';
+          client.state='handshaking';
+
+          client.write('set_protocol', {
+            protocolVersion: version.version,
+            serverHost: '127.0.0.1',
+            serverPort: 25565,
+            nextState: 2
+          });
+          client.state='login'; // at that point the client-side client knows about the change of state
+          client.write('login_start',{username:'superpants'}); // and send some packet of the new state
+          // putting that line ^ in a setTimeout "fixes" this test, but the other servers aren't that nice, so this needs to be handled
+
+          serverClient.on('set_protocol',function(){  // but the server-side client only knows about it at that point
+            // which might be one tick too late with an async parser
+            serverClient.state='login';
+          });
+
+          serverClient.on('login_start',function(){
+            done();
+          });
+
+
+        });
+        client = new Client(false,version.majorVersion);
+        client.setSocket(net.connect(25565, 'localhost'));
+      });
+      server.listen(25565, 'localhost');
+    });
+
     it("starts listening and shuts down cleanly", function(done) {
       var server = mc.createServer({
         'online-mode': false,
