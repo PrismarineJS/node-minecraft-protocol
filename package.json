@@ -28,7 +28,7 @@
   },
   "browser": "browser.js",
   "devDependencies": {
-    "babel-preset-es2015": "^6.3.13",
+    "babel-preset-es2015-node5": "^1.1.1",
     "endian-toggle": "0.0.0",
     "espower-loader": "^1.0.0",
     "gulp": "^3.9.0",
