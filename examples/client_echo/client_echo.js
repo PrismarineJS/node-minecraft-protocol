@@ -15,6 +15,9 @@ var client = mc.createClient({
 client.on('connect', function() {
   console.info('connected');
 });
+client.on('disconnect', function(packet) {
+  console.log('disconnected: '+ packet.reason);
+});
 client.on('chat', function(packet) {
   var jsonMsg = JSON.parse(packet.message);
   if(jsonMsg.translate == 'chat.type.announcement' || jsonMsg.translate == 'chat.type.text') {
