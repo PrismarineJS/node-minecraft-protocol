@@ -8,7 +8,7 @@ var yggdrasil = require('yggdrasil')({});
 var yggserver = require('yggdrasil').server({});
 var states = require("./states");
 var debug = require("./debug");
-var uuid = require('uuid');
+var UUID = require('uuid-1345');
 
 module.exports=createClient;
 
@@ -31,7 +31,7 @@ function createClient(options) {
   assert.ok(options, "options is required");
   var port = options.port || 25565;
   var host = options.host || 'localhost';
-  var clientToken = options.clientToken || uuid.v4();
+  var clientToken = options.clientToken || UUID.v4().toString();
   var accessToken;
 
   assert.ok(options.username, "username is required");
