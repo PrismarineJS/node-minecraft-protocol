@@ -97,13 +97,31 @@ proto.addType('FML|HS',
 
       // ModList
       {
-        "name": "numberOfMods",
+        "name": "mods",
         "type": [
           "switch",
           {
             "compareTo": "discriminator",
             "fields": {
-              "2": "varint"
+              "2": [
+                "array",
+                {
+                  "countType": "varint",
+                  "type": [
+                    "container",
+                    [
+                      {
+                        "name": "name",
+                        "type": "string"
+                      },
+                      {
+                        "name": "version",
+                        "type": "string"
+                      }
+                    ]
+                  ],
+                },
+              ],
             },
             "default": "void"
           }
@@ -150,8 +168,14 @@ client.on('custom_payload', function(packet) {
 
       var modList = proto.createPacketBuffer('FML|HS', {
         discriminator: 2, // ModList
-        numberOfMods: 0,
+        mods: []
         // TODO: send some mods
+        // TODO: fix Error: SizeOf error for mods.2.0.name : missing data type: string
+        /*
+        mods: [
+          {name:'IronChest', version:'6.0.121.768'}
+        ]
+        */
       });
       client.write('custom_payload', {
         channel: 'FML|HS',
