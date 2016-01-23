@@ -93,7 +93,23 @@ proto.addType('FML|HS',
             "default": "void"
           }
         ],
-      }
+      },
+
+      // ModList
+      {
+        "name": "numberOfMods",
+        "type": [
+          "switch",
+          {
+            "compareTo": "discriminator",
+            "fields": {
+              "2": "varint"
+            },
+            "default": "void"
+          }
+        // TODO: mods array: modname string, modversion string
+        ],
+      },
     ]
   ]
 );
@@ -130,6 +146,16 @@ client.on('custom_payload', function(packet) {
       client.write('custom_payload', {
         channel: 'FML|HS',
         data: clientHello
+      });
+
+      var modList = proto.createPacketBuffer('FML|HS', {
+        discriminator: 2, // ModList
+        numberOfMods: 0,
+        // TODO: send some mods
+      });
+      client.write('custom_payload', {
+        channel: 'FML|HS',
+        data: modList
       });
     }
   }
