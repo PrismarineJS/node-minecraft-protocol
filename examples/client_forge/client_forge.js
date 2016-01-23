@@ -28,3 +28,14 @@ client.on('chat', function(packet) {
     client.write('chat', {message: msg});
   }
 });
+client.on('custom_payload', function(packet) {
+  var channel = packet.channel;
+  var data = packet.data;
+
+  if (channel === 'REGISTER') {
+    var channels = data.toString().split('\0');
+    console.log('Server-side registered channels:',channels);
+    // TODO: do something?
+    // expect:  [ 'FML|HS', 'FML', 'FML|MP', 'FML', 'FORGE' ]
+  }
+});
