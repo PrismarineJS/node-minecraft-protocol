@@ -117,6 +117,11 @@ client.on('custom_payload', function(packet) {
         // TODO: support higher protocols, if they change
       }
 
+      client.write('custom_payload', {
+        channel: 'REGISTER',
+        data: new Buffer(['FML|HS', 'FML', 'FML|MP', 'FML', 'FORGE'].join('\0'))
+      });
+
       var clientHello = proto.createPacketBuffer('FML|HS', {
         discriminator: 1, // ClientHello
         fmlProtocolVersionClient: parsed.data.fmlProtocolVersionServer
