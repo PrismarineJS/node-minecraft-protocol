@@ -1,4 +1,5 @@
 var mc = require('minecraft-protocol');
+var ProtoDef = require('protodef').ProtoDef;
 
 if(process.argv.length < 4 || process.argv.length > 6) {
   console.log("Usage : node echo.js <host> <port> [<name>] [<password>]");
@@ -28,6 +29,19 @@ client.on('chat', function(packet) {
     client.write('chat', {message: msg});
   }
 });
+
+var proto = new ProtoDef();
+// http://wiki.vg/User:Pokechu22/Forge#FML.7CHS_Packet_structure
+proto.addType('FML|HS', [
+    'container',
+    [
+      {
+        "name": "discriminator",
+        "type": "byte"
+      }
+    ]
+]);
+
 client.on('custom_payload', function(packet) {
   var channel = packet.channel;
   var data = packet.data;
@@ -37,5 +51,8 @@ client.on('custom_payload', function(packet) {
     console.log('Server-side registered channels:',channels);
     // TODO: do something?
     // expect:  [ 'FML|HS', 'FML', 'FML|MP', 'FML', 'FORGE' ]
+  } else if (channel === 'FML|HS') {
+    var parsed = proto.parsePacketBuffer('FML|HS', data);
+    console.log('FML|HS',parsed);
   }
 });
