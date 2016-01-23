@@ -174,14 +174,11 @@ client.on('custom_payload', function(packet) {
 
       var modList = proto.createPacketBuffer('FML|HS', {
         discriminator: 2, // ModList
-        mods: []
-        // TODO: send some mods
-        // TODO: fix Error: SizeOf error for mods.2.0.name : missing data type: string
-        /*
+        //mods: []
+        // TODO: send from ServerListPing packet, allow customizing not hardcoding
         mods: [
           {name:'IronChest', version:'6.0.121.768'}
         ]
-        */
       });
       client.write('custom_payload', {
         channel: 'FML|HS',
