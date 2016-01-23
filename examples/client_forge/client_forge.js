@@ -38,6 +38,8 @@ proto.addType("string", ["pstring", {
 
 
 // http://wiki.vg/Minecraft_Forge_Handshake
+// TODO: refactor to use one big switch like https://github.com/PrismarineJS/node-minecraft-protocol/blob/master/src/transforms/serializer.js#L21
+// and with a mapper for symbolic names https://github.com/PrismarineJS/prismarine-nbt/blob/master/nbt.json#L48
 proto.addType('FML|HS',
   [
     'container',
@@ -135,6 +137,35 @@ proto.addType('FML|HS',
         ],
       },
 
+      // RegistryData
+      {
+        "name": "hasMore",
+        "type": [
+          "switch",
+          {
+            "compareTo": "discriminator",
+            "fields": {
+              "3": "boolean"
+            },
+            "default": "void"
+          },
+        ],
+
+        /* TODO: support all fields
+        "name": "registryName",
+        "type": [
+          "switch",
+          {
+            "compareTo": "discriminator",
+            "fields": {
+              "3": "string"
+            },
+            "default": "void"
+          },
+        ],
+        */
+      },
+
       // HandshakeAck
       {
         "name": "phase",
@@ -152,6 +183,17 @@ proto.addType('FML|HS',
     ]
   ]
 );
+
+function writeAck(client, phase) {
+  var ackData = proto.createPacketBuffer('FML|HS', {
+    discriminator: -1, // HandshakeAck,
+    phase: 2 // WAITINGSERVERDATA
+  });
+  client.write('custom_payload', {
+    channel: 'FML|HS',
+    data: ackData
+  });
+}
 
 client.on('custom_payload', function(packet) {
   var channel = packet.channel;
@@ -199,18 +241,24 @@ client.on('custom_payload', function(packet) {
         channel: 'FML|HS',
         data: modList
       });
+      writeAck(client, 2); // WAITINGSERVERDATA
     } else if (parsed.data.discriminator === 2) { // ModList
       console.log('Server ModList:',parsed.data.mods);
       // TODO: client/server check if mods compatible
 
-      var ackWaitingServerData = proto.createPacketBuffer('FML|HS', {
-        discriminator: -1, // HandshakeAck,
-        phase: 2 // WAITINGSERVERDATA
-      });
-      client.write('custom_payload', {
-        channel: 'FML|HS',
-        data: ackWaitingServerData
-      });
+    } else if (parsed.data.discriminator === 3) { // RegistryData
+      console.log('RegistryData',parsed.data);
+      if (!parsed.data.hasMore) {
+        console.log('LAST RegistryData');
+
+        writeAck(client, 3); // WAITINGSERVERCOMPLETE
+      }
+    } else if (parsed.data.discriminator === -1) { // HandshakeAck
+      if (parsed.data.phase === 2) { // WAITINGCACK
+        writeAck(client, 4); // PENDINGCOMPLETE
+      } else if (parsed.data.phase === 3) { // COMPLETE
+        console.log('HandshakeAck Complete!');
+      }
     }
   }
 });
