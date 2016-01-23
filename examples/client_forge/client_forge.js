@@ -31,14 +31,27 @@ client.on('chat', function(packet) {
 });
 
 var proto = new ProtoDef();
-// http://wiki.vg/User:Pokechu22/Forge#FML.7CHS_Packet_structure
+// http://wiki.vg/Minecraft_Forge_Handshake
 proto.addType('FML|HS', [
     'container',
     [
       {
         "name": "discriminator",
         "type": "byte"
-      }
+      },
+      {
+        // ServerHello
+        "name": "fmlProtocolVersion",
+        "type": [
+          "switch",
+          {
+            "compareTo": "discriminator",
+            "fields": {
+              "0": "byte"
+            },
+            "default": "void"
+          },
+        ]      }
     ]
 ]);
 
