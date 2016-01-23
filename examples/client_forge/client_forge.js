@@ -184,6 +184,8 @@ client.on('custom_payload', function(packet) {
         channel: 'FML|HS',
         data: modList
       });
+    } else if (parsed.data.discriminator === 2) { // ModList
+      console.log('Server ModList:',parsed.data.mods);
     }
   }
 });
