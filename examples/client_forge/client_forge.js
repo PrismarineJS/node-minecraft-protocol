@@ -32,15 +32,17 @@ client.on('chat', function(packet) {
 
 var proto = new ProtoDef();
 // http://wiki.vg/Minecraft_Forge_Handshake
-proto.addType('FML|HS', [
+proto.addType('FML|HS',
+  [
     'container',
     [
       {
         "name": "discriminator",
         "type": "byte"
       },
+
+      // ServerHello
       {
-        // ServerHello
         "name": "fmlProtocolVersion",
         "type": [
           "switch",
@@ -76,9 +78,25 @@ proto.addType('FML|HS', [
             "default": "void"
           },
         ],
+      },
+
+      // ClientHello
+      {
+        "name": "fmlProtocolVersion",
+        "type": [
+          "switch",
+          {
+            "compareTo": "discriminator",
+            "fields": {
+              "1": "byte"
+            },
+            "default": "void"
+          }
+        ],
       }
     ]
-]);
+  ]
+);
 
 client.on('custom_payload', function(packet) {
   var channel = packet.channel;
