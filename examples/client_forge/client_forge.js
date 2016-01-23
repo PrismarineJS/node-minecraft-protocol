@@ -60,9 +60,7 @@ proto.addType('FML|HS', [
           {
             "compareTo": "discriminator",
             "fields": {
-              "0": "int"
-                /* TODO
-                [
+              "0": [
                 "switch",
                 {
                   // "Only sent if protocol version is greater than 1."
@@ -75,13 +73,11 @@ proto.addType('FML|HS', [
                 }
               ]
             },
-            */
+            "default": "void"
           },
-          "default": "void"
-        },
-      ]
-    }
-  ]
+        ],
+      }
+    ]
 ]);
 
 client.on('custom_payload', function(packet) {
