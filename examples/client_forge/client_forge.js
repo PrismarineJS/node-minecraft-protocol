@@ -43,7 +43,7 @@ proto.addType('FML|HS',
 
       // ServerHello
       {
-        "name": "fmlProtocolVersion",
+        "name": "fmlProtocolVersionServer",
         "type": [
           "switch",
           {
@@ -82,7 +82,7 @@ proto.addType('FML|HS',
 
       // ClientHello
       {
-        "name": "fmlProtocolVersion",
+        "name": "fmlProtocolVersionClient", // TODO: merge or fix name collision with fmlProtocolVersionServer?
         "type": [
           "switch",
           {
@@ -110,5 +110,22 @@ client.on('custom_payload', function(packet) {
   } else if (channel === 'FML|HS') {
     var parsed = proto.parsePacketBuffer('FML|HS', data);
     console.log('FML|HS',parsed);
+
+
+    if (parsed.data.discriminator === 0) { // ServerHello
+      if (parsed.data.fmlProtocolVersionServer > 2) {
+        // TODO: support higher protocols, if they change
+      }
+
+      var clientHello = proto.createPacketBuffer('FML|HS', {
+        discriminator: 1, // ClientHello
+        fmlProtocolVersionClient: parsed.data.fmlProtocolVersionServer
+      });
+
+      client.write('custom_payload', {
+        channel: 'FML|HS',
+        data: clientHello
+      });
+    }
   }
 });
