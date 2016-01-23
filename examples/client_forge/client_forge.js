@@ -51,8 +51,37 @@ proto.addType('FML|HS', [
             },
             "default": "void"
           },
-        ]      }
-    ]
+        ],
+      },
+      {
+        "name": "overrideDimension",
+        "type": [
+          "switch",
+          {
+            "compareTo": "discriminator",
+            "fields": {
+              "0": "int"
+                /* TODO
+                [
+                "switch",
+                {
+                  // "Only sent if protocol version is greater than 1."
+                  "compareTo": "fmlProtocolVersion",
+                  "fields": {
+                    "0": "void",
+                    "1": "void"
+                  },
+                  "default": "int"
+                }
+              ]
+            },
+            */
+          },
+          "default": "void"
+        },
+      ]
+    }
+  ]
 ]);
 
 client.on('custom_payload', function(packet) {
