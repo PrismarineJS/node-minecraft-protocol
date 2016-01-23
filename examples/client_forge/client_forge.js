@@ -31,6 +31,12 @@ client.on('chat', function(packet) {
 });
 
 var proto = new ProtoDef();
+// copied from ../../dist/transforms/serializer.js TODO: refactor
+proto.addType("string", ["pstring", {
+      countType: "varint"
+    }]);
+
+
 // http://wiki.vg/Minecraft_Forge_Handshake
 proto.addType('FML|HS',
   [
