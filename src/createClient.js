@@ -90,9 +90,12 @@ function createClient(options) {
   return client;
 
   function onConnect() {
+    var taggedHost = host;
+    if (options.forge) taggedHost += '\0FML\0';
+
     client.write('set_protocol', {
       protocolVersion: version.version,
-      serverHost: host,
+      serverHost: taggedHost,
       serverPort: port,
       nextState: 2
     });
