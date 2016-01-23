@@ -257,6 +257,7 @@ client.on('custom_payload', function(packet) {
       if (parsed.data.phase === 2) { // WAITINGCACK
         writeAck(client, 4); // PENDINGCOMPLETE
       } else if (parsed.data.phase === 3) { // COMPLETE
+        writeAck(client, 5); // COMPLETE
         console.log('HandshakeAck Complete!');
       }
     }
