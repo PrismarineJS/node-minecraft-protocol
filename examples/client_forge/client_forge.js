@@ -134,6 +134,21 @@ proto.addType('FML|HS',
         // TODO: mods array: modname string, modversion string
         ],
       },
+
+      // HandshakeAck
+      {
+        "name": "phase",
+        "type": [
+          "switch",
+          {
+            "compareTo": "discriminator",
+            "fields": {
+              "-1": "byte"
+            },
+            "default": "void"
+          },
+        ],
+      },
     ]
   ]
 );
@@ -186,6 +201,16 @@ client.on('custom_payload', function(packet) {
       });
     } else if (parsed.data.discriminator === 2) { // ModList
       console.log('Server ModList:',parsed.data.mods);
+      // TODO: client/server check if mods compatible
+
+      var ackWaitingServerData = proto.createPacketBuffer('FML|HS', {
+        discriminator: -1, // HandshakeAck,
+        phase: 2 // WAITINGSERVERDATA
+      });
+      client.write('custom_payload', {
+        channel: 'FML|HS',
+        data: ackWaitingServerData
+      });
     }
   }
 });
