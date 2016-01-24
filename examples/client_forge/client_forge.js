@@ -248,7 +248,7 @@ function fmlHandshakeStep(client, data)
         channel: 'FML|HS',
         data: modList
       });
-      writeAck(client, 2); // WAITINGSERVERDATA
+      writeAck(client, FMLHandshakeClientState.WAITINGSERVERDATA);
       client.fmlHandshakeState = FMLHandshakeClientState.WAITINGSERVERDATA;
       break;
     }
@@ -270,7 +270,7 @@ function fmlHandshakeStep(client, data)
       if (parsed.data.hasMore === false) {
         console.log('LAST RegistryData');
 
-        writeAck(client, 3); // WAITINGSERVERCOMPLETE
+        writeAck(client, FMLHandshakeClientState.WAITINGSERVERCOMPLETE);
         client.fmlHandshakeState = FMLHandshakeClientState.PENDINGCOMPLETE;
       }
       break;
@@ -280,7 +280,7 @@ function fmlHandshakeStep(client, data)
     {
       assert.ok(parsed.data.discriminator === 'HandshakeAck', `expected HandshakeAck in PENDINGCOMPLETE, got ${parsed.data.discrimnator}`);
       assert.ok(parsed.data.phase === 2, `expected HandshakeAck phase WAITINGACK, got ${parsed.data.phase}`);
-      writeAck(client, 4); // PENDINGCOMPLETE
+      writeAck(client, FMLHandshakeClientState.PENDINGCOMPLETE4);
       client.fmlHandshakeState = FMLHandshakeClientState.COMPLETE
       break;
     }
@@ -289,7 +289,7 @@ function fmlHandshakeStep(client, data)
     {
       assert.ok(parsed.data.phase === 3, `expected HandshakeAck phase COMPLETE, got ${parsed.data.phase}`);
 
-      writeAck(client, 5); // COMPLETE
+      writeAck(client, FMLHandshakeClientState.COMPLETE);
       console.log('HandshakeAck Complete!');
       break;
     }
