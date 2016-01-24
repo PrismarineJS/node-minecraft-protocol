@@ -1,5 +1,6 @@
 var ProtoDef = require('protodef').ProtoDef;
 var assert = require('assert');
+var debug = require('./debug');
 
 var proto = new ProtoDef();
 // copied from ../../dist/transforms/serializer.js TODO: refactor
@@ -174,7 +175,7 @@ var FMLHandshakeClientState = {
 function fmlHandshakeStep(client, data)
 {
   var parsed = proto.parsePacketBuffer('FML|HS', data);
-  console.log('FML|HS',parsed);
+  debug('FML|HS',parsed);
 
   var fmlHandshakeState = client.fmlHandshakeState || FMLHandshakeClientState.START;
 
@@ -201,7 +202,7 @@ function fmlHandshakeStep(client, data)
         data: clientHello
       });
 
-      console.log('Sending client modlist');
+      debug('Sending client modlist');
       var modList = proto.createPacketBuffer('FML|HS', {
         discriminator: 'ModList',
         mods: client.forgeMods || []
@@ -218,7 +219,7 @@ function fmlHandshakeStep(client, data)
     case FMLHandshakeClientState.WAITINGSERVERDATA:
     {
       assert.ok(parsed.data.discriminator === 'ModList', `expected ModList in WAITINGSERVERDATA state, got ${parsed.data.discriminator}`);
-      console.log('Server ModList:',parsed.data.mods);
+      debug('Server ModList:',parsed.data.mods);
       // TODO: client/server check if mods compatible
       client.fmlHandshakeState = FMLHandshakeClientState.WAITINGSERVERCOMPLETE;
       break;
@@ -227,10 +228,10 @@ function fmlHandshakeStep(client, data)
     case FMLHandshakeClientState.WAITINGSERVERCOMPLETE:
     {
       assert.ok(parsed.data.discriminator === 'RegistryData', `expected RegistryData in WAITINGSERVERCOMPLETE, got ${parsed.data.discriminator}`);
-      console.log('RegistryData',parsed.data);
+      debug('RegistryData',parsed.data);
       // TODO: support <=1.7.10 single registry, https://github.com/ORelio/Minecraft-Console-Client/pull/100/files#diff-65b97c02a9736311374109e22d30ca9cR297
       if (parsed.data.hasMore === false) {
-        console.log('LAST RegistryData');
+        debug('LAST RegistryData');
 
         writeAck(client, FMLHandshakeClientState.WAITINGSERVERCOMPLETE);
         client.fmlHandshakeState = FMLHandshakeClientState.PENDINGCOMPLETE;
@@ -252,7 +253,7 @@ function fmlHandshakeStep(client, data)
       assert.ok(parsed.data.phase === 3, `expected HandshakeAck phase COMPLETE, got ${parsed.data.phase}`);
 
       writeAck(client, FMLHandshakeClientState.COMPLETE);
-      console.log('HandshakeAck Complete!');
+      debug('HandshakeAck Complete!');
       break;
     }
 
@@ -260,25 +261,6 @@ function fmlHandshakeStep(client, data)
       console.error(`unexpected FML state ${fmlHandshakeState}`);
   }
 }
-
-//var forgeMods; // = [ {modid:'IronChest', version:'6.0.121.768'} ];
-/*
-function injectForge(client) {
-  client.on('custom_payload', function(packet) {
-    var channel = packet.channel;
-    var data = packet.data;
-
-    if (channel === 'REGISTER') {
-      var channels = data.toString().split('\0');
-      console.log('Server-side registered channels:',channels);
-      // TODO: do something?
-      // expect:  [ 'FML|HS', 'FML', 'FML|MP', 'FML', 'FORGE' ]
-    } else if (channel === 'FML|HS') {
-      fmlHandshakeStep(client, data);
-    }
-  });
-}
-*/
 
 module.exports = {
   fmlHandshakeStep

@@ -55,4 +55,7 @@ mc.ping({host, port}, function(err, response) {
       client.write('chat', {message: msg});
     }
   });
+  client.on('forgeMods', function(mods) {
+    console.log('Received forgeMods event:',mods);
+  });
 });

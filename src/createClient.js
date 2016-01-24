@@ -56,6 +56,7 @@ function createClient(options) {
   client.on("set_compression", onCompressionRequest);
   if(client.forge) {
     client.on('custom_payload', function(packet) {
+      // TODO: channel registration tracking in NMP
       if (packet.channel === 'FML|HS') {
         fml.fmlHandshakeStep(client, packet.data);
       }
