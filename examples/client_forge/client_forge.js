@@ -184,7 +184,7 @@ proto.addType('FML|HS',
 function writeAck(client, phase) {
   var ackData = proto.createPacketBuffer('FML|HS', {
     discriminator: 'HandshakeAck', // HandshakeAck,
-    phase: 2 // WAITINGSERVERDATA
+    phase: phase
   });
   client.write('custom_payload', {
     channel: 'FML|HS',
