@@ -62,7 +62,7 @@ proto.addType('FML|HS',
     [
       {
         "name": "discriminator",
-        "type": "byte"
+        "type": "fml|hsMapper"
       },
 
       // ServerHello
@@ -73,7 +73,7 @@ proto.addType('FML|HS',
           {
             "compareTo": "discriminator",
             "fields": {
-              "0": "byte"
+              "ServerHello": "byte"
             },
             "default": "void"
           },
@@ -86,7 +86,7 @@ proto.addType('FML|HS',
           {
             "compareTo": "discriminator",
             "fields": {
-              "0": [
+              "ServerHello": [
                 "switch",
                 {
                   // "Only sent if protocol version is greater than 1."
@@ -112,7 +112,7 @@ proto.addType('FML|HS',
           {
             "compareTo": "discriminator",
             "fields": {
-              "1": "byte"
+              "ClientHello": "byte"
             },
             "default": "void"
           }
@@ -127,7 +127,7 @@ proto.addType('FML|HS',
           {
             "compareTo": "discriminator",
             "fields": {
-              "2": [
+              "ModList": [
                 "array",
                 {
                   "countType": "varint",
@@ -161,7 +161,7 @@ proto.addType('FML|HS',
           {
             "compareTo": "discriminator",
             "fields": {
-              "3": "boolean"
+              "RegistryData": "boolean"
             },
             "default": "void"
           },
@@ -190,7 +190,7 @@ proto.addType('FML|HS',
           {
             "compareTo": "discriminator",
             "fields": {
-              "-1": "byte"
+              "HandshakeAck": "byte"
             },
             "default": "void"
           },
@@ -202,7 +202,7 @@ proto.addType('FML|HS',
 
 function writeAck(client, phase) {
   var ackData = proto.createPacketBuffer('FML|HS', {
-    discriminator: -1, // HandshakeAck,
+    discriminator: 'HandshakeAck', // HandshakeAck,
     phase: 2 // WAITINGSERVERDATA
   });
   client.write('custom_payload', {
@@ -225,7 +225,7 @@ client.on('custom_payload', function(packet) {
     console.log('FML|HS',parsed);
 
 
-    if (parsed.data.discriminator === 0) { // ServerHello
+    if (parsed.data.discriminator === 'ServerHello') {
       if (parsed.data.fmlProtocolVersionServer > 2) {
         // TODO: support higher protocols, if they change
       }
@@ -236,7 +236,7 @@ client.on('custom_payload', function(packet) {
       });
 
       var clientHello = proto.createPacketBuffer('FML|HS', {
-        discriminator: 1, // ClientHello
+        discriminator: 'ClientHello',
         fmlProtocolVersionClient: parsed.data.fmlProtocolVersionServer
       });
 
@@ -246,7 +246,7 @@ client.on('custom_payload', function(packet) {
       });
 
       var modList = proto.createPacketBuffer('FML|HS', {
-        discriminator: 2, // ModList
+        discriminator: 'ModList',
         //mods: []
         // TODO: send from ServerListPing packet, allow customizing not hardcoding
         mods: [
@@ -258,18 +258,18 @@ client.on('custom_payload', function(packet) {
         data: modList
       });
       writeAck(client, 2); // WAITINGSERVERDATA
-    } else if (parsed.data.discriminator === 2) { // ModList
+    } else if (parsed.data.discriminator === 'ModList') {
       console.log('Server ModList:',parsed.data.mods);
       // TODO: client/server check if mods compatible
 
-    } else if (parsed.data.discriminator === 3) { // RegistryData
+    } else if (parsed.data.discriminator === 'RegistryData') {
       console.log('RegistryData',parsed.data);
       if (!parsed.data.hasMore) {
         console.log('LAST RegistryData');
 
         writeAck(client, 3); // WAITINGSERVERCOMPLETE
       }
-    } else if (parsed.data.discriminator === -1) { // HandshakeAck
+    } else if (parsed.data.discriminator === 'HandshakeAck') {
       if (parsed.data.phase === 2) { // WAITINGCACK
         writeAck(client, 4); // PENDINGCOMPLETE
       } else if (parsed.data.phase === 3) { // COMPLETE
