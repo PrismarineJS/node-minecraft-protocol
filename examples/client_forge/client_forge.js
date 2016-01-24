@@ -150,7 +150,7 @@ proto.addType('FML|HS',
                 [
                   {
                     "name": "hasMore",
-                    "type": "boolean"
+                    "type": "bool"
                   },
 
                   /* TODO: support all fields
@@ -246,7 +246,7 @@ client.on('custom_payload', function(packet) {
 
     } else if (parsed.data.discriminator === 'RegistryData') {
       console.log('RegistryData',parsed.data);
-      if (!parsed.data.hasMore) {
+      if (parsed.data.hasMore === false) {
         console.log('LAST RegistryData');
 
         writeAck(client, 3); // WAITINGSERVERCOMPLETE
