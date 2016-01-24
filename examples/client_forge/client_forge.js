@@ -24,6 +24,7 @@ mc.ping({host, port}, function(err, response) {
   console.log('Using forgeMods:',forgeMods);
 
   var client = mc.createClient({
+    tagHost: '\0FML\0', // signifies client supports FML/Forge
     forge: true,
     forgeMods: forgeMods,
     // Client/server mods installed on the client
