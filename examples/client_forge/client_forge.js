@@ -1,5 +1,6 @@
 var mc = require('minecraft-protocol');
 var ProtoDef = require('protodef').ProtoDef;
+var assert = require('assert');
 
 if(process.argv.length < 4 || process.argv.length > 6) {
   console.log("Usage : node echo.js <host> <port> [<name>] [<password>]");
@@ -200,59 +201,101 @@ function writeAck(client, phase) {
   });
 }
 
+var FMLHandshakeClientState = {
+  START: 1,
+  WAITINGSERVERDATA: 2,
+  WAITINGSERVERCOMPLETE: 3,
+  PENDINGCOMPLETE: 4,
+  COMPLETE: 5,
+};
+
 function fmlHandshakeStep(client, data)
 {
   var parsed = proto.parsePacketBuffer('FML|HS', data);
   console.log('FML|HS',parsed);
 
-  if (parsed.data.discriminator === 'ServerHello') {
-    if (parsed.data.fmlProtocolVersion > 2) {
-      // TODO: support higher protocols, if they change
+  var fmlHandshakeState = client.fmlHandshakeState || FMLHandshakeClientState.START;
+
+  switch(fmlHandshakeState) {
+    case FMLHandshakeClientState.START:
+    {
+      assert.ok(parsed.data.discriminator === 'ServerHello', `expected ServerHello in START state, got ${parsed.data.discriminator}`);
+      if (parsed.data.fmlProtocolVersion > 2) {
+        // TODO: support higher protocols, if they change
+      }
+
+      client.write('custom_payload', {
+        channel: 'REGISTER',
+        data: new Buffer(['FML|HS', 'FML', 'FML|MP', 'FML', 'FORGE'].join('\0'))
+      });
+
+      var clientHello = proto.createPacketBuffer('FML|HS', {
+        discriminator: 'ClientHello',
+        fmlProtocolVersion: parsed.data.fmlProtocolVersion
+      });
+
+      client.write('custom_payload', {
+        channel: 'FML|HS',
+        data: clientHello
+      });
+
+      console.log('Sending client modlist');
+      var modList = proto.createPacketBuffer('FML|HS', {
+        discriminator: 'ModList',
+        mods: client.forgeMods || []
+      });
+      client.write('custom_payload', {
+        channel: 'FML|HS',
+        data: modList
+      });
+      writeAck(client, 2); // WAITINGSERVERDATA
+      client.fmlHandshakeState = FMLHandshakeClientState.WAITINGSERVERDATA;
+      break;
     }
 
-    client.write('custom_payload', {
-      channel: 'REGISTER',
-      data: new Buffer(['FML|HS', 'FML', 'FML|MP', 'FML', 'FORGE'].join('\0'))
-    });
-
-    var clientHello = proto.createPacketBuffer('FML|HS', {
-      discriminator: 'ClientHello',
-      fmlProtocolVersion: parsed.data.fmlProtocolVersion
-    });
-
-    client.write('custom_payload', {
-      channel: 'FML|HS',
-      data: clientHello
-    });
-
-    console.log('Sending client modlist');
-    var modList = proto.createPacketBuffer('FML|HS', {
-      discriminator: 'ModList',
-      mods: client.forgeMods || []
-    });
-    client.write('custom_payload', {
-      channel: 'FML|HS',
-      data: modList
-    });
-    writeAck(client, 2); // WAITINGSERVERDATA
-  } else if (parsed.data.discriminator === 'ModList') {
-    console.log('Server ModList:',parsed.data.mods);
-    // TODO: client/server check if mods compatible
-
-  } else if (parsed.data.discriminator === 'RegistryData') {
-    console.log('RegistryData',parsed.data);
-    if (parsed.data.hasMore === false) {
-      console.log('LAST RegistryData');
-
-      writeAck(client, 3); // WAITINGSERVERCOMPLETE
+    case FMLHandshakeClientState.WAITINGSERVERDATA:
+    {
+      assert.ok(parsed.data.discriminator === 'ModList', `expected ModList in WAITINGSERVERDATA state, got ${parsed.data.discriminator}`);
+      console.log('Server ModList:',parsed.data.mods);
+      // TODO: client/server check if mods compatible
+      client.fmlHandshakeState = FMLHandshakeClientState.WAITINGSERVERCOMPLETE;
+      break;
     }
-  } else if (parsed.data.discriminator === 'HandshakeAck') {
-    if (parsed.data.phase === 2) { // WAITINGCACK
+
+    case FMLHandshakeClientState.WAITINGSERVERCOMPLETE:
+    {
+      assert.ok(parsed.data.discriminator === 'RegistryData', `expected RegistryData in WAITINGSERVERCOMPLETE, got ${parsed.data.discriminator}`);
+      console.log('RegistryData',parsed.data);
+      // TODO: support <=1.7.10 single registry, https://github.com/ORelio/Minecraft-Console-Client/pull/100/files#diff-65b97c02a9736311374109e22d30ca9cR297
+      if (parsed.data.hasMore === false) {
+        console.log('LAST RegistryData');
+
+        writeAck(client, 3); // WAITINGSERVERCOMPLETE
+        client.fmlHandshakeState = FMLHandshakeClientState.PENDINGCOMPLETE;
+      }
+      break;
+    }
+
+    case FMLHandshakeClientState.PENDINGCOMPLETE:
+    {
+      assert.ok(parsed.data.discriminator === 'HandshakeAck', `expected HandshakeAck in PENDINGCOMPLETE, got ${parsed.data.discrimnator}`);
+      assert.ok(parsed.data.phase === 2, `expected HandshakeAck phase WAITINGACK, got ${parsed.data.phase}`);
       writeAck(client, 4); // PENDINGCOMPLETE
-    } else if (parsed.data.phase === 3) { // COMPLETE
+      client.fmlHandshakeState = FMLHandshakeClientState.COMPLETE
+      break;
+    }
+
+    case FMLHandshakeClientState.COMPLETE:
+    {
+      assert.ok(parsed.data.phase === 3, `expected HandshakeAck phase COMPLETE, got ${parsed.data.phase}`);
+
       writeAck(client, 5); // COMPLETE
       console.log('HandshakeAck Complete!');
+      break;
     }
+
+    default:
+      console.error(`unexpected FML state ${fmlHandshakeState}`);
   }
 }
 
