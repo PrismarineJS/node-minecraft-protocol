@@ -220,7 +220,8 @@ function fmlHandshakeStep(client, data)
     {
       assert.ok(parsed.data.discriminator === 'ModList', `expected ModList in WAITINGSERVERDATA state, got ${parsed.data.discriminator}`);
       debug('Server ModList:',parsed.data.mods);
-      // TODO: client/server check if mods compatible
+      // Emit event so client can check client/server mod compatibility
+      client.emit('forgeMods', parsed.data.mods);
       client.fmlHandshakeState = FMLHandshakeClientState.WAITINGSERVERCOMPLETE;
       break;
     }
