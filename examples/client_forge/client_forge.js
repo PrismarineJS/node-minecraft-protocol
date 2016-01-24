@@ -79,7 +79,7 @@ proto.addType('FML|HS',
                 "container",
                 [
                   {
-                    "name": "fmlProtocolVersionServer",
+                    "name": "fmlProtocolVersion",
                     "type": "byte"
                   },
                   {
@@ -89,7 +89,7 @@ proto.addType('FML|HS',
                       "switch",
                       {
                         // "Only sent if protocol version is greater than 1."
-                        "compareTo": "fmlProtocolVersionServer",
+                        "compareTo": "fmlProtocolVersion",
                         "fields":
                         {
                           "0": "void",
@@ -107,7 +107,7 @@ proto.addType('FML|HS',
                 "container",
                 [
                   {
-                    "name": "fmlProtocolVersionClient",
+                    "name": "fmlProtocolVersion",
                     "type": "byte"
                   }
                 ]
@@ -207,7 +207,7 @@ client.on('custom_payload', function(packet) {
 
 
     if (parsed.data.discriminator === 'ServerHello') {
-      if (parsed.data.fmlProtocolVersionServer > 2) {
+      if (parsed.data.fmlProtocolVersion > 2) {
         // TODO: support higher protocols, if they change
       }
 
@@ -218,7 +218,7 @@ client.on('custom_payload', function(packet) {
 
       var clientHello = proto.createPacketBuffer('FML|HS', {
         discriminator: 'ClientHello',
-        fmlProtocolVersionClient: parsed.data.fmlProtocolVersionServer
+        fmlProtocolVersion: parsed.data.fmlProtocolVersion
       });
 
       client.write('custom_payload', {
