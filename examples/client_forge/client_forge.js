@@ -58,144 +58,125 @@ proto.addType('fml|hsMapper',
 // TODO: refactor to use one big switch like https://github.com/PrismarineJS/node-minecraft-protocol/blob/master/src/transforms/serializer.js#L21
 proto.addType('FML|HS',
   [
-    'container',
+    "container",
     [
       {
         "name": "discriminator",
         "type": "fml|hsMapper"
       },
 
-      // ServerHello
       {
-        "name": "fmlProtocolVersionServer",
-        "type": [
+        "anon": true,
+        "type":
+        [
           "switch",
           {
             "compareTo": "discriminator",
-            "fields": {
-              "ServerHello": "byte"
-            },
-            "default": "void"
-          },
-        ],
-      },
-      {
-        "name": "overrideDimension",
-        "type": [
-          "switch",
-          {
-            "compareTo": "discriminator",
-            "fields": {
-              "ServerHello": [
-                "switch",
-                {
-                  // "Only sent if protocol version is greater than 1."
-                  "compareTo": "fmlProtocolVersion",
-                  "fields": {
-                    "0": "void",
-                    "1": "void"
+            "fields":
+            {
+              "ServerHello":
+              [
+                "container",
+                [
+                  {
+                    "name": "fmlProtocolVersionServer",
+                    "type": "byte"
                   },
-                  "default": "int"
-                }
-              ]
-            },
-            "default": "void"
-          },
-        ],
-      },
-
-      // ClientHello
-      {
-        "name": "fmlProtocolVersionClient", // TODO: merge or fix name collision with fmlProtocolVersionServer?
-        "type": [
-          "switch",
-          {
-            "compareTo": "discriminator",
-            "fields": {
-              "ClientHello": "byte"
-            },
-            "default": "void"
-          }
-        ],
-      },
-
-      // ModList
-      {
-        "name": "mods",
-        "type": [
-          "switch",
-          {
-            "compareTo": "discriminator",
-            "fields": {
-              "ModList": [
-                "array",
-                {
-                  "countType": "varint",
-                  "type": [
-                    "container",
+                  {
+                    "name": "overrideDimension",
+                    "type":
                     [
+                      "switch",
                       {
-                        "name": "name",
-                        "type": "string"
-                      },
-                      {
-                        "name": "version",
-                        "type": "string"
+                        // "Only sent if protocol version is greater than 1."
+                        "compareTo": "fmlProtocolVersionServer",
+                        "fields":
+                        {
+                          "0": "void",
+                          "1": "void"
+                        },
+                        "default": "int"
                       }
                     ]
-                  ],
-                },
+                  },
+                ],
               ],
+
+              "ClientHello":
+              [
+                "container",
+                [
+                  {
+                    "name": "fmlProtocolVersionClient",
+                    "type": "byte"
+                  }
+                ]
+              ],
+
+              "ModList":
+              [
+                "container",
+                [
+                  {
+                    "name": "mods",
+                    "type":
+                    [
+                      "array",
+                      {
+                        "countType": "varint",
+                        "type":
+                        [
+                          "container",
+                          [
+                            {
+                              "name": "name",
+                              "type": "string"
+                            },
+                            {
+                              "name": "version",
+                              "type": "string"
+                            }
+                          ]
+                        ],
+                      },
+                    ]
+                  }
+                ],
+              ],
+
+              "RegistryData":
+              [
+                "container",
+                [
+                  {
+                    "name": "hasMore",
+                    "type": "boolean"
+                  },
+
+                  /* TODO: support all fields
+                  {
+                    "name": "registryName",
+                    "type": "string"
+                  },
+                  */
+                ],
+              ],
+
+              "HandshakeAck":
+              [
+                "container",
+                [
+                  {
+                    "name": "phase",
+                    "type": "byte"
+                  },
+                ],
+              ],
+
             },
-            "default": "void"
           }
-        // TODO: mods array: modname string, modversion string
-        ],
-      },
-
-      // RegistryData
-      {
-        "name": "hasMore",
-        "type": [
-          "switch",
-          {
-            "compareTo": "discriminator",
-            "fields": {
-              "RegistryData": "boolean"
-            },
-            "default": "void"
-          },
-        ],
-
-        /* TODO: support all fields
-        "name": "registryName",
-        "type": [
-          "switch",
-          {
-            "compareTo": "discriminator",
-            "fields": {
-              "3": "string"
-            },
-            "default": "void"
-          },
-        ],
-        */
-      },
-
-      // HandshakeAck
-      {
-        "name": "phase",
-        "type": [
-          "switch",
-          {
-            "compareTo": "discriminator",
-            "fields": {
-              "HandshakeAck": "byte"
-            },
-            "default": "void"
-          },
-        ],
-      },
+        ]
+      }
     ]
   ]
 );
@@ -245,6 +226,7 @@ client.on('custom_payload', function(packet) {
         data: clientHello
       });
 
+      console.log('Sending client modlist');
       var modList = proto.createPacketBuffer('FML|HS', {
         discriminator: 'ModList',
         //mods: []
