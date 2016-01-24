@@ -12,7 +12,7 @@ class PluginChannels extends EventEmitter {
   constructor(client) {
     super();
     this.client = client;
-    this.channels = [];
+    this.channels = new Set();
   }
 }
 
@@ -25,11 +25,11 @@ class IncomingPluginChannels extends PluginChannels {
 
       if (packet.channel === 'REGISTER') {
         parseChannelList(packet.data).forEach((channel) => {
-          this.channels.push(channel);
+          this.channels.add(channel);
         });
       } else if (packet.channel === 'UNREGISTER') {
         parseChannelList(packet.data).forEach((channel) => {
-          this.channels.pop(channel);
+          this.channels.delete(channel);
         });
       }
     });
@@ -51,14 +51,14 @@ class OutgoingPluginChannels extends PluginChannels {
   register(...channels) {
     this.write('REGISTER', serializeChannelList(channels));
     this.channels.forEach((channel) => {
-      this.channels.push(channel);
+      this.channels.add(channel);
     });
   }
 
   unregister(...channels) {
     this.write('UNREGISTER', serializeChannelList(channels));
     this.channels.forEach((channel) => {
-      this.channels.pop(channel);
+      this.channels.delete(channel);
     });
   }
 }
