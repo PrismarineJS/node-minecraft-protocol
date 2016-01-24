@@ -38,8 +38,24 @@ proto.addType("string", ["pstring", {
 
 
 // http://wiki.vg/Minecraft_Forge_Handshake
+proto.addType('fml|hsMapper',
+  [
+    "mapper",
+    {
+      "type": "byte",
+      "mappings": {
+        "0": "ServerHello",
+        "1": "ClientHello",
+        "2": "ModList",
+        "3": "RegistryData",
+        "-1": "HandshakeAck",
+        "-2": "HandshakeReset"
+      },
+    }
+  ]
+);
+
 // TODO: refactor to use one big switch like https://github.com/PrismarineJS/node-minecraft-protocol/blob/master/src/transforms/serializer.js#L21
-// and with a mapper for symbolic names https://github.com/PrismarineJS/prismarine-nbt/blob/master/nbt.json#L48
 proto.addType('FML|HS',
   [
     'container',
