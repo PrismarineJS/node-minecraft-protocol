@@ -129,7 +129,7 @@ proto.addType('FML|HS',
                           "container",
                           [
                             {
-                              "name": "name",
+                              "name": "modid",
                               "type": "string"
                             },
                             {
@@ -232,7 +232,7 @@ client.on('custom_payload', function(packet) {
         //mods: []
         // TODO: send from ServerListPing packet, allow customizing not hardcoding
         mods: [
-          {name:'IronChest', version:'6.0.121.768'}
+          {modid:'IronChest', version:'6.0.121.768'}
         ]
       });
       client.write('custom_payload', {
