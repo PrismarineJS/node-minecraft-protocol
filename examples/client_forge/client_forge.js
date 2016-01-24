@@ -8,6 +8,12 @@ if(process.argv.length < 4 || process.argv.length > 6) {
 
 var client = mc.createClient({
   forge: true,
+  // Client/server mods installed on the client
+  // TODO: send from ServerListPing packet
+  forgeMods:
+  [
+    {modid:'IronChest', version:'6.0.121.768'}
+  ],
   host: process.argv[2],
   port: parseInt(process.argv[3]),
   username: process.argv[4] ? process.argv[4] : "echo",
@@ -58,7 +64,6 @@ proto.addType('fml|hsMapper',
   ]
 );
 
-// TODO: refactor to use one big switch like https://github.com/PrismarineJS/node-minecraft-protocol/blob/master/src/transforms/serializer.js#L21
 proto.addType('FML|HS',
   [
     "container",
@@ -232,11 +237,7 @@ client.on('custom_payload', function(packet) {
       console.log('Sending client modlist');
       var modList = proto.createPacketBuffer('FML|HS', {
         discriminator: 'ModList',
-        //mods: []
-        // TODO: send from ServerListPing packet, allow customizing not hardcoding
-        mods: [
-          {modid:'IronChest', version:'6.0.121.768'}
-        ]
+        mods: client.forgeMods || []
       });
       client.write('custom_payload', {
         channel: 'FML|HS',
