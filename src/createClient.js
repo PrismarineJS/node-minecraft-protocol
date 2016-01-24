@@ -9,7 +9,6 @@ var yggserver = require('yggdrasil').server({});
 var states = require("./states");
 var debug = require("./debug");
 var UUID = require('uuid-1345');
-var fml = require('./fml');
 
 module.exports=createClient;
 
@@ -46,22 +45,12 @@ function createClient(options) {
 
 
   var client = new Client(false,version.majorVersion);
-  client.forge = options.forge;
-  client.forgeMods = options.forgeMods;
   client.on('connect', onConnect);
   if(keepAlive) client.on('keep_alive', onKeepAlive);
   client.once('encryption_begin', onEncryptionKeyRequest);
   client.once('success', onLogin);
   client.once("compress", onCompressionRequest);
   client.on("set_compression", onCompressionRequest);
-  if(client.forge) {
-    client.on('custom_payload', function(packet) {
-      // TODO: channel registration tracking in NMP
-      if (packet.channel === 'FML|HS') {
-        fml.fmlHandshakeStep(client, packet.data);
-      }
-    });
-  }
   if(haveCredentials) {
     // make a request to get the case-correct username before connecting.
     var cb = function(err, session) {

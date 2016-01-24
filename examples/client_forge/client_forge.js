@@ -1,4 +1,5 @@
 var mc = require('minecraft-protocol');
+var fml = require('../../dist/fml'); // TODO: separate module
 
 if(process.argv.length < 4 || process.argv.length > 6) {
   console.log("Usage : node echo.js <host> <port> [<name>] [<password>]");
@@ -25,8 +26,6 @@ mc.ping({host, port}, function(err, response) {
 
   var client = mc.createClient({
     tagHost: '\0FML\0', // signifies client supports FML/Forge
-    forge: true,
-    forgeMods: forgeMods,
     // Client/server mods installed on the client
     // if not specified, pings server and uses its list
     /*
@@ -37,6 +36,7 @@ mc.ping({host, port}, function(err, response) {
     username: username,
     password: password
   });
+  client.forgeMods = forgeMods; // for fmlHandshakeStep TODO: refactor
 
   client.on('connect', function() {
     console.info('connected');
@@ -56,6 +56,14 @@ mc.ping({host, port}, function(err, response) {
       client.write('chat', {message: msg});
     }
   });
+
+  client.on('custom_payload', function(packet) {
+    // TODO: channel registration tracking in NMP, https://github.com/PrismarineJS/node-minecraft-protocol/pull/328
+    if (packet.channel === 'FML|HS') {
+      fml.fmlHandshakeStep(client, packet.data);
+    }
+  });
+
   client.on('forgeMods', function(mods) {
     console.log('Received forgeMods event:',mods);
   });

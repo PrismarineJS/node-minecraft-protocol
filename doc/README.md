@@ -69,8 +69,6 @@ Returns a `Client` instance and perform login.
  * port : default to 25565
  * password : can be omitted (if the tokens are also omitted then it tries to connect in offline mode)
  * host : default to localhost
- * forge : if true, will attempt to negotiate a FML/Forge handshake
- * forgeMods : array of objects with `modid` and `version` properties for the Forge mods the client supports
  * clientToken : generated if a password is given
  * accessToken : generated if a password is given
  * keepAlive : send keep alive packets : default to true
@@ -132,11 +130,6 @@ and the packet metadata (name, state)
 
 Called when the protocol changes state. Takes the new state and old state as
 parameters.
-
-### `forgeMods` event
-
-Called when the client receives the server's `ModList`, when connecting to an
-FML/Forge server.
 
 ### per-packet events
 
