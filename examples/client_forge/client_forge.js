@@ -200,6 +200,62 @@ function writeAck(client, phase) {
   });
 }
 
+function fmlHandshakeStep(client, data)
+{
+  var parsed = proto.parsePacketBuffer('FML|HS', data);
+  console.log('FML|HS',parsed);
+
+  if (parsed.data.discriminator === 'ServerHello') {
+    if (parsed.data.fmlProtocolVersion > 2) {
+      // TODO: support higher protocols, if they change
+    }
+
+    client.write('custom_payload', {
+      channel: 'REGISTER',
+      data: new Buffer(['FML|HS', 'FML', 'FML|MP', 'FML', 'FORGE'].join('\0'))
+    });
+
+    var clientHello = proto.createPacketBuffer('FML|HS', {
+      discriminator: 'ClientHello',
+      fmlProtocolVersion: parsed.data.fmlProtocolVersion
+    });
+
+    client.write('custom_payload', {
+      channel: 'FML|HS',
+      data: clientHello
+    });
+
+    console.log('Sending client modlist');
+    var modList = proto.createPacketBuffer('FML|HS', {
+      discriminator: 'ModList',
+      mods: client.forgeMods || []
+    });
+    client.write('custom_payload', {
+      channel: 'FML|HS',
+      data: modList
+    });
+    writeAck(client, 2); // WAITINGSERVERDATA
+  } else if (parsed.data.discriminator === 'ModList') {
+    console.log('Server ModList:',parsed.data.mods);
+    // TODO: client/server check if mods compatible
+
+  } else if (parsed.data.discriminator === 'RegistryData') {
+    console.log('RegistryData',parsed.data);
+    if (parsed.data.hasMore === false) {
+      console.log('LAST RegistryData');
+
+      writeAck(client, 3); // WAITINGSERVERCOMPLETE
+    }
+  } else if (parsed.data.discriminator === 'HandshakeAck') {
+    if (parsed.data.phase === 2) { // WAITINGCACK
+      writeAck(client, 4); // PENDINGCOMPLETE
+    } else if (parsed.data.phase === 3) { // COMPLETE
+      writeAck(client, 5); // COMPLETE
+      console.log('HandshakeAck Complete!');
+    }
+  }
+}
+
 client.on('custom_payload', function(packet) {
   var channel = packet.channel;
   var data = packet.data;
@@ -210,58 +266,6 @@ client.on('custom_payload', function(packet) {
     // TODO: do something?
     // expect:  [ 'FML|HS', 'FML', 'FML|MP', 'FML', 'FORGE' ]
   } else if (channel === 'FML|HS') {
-    var parsed = proto.parsePacketBuffer('FML|HS', data);
-    console.log('FML|HS',parsed);
-
-
-    if (parsed.data.discriminator === 'ServerHello') {
-      if (parsed.data.fmlProtocolVersion > 2) {
-        // TODO: support higher protocols, if they change
-      }
-
-      client.write('custom_payload', {
-        channel: 'REGISTER',
-        data: new Buffer(['FML|HS', 'FML', 'FML|MP', 'FML', 'FORGE'].join('\0'))
-      });
-
-      var clientHello = proto.createPacketBuffer('FML|HS', {
-        discriminator: 'ClientHello',
-        fmlProtocolVersion: parsed.data.fmlProtocolVersion
-      });
-
-      client.write('custom_payload', {
-        channel: 'FML|HS',
-        data: clientHello
-      });
-
-      console.log('Sending client modlist');
-      var modList = proto.createPacketBuffer('FML|HS', {
-        discriminator: 'ModList',
-        mods: client.forgeMods || []
-      });
-      client.write('custom_payload', {
-        channel: 'FML|HS',
-        data: modList
-      });
-      writeAck(client, 2); // WAITINGSERVERDATA
-    } else if (parsed.data.discriminator === 'ModList') {
-      console.log('Server ModList:',parsed.data.mods);
-      // TODO: client/server check if mods compatible
-
-    } else if (parsed.data.discriminator === 'RegistryData') {
-      console.log('RegistryData',parsed.data);
-      if (parsed.data.hasMore === false) {
-        console.log('LAST RegistryData');
-
-        writeAck(client, 3); // WAITINGSERVERCOMPLETE
-      }
-    } else if (parsed.data.discriminator === 'HandshakeAck') {
-      if (parsed.data.phase === 2) { // WAITINGCACK
-        writeAck(client, 4); // PENDINGCOMPLETE
-      } else if (parsed.data.phase === 3) { // COMPLETE
-        writeAck(client, 5); // COMPLETE
-        console.log('HandshakeAck Complete!');
-      }
-    }
+    fmlHandshakeStep(client, data);
   }
 });
