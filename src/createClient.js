@@ -9,6 +9,8 @@ var yggserver = require('yggdrasil').server({});
 var states = require("./states");
 var debug = require("./debug");
 var UUID = require('uuid-1345');
+var IncomingPluginChannels = require('./pluginChannels').IncomingPluginChannels;
+var OutgoingPluginChannels = require('./pluginChannels').OutgoingPluginChannels;
 
 module.exports=createClient;
 
@@ -45,6 +47,8 @@ function createClient(options) {
 
 
   var client = new Client(false,version.majorVersion);
+  client.incomingPluginChannels = new IncomingPluginChannels(client);
+  client.outgoingPluginChannels = new OutgoingPluginChannels(client);
   client.on('connect', onConnect);
   if(keepAlive) client.on('keep_alive', onKeepAlive);
   client.once('encryption_begin', onEncryptionKeyRequest);
