@@ -75,6 +75,11 @@ Returns a `Client` instance and perform login.
  * checkTimeoutInterval : default to `10*1000` (10s), check if keepalive received at that period, disconnect otherwise.
  * version : 1.8 or 1.9 : default to 1.8
 
+## mc.createClientAuto(options, cb)
+
+Pings the server and attempts to call `createClient(options)` with the appropriate protocol version.
+When created, calls the callback `cb(err, client)`.
+
 ## mc.Client(isServer,version)
 
 Create a new client, if `isServer` is true then it is a server-side client, otherwise it's a client-side client.
