@@ -18,6 +18,7 @@ automatically logged in and validated against mojang's auth.
  * maxPlayers : default to 20
  * keepAlive : send keep alive packets : default to true
  * version : 1.8 or 1.9 : default to 1.8
+ * protocolVersion : optional protocol version number, if omitted inferred from `version`
 
 ## mc.Server(version)
 
