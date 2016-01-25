@@ -42,6 +42,7 @@ function createClient(options) {
   var optVersion = options.version || require("./version").defaultVersion;
   var mcData=require("minecraft-data")(optVersion);
   var version = mcData.version;
+  var protocolVersion = options.protocolVersion || version.version;
 
 
   var client = new Client(false,version.majorVersion);
@@ -91,7 +92,7 @@ function createClient(options) {
 
   function onConnect() {
     client.write('set_protocol', {
-      protocolVersion: version.version,
+      protocolVersion: protocolVersion,
       serverHost: host,
       serverPort: port,
       nextState: 2
