@@ -42,5 +42,6 @@ function ping(options, cb) {
     client.state = states.STATUS;
   });
 
+  // TODO: update
   client.connect(port, host);
 }

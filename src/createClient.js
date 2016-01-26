@@ -12,25 +12,24 @@ var play = require('./client/play');
 
 module.exports=createClient;
 
-Client.prototype.connect = function(port, host) {
-  var self = this;
-  if(port == 25565 && net.isIP(host) === 0) {
-    dns.resolveSrv("_minecraft._tcp." + host, function(err, addresses) {
-      if(addresses && addresses.length > 0) {
-        self.setSocket(net.connect(addresses[0].port, addresses[0].name));
-      } else {
-        self.setSocket(net.connect(port, host));
-      }
-    });
-  } else {
-    self.setSocket(net.connect(port, host));
-  }
-};
-
 function createClient(options) {
   assert.ok(options, "options is required");
   options.port = options.port || 25565;
   options.host = options.host || 'localhost';
+
+  options.connect = (client) => {
+    if(options.port == 25565 && net.isIP(host) === 0) {
+      dns.resolveSrv("_minecraft._tcp." + options.host, function(err, addresses) {
+        if(addresses && addresses.length > 0) {
+          client.setSocket(net.connect(addresses[0].port, addresses[0].name));
+        } else {
+          client.setSocket(net.connect(options.port, options.host));
+        }
+      });
+    } else {
+      client.setSocket(net.connect(options.port, options.host));
+    }
+  };
 
   assert.ok(options.username, "username is required");
 

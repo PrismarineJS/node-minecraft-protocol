@@ -16,7 +16,7 @@ module.exports = function(client, options) {
         client.username = session.selectedProfile.name;
         accessToken = session.accessToken;
         client.emit('session');
-        client.connect(options.port, options.host);
+        options.connect(client);
       }
     };
 
@@ -38,6 +38,6 @@ module.exports = function(client, options) {
   } else {
     // assume the server is in offline mode and just go for it.
     client.username = options.username;
-    client.connect(options.port, options.host);
+    options.connect(client);
   }
 };
