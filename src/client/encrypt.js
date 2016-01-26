@@ -1,5 +1,6 @@
 var crypto = require('crypto');
 var yggserver = require('yggdrasil').server({});
+var ursa=require("../ursa");
 var debug = require("../debug");
 
 module.exports = function(client) {

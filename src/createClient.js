@@ -1,9 +1,7 @@
-var ursa=require("./ursa");
 var net = require('net');
 var dns = require('dns');
 var Client = require('./client');
 var assert = require('assert');
-var debug = require("./debug");
 
 var encrypt = require('./client/encrypt');
 var keepalive = require('./client/keepalive');
