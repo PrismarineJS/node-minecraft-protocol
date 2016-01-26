@@ -26,9 +26,9 @@ function createClient(options) {
   tcp_dns(client, options);
   setProtocol(client, options);
   keepalive(client, options);
-  encrypt(client);
-  play(client);
-  compress(client);
+  encrypt(client, options);
+  play(client, options);
+  compress(client, options);
   caseCorrect(client, options);
 
   return client;
