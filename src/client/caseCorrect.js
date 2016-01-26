@@ -3,10 +3,10 @@ var UUID = require('uuid-1345');
 
 module.exports = function(client, options) {
   var clientToken = options.clientToken || UUID.v4().toString();
-  var accessToken;
-  var haveCredentials = options.password != null || (clientToken != null && options.session != null);
+  options.accessToken = null;
+  options.haveCredentials = options.password != null || (clientToken != null && options.session != null);
 
-  if(haveCredentials) {
+  if(options.haveCredentials) {
     // make a request to get the case-correct username before connecting.
     var cb = function(err, session) {
       if(err) {
@@ -14,7 +14,7 @@ module.exports = function(client, options) {
       } else {
         client.session = session;
         client.username = session.selectedProfile.name;
-        accessToken = session.accessToken;
+        options.accessToken = session.accessToken;
         client.emit('session');
         options.connect(client);
       }

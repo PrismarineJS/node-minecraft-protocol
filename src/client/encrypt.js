@@ -16,7 +16,7 @@ module.exports = function(client, options) {
         client.end();
         return;
       }
-      if(haveCredentials) {
+      if(options.haveCredentials) {
         joinServerRequest(onJoinServerResponse);
       } else {
         if(packet.serverId != '-') {
@@ -35,7 +35,7 @@ module.exports = function(client, options) {
       }
 
       function joinServerRequest(cb) {
-        yggserver.join(accessToken, client.session.selectedProfile.id,
+        yggserver.join(options.accessToken, client.session.selectedProfile.id,
             packet.serverId, sharedSecret, packet.publicKey, cb);
       }
 
