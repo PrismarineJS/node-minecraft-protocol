@@ -3,7 +3,6 @@ var net = require('net');
 var dns = require('dns');
 var Client = require('./client');
 var assert = require('assert');
-var states = require("./states");
 var debug = require("./debug");
 
 var encrypt = require('./client/encrypt');
@@ -11,6 +10,7 @@ var keepalive = require('./client/keepalive');
 var compress = require('./client/compress');
 var caseCorrect = require('./client/caseCorrect');
 var setProtocol = require('./client/setProtocol');
+var play = require('./client/play');
 
 module.exports=createClient;
 
@@ -42,20 +42,14 @@ function createClient(options) {
   options.majorVersion = version.majorVersion;
   options.protocolVersion = version.version;
 
-
   var client = new Client(false, options.majorVersion);
+
   setProtocol(client, options);
   keepalive(client, options);
   encrypt(client);
-  client.once('success', onLogin);
+  play(client);
   compress(client);
   caseCorrect(client, options);
 
   return client;
-
-  function onLogin(packet) {
-    client.state = states.PLAY;
-    client.uuid = packet.uuid;
-    client.username = packet.username;
-  }
 }
