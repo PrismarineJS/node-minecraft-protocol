@@ -8,6 +8,7 @@ var states = require("./states");
 var debug = require("./debug");
 var UUID = require('uuid-1345');
 var encrypt = require('./client/encrypt');
+var keepalive = require('./client/keepalive');
 
 module.exports=createClient;
 
@@ -45,7 +46,7 @@ function createClient(options) {
 
   var client = new Client(false,version.majorVersion);
   client.on('connect', onConnect);
-  if(keepAlive) client.on('keep_alive', onKeepAlive);
+  if(keepAlive) keepalive(client);
   encrypt(client);
   client.once('success', onLogin);
   client.once("compress", onCompressionRequest);
@@ -85,7 +86,6 @@ function createClient(options) {
     client.connect(port, host);
   }
 
-  var timeout = null;
   return client;
 
   function onConnect() {
@@ -104,32 +104,10 @@ function createClient(options) {
   function onCompressionRequest(packet) {
     client.compressionThreshold = packet.threshold;
   }
-  function onKeepAlive(packet) {
-    if (timeout)
-      clearTimeout(timeout);
-    timeout = setTimeout(() => client.end(), checkTimeoutInterval);
-    client.write('keep_alive', {
-      keepAliveId: packet.keepAliveId
-    });
-  }
 
   function onLogin(packet) {
     client.state = states.PLAY;
     client.uuid = packet.uuid;
     client.username = packet.username;
   }
-}
-
-
-
-function mcPubKeyToURsa(mcPubKeyBuffer) {
-  var pem = "-----BEGIN PUBLIC KEY-----\n";
-  var base64PubKey = mcPubKeyBuffer.toString('base64');
-  var maxLineLength = 65;
-  while(base64PubKey.length > 0) {
-    pem += base64PubKey.substring(0, maxLineLength) + "\n";
-    base64PubKey = base64PubKey.substring(maxLineLength);
-  }
-  pem += "-----END PUBLIC KEY-----\n";
-  return ursa.createPublicKey(pem, 'utf8');
 }
