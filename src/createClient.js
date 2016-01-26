@@ -10,6 +10,7 @@ var encrypt = require('./client/encrypt');
 var keepalive = require('./client/keepalive');
 var compress = require('./client/compress');
 var caseCorrect = require('./client/caseCorrect');
+var setProtocol = require('./client/setProtocol');
 
 module.exports=createClient;
 
@@ -38,10 +39,12 @@ function createClient(options) {
   var optVersion = options.version || require("./version").defaultVersion;
   var mcData=require("minecraft-data")(optVersion);
   var version = mcData.version;
+  options.majorVersion = version.majorVersion;
+  options.protocolVersion = version.version;
 
 
-  var client = new Client(false,version.majorVersion);
-  client.on('connect', onConnect);
+  var client = new Client(false, options.majorVersion);
+  setProtocol(client, options);
   keepalive(client, options);
   encrypt(client);
   client.once('success', onLogin);
@@ -49,19 +52,6 @@ function createClient(options) {
   caseCorrect(client, options);
 
   return client;
-
-  function onConnect() {
-    client.write('set_protocol', {
-      protocolVersion: version.version,
-      serverHost: options.host,
-      serverPort: options.port,
-      nextState: 2
-    });
-    client.state = states.LOGIN;
-    client.write('login_start', {
-      username: client.username
-    });
-  }
 
   function onLogin(packet) {
     client.state = states.PLAY;
