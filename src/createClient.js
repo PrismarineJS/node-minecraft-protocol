@@ -3,12 +3,11 @@ var net = require('net');
 var dns = require('dns');
 var Client = require('./client');
 var assert = require('assert');
-var crypto = require('crypto');
 var yggdrasil = require('yggdrasil')({});
-var yggserver = require('yggdrasil').server({});
 var states = require("./states");
 var debug = require("./debug");
 var UUID = require('uuid-1345');
+var encrypt = require('./client/encrypt');
 
 module.exports=createClient;
 
@@ -47,7 +46,7 @@ function createClient(options) {
   var client = new Client(false,version.majorVersion);
   client.on('connect', onConnect);
   if(keepAlive) client.on('keep_alive', onKeepAlive);
-  client.once('encryption_begin', onEncryptionKeyRequest);
+  encrypt(client);
   client.once('success', onLogin);
   client.once("compress", onCompressionRequest);
   client.on("set_compression", onCompressionRequest);
@@ -112,52 +111,6 @@ function createClient(options) {
     client.write('keep_alive', {
       keepAliveId: packet.keepAliveId
     });
-  }
-
-  function onEncryptionKeyRequest(packet) {
-    crypto.randomBytes(16, gotSharedSecret);
-
-    function gotSharedSecret(err, sharedSecret) {
-      if(err) {
-        debug(err);
-        client.emit('error', err);
-        client.end();
-        return;
-      }
-      if(haveCredentials) {
-        joinServerRequest(onJoinServerResponse);
-      } else {
-        if(packet.serverId != '-') {
-          debug('This server appears to be an online server and you are providing no password, the authentication will probably fail');
-        }
-        sendEncryptionKeyResponse();
-      }
-
-      function onJoinServerResponse(err) {
-        if(err) {
-          client.emit('error', err);
-          client.end();
-        } else {
-          sendEncryptionKeyResponse();
-        }
-      }
-
-      function joinServerRequest(cb) {
-        yggserver.join(accessToken, client.session.selectedProfile.id,
-            packet.serverId, sharedSecret, packet.publicKey, cb);
-      }
-
-      function sendEncryptionKeyResponse() {
-        var pubKey = mcPubKeyToURsa(packet.publicKey);
-        var encryptedSharedSecretBuffer = pubKey.encrypt(sharedSecret, undefined, undefined, ursa.RSA_PKCS1_PADDING);
-        var encryptedVerifyTokenBuffer = pubKey.encrypt(packet.verifyToken, undefined, undefined, ursa.RSA_PKCS1_PADDING);
-        client.write('encryption_begin', {
-          sharedSecret: encryptedSharedSecretBuffer,
-          verifyToken: encryptedVerifyTokenBuffer
-        });
-        client.setEncryption(sharedSecret);
-      }
-    }
   }
 
   function onLogin(packet) {
