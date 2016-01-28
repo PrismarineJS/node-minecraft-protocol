@@ -1,6 +1,6 @@
 var ProtoDef = require('protodef').ProtoDef;
 var assert = require('assert');
-var debug = require('./debug');
+var debug = require('../debug');
 
 var proto = new ProtoDef();
 // copied from ../../dist/transforms/serializer.js TODO: refactor
