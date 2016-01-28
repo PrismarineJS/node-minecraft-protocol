@@ -19,6 +19,9 @@ function protocol2version(n) {
 function createClientAsync(options, cb) {
   assert.ok(options, 'options is required');
 
+  debug('creating client');
+  options.wait_connect = true; // don't let createClient / src/client/setProtocol proceed on socket 'connect' until 'connect_allowed'
+  var client = createClient(options); // vanilla
   debug('pinging',options.host);
   // TODO: refactor with DNS SRV lookup in NMP
   // TODO: detect ping timeout, https://github.com/PrismarineJS/node-minecraft-protocol/issues/329
@@ -41,10 +44,12 @@ function createClientAsync(options, cb) {
     // Note that versionName is a descriptive version stirng like '1.8.9' on vailla, but other
     // servers add their own name (Spigot 1.8.8, Glowstone++ 1.8.9) so we cannot use it directly,
     // even though it is in a format accepted by minecraft-data. Instead, translate the protocol.
+    //XXX TODO: modify client object
     options.version = protocol2version(versionProtocol);
 
     // Use the exact same protocol version
     // Requires https://github.com/PrismarineJS/node-minecraft-protocol/pull/330
+    //XXX TODO: modify client objecti
     options.protocolVersion = versionProtocol;
 
     if (response.modinfo && response.modinfo.type === 'FML') {
@@ -53,10 +58,13 @@ function createClientAsync(options, cb) {
       debug('Using forgeMods:',forgeMods);
       // TODO: https://github.com/PrismarineJS/node-minecraft-protocol/issues/114
       //  https://github.com/PrismarineJS/node-minecraft-protocol/pull/326
+      // TODO: modify client object to set forgeMods and enable forgeHandshake
       throw new Error('FML/Forge not yet supported');
-    } else {
-      client = createClient(options); // vanilla
     }
+    // done configuring client object, let connection proceed
+    client.emit('connect_allowed');
+
+
     cb(null, client);
   });
 }

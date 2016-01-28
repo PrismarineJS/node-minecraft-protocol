@@ -5,6 +5,14 @@ module.exports = function(client, options) {
   client.on('connect', onConnect);
 
   function onConnect() {
+    if (options.wait_connect) {
+      client.on('connect_allowed', next);
+    } else {
+      next();
+    }
+  }
+
+  function next() {
     client.write('set_protocol', {
       protocolVersion: options.protocolVersion,
       serverHost: options.host,
@@ -16,6 +24,4 @@ module.exports = function(client, options) {
       username: client.username
     });
   }
-
-
 }
