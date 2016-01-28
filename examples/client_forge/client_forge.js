@@ -1,5 +1,5 @@
 var mc = require('minecraft-protocol');
-var fml = require('../../dist/client/forgeHandshake'); // TODO: separate module
+var forgeHandshake = require('../../dist/client/forgeHandshake'); // TODO: what's with 'dist' here?
 
 if(process.argv.length < 4 || process.argv.length > 6) {
   console.log("Usage : node echo.js <host> <port> [<name>] [<password>]");
@@ -25,18 +25,13 @@ mc.ping({host, port}, function(err, response) {
   console.log('Using forgeMods:',forgeMods);
 
   var client = mc.createClient({
-    tagHost: '\0FML\0', // signifies client supports FML/Forge
-    // Client/server mods installed on the client
-    // if not specified, pings server and uses its list
-    /*
-    forgeMods:
-    */
+    tagHost: '\0FML\0', // passed to src/client/setProtocol.js, signifies client supports FML/Forge TODO: refactor into src/client/forgeHandshake.js, let it set it, but earliest enough(pause)
     host: host,
     port: port,
     username: username,
     password: password
   });
-  client.forgeMods = forgeMods; // for fmlHandshakeStep TODO: refactor
+  forgeHandshake(client, {forgeMods});
 
   client.on('connect', function() {
     console.info('connected');
@@ -54,13 +49,6 @@ mc.ping({host, port}, function(err, response) {
       var msg = jsonMsg.with[1];
       if(username === client.username) return;
       client.write('chat', {message: msg});
-    }
-  });
-
-  client.on('custom_payload', function(packet) {
-    // TODO: channel registration tracking in NMP, https://github.com/PrismarineJS/node-minecraft-protocol/pull/328
-    if (packet.channel === 'FML|HS') {
-      fml.fmlHandshakeStep(client, packet.data);
     }
   });
 

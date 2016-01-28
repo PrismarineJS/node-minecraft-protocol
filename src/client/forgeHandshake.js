@@ -172,7 +172,7 @@ var FMLHandshakeClientState = {
   COMPLETE: 5,
 };
 
-function fmlHandshakeStep(client, data)
+function fmlHandshakeStep(client, data, options)
 {
   var parsed = proto.parsePacketBuffer('FML|HS', data);
   debug('FML|HS',parsed);
@@ -205,7 +205,7 @@ function fmlHandshakeStep(client, data)
       debug('Sending client modlist');
       var modList = proto.createPacketBuffer('FML|HS', {
         discriminator: 'ModList',
-        mods: client.forgeMods || []
+        mods: options.forgeMods || []
       });
       client.write('custom_payload', {
         channel: 'FML|HS',
@@ -263,6 +263,11 @@ function fmlHandshakeStep(client, data)
   }
 }
 
-module.exports = {
-  fmlHandshakeStep
+module.exports = function(client, options) {
+  client.on('custom_payload', function(packet) {
+    // TODO: channel registration tracking in NMP, https://github.com/PrismarineJS/node-minecraft-protocol/pull/328
+    if (packet.channel === 'FML|HS') {
+      fmlHandshakeStep(client, packet.data, options);
+    }
+  });
 };
