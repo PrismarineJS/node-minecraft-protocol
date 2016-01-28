@@ -215,6 +215,13 @@ class Client extends EventEmitter
     else
       this.compressor.write(buffer);
   }
+
+  // TCP/IP-specific (not generic Stream) method for backwards-compatibility
+  connect(port, host) {
+    var options = {port, host};
+    require('./client/tcp_dns')(this, options);
+    options.connect(this);
+  }
 }
 
 module.exports = Client;
