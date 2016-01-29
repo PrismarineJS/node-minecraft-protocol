@@ -96,8 +96,6 @@ False if it is a connection from client to server.
 Returns the internal nodejs Socket used to communicate with this client.
 
 ### client.outgoingPluginChannels.write(channel, data)
-### client.outgoingPluginChannels.register(channels...)
-### client.outgoingPluginChannels.unregister(channels...)
 
 Writes a raw payload buffer to an outgoing plugin channel. Registering and unregistering
 channels notifies the other side.
