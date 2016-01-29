@@ -1,17 +1,20 @@
 var net = require('net');
 var Client = require('./client');
 var states = require("./states");
+var tcp_dns = require('./client/tcp_dns');
 
 module.exports = ping;
 
 function ping(options, cb) {
-  var host = options.host || 'localhost';
-  var port = options.port || 25565;
+  options.host = options.host || 'localhost';
+  options.port = options.port || 25565;
   var optVersion = options.version || require("./version").defaultVersion;
   var mcData=require("minecraft-data")(optVersion);
   var version = mcData.version;
+  options.majorVersion = version.majorVersion;
+  options.protocolVersion = version.version;
 
-  var client = new Client(false,version.majorVersion);
+  var client = new Client(false,options.majorVersion);
   client.on('error', function(err) {
     cb(err);
   });
@@ -32,15 +35,17 @@ function ping(options, cb) {
       client.write('ping_start', {});
   });
 
+  // TODO: refactor with src/client/setProtocol.js
   client.on('connect', function() {
     client.write('set_protocol', {
-      protocolVersion: version.version,
-      serverHost: host,
-      serverPort: port,
+      protocolVersion: options.protocolVersion,
+      serverHost: options.host,
+      serverPort: options.port,
       nextState: 1
     });
     client.state = states.STATUS;
   });
 
-  client.connect(port, host);
+  tcp_dns(client, options);
+  options.connect(client);
 }
