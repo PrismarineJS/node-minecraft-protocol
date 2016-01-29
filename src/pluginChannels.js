@@ -4,7 +4,6 @@ class PluginChannels extends EventEmitter {
   constructor(client) {
     super();
     this.client = client;
-    this.channels = new Set();
   }
 }
 
@@ -31,7 +30,7 @@ class OutgoingPluginChannels extends PluginChannels {
   }
 }
 
-module.exports = {
-  IncomingPluginChannels,
-  OutgoingPluginChannels
+module.exports = function(client, options) {
+  client.incomingPluginChannels = new IncomingPluginChannels(client);
+  client.outgoingPluginChannels = new OutgoingPluginChannels(client);
 };

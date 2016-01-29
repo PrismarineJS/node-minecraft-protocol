@@ -25,9 +25,6 @@ function createClient(options) {
 
   var client = new Client(false, options.majorVersion);
 
-  client.incomingPluginChannels = new IncomingPluginChannels(client);
-  client.outgoingPluginChannels = new OutgoingPluginChannels(client);
-
   tcp_dns(client, options);
   setProtocol(client, options);
   keepalive(client, options);
