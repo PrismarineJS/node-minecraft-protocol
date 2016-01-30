@@ -40,6 +40,7 @@ function createServer(options) {
     client.once('set_protocol', onHandshake);
     client.once('login_start', onLogin);
     client.once('ping_start', onPing);
+    client.once('legacy_server_list_ping', onLegacyPing);
     client.on('end', onEnd);
 
     var keepAlive = false;
@@ -124,6 +125,31 @@ function createServer(options) {
         client.write('ping', {time: packet.time});
         client.end();
       });
+    }
+
+    function onLegacyPing(packet) {
+      console.log('onLegacyPing',packet);
+      if (packet.payload === 0) {
+        var responseString = [server.motd, server.playerCount.toString(), server.maxPlayers.toString()].join('\xa7');
+
+        function utf16be(s) {
+          //var responseBuffer = new Buffer(responseString, 'utf16le'); // unfortunately, we need utf16be not le
+          //var responseBuffer = new Buffer(responseString, 'ucs2'); // aliases for utf16le
+          // hack semi-UTF16BE encoding, by prefixing each character with a null byte
+          // TODO: use a real encoder, maybe https://github.com/ForbesLindesay/legacy-encoding?
+          // uses https://github.com/ashtuchkin/iconv-lite which has 'utf16-be'. use or separate out?
+          return new Buffer([''].concat(s.split('')).join('\0'), 'binary');
+        }
+
+        var responseBuffer = utf16be(responseString);
+
+        var length = responseString.length; // UCS2 characters, not bytes
+        var lengthBuffer = new Buffer(2);
+        lengthBuffer.writeUInt16BE(length);
+
+        client.writeRaw(Buffer.concat([new Buffer('ff', 'hex'), lengthBuffer, responseBuffer]));
+      }
+      // TODO: support ping type 1
     }
 
     function onLogin(packet) {
