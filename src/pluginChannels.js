@@ -31,7 +31,7 @@ module.exports = function(client, options) {
       }
       // If we want more, wait until we get more
       if (!areWeDone)
-        client.on('custom_payload', function bleh(data) {
+        client.on('custom_payload', (data) => {
            // When push returns false, we should stop reading until _read is called again.
           if (!this.push(this.readStuff.unshift()))
             client.removeEventListener('custom_payload', bleh);
