@@ -7,6 +7,12 @@ module.exports = function(client, options) {
     constructor(name) {
       super();
       this.name = name;
+      this.readStuff = [];
+
+      client.on('custom_payload', (data) => {
+        if (data.channel === "stuff")
+          this.readStuff.push(data);
+      });
     }
 
     _write(chunk, encoding, cb) {
@@ -18,11 +24,18 @@ module.exports = function(client, options) {
     }
 
     _read() {
-      //TODO
-      /*
-      client.on('custom_payload', (packet) => {
-      client.incomingPluginChannels.emit(packet.channel, packet.data);
-      */
+      // First, read everything currently in the cache.
+      var areWeDone = false;
+      while (this.readStuff.length > 0 && areWeDone) {
+        areWeDone = this.push(this.readStuff.unshift());
+      }
+      // If we want more, wait until we get more
+      if (!areWeDone)
+        client.on('custom_payload', function bleh(data) {
+           // When push returns false, we should stop reading until _read is called again.
+          if (!this.push(this.readStuff.unshift()))
+            client.removeEventListener('custom_payload', bleh);
+        });
     }
   }
 
