@@ -30,6 +30,13 @@ class Splitter extends Transform {
   }
   _transform(chunk, enc, cb) {
     this.buffer = Buffer.concat([this.buffer, chunk]);
+
+    if (this.buffer[0] === 0xfe) {
+      // legacy_server_list_ping packet follows a different protocol format, no varint length
+      this.push(this.buffer);
+      return cb();
+    }
+
     var offset = 0;
 
     var { value, size, error } = readVarInt(this.buffer, offset) || { error: "Not enough data" };
