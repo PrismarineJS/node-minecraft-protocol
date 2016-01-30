@@ -29,12 +29,12 @@ class Splitter extends Transform {
   constructor() {
     super();
     this.buffer = new Buffer(0);
+    this.recognizeLegacyPing = false;
   }
   _transform(chunk, enc, cb) {
     this.buffer = Buffer.concat([this.buffer, chunk]);
 
-    // TODO: only decode if in handshake state! important since 254 is a valid varint (encodes as 0xfe 0x01), packet length
-    if (this.buffer[0] === LEGACY_PING_PACKET_ID) {
+    if (this.recognizeLegacyPing && this.buffer[0] === LEGACY_PING_PACKET_ID) {
       // legacy_server_list_ping packet follows a different protocol format
       // prefix the encoded varint packet id for the deserializer
       var header = new Buffer(sizeOfVarInt(LEGACY_PING_PACKET_ID));
