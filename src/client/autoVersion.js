@@ -28,7 +28,6 @@ function createClientAuto(options) {
   options.wait_connect = true; // don't let createClient / src/client/setProtocol proceed on socket 'connect' until 'connect_allowed'
   var client = createClient(options); // vanilla
   debug('pinging',options.host);
-  // TODO: refactor with DNS SRV lookup in NMP
   // TODO: detect ping timeout, https://github.com/PrismarineJS/node-minecraft-protocol/issues/329
   ping(options, function(err, response) {
     if (err) throw err; // hmm
