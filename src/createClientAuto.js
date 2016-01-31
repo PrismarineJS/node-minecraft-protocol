@@ -26,8 +26,6 @@ function createClientAsync(options, cb) {
   // TODO: refactor with DNS SRV lookup in NMP
   // TODO: detect ping timeout, https://github.com/PrismarineJS/node-minecraft-protocol/issues/329
   ping(options, function(err, response) {
-    var client;
-
     if (err) return cb(err, null);
     debug('ping response',response);
     // TODO: could also use ping pre-connect to save description, type, negotiate protocol etc.
