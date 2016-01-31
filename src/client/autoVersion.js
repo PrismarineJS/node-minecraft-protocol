@@ -9,11 +9,10 @@ var minecraft_data = require('minecraft-data');
 // Get the minecraft-data version string for a protocol version
 // TODO: add to node-minecraft-data index (protocol to newest release, if multiple)
 function protocolVersion2MinecraftVersion(n) {
-  var usesNetty = n > 0;
+  var usesNetty = true; // for now, only Netty protocols are supported TODO: pre-Netty (beware, colliding protocol version numbers)
   for (var i = 0; i < minecraft_data.versions.length; ++i) {
     var version = minecraft_data.versions[i];
-    if (version.version === Math.abs(n) && version.usesNetty === usesNetty) {
-      console.log(version);
+    if (version.version === n && version.usesNetty === usesNetty) {
       return [version.minecraftVersion, version.majorVersion];
     }
   }
