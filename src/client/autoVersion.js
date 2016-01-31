@@ -31,8 +31,7 @@ module.exports = function(client) {
   ping(pingOptions, function(err, response) {
     if (err) throw err; // hmm
     debug('ping response',response);
-    // TODO: could also use ping pre-connect to save description, type, negotiate protocol etc.
-    //  ^ see https://github.com/PrismarineJS/node-minecraft-protocol/issues/327
+    // TODO: could also use ping pre-connect to save description, type, max players, etc.
     var motd = response.description;
     debug('Server description:',motd); // TODO: save
 
@@ -47,12 +46,9 @@ module.exports = function(client) {
     // even though it is in a format accepted by minecraft-data. Instead, translate the protocol.
     var [minecraftVersion, majorVersion] = protocolVersion2MinecraftVersion(protocolVersion);
     client.options.version = minecraftVersion;
-
-    // Use the exact same protocol version
-    // Requires https://github.com/PrismarineJS/node-minecraft-protocol/pull/330
     client.options.protocolVersion = protocolVersion;
 
-    // reinitialize client object with new version TODO: move out of its constructor
+    // Reinitialize client object with new version TODO: move out of its constructor?
     client.version = majorVersion;
     client.state = states.HANDSHAKING;
 
@@ -65,7 +61,7 @@ module.exports = function(client) {
       // TODO: modify client object to set forgeMods and enable forgeHandshake
       throw new Error('FML/Forge not yet supported');
     }
-    // done configuring client object, let connection proceed
+    // Finished configuring client object, let connection proceed
     client.emit('connect_allowed');
   });
   return client;
