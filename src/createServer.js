@@ -5,6 +5,7 @@ var states = require("./states");
 var bufferEqual = require('buffer-equal');
 var Server = require('./server');
 var UUID = require('uuid-1345');
+var endianToggle = require('endian-toggle');
 
 module.exports=createServer;
 
@@ -139,12 +140,7 @@ function createServer(options) {
 
       function sendPingResponse(responseString) {
         function utf16be(s) {
-          //var responseBuffer = new Buffer(responseString, 'utf16le'); // unfortunately, we need utf16be not le
-          //var responseBuffer = new Buffer(responseString, 'ucs2'); // aliases for utf16le
-          // hack semi-UTF16BE encoding, by prefixing each character with a null byte
-          // TODO: use a real encoder, maybe https://github.com/ForbesLindesay/legacy-encoding?
-          // uses https://github.com/ashtuchkin/iconv-lite which has 'utf16-be'. use or separate out?
-          return new Buffer([''].concat(s.split('')).join('\0'), 'binary');
+          return endianToggle(new Buffer(s, 'utf16le'), 16);
         }
 
         var responseBuffer = utf16be(responseString);
