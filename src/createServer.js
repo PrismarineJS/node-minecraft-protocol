@@ -128,10 +128,10 @@ function createServer(options) {
     }
 
     function onLegacyPing(packet) {
-      console.log('onLegacyPing',packet);
-
       if (packet.payload === 1) {
-        // TODO: ping type 1
+        var pingVersion = 1;
+        sendPingResponse('\xa7' + [pingVersion, version.version, version.minecraftVersion,
+            server.motd, server.playerCount.toString(), server.maxPlayers.toString()].join('\0'));
       } else {
         // ping type 0
         sendPingResponse([server.motd, server.playerCount.toString(), server.maxPlayers.toString()].join('\xa7'));
@@ -153,7 +153,10 @@ function createServer(options) {
         var lengthBuffer = new Buffer(2);
         lengthBuffer.writeUInt16BE(length);
 
-        client.writeRaw(Buffer.concat([new Buffer('ff', 'hex'), lengthBuffer, responseBuffer]));
+        var raw = Buffer.concat([new Buffer('ff', 'hex'), lengthBuffer, responseBuffer]);
+
+        //client.writeRaw(raw); // not raw enough, it includes length
+        client.socket.write(raw);
       }
 
     }
