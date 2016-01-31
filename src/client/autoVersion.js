@@ -54,7 +54,7 @@ module.exports = function(client) {
 
     // reinitialize client object with new version TODO: move out of its constructor
     client.version = majorVersion;
-    client.setSerializer(states.HANDSHAKING);
+    client.state = states.HANDSHAKING;
 
     if (response.modinfo && response.modinfo.type === 'FML') {
       // Use the list of Forge mods from the server ping, so client will match server
