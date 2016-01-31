@@ -25,7 +25,6 @@ class Client extends EventEmitter
     this.decompressor=null;
     this.deserializer;
     this.isServer;
-    this.version;
     this.protocolState=states.HANDSHAKING;
     this.ended=true;
     this.latency=0;
