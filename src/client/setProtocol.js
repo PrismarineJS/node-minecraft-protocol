@@ -1,7 +1,8 @@
 
 var states = require("../states");
 
-module.exports = function(client, options) {
+module.exports = function(client) {
+  var options = client.options;
   client.on('connect', onConnect);
 
   function onConnect() {

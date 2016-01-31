@@ -1,6 +1,6 @@
 var states = require("../states");
 
-module.exports = function(client, options) {
+module.exports = function(client) {
   client.once('success', onLogin);
 
   function onLogin(packet) {

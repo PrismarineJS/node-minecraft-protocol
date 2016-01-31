@@ -15,6 +15,7 @@ function ping(options, cb) {
   options.protocolVersion = version.version;
 
   var client = new Client(false,options.majorVersion);
+  client.options = options;
   client.on('error', function(err) {
     cb(err);
   });
@@ -46,6 +47,6 @@ function ping(options, cb) {
     client.state = states.STATUS;
   });
 
-  tcp_dns(client, options);
+  tcp_dns(client);
   options.connect(client);
 }

@@ -1,4 +1,4 @@
-module.exports = function(client, options) {
+module.exports = function(client) {
   client.once("compress", onCompressionRequest);
   client.on("set_compression", onCompressionRequest);
 

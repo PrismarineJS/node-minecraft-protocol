@@ -47,13 +47,11 @@ function createClientAuto(options) {
     // Note that versionName is a descriptive version stirng like '1.8.9' on vailla, but other
     // servers add their own name (Spigot 1.8.8, Glowstone++ 1.8.9) so we cannot use it directly,
     // even though it is in a format accepted by minecraft-data. Instead, translate the protocol.
-    //XXX TODO: modify client object
-    options.version = protocolVersion2MinecraftVersion(protocolVersion);
+    client.options.version = protocolVersion2MinecraftVersion(protocolVersion);
 
     // Use the exact same protocol version
     // Requires https://github.com/PrismarineJS/node-minecraft-protocol/pull/330
-    //XXX TODO: modify client objecti
-    options.protocolVersion = protocolVersion;
+    client.options.protocolVersion = protocolVersion;
 
     if (response.modinfo && response.modinfo.type === 'FML') {
       // Use the list of Forge mods from the server ping, so client will match server
