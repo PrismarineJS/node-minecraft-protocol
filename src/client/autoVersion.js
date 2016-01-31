@@ -24,11 +24,11 @@ function protocolVersion2MinecraftVersion(n) {
 module.exports = function(client) {
   var options = client.options;
 
-  debug('creating client');
   options.wait_connect = true; // don't let src/client/setProtocol proceed on socket 'connect' until 'connect_allowed'
   debug('pinging',options.host);
-  // TODO: detect ping timeout, https://github.com/PrismarineJS/node-minecraft-protocol/issues/329
-  ping(options, function(err, response) {
+  var pingOptions = {host: options.host, port: options.port};
+  // TODO: use 0xfe ping instead for better compatibility/performance? https://github.com/deathcap/node-minecraft-ping
+  ping(pingOptions, function(err, response) {
     if (err) throw err; // hmm
     debug('ping response',response);
     // TODO: could also use ping pre-connect to save description, type, negotiate protocol etc.
