@@ -1,9 +1,9 @@
 'use strict';
 
-var ping = require('./ping');
+var ping = require('../ping');
+var debug = require('../debug');
+var states = require('../states');
 var assert = require('assert');
-var debug = require('./debug');
-var createClient = require('./createClient');
 var minecraft_data = require('minecraft-data');
 
 // Get the minecraft-data version string for a protocol version
@@ -14,19 +14,18 @@ function protocolVersion2MinecraftVersion(n) {
     var version = minecraft_data.versions[i];
     if (version.version === Math.abs(n) && version.usesNetty === usesNetty) {
       console.log(version);
-      return version.minecraftVersion;
+      return [version.minecraftVersion, version.majorVersion];
     }
   }
 
   throw new Error(`unsupported/unknown protocol version: ${n}, update minecraft-data`);
 }
 
-function createClientAuto(options) {
-  assert.ok(options, 'options is required');
+module.exports = function(client) {
+  var options = client.options;
 
   debug('creating client');
-  options.wait_connect = true; // don't let createClient / src/client/setProtocol proceed on socket 'connect' until 'connect_allowed'
-  var client = createClient(options); // vanilla
+  options.wait_connect = true; // don't let src/client/setProtocol proceed on socket 'connect' until 'connect_allowed'
   debug('pinging',options.host);
   // TODO: detect ping timeout, https://github.com/PrismarineJS/node-minecraft-protocol/issues/329
   ping(options, function(err, response) {
@@ -46,11 +45,16 @@ function createClientAuto(options) {
     // Note that versionName is a descriptive version stirng like '1.8.9' on vailla, but other
     // servers add their own name (Spigot 1.8.8, Glowstone++ 1.8.9) so we cannot use it directly,
     // even though it is in a format accepted by minecraft-data. Instead, translate the protocol.
-    client.options.version = protocolVersion2MinecraftVersion(protocolVersion);
+    var [minecraftVersion, majorVersion] = protocolVersion2MinecraftVersion(protocolVersion);
+    client.options.version = minecraftVersion;
 
     // Use the exact same protocol version
     // Requires https://github.com/PrismarineJS/node-minecraft-protocol/pull/330
     client.options.protocolVersion = protocolVersion;
+
+    // reinitialize client object with new version TODO: move out of its constructor
+    client.version = majorVersion;
+    client.setSerializer(states.HANDSHAKING);
 
     if (response.modinfo && response.modinfo.type === 'FML') {
       // Use the list of Forge mods from the server ping, so client will match server
@@ -66,5 +70,3 @@ function createClientAuto(options) {
   });
   return client;
 }
-
-module.exports = createClientAuto;
