@@ -5,14 +5,13 @@ var states = require("./states");
 
 class Server extends EventEmitter
 {
-  socketServer=null;
-  cipher=null;
-  decipher=null;
-  clients={};
-
   constructor(version) {
     super();
     this.version=version;
+    this.socketServer=null;
+    this.cipher=null;
+    this.decipher=null;
+    this.clients={};
   }
 
   listen(port, host) {

@@ -93,6 +93,10 @@ client.on('connect', function() {
   console.info(color('Successfully connected to ' + host + ':' + port, "blink+green"));
 });
 
+client.on('disconnect', function(packet) {
+  console.log('disconnected: '+ packet.reason);
+});
+
 client.on('end', function() {
   console.log("Connection lost");
   process.exit();

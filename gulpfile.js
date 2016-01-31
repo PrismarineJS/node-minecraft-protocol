@@ -3,8 +3,7 @@ var gulp = require('gulp');
 var plumber = require('gulp-plumber');
 var babel = require('gulp-babel');
 var options = {
-  stage: 0, // Dat ES7 goodness
-  optional: ["runtime"]
+  presets: ['es2015']
 };
 
 var sourcemaps = require('gulp-sourcemaps');

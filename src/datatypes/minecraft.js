@@ -1,5 +1,5 @@
 var nbt = require('prismarine-nbt');
-var uuid = require('node-uuid');
+var UUID = require('uuid-1345');
 
 module.exports = {
   'UUID': [readUUID, writeUUID, 16],
@@ -11,13 +11,14 @@ module.exports = {
 
 function readUUID(buffer, offset) {
   return {
-    value: uuid.unparse(buffer, offset),
+    value: UUID.stringify(buffer.slice(offset,16)),
     size: 16
   };
 }
 
 function writeUUID(value, buffer, offset) {
-  uuid.parse(value, buffer, offset);
+  var buf=UUID.parse(value);
+  buf.copy(buffer,offset);
   return offset + 16;
 }
 
