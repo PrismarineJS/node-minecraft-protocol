@@ -129,9 +129,15 @@ function createServer(options) {
 
     function onLegacyPing(packet) {
       console.log('onLegacyPing',packet);
-      if (packet.payload === 0) {
-        var responseString = [server.motd, server.playerCount.toString(), server.maxPlayers.toString()].join('\xa7');
 
+      if (packet.payload === 1) {
+        // TODO: ping type 1
+      } else {
+        // ping type 0
+        sendPingResponse([server.motd, server.playerCount.toString(), server.maxPlayers.toString()].join('\xa7'));
+      }
+
+      function sendPingResponse(responseString) {
         function utf16be(s) {
           //var responseBuffer = new Buffer(responseString, 'utf16le'); // unfortunately, we need utf16be not le
           //var responseBuffer = new Buffer(responseString, 'ucs2'); // aliases for utf16le
@@ -149,7 +155,7 @@ function createServer(options) {
 
         client.writeRaw(Buffer.concat([new Buffer('ff', 'hex'), lengthBuffer, responseBuffer]));
       }
-      // TODO: support ping type 1
+
     }
 
     function onLogin(packet) {
