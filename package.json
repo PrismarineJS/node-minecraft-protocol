@@ -47,7 +47,6 @@
     "prismarine-nbt": "0.1.0",
     "protodef": "0.2.5",
     "readable-stream": "^1.1.0",
-    "through": "^2.3.8",
     "ursa-purejs": "0.0.3",
     "uuid-1345": "^0.99.6",
     "yggdrasil": "0.1.0"

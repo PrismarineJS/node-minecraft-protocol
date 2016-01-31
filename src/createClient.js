@@ -1,5 +1,4 @@
 var Client = require('./client');
-var createClientStream = require('./createClientStream');
 var assert = require('assert');
 
 var encrypt = require('./client/encrypt');
