@@ -218,6 +218,7 @@ class Client extends EventEmitter
   // TCP/IP-specific (not generic Stream) method for backwards-compatibility
   connect(port, host) {
     var options = {port, host};
+    if (!this.options) this.options = options;
     require('./client/tcp_dns')(this, options);
     options.connect(this);
   }
