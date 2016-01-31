@@ -8,6 +8,7 @@ var caseCorrect = require('./client/caseCorrect');
 var setProtocol = require('./client/setProtocol');
 var play = require('./client/play');
 var tcp_dns = require('./client/tcp_dns');
+var forgeHandshake = require('./client/forgeHandshake');
 
 module.exports=createClient;
 
@@ -24,6 +25,7 @@ function createClient(options) {
   var client = new Client(false, options.majorVersion);
 
   tcp_dns(client, options);
+  if (options.forgeMods) forgeHandshake(client, options);
   setProtocol(client, options);
   keepalive(client, options);
   encrypt(client, options);

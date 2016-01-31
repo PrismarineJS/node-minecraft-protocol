@@ -264,6 +264,8 @@ function fmlHandshakeStep(client, data, options)
 }
 
 module.exports = function(client, options) {
+  options.tagHost = '\0FML\0'; // passed to src/client/setProtocol.js, signifies client supports FML/Forge
+
   client.on('custom_payload', function(packet) {
     // TODO: channel registration tracking in NMP, https://github.com/PrismarineJS/node-minecraft-protocol/pull/328
     if (packet.channel === 'FML|HS') {
