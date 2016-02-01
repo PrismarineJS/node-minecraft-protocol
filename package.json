@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "buffer-equal": "0.0.1",
-    "minecraft-data": "PrismarineJS/node-minecraft-data",
+    "minecraft-data": "git://github.com/prismarinejs/node-minecraft-data.git#4e7f910e62ea30c641a9df2170275d49bbd1edad",
     "prismarine-nbt": "0.1.0",
     "protodef": "0.2.5",
     "readable-stream": "^1.1.0",
