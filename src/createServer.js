@@ -5,6 +5,7 @@ var states = require("./states");
 var bufferEqual = require('buffer-equal');
 var Server = require('./server');
 var UUID = require('uuid-1345');
+var endianToggle = require('endian-toggle');
 
 module.exports=createServer;
 
@@ -40,6 +41,7 @@ function createServer(options) {
     client.once('set_protocol', onHandshake);
     client.once('login_start', onLogin);
     client.once('ping_start', onPing);
+    client.once('legacy_server_list_ping', onLegacyPing);
     client.on('end', onEnd);
 
     var keepAlive = false;
@@ -124,6 +126,35 @@ function createServer(options) {
         client.write('ping', {time: packet.time});
         client.end();
       });
+    }
+
+    function onLegacyPing(packet) {
+      if (packet.payload === 1) {
+        var pingVersion = 1;
+        sendPingResponse('\xa7' + [pingVersion, version.version, version.minecraftVersion,
+            server.motd, server.playerCount.toString(), server.maxPlayers.toString()].join('\0'));
+      } else {
+        // ping type 0
+        sendPingResponse([server.motd, server.playerCount.toString(), server.maxPlayers.toString()].join('\xa7'));
+      }
+
+      function sendPingResponse(responseString) {
+        function utf16be(s) {
+          return endianToggle(new Buffer(s, 'utf16le'), 16);
+        }
+
+        var responseBuffer = utf16be(responseString);
+
+        var length = responseString.length; // UCS2 characters, not bytes
+        var lengthBuffer = new Buffer(2);
+        lengthBuffer.writeUInt16BE(length);
+
+        var raw = Buffer.concat([new Buffer('ff', 'hex'), lengthBuffer, responseBuffer]);
+
+        //client.writeRaw(raw); // not raw enough, it includes length
+        client.socket.write(raw);
+      }
+
     }
 
     function onLogin(packet) {
