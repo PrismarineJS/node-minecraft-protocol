@@ -197,13 +197,14 @@ function createServer(options) {
     }
 
     function onEncryptionKeyResponse(packet) {
+      let sharedSecret;
       try {
         const verifyToken = serverKey.decrypt(packet.verifyToken, undefined, undefined, ursa.RSA_PKCS1_PADDING);
         if(!bufferEqual(client.verifyToken, verifyToken)) {
           client.end('DidNotEncryptVerifyTokenProperly');
           return;
         }
-        const sharedSecret = serverKey.decrypt(packet.sharedSecret, undefined, undefined, ursa.RSA_PKCS1_PADDING);
+        sharedSecret = serverKey.decrypt(packet.sharedSecret, undefined, undefined, ursa.RSA_PKCS1_PADDING);
       } catch(e) {
         client.end('DidNotEncryptVerifyTokenProperly');
         return;
