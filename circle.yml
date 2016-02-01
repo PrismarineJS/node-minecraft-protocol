@@ -8,3 +8,4 @@ machine:
 dependencies:
   pre:
     - mkdir minecraft-server
+    - git clone https://github.com/PrismarineJS/minecraft-data node_modules/minecraft-data/minecraft-data || true
