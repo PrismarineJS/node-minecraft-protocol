@@ -15,9 +15,10 @@ class Framer extends Transform {
   }
 
   _transform(chunk, enc, cb) {
-    var buffer = new Buffer(sizeOfVarInt(chunk.length) + chunk.length);
+    const varIntSize=sizeOfVarInt(chunk.length);
+    var buffer = new Buffer(varIntSize + chunk.length);
     writeVarInt(chunk.length, buffer, 0);
-    chunk.copy(buffer, sizeOfVarInt(chunk.length));
+    chunk.copy(buffer, varIntSize);
     this.push(buffer);
     return cb();
   }
