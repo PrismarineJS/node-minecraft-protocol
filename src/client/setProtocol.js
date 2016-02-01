@@ -1,5 +1,4 @@
-
-var states = require("../states");
+const states = require("../states");
 
 module.exports = function(client, options) {
   client.on('connect', onConnect);
@@ -24,4 +23,4 @@ module.exports = function(client, options) {
       username: client.username
     });
   }
-}
+};

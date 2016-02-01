@@ -1,5 +1,5 @@
-var net = require('net');
-var dns = require('dns');
+const net = require('net');
+const dns = require('dns');
 
 module.exports = function(client, options) {
   options.port = options.port || 25565;

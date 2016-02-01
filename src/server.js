@@ -1,7 +1,7 @@
-var net = require('net');
-var EventEmitter = require('events').EventEmitter;
-var Client = require('./client');
-var states = require("./states");
+const net = require('net');
+const EventEmitter = require('events').EventEmitter;
+const Client = require('./client');
+const states = require("./states");
 
 class Server extends EventEmitter
 {
@@ -15,11 +15,11 @@ class Server extends EventEmitter
   }
 
   listen(port, host) {
-    var self = this;
-    var nextId = 0;
+    const self = this;
+    let nextId = 0;
     self.socketServer = net.createServer();
     self.socketServer.on('connection', socket => {
-      var client = new Client(true,this.version);
+      const client = new Client(true,this.version);
       client._end = client.end;
       client.end = function end(endReason) {
         endReason='{"text":"'+endReason+'"}';
@@ -51,13 +51,10 @@ class Server extends EventEmitter
   }
 
   close() {
-    var client;
-    for(var clientId in this.clients) {
-      if(!this.clients.hasOwnProperty(clientId)) continue;
-
-      client = this.clients[clientId];
+    Object.keys(this.clients).forEach(clientId => {
+      const client = this.clients[clientId];
       client.end('ServerShutdown');
-    }
+    });
     this.socketServer.close();
   }
 }
