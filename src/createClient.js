@@ -1,5 +1,7 @@
 var Client = require('./client');
 var assert = require('assert');
+var IncomingPluginChannels = require('./pluginChannels').IncomingPluginChannels;
+var OutgoingPluginChannels = require('./pluginChannels').OutgoingPluginChannels;
 
 var encrypt = require('./client/encrypt');
 var keepalive = require('./client/keepalive');

@@ -95,6 +95,11 @@ False if it is a connection from client to server.
 
 Returns the internal nodejs Socket used to communicate with this client.
 
+### client.outgoingPluginChannels.write(channel, data)
+
+Writes a raw payload buffer to an outgoing plugin channel. Registering and unregistering
+channels notifies the other side.
+
 ### client.uuid
 
 A string representation of the client's UUID. Note that UUIDs are unique for
@@ -134,6 +139,11 @@ parameters.
 ### per-packet events
 
 Check out the [minecraft-data docs](https://prismarinejs.github.io/minecraft-data/?v=1.8&d=protocol) to know the event names and data field names.
+
+### per-channel events
+
+`client.incomingPluginChannels` emits events for each plugin channel.
+The raw payload buffer is passed as the first argument.
 
 ## Not Immediately Obvious Data Type Formats
 
