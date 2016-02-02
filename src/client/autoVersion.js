@@ -7,7 +7,7 @@ var assert = require('assert');
 var minecraft_data = require('minecraft-data');
 
 module.exports = function(client, options) {
-  options.wait_connect = true; // don't let src/client/setProtocol proceed on socket 'connect' until 'connect_allowed'
+  client.wait_connect = true; // don't let src/client/setProtocol proceed on socket 'connect' until 'connect_allowed'
   debug('pinging',options.host);
   var pingOptions = {host: options.host, port: options.port};
   // TODO: use 0xfe ping instead for better compatibility/performance? https://github.com/deathcap/node-minecraft-ping

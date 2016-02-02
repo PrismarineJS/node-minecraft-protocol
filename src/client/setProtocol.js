@@ -5,7 +5,7 @@ module.exports = function(client, options) {
   client.on('connect', onConnect);
 
   function onConnect() {
-    if (options.wait_connect) {
+    if (client.wait_connect) {
       client.on('connect_allowed', next);
     } else {
       next();
