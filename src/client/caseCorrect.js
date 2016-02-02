@@ -1,8 +1,7 @@
 var yggdrasil = require('yggdrasil')({});
 var UUID = require('uuid-1345');
 
-module.exports = function(client) {
-  var options = client.options;
+module.exports = function(client, options) {
   var clientToken = options.clientToken || UUID.v4().toString();
   options.accessToken = null;
   options.haveCredentials = options.password != null || (clientToken != null && options.session != null);

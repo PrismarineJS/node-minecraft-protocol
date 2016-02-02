@@ -25,16 +25,15 @@ function createClient(options) {
   options.protocolVersion = version.version;
 
   var client = new Client(false, options.majorVersion);
-  client.options = options;
 
-  tcp_dns(client);
-  caseCorrect(client);
-  if (options.version === false) autoVersion(client);
-  setProtocol(client);
-  keepalive(client);
-  encrypt(client);
-  play(client);
-  compress(client);
+  tcp_dns(client, options);
+  caseCorrect(client, options);
+  if (options.version === false) autoVersion(client, options);
+  setProtocol(client, options);
+  keepalive(client, options);
+  encrypt(client, options);
+  play(client, options);
+  compress(client, options);
 
   return client;
 }

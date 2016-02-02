@@ -1,8 +1,7 @@
 var net = require('net');
 var dns = require('dns');
 
-module.exports = function(client) {
-  var options = client.options;
+module.exports = function(client, options) {
   options.port = options.port || 25565;
   options.host = options.host || 'localhost';
 

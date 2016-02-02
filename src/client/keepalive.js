@@ -1,5 +1,4 @@
-module.exports = function(client) {
-  var options = client.options;
+module.exports = function(client, options) {
   var keepAlive = options.keepAlive == null ? true : options.keepAlive;
   if (!keepAlive) return;
 

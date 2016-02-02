@@ -3,8 +3,7 @@ var yggserver = require('yggdrasil').server({});
 var ursa=require("../ursa");
 var debug = require("../debug");
 
-module.exports = function(client) {
-  var options = client.options;
+module.exports = function(client, options) {
   client.once('encryption_begin', onEncryptionKeyRequest);
 
   function onEncryptionKeyRequest(packet) {

@@ -6,9 +6,7 @@ var states = require('../states');
 var assert = require('assert');
 var minecraft_data = require('minecraft-data');
 
-module.exports = function(client) {
-  var options = client.options;
-
+module.exports = function(client, options) {
   options.wait_connect = true; // don't let src/client/setProtocol proceed on socket 'connect' until 'connect_allowed'
   debug('pinging',options.host);
   var pingOptions = {host: options.host, port: options.port};
@@ -33,8 +31,8 @@ module.exports = function(client) {
     var versionInfos = minecraft_data.postNettyVersionsByProtocolVersion[protocolVersion];
     if (!versionInfos && versionInfos.length < 1) throw new Error(`unsupported/unknown protocol version: ${protocolVersion}, update minecraft-data`);
     var versionInfo = versionInfos[0]; // use newest
-    client.options.version = versionInfo.minecraftVersion;
-    client.options.protocolVersion = protocolVersion;
+    options.version = versionInfo.minecraftVersion;
+    options.protocolVersion = protocolVersion;
 
     // Reinitialize client object with new version TODO: move out of its constructor?
     client.version = versionInfo.majorVersion;
