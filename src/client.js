@@ -25,7 +25,6 @@ class Client extends EventEmitter
     this.decompressor=null;
     this.deserializer;
     this.isServer;
-    this.version;
     this.protocolState=states.HANDSHAKING;
     this.ended=true;
     this.latency=0;
@@ -220,6 +219,7 @@ class Client extends EventEmitter
   // TCP/IP-specific (not generic Stream) method for backwards-compatibility
   connect(port, host) {
     var options = {port, host};
+    if (!this.options) this.options = options;
     require('./client/tcp_dns')(this, options);
     options.connect(this);
   }
