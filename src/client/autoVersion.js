@@ -6,20 +6,6 @@ var states = require('../states');
 var assert = require('assert');
 var minecraft_data = require('minecraft-data');
 
-// Get the minecraft-data version string for a protocol version
-// TODO: add to node-minecraft-data index (protocol to newest release, if multiple)
-function protocolVersion2MinecraftVersion(n) {
-  var usesNetty = true; // for now, only Netty protocols are supported TODO: pre-Netty (beware, colliding protocol version numbers)
-  for (var i = 0; i < minecraft_data.versions.length; ++i) {
-    var version = minecraft_data.versions[i];
-    if (version.version === n && version.usesNetty === usesNetty) {
-      return [version.minecraftVersion, version.majorVersion];
-    }
-  }
-
-  throw new Error(`unsupported/unknown protocol version: ${n}, update minecraft-data`);
-}
-
 module.exports = function(client) {
   var options = client.options;
 
@@ -43,12 +29,15 @@ module.exports = function(client) {
     // Note that versionName is a descriptive version stirng like '1.8.9' on vailla, but other
     // servers add their own name (Spigot 1.8.8, Glowstone++ 1.8.9) so we cannot use it directly,
     // even though it is in a format accepted by minecraft-data. Instead, translate the protocol.
-    var [minecraftVersion, majorVersion] = protocolVersion2MinecraftVersion(protocolVersion);
-    client.options.version = minecraftVersion;
+    // TODO: pre-Netty version support (uses overlapping version numbers, so would have to check versionName)
+    var versionInfos = minecraft_data.postNettyVersionsByProtocolVersion[protocolVersion];
+    if (!versionInfos && versionInfos.length < 1) throw new Error(`unsupported/unknown protocol version: ${protocolVersion}, update minecraft-data`);
+    var versionInfo = versionInfos[0]; // use newest
+    client.options.version = versionInfo.minecraftVersion;
     client.options.protocolVersion = protocolVersion;
 
     // Reinitialize client object with new version TODO: move out of its constructor?
-    client.version = majorVersion;
+    client.version = versionInfo.majorVersion;
     client.state = states.HANDSHAKING;
 
     if (response.modinfo && response.modinfo.type === 'FML') {
