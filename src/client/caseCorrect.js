@@ -1,14 +1,14 @@
-var yggdrasil = require('yggdrasil')({});
-var UUID = require('uuid-1345');
+const yggdrasil = require('yggdrasil')({});
+const UUID = require('uuid-1345');
 
 module.exports = function(client, options) {
-  var clientToken = options.clientToken || UUID.v4().toString();
+  const clientToken = options.clientToken || UUID.v4().toString();
   options.accessToken = null;
   options.haveCredentials = options.password != null || (clientToken != null && options.session != null);
 
   if(options.haveCredentials) {
     // make a request to get the case-correct username before connecting.
-    var cb = function(err, session) {
+    const cb = function(err, session) {
       if(err) {
         client.emit('error', err);
       } else {

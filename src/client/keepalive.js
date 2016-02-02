@@ -1,12 +1,12 @@
 module.exports = function(client, options) {
-  var keepAlive = options.keepAlive == null ? true : options.keepAlive;
+  const keepAlive = options.keepAlive == null ? true : options.keepAlive;
   if (!keepAlive) return;
 
-  var checkTimeoutInterval = options.checkTimeoutInterval || 10 * 1000;
+  const checkTimeoutInterval = options.checkTimeoutInterval || 10 * 1000;
 
   client.on('keep_alive', onKeepAlive);
 
-  var timeout = null;
+  let timeout = null;
 
   function onKeepAlive(packet) {
     if (timeout)

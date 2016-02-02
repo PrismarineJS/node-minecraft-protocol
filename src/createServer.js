@@ -1,38 +1,38 @@
-var ursa=require("./ursa");
-var crypto = require('crypto');
-var yggserver = require('yggdrasil').server({});
-var states = require("./states");
-var bufferEqual = require('buffer-equal');
-var Server = require('./server');
-var UUID = require('uuid-1345');
-var endianToggle = require('endian-toggle');
+const ursa=require("./ursa");
+const crypto = require('crypto');
+const yggserver = require('yggdrasil').server({});
+const states = require("./states");
+const bufferEqual = require('buffer-equal');
+const Server = require('./server');
+const UUID = require('uuid-1345');
+const endianToggle = require('endian-toggle');
 
 module.exports=createServer;
 
 function createServer(options) {
   options = options || {};
-  var port = options.port != null ?
+  const port = options.port != null ?
     options.port :
     options['server-port'] != null ?
       options['server-port'] :
       25565;
-  var host = options.host || '0.0.0.0';
-  var kickTimeout = options.kickTimeout || 10 * 1000;
-  var checkTimeoutInterval = options.checkTimeoutInterval || 4 * 1000;
-  var onlineMode = options['online-mode'] == null ? true : options['online-mode'];
+  const host = options.host || '0.0.0.0';
+  const kickTimeout = options.kickTimeout || 10 * 1000;
+  const checkTimeoutInterval = options.checkTimeoutInterval || 4 * 1000;
+  const onlineMode = options['online-mode'] == null ? true : options['online-mode'];
   // a function receiving the default status object and the client
   // and returning a modified response object.
-  var beforePing = options.beforePing || null;
+  const beforePing = options.beforePing || null;
 
-  var enableKeepAlive = options.keepAlive == null ? true : options.keepAlive;
+  const enableKeepAlive = options.keepAlive == null ? true : options.keepAlive;
 
-  var optVersion = options.version || require("./version").defaultVersion;
-  var mcData=require("minecraft-data")(optVersion);
-  var version = mcData.version;
+  const optVersion = options.version || require("./version").defaultVersion;
+  const mcData=require("minecraft-data")(optVersion);
+  const version = mcData.version;
 
-  var serverKey = ursa.generatePrivateKey(1024);
+  const serverKey = ursa.generatePrivateKey(1024);
 
-  var server = new Server(version.majorVersion);
+  const server = new Server(version.majorVersion);
   server.motd = options.motd || "A Minecraft server";
   server.maxPlayers = options['max-players'] || 20;
   server.playerCount = 0;
@@ -44,16 +44,16 @@ function createServer(options) {
     client.once('legacy_server_list_ping', onLegacyPing);
     client.on('end', onEnd);
 
-    var keepAlive = false;
-    var loggedIn = false;
-    var lastKeepAlive = null;
+    let keepAlive = false;
+    let loggedIn = false;
+    let lastKeepAlive = null;
 
-    var keepAliveTimer = null;
-    var loginKickTimer = setTimeout(kickForNotLoggingIn, kickTimeout);
+    let keepAliveTimer = null;
+    let loginKickTimer = setTimeout(kickForNotLoggingIn, kickTimeout);
 
-    var serverId;
-    
-    var sendKeepAliveTime;
+    let serverId;
+
+    let sendKeepAliveTime;
 
     function kickForNotLoggingIn() {
       client.end('LoginTimeout');
@@ -64,7 +64,7 @@ function createServer(options) {
         return;
 
       // check if the last keepAlive was too long ago (kickTimeout)
-      var elapsed = new Date() - lastKeepAlive;
+      const elapsed = new Date() - lastKeepAlive;
       if(elapsed > kickTimeout) {
         client.end('KeepAliveTimeout');
         return;
@@ -93,7 +93,7 @@ function createServer(options) {
     }
 
     function onPing() {
-      var response = {
+      const response = {
         "version": {
           "name": version.minecraftVersion,
           "protocol": version.version
@@ -130,7 +130,7 @@ function createServer(options) {
 
     function onLegacyPing(packet) {
       if (packet.payload === 1) {
-        var pingVersion = 1;
+        const pingVersion = 1;
         sendPingResponse('\xa7' + [pingVersion, version.version, version.minecraftVersion,
             server.motd, server.playerCount.toString(), server.maxPlayers.toString()].join('\0'));
       } else {
@@ -143,13 +143,13 @@ function createServer(options) {
           return endianToggle(new Buffer(s, 'utf16le'), 16);
         }
 
-        var responseBuffer = utf16be(responseString);
+        const responseBuffer = utf16be(responseString);
 
-        var length = responseString.length; // UCS2 characters, not bytes
-        var lengthBuffer = new Buffer(2);
+        const length = responseString.length; // UCS2 characters, not bytes
+        const lengthBuffer = new Buffer(2);
         lengthBuffer.writeUInt16BE(length);
 
-        var raw = Buffer.concat([new Buffer('ff', 'hex'), lengthBuffer, responseBuffer]);
+        const raw = Buffer.concat([new Buffer('ff', 'hex'), lengthBuffer, responseBuffer]);
 
         //client.writeRaw(raw); // not raw enough, it includes length
         client.socket.write(raw);
@@ -159,14 +159,14 @@ function createServer(options) {
 
     function onLogin(packet) {
       client.username = packet.username;
-      var isException = !!server.onlineModeExceptions[client.username.toLowerCase()];
-      var needToVerify = (onlineMode && !isException) || (!onlineMode && isException);
+      const isException = !!server.onlineModeExceptions[client.username.toLowerCase()];
+      const needToVerify = (onlineMode && !isException) || (!onlineMode && isException);
       if(needToVerify) {
         serverId = crypto.randomBytes(4).toString('hex');
         client.verifyToken = crypto.randomBytes(4);
-        var publicKeyStrArr = serverKey.toPublicPem("utf8").split("\n");
-        var publicKeyStr = "";
-        for(var i = 1; i < publicKeyStrArr.length - 2; i++) {
+        const publicKeyStrArr = serverKey.toPublicPem("utf8").split("\n");
+        let publicKeyStr = "";
+        for(let i = 1; i < publicKeyStrArr.length - 2; i++) {
           publicKeyStr += publicKeyStrArr[i]
         }
         client.publicKey = new Buffer(publicKeyStr, 'base64');
@@ -197,22 +197,23 @@ function createServer(options) {
     }
 
     function onEncryptionKeyResponse(packet) {
+      let sharedSecret;
       try {
-        var verifyToken = serverKey.decrypt(packet.verifyToken, undefined, undefined, ursa.RSA_PKCS1_PADDING);
+        const verifyToken = serverKey.decrypt(packet.verifyToken, undefined, undefined, ursa.RSA_PKCS1_PADDING);
         if(!bufferEqual(client.verifyToken, verifyToken)) {
           client.end('DidNotEncryptVerifyTokenProperly');
           return;
         }
-        var sharedSecret = serverKey.decrypt(packet.sharedSecret, undefined, undefined, ursa.RSA_PKCS1_PADDING);
+        sharedSecret = serverKey.decrypt(packet.sharedSecret, undefined, undefined, ursa.RSA_PKCS1_PADDING);
       } catch(e) {
         client.end('DidNotEncryptVerifyTokenProperly');
         return;
       }
       client.setEncryption(sharedSecret);
 
-      var isException = !!server.onlineModeExceptions[client.username.toLowerCase()];
-      var needToVerify = (onlineMode && !isException) || (!onlineMode && isException);
-      var nextStep = needToVerify ? verifyUsername : loginClient;
+      const isException = !!server.onlineModeExceptions[client.username.toLowerCase()];
+      const needToVerify = (onlineMode && !isException) || (!onlineMode && isException);
+      const nextStep = needToVerify ? verifyUsername : loginClient;
       nextStep();
 
       function verifyUsername() {
@@ -234,9 +235,9 @@ function createServer(options) {
     // https://github.com/openjdk-mirror/jdk7u-jdk/blob/f4d80957e89a19a29bb9f9807d2a28351ed7f7df/src/share/classes/java/util/UUID.java#L163
     function javaUUID(s)
     {
-      var hash = crypto.createHash("md5");
+      const hash = crypto.createHash("md5");
       hash.update(s, 'utf8');
-      var buffer = hash.digest();
+      const buffer = hash.digest();
       buffer[6] = (buffer[6] & 0x0f) | 0x30;
       buffer[8] = (buffer[8] & 0x3f) | 0x80;
       return buffer;
@@ -248,7 +249,7 @@ function createServer(options) {
     }
 
     function loginClient() {
-      var isException = !!server.onlineModeExceptions[client.username.toLowerCase()];
+      const isException = !!server.onlineModeExceptions[client.username.toLowerCase()];
       if(onlineMode == false || isException) {
         client.uuid = nameToMcOfflineUUID(client.username);
       }

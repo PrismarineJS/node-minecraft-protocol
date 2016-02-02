@@ -1,7 +1,7 @@
-var crypto = require('crypto');
-var yggserver = require('yggdrasil').server({});
-var ursa=require("../ursa");
-var debug = require("../debug");
+const crypto = require('crypto');
+const yggserver = require('yggdrasil').server({});
+const ursa=require("../ursa");
+const debug = require("../debug");
 
 module.exports = function(client, options) {
   client.once('encryption_begin', onEncryptionKeyRequest);
@@ -40,9 +40,9 @@ module.exports = function(client, options) {
       }
 
       function sendEncryptionKeyResponse() {
-        var pubKey = mcPubKeyToURsa(packet.publicKey);
-        var encryptedSharedSecretBuffer = pubKey.encrypt(sharedSecret, undefined, undefined, ursa.RSA_PKCS1_PADDING);
-        var encryptedVerifyTokenBuffer = pubKey.encrypt(packet.verifyToken, undefined, undefined, ursa.RSA_PKCS1_PADDING);
+        const pubKey = mcPubKeyToURsa(packet.publicKey);
+        const encryptedSharedSecretBuffer = pubKey.encrypt(sharedSecret, undefined, undefined, ursa.RSA_PKCS1_PADDING);
+        const encryptedVerifyTokenBuffer = pubKey.encrypt(packet.verifyToken, undefined, undefined, ursa.RSA_PKCS1_PADDING);
         client.write('encryption_begin', {
           sharedSecret: encryptedSharedSecretBuffer,
           verifyToken: encryptedVerifyTokenBuffer
@@ -54,9 +54,9 @@ module.exports = function(client, options) {
 };
 
 function mcPubKeyToURsa(mcPubKeyBuffer) {
-  var pem = "-----BEGIN PUBLIC KEY-----\n";
-  var base64PubKey = mcPubKeyBuffer.toString('base64');
-  var maxLineLength = 65;
+  let pem = "-----BEGIN PUBLIC KEY-----\n";
+  let base64PubKey = mcPubKeyBuffer.toString('base64');
+  const maxLineLength = 65;
   while(base64PubKey.length > 0) {
     pem += base64PubKey.substring(0, maxLineLength) + "\n";
     base64PubKey = base64PubKey.substring(maxLineLength);

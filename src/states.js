@@ -1,4 +1,4 @@
-var states = {
+const states = {
   "HANDSHAKING": "handshaking",
   "STATUS": "status",
   "LOGIN": "login",
