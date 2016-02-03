@@ -1,8 +1,8 @@
-var ProtoDef = require('protodef').ProtoDef;
-var assert = require('assert');
-var debug = require('../debug');
+const ProtoDef = require('protodef').ProtoDef;
+const assert = require('assert');
+const debug = require('../debug');
 
-var proto = new ProtoDef();
+const proto = new ProtoDef();
 // copied from ../../dist/transforms/serializer.js TODO: refactor
 proto.addType("string", ["pstring", {
       countType: "varint"
@@ -154,7 +154,7 @@ proto.addType('FML|HS',
 );
 
 function writeAck(client, phase) {
-  var ackData = proto.createPacketBuffer('FML|HS', {
+  const ackData = proto.createPacketBuffer('FML|HS', {
     discriminator: 'HandshakeAck', // HandshakeAck,
     phase: phase
   });
@@ -164,7 +164,7 @@ function writeAck(client, phase) {
   });
 }
 
-var FMLHandshakeClientState = {
+const FMLHandshakeClientState = {
   START: 1,
   WAITINGSERVERDATA: 2,
   WAITINGSERVERCOMPLETE: 3,
@@ -174,10 +174,10 @@ var FMLHandshakeClientState = {
 
 function fmlHandshakeStep(client, data, options)
 {
-  var parsed = proto.parsePacketBuffer('FML|HS', data);
+  const parsed = proto.parsePacketBuffer('FML|HS', data);
   debug('FML|HS',parsed);
 
-  var fmlHandshakeState = client.fmlHandshakeState || FMLHandshakeClientState.START;
+  const fmlHandshakeState = client.fmlHandshakeState || FMLHandshakeClientState.START;
 
   switch(fmlHandshakeState) {
     case FMLHandshakeClientState.START:
@@ -192,7 +192,7 @@ function fmlHandshakeStep(client, data, options)
         data: new Buffer(['FML|HS', 'FML', 'FML|MP', 'FML', 'FORGE'].join('\0'))
       });
 
-      var clientHello = proto.createPacketBuffer('FML|HS', {
+      const clientHello = proto.createPacketBuffer('FML|HS', {
         discriminator: 'ClientHello',
         fmlProtocolVersion: parsed.data.fmlProtocolVersion
       });
@@ -203,7 +203,7 @@ function fmlHandshakeStep(client, data, options)
       });
 
       debug('Sending client modlist');
-      var modList = proto.createPacketBuffer('FML|HS', {
+      const modList = proto.createPacketBuffer('FML|HS', {
         discriminator: 'ModList',
         mods: options.forgeMods || []
       });
