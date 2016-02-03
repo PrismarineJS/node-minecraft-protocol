@@ -14,6 +14,7 @@ class Client extends EventEmitter
     super();
     this.version=version;
     this.isServer = !!isServer;
+    this.splitter=framing.createSplitter();
     this.setSerializer(states.HANDSHAKING);
     this.packetsToParse={};
     this.serializer;
@@ -21,7 +22,6 @@ class Client extends EventEmitter
     this.framer=framing.createFramer();
     this.cipher=null;
     this.decipher=null;
-    this.splitter=framing.createSplitter();
     this.decompressor=null;
     this.deserializer;
     this.isServer;
@@ -51,6 +51,7 @@ class Client extends EventEmitter
     this.deserializer = createDeserializer({ isServer:this.isServer, version:this.version, state: state, packetsToParse:
       this.packetsToParse});
 
+    this.splitter.recognizeLegacyPing = state === states.HANDSHAKING;
 
     this.serializer.on('error', (e) => {
       var parts=e.field.split(".");
