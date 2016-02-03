@@ -1,27 +1,27 @@
-var net = require('net');
-var Client = require('./client');
-var states = require("./states");
-var tcp_dns = require('./client/tcp_dns');
+const net = require('net');
+const Client = require('./client');
+const states = require("./states");
+const tcp_dns = require('./client/tcp_dns');
 
 module.exports = ping;
 
 function ping(options, cb) {
   options.host = options.host || 'localhost';
   options.port = options.port || 25565;
-  var optVersion = options.version || require("./version").defaultVersion;
-  var mcData=require("minecraft-data")(optVersion);
-  var version = mcData.version;
+  const optVersion = options.version || require("./version").defaultVersion;
+  const mcData=require("minecraft-data")(optVersion);
+  const version = mcData.version;
   options.majorVersion = version.majorVersion;
   options.protocolVersion = version.version;
 
-  var client = new Client(false,options.majorVersion);
+  const client = new Client(false,options.majorVersion);
   client.on('error', function(err) {
     cb(err);
   });
 
   client.once('server_info', function(packet) {
-    var data = JSON.parse(packet.response);
-    var start = Date.now();
+    const data = JSON.parse(packet.response);
+    const start = Date.now();
     client.once('ping', function(packet) {
       data.latency = Date.now() - start;
       cb(null, data);

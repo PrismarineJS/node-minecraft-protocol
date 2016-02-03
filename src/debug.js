@@ -1,8 +1,8 @@
-var util = require('util');
+const util = require('util');
 
-var debug;
+let debug;
 if(process.env.NODE_DEBUG && /(minecraft-protocol|mc-proto)/.test(process.env.NODE_DEBUG)) {
-  var pid = process.pid;
+  const pid = process.pid;
   debug = function(x) {
     // if console is not set up yet, then skip this.
     if(!console.error)

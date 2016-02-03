@@ -1,12 +1,12 @@
-var EventEmitter = require('events').EventEmitter;
-var debug = require('./debug');
-var compression = require('./transforms/compression');
-var framing = require('./transforms/framing');
-var crypto = require('crypto');
-var states = require("./states");
+const EventEmitter = require('events').EventEmitter;
+const debug = require('./debug');
+const compression = require('./transforms/compression');
+const framing = require('./transforms/framing');
+const crypto = require('crypto');
+const states = require("./states");
 
-var createSerializer=require("./transforms/serializer").createSerializer;
-var createDeserializer=require("./transforms/serializer").createDeserializer;
+const createSerializer=require("./transforms/serializer").createSerializer;
+const createDeserializer=require("./transforms/serializer").createDeserializer;
 
 class Client extends EventEmitter
 {
@@ -25,18 +25,17 @@ class Client extends EventEmitter
     this.decompressor=null;
     this.deserializer;
     this.isServer;
-    this.version;
     this.protocolState=states.HANDSHAKING;
     this.ended=true;
     this.latency=0;
 
     this.on('newListener', function(event, listener) {
-      var direction = this.isServer ? 'toServer' : 'toClient';
+      const direction = this.isServer ? 'toServer' : 'toClient';
       if(typeof this.packetsToParse[event] === "undefined") this.packetsToParse[event] = 1;
       else this.packetsToParse[event] += 1;
     });
     this.on('removeListener', function(event, listener) {
-      var direction = this.isServer ? 'toServer' : 'toClient';
+      const direction = this.isServer ? 'toServer' : 'toClient';
       this.packetsToParse[event] -= 1;
     });
   }
@@ -54,9 +53,9 @@ class Client extends EventEmitter
     this.splitter.recognizeLegacyPing = state === states.HANDSHAKING;
 
     this.serializer.on('error', (e) => {
-      var parts=e.field.split(".");
+      const parts=e.field.split(".");
       parts.shift();
-      var serializerDirection = !this.isServer ? 'toServer' : 'toClient';
+      const serializerDirection = !this.isServer ? 'toServer' : 'toClient';
       e.field = [this.protocolState, serializerDirection].concat(parts).join(".");
       e.message = `Serialization error for ${e.field} : ${e.message}`;
       this.emit('error',e);
@@ -64,9 +63,9 @@ class Client extends EventEmitter
 
 
     this.deserializer.on('error', (e) => {
-      var parts=e.field.split(".");
+      const parts=e.field.split(".");
       parts.shift();
-      var deserializerDirection = this.isServer ? 'toServer' : 'toClient';
+      const deserializerDirection = this.isServer ? 'toServer' : 'toClient';
       e.field = [this.protocolState, deserializerDirection].concat(parts).join(".");
       e.message = `Deserialization error for ${e.field} : ${e.message}`;
       this.emit('error',e);
@@ -86,7 +85,7 @@ class Client extends EventEmitter
   }
 
   set state(newProperty) {
-    var oldProperty = this.protocolState;
+    const oldProperty = this.protocolState;
     this.protocolState = newProperty;
 
     if(!this.compressor)
@@ -130,7 +129,7 @@ class Client extends EventEmitter
     this.ended = false;
 
     // TODO : A lot of other things needs to be done.
-    var endSocket = () => {
+    const endSocket = () => {
       if(this.ended) return;
       this.ended = true;
       this.socket.removeListener('close', endSocket);
@@ -139,12 +138,12 @@ class Client extends EventEmitter
       this.emit('end', this._endReason);
     };
 
-    var onFatalError = (err) => {
+    const onFatalError = (err) => {
       this.emit('error', err);
       endSocket();
     };
 
-    var onError = (err) => this.emit('error', err);
+    const onError = (err) => this.emit('error', err);
 
     this.socket = socket;
 
@@ -219,7 +218,8 @@ class Client extends EventEmitter
 
   // TCP/IP-specific (not generic Stream) method for backwards-compatibility
   connect(port, host) {
-    var options = {port, host};
+    const options = {port, host};
+    if (!this.options) this.options = options;
     require('./client/tcp_dns')(this, options);
     options.connect(this);
   }
