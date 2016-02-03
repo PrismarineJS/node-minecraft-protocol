@@ -4,9 +4,6 @@ module.exports = function(client, options) {
   client.on('connect', onConnect);
 
   function onConnect() {
-    let taggedHost = options.host;
-    if (options.tagHost) taggedHost += options.tagHost;
-
     if (client.wait_connect) {
       client.on('connect_allowed', next);
     } else {
@@ -14,6 +11,9 @@ module.exports = function(client, options) {
     }
 
     function next() {
+      let taggedHost = options.host;
+      if (options.tagHost) taggedHost += options.tagHost;
+
       client.write('set_protocol', {
         protocolVersion: options.protocolVersion,
         serverHost: taggedHost,

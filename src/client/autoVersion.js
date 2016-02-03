@@ -3,6 +3,7 @@ const debug = require('../debug');
 const states = require('../states');
 const assert = require('assert');
 const minecraft_data = require('minecraft-data');
+const forgeHandshake = require('./forgeHandshake');
 
 module.exports = function(client, options) {
   client.wait_connect = true; // don't let src/client/setProtocol proceed on socket 'connect' until 'connect_allowed'
@@ -40,10 +41,8 @@ module.exports = function(client, options) {
       // Use the list of Forge mods from the server ping, so client will match server
       const forgeMods = response.modinfo.modList;
       debug('Using forgeMods:',forgeMods);
-      // TODO: https://github.com/PrismarineJS/node-minecraft-protocol/issues/114
-      //  https://github.com/PrismarineJS/node-minecraft-protocol/pull/326
-      // TODO: modify client object to set forgeMods and enable forgeHandshake
-      throw new Error('FML/Forge not yet supported');
+      options.forgeMods = forgeMods;
+      forgeHandshake(client, options);
     }
     // Finished configuring client object, let connection proceed
     client.emit('connect_allowed');
