@@ -40,7 +40,7 @@ server.on('login', function(client) {
 
   client.on('chat', function(data) {
     var message = '<' + client.username + '>' + ' ' + data.message;
-    broadcast(message, client, client.username);
+    broadcast(message, null, client.username);
     console.log(message);
   });
 });
