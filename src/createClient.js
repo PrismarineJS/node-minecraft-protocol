@@ -1,6 +1,7 @@
 const Client = require('./client');
 const assert = require('assert');
 
+
 const encrypt = require('./client/encrypt');
 const keepalive = require('./client/keepalive');
 const compress = require('./client/compress');
@@ -9,7 +10,6 @@ const setProtocol = require('./client/setProtocol');
 const play = require('./client/play');
 const tcp_dns = require('./client/tcp_dns');
 const autoVersion = require('./client/autoVersion');
-const forgeHandshake = require('./client/forgeHandshake');
 
 module.exports=createClient;
 
@@ -28,7 +28,6 @@ function createClient(options) {
   const client = new Client(false, options.majorVersion);
 
   tcp_dns(client, options);
-  if (options.forgeMods) forgeHandshake(client, options);
   caseCorrect(client, options);
   if (options.version === false) autoVersion(client, options);
   setProtocol(client, options);
