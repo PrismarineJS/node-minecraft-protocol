@@ -12,7 +12,7 @@ module.exports = function(client, options) {
 
     function next() {
       let taggedHost = options.host;
-      if (options.tagHost) taggedHost += options.tagHost;
+      if (client.tagHost) taggedHost += client.tagHost;
 
       client.write('set_protocol', {
         protocolVersion: options.protocolVersion,
