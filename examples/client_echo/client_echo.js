@@ -18,6 +18,9 @@ client.on('connect', function() {
 client.on('disconnect', function(packet) {
   console.log('disconnected: '+ packet.reason);
 });
+client.on('end', function(err) {
+  console.log('Connection lost');
+});
 client.on('chat', function(packet) {
   var jsonMsg = JSON.parse(packet.message);
   if(jsonMsg.translate == 'chat.type.announcement' || jsonMsg.translate == 'chat.type.text') {
