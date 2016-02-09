@@ -36,18 +36,18 @@
     "gulp-plumber": "^1.0.1",
     "gulp-sourcemaps": "^1.6.0",
     "intelli-espower-loader": "^1.0.0",
-    "minecraft-wrap": "~0.6.5",
-    "mocha": "~2.3.3",
+    "minecraft-wrap": "~0.7.1",
+    "mocha": "~2.4.5",
     "power-assert": "^1.0.0",
     "require-self": "^0.1.0",
-    "source-map-support": "^0.3.2"
+    "source-map-support": "^0.4.0"
   },
   "dependencies": {
-    "buffer-equal": "0.0.1",
+    "buffer-equal": "1.0.0",
     "minecraft-data": "^0.19.1",
-    "prismarine-nbt": "0.1.0",
+    "prismarine-nbt": "0.2.0",
     "protodef": "0.2.5",
-    "readable-stream": "^1.1.0",
+    "readable-stream": "^2.0.5",
     "ursa-purejs": "0.0.3",
     "uuid-1345": "^0.99.6",
     "yggdrasil": "0.1.0"
