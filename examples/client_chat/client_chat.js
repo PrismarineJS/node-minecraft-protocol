@@ -171,9 +171,11 @@ function parseChat(chatObj, parentState) {
 
       chat += color(util.format.apply(this, args), getColorize(parentState));
     }
-    chatObj.extra.forEach(function(i) {
-      chat += parseChat(chatObj.extra[i], parentState);
-    });
+    if (chatObj.extra) {
+      chatObj.extra.forEach(function(item) {
+        chat += parseChat(item, parentState);
+      });
+    }
     return chat;
   }
 }
