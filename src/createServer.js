@@ -17,7 +17,7 @@ function createServer(options) {
       options['server-port'] :
       25565;
   const host = options.host || '0.0.0.0';
-  const kickTimeout = options.kickTimeout || 10 * 1000;
+  const kickTimeout = options.kickTimeout || 30 * 1000;
   const checkTimeoutInterval = options.checkTimeoutInterval || 4 * 1000;
   const onlineMode = options['online-mode'] == null ? true : options['online-mode'];
   // a function receiving the default status object and the client

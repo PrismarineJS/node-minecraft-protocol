@@ -2,7 +2,7 @@ module.exports = function(client, options) {
   const keepAlive = options.keepAlive == null ? true : options.keepAlive;
   if (!keepAlive) return;
 
-  const checkTimeoutInterval = options.checkTimeoutInterval || 10 * 1000;
+  const checkTimeoutInterval = options.checkTimeoutInterval || 20 * 1000;
 
   client.on('keep_alive', onKeepAlive);
 
