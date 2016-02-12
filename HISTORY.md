@@ -1,5 +1,15 @@
 # History
 
+## 0.17.0
+
+* requires node>=4
+* big refactor of createClient : split in several modules (thanks @deathcap)
+* stop using es7
+* make it easy to create client plugins (and create minecraft-protocol-forge) (thanks @deathcap)
+* use babel6
+* add dynamic version support in client
+* update minecraft-data
+
 ## 0.16.6
 
 * fix latency before the first keep alive
