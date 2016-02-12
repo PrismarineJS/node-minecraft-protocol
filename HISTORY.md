@@ -1,5 +1,10 @@
 # History
 
+## 0.17.1
+
+* use correct default timeout value : 30 for the server, 20 for the client
+* fix a small dependency error
+
 ## 0.17.0
 
 * requires node>=4
