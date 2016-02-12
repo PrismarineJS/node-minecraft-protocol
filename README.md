@@ -27,6 +27,12 @@ Parse and serialize minecraft packets, plus authentication and encryption.
    - Ping status
  * Robust test coverage.
  * Optimized for rapidly staying up to date with Minecraft protocol updates.
+ 
+## Third Party Plugins
+
+node-minecraft-protocol is pluggable.
+
+* [minecraft-protocol-forge](https://github.com/PrismarineJS/node-minecraft-protocol-forge) add forge support to minecraft-protocol
 
 ## Projects Using node-minecraft-protocol
 
