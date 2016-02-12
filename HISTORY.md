@@ -1,5 +1,9 @@
 # History
 
+## 0.17.2
+
+* fix readUUID
+
 ## 0.17.1
 
 * use correct default timeout value : 30 for the server, 20 for the client
