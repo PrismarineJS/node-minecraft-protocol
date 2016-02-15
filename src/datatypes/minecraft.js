@@ -73,7 +73,7 @@ function writeCompressedNbt(value, buffer, offset) {
     buffer.writeInt16BE(-1,offset);
     return offset+2;
   }
-  buffer.writeInt16(sizeOfNbt(value),offset);
+  buffer.writeInt16BE(sizeOfNbt(value),offset);
   return nbt.proto.write(value,buffer,offset+2,"nbt");
 }
 
