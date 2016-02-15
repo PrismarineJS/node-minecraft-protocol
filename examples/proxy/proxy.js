@@ -85,9 +85,10 @@ srv.on('login', function(client) {
     if(!endedTargetClient)
       targetClient.end("End");
   });
-  client.on('error', function() {
+  client.on('error', function(err) {
     endedClient = true;
     console.log('Connection error by client', '(' + addr + ')');
+    console.log(err.stack);
     if(!endedTargetClient)
       targetClient.end("Error");
   });
