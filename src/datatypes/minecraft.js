@@ -5,6 +5,7 @@ module.exports = {
   'UUID': [readUUID, writeUUID, 16],
   'nbt': [readNbt, writeNbt, sizeOfNbt],
   'optionalNbt':[readOptionalNbt,writeOptionalNbt,sizeOfOptionalNbt],
+  'optionalLengthPrefixedNbt':[readOptionalLengthPrefixedNbt,writeOptionalLengthPrefixedNbt,sizeOfOptionalLengthPrefixedNbt],
   'restBuffer': [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
   'entityMetadataLoop': [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata]
 };
@@ -53,6 +54,29 @@ function sizeOfOptionalNbt(value) {
     return 1;
   return nbt.proto.sizeOf(value,"nbt");
 }
+
+// Length-prefixed optional NBT, short instead of null byte: http://wiki.vg/index.php?title=Slot_Data&diff=6056&oldid=4753
+function readOptionalLengthPrefixedNbt(buffer, offset) {
+  if(buffer.readInt16BE(offset) == -1) return {size:2};
+  return nbt.proto.read(buffer,offset,"nbt");
+}
+
+function writeOptionalLengthPrefixedNbt(value, buffer, offset) {
+  if(value==undefined) {
+    buffer.writeInt16BE(-1,offset);
+    return offset+2;
+  }
+  buffer.writeInt16(sizeOfNbt(value),offset);
+  return nbt.proto.write(value,buffer,offset+2,"nbt");
+}
+
+function sizeOfOptionalLengthPrefixedNbt(value) {
+  if(value==undefined)
+    return 2;
+  return 2+nbt.proto.sizeOf(value,"nbt");
+}
+
+
 
 function readRestBuffer(buffer, offset) {
   return {
