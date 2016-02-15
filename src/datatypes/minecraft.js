@@ -1,10 +1,12 @@
 const nbt = require('prismarine-nbt');
 const UUID = require('uuid-1345');
+const zlib = require('zlib');
 
 module.exports = {
   'UUID': [readUUID, writeUUID, 16],
   'nbt': [readNbt, writeNbt, sizeOfNbt],
   'optionalNbt':[readOptionalNbt,writeOptionalNbt,sizeOfOptionalNbt],
+  'compressedNbt':[readCompressedNbt,writeCompressedNbt,sizeOfCompressedNbt],
   'restBuffer': [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
   'entityMetadataLoop': [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata]
 };
@@ -53,6 +55,35 @@ function sizeOfOptionalNbt(value) {
     return 1;
   return nbt.proto.sizeOf(value,"nbt");
 }
+
+// Length-prefixed compressed NBT, see differences: http://wiki.vg/index.php?title=Slot_Data&diff=6056&oldid=4753
+function readCompressedNbt(buffer, offset) {
+  const length = buffer.readInt16BE(offset);
+  if(length == -1) return {size:2};
+
+  const compressedNbt = buffer.slice(offset+2, offset+2+length);
+
+  const nbtBuffer = zlib.gunzipSync(compressedNbt); // TODO: async
+
+  return nbt.proto.read(nbtBuffer,0,"nbt");
+}
+
+function writeCompressedNbt(value, buffer, offset) {
+  if(value==undefined) {
+    buffer.writeInt16BE(-1,offset);
+    return offset+2;
+  }
+  buffer.writeInt16(sizeOfNbt(value),offset);
+  return nbt.proto.write(value,buffer,offset+2,"nbt");
+}
+
+function sizeOfCompressedNbt(value) {
+  if(value==undefined)
+    return 2;
+  return 2+nbt.proto.sizeOf(value,"nbt");
+}
+
+
 
 function readRestBuffer(buffer, offset) {
   return {
