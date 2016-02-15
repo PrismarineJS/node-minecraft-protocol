@@ -58,7 +58,7 @@ function sizeOfOptionalNbt(value) {
 // Length-prefixed optional NBT, short instead of null byte: http://wiki.vg/index.php?title=Slot_Data&diff=6056&oldid=4753
 function readOptionalLengthPrefixedNbt(buffer, offset) {
   if(buffer.readInt16BE(offset) == -1) return {size:2};
-  return nbt.proto.read(buffer,offset,"nbt");
+  return nbt.proto.read(buffer,offset+2,"nbt");
 }
 
 function writeOptionalLengthPrefixedNbt(value, buffer, offset) {
