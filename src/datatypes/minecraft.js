@@ -73,14 +73,27 @@ function writeCompressedNbt(value, buffer, offset) {
     buffer.writeInt16BE(-1,offset);
     return offset+2;
   }
-  buffer.writeInt16BE(sizeOfNbt(value),offset);
-  return nbt.proto.write(value,buffer,offset+2,"nbt");
+  const nbtBuffer = new Buffer(sizeOfNbt(value));
+  nbt.proto.write(value,nbtBuffer,0,"nbt");
+
+  const compressedNbt = zlib.gzipSync(nbtBuffer); // TODO: async
+  compressedNbt.writeUInt8(0, 9); // clear the OS field to match MC
+
+  buffer.writeInt16BE(compressedNbt.length,offset);
+  compressedNbt.copy(buffer,offset+2);
+  return offset+2+compressedNbt.length;
 }
 
 function sizeOfCompressedNbt(value) {
   if(value==undefined)
     return 2;
-  return 2+nbt.proto.sizeOf(value,"nbt");
+
+  const nbtBuffer = new Buffer(sizeOfNbt(value,"nbt"));
+  nbt.proto.write(value,nbtBuffer,0,"nbt");
+
+  const compressedNbt = zlib.gzipSync(nbtBuffer); // TODO: async
+
+  return 2+compressedNbt.length;
 }
 
 
