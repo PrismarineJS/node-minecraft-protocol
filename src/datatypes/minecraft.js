@@ -77,6 +77,7 @@ function writeCompressedNbt(value, buffer, offset) {
   nbt.proto.write(value,nbtBuffer,0,"nbt");
 
   const compressedNbt = zlib.gzipSync(nbtBuffer); // TODO: async
+  compressedNbt.writeUInt8(0, 9); // clear the OS field to match MC
 
   buffer.writeInt16BE(compressedNbt.length,offset);
   compressedNbt.copy(buffer,offset+2);
