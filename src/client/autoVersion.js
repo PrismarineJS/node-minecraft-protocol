@@ -17,23 +17,28 @@ module.exports = function(client, options) {
     debug('Server description:',motd); // TODO: save
 
     // Pass server-reported version to protocol handler
-    // The version string is interpereted by https://github.com/PrismarineJS/node-minecraft-data
-    const minecraftVersion = response.version.name;        // 1.8.9, 1.7.10
+    // The version string is interpreted by https://github.com/PrismarineJS/node-minecraft-data
+    const brandedMinecraftVersion = response.version.name;        // 1.8.9, 1.7.10
     const protocolVersion = response.version.protocol;//    47,      5
 
-    debug(`Server version: ${minecraftVersion}, protocol: ${protocolVersion}`);
-    // Note that versionName is a descriptive version stirng like '1.8.9' on vailla, but other
-    // servers add their own name (Spigot 1.8.8, Glowstone++ 1.8.9) so we cannot use it directly,
-    // even though it is in a format accepted by minecraft-data. Instead, translate the protocol.
-    // TODO: pre-Netty version support (uses overlapping version numbers, so would have to check versionName)
-    const versionInfos = minecraft_data.postNettyVersionsByProtocolVersion[protocolVersion];
-    if (!versionInfos && versionInfos.length < 1) throw new Error(`unsupported/unknown protocol version: ${protocolVersion}, update minecraft-data`);
-    const versionInfo = versionInfos[0]; // use newest
-    options.version = versionInfo.minecraftVersion;
+    debug(`Server version: ${brandedMinecraftVersion}, protocol: ${protocolVersion}`);
+
+    let minecraftVersion;
+    if (brandedMinecraftVersion.indexOf(' ') !== -1) {
+      // Spigot and Glowstone++ prepend their name; strip it off
+      minecraftVersion = brandedMinecraftVersion.split(' ')[1];
+    } else {
+      minecraftVersion = brandedMinecraftVersion;
+    }
+
+    const versionInfo = minecraft_data.versionsByMinecraftVersion[minecraftVersion];
+    if (!versionInfo) throw new Error(`unsupported/unknown protocol version: ${protocolVersion}, update minecraft-data`);
+
+    options.version = minecraftVersion;
     options.protocolVersion = protocolVersion;
 
     // Reinitialize client object with new version TODO: move out of its constructor?
-    client.version = versionInfo.majorVersion;
+    client.version = minecraftVersion;
     client.state = states.HANDSHAKING;
 
     // Let other plugins such as Forge/FML (modinfo) respond to the ping response
