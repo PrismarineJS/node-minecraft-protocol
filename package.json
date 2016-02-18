@@ -45,7 +45,7 @@
     "buffer-equal": "1.0.0",
     "minecraft-data": "^0.19.1",
     "prismarine-nbt": "0.2.0",
-    "protodef": "0.2.5",
+    "protodef": "0.2.6",
     "readable-stream": "^2.0.5",
     "ursa-purejs": "0.0.3",
     "uuid-1345": "^0.99.6",
