@@ -10,8 +10,11 @@ module.exports = {
   'restBuffer': [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
   'entityMetadataLoop': [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata]
 };
+var PartialReadError=require('protodef').utils.PartialReadError;
 
 function readUUID(buffer, offset) {
+  if(offset+16>buffer.length)
+    throw new PartialReadError();
   return {
     value: UUID.stringify(buffer.slice(offset,16+offset)),
     size: 16
@@ -38,6 +41,8 @@ function sizeOfNbt(value) {
 
 
 function readOptionalNbt(buffer, offset) {
+  if(offset+1>buffer.length)
+    throw new PartialReadError();
   if(buffer.readInt8(offset) == 0) return {size:1};
   return nbt.proto.read(buffer,offset,"nbt");
 }
@@ -58,8 +63,12 @@ function sizeOfOptionalNbt(value) {
 
 // Length-prefixed compressed NBT, see differences: http://wiki.vg/index.php?title=Slot_Data&diff=6056&oldid=4753
 function readCompressedNbt(buffer, offset) {
+  if(offset+2>buffer.length)
+    throw new PartialReadError();
   const length = buffer.readInt16BE(offset);
   if(length == -1) return {size:2};
+  if(offset+2+length>buffer.length)
+    throw new PartialReadError();
 
   const compressedNbt = buffer.slice(offset+2, offset+2+length);
 
@@ -119,6 +128,8 @@ function readEntityMetadata(buffer, offset, {type,endVal}) {
   const metadata = [];
   let item;
   while(true) {
+    if(offset+1>buffer.length)
+      throw new PartialReadError();
     item = buffer.readUInt8(cursor);
     if(item === endVal) {
       return {
