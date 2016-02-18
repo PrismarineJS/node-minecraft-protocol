@@ -9,7 +9,7 @@
   },
   "scripts": {
     "prepublish": "gulp && require-self",
-    "test": "mocha --recursive --require intelli-espower-loader --reporter spec"
+    "test": "mocha --recursive --reporter spec"
   },
   "keywords": [
     "minecraft",
