@@ -136,13 +136,13 @@ mc.supportedVersions.forEach(function(supportedVersion){
   describe("packets "+version.minecraftVersion, function() {
     var client, server, serverClient;
     before(function(done) {
-      server = new Server(version.majorVersion);
+      server = new Server(version.minecraftVersion);
       server.once('listening', function() {
         server.once('connection', function(c) {
           serverClient = c;
           done();
         });
-        client = new Client(false,version.majorVersion);
+        client = new Client(false,version.minecraftVersion);
         client.setSocket(net.connect(25565, 'localhost'));
       });
       server.listen(25565, 'localhost');

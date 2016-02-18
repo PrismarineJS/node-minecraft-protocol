@@ -49,6 +49,7 @@ class Splitter extends Transform {
 
     let offset = 0;
     let value, size, error;
+    let stop=false;
     try {
       ({ value, size, error } = readVarInt(this.buffer, offset));
     }
@@ -56,8 +57,10 @@ class Splitter extends Transform {
       if(!(e instanceof PartialReadError)) {
         throw e;
       }
+      else
+        stop=true;
     }
-    while (this.buffer.length >= offset + size + value)
+    if(!stop) while (this.buffer.length >= offset + size + value)
     {
       try {
         this.push(this.buffer.slice(offset + size, offset + size + value));
