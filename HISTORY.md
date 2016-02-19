@@ -1,5 +1,9 @@
 # History
 
+## 0.18.1
+
+* update protodef dependency
+
 ## 0.18.0
 
 * Supports Minecraft version 1.7.10, 1.8.8 and 1.9 (15w40b and 16w05b)
