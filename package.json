@@ -43,9 +43,9 @@
   },
   "dependencies": {
     "buffer-equal": "1.0.0",
-    "minecraft-data": "^0.20.4",
-    "prismarine-nbt": "0.2.0",
-    "protodef": "0.3.0",
+    "minecraft-data": "^1.0.2",
+    "prismarine-nbt": "0.2.1",
+    "protodef": "^1.0.0",
     "readable-stream": "^2.0.5",
     "ursa-purejs": "0.0.3",
     "uuid-1345": "^0.99.6",

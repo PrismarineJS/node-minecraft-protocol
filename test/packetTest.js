@@ -104,7 +104,7 @@ var values = {
       test7: {type: "intArray", value: [12, 42]}
     }
   },
-  'long': [0, 1],
+  'i64': [0, 1],
   'entityMetadata': [
     {key: 17, value: 0, type: 0}
   ],
