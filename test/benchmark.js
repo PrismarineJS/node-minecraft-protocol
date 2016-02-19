@@ -18,7 +18,7 @@ mc.supportedVersions.forEach(function(supportedVersion){
     this.timeout(60 * 1000);
     var inputData = [];
     it("bench serializing",function(done){
-      var serializer=new mc.createSerializer({state:states.PLAY,isServer:false,version:version.majorVersion});
+      var serializer=new mc.createSerializer({state:states.PLAY,isServer:false,version:version.minecraftVersion});
       var start, i, j;
       console.log('Beginning write test');
       start = Date.now();
@@ -33,7 +33,7 @@ mc.supportedVersions.forEach(function(supportedVersion){
     });
 
     it("bench parsing",function(done){
-      var deserializer=new mc.createDeserializer({state:states.PLAY,isServer:true,version:version.majorVersion});
+      var deserializer=new mc.createDeserializer({state:states.PLAY,isServer:true,version:version.minecraftVersion});
       console.log('Beginning read test');
       start = Date.now();
       for (var j = 0; j < inputData.length; j++) {
