@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "buffer-equal": "1.0.0",
-    "minecraft-data": "^0.20.1",
+    "minecraft-data": "^0.20.2",
     "prismarine-nbt": "0.2.0",
     "protodef": "0.3.0",
     "readable-stream": "^2.0.5",
