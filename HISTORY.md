@@ -1,5 +1,10 @@
 # History
 
+## 0.18.0
+
+* Supports Minecraft version 1.7.10, 1.8.8 and 1.9 (15w40b and 16w05b)
+* improve auto version detection
+
 ## 0.17.2
 
 * fix readUUID
