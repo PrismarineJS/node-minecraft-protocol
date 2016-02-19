@@ -74,7 +74,11 @@ function readCompressedNbt(buffer, offset) {
 
   const nbtBuffer = zlib.gunzipSync(compressedNbt); // TODO: async
 
-  return nbt.proto.read(nbtBuffer,0,"nbt");
+  const results=nbt.proto.read(nbtBuffer,0,"nbt");
+  return {
+    size:length+2,
+    value:results.value
+  }
 }
 
 function writeCompressedNbt(value, buffer, offset) {
