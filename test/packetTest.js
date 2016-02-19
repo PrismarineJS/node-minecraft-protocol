@@ -92,6 +92,18 @@ var values = {
       test7: {type: "intArray", value: [12, 42]}
     }
   },
+  'compressedNbt':{
+    type:"compound",
+    name: "test", value: {
+      test1: {type: "int", value: 4},
+      test2: {type: "long", value: [12, 42]},
+      test3: {type: "byteArray", value: [32]},
+      test4: {type: "string", value: "ohi"},
+      test5: {type: "list", value: {type: "int", value: [4]}},
+      test6: {type: "compound", value: {test: {type: "int", value: 4}}},
+      test7: {type: "intArray", value: [12, 42]}
+    }
+  },
   'long': [0, 1],
   'entityMetadata': [
     {key: 17, value: 0, type: 0}
@@ -103,7 +115,10 @@ var values = {
     velocityZ: 3
   },
   'UUID': "00112233-4455-6677-8899-aabbccddeeff",
-  'position': {x: 12, y: 332, z: 4382821},
+  'position': {x: 12, y: 100, z: 4382821},
+  'position_ibi': {x: 12, y: 100, z: 4382821},
+  'position_isi': {x: 12, y: 100, z: 4382821},
+  'position_iii': {x: 12, y: 100, z: 4382821},
   'restBuffer': new Buffer(0),
   'switch': function(typeArgs, context) {
     var i = typeArgs.fields[getField(typeArgs.compareTo, context)];
