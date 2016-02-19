@@ -14,12 +14,12 @@ function evalCount(count, fields) {
 }
 
 var values = {
-  'int': 123456,
-  'short': -123,
-  'ushort': 123,
+  'i32': 123456,
+  'i16': -123,
+  'u16': 123,
   'varint': 25992,
-  'byte': -10,
-  'ubyte': 8,
+  'i8': -10,
+  'u8': 8,
   'string': "hi hi this is my client string",
   'buffer': new Buffer(8),
   'array': function(typeArgs, context) {
@@ -49,8 +49,8 @@ var values = {
   },
   'count': 1, // TODO : might want to set this to a correct value
   'bool': true,
-  'double': 99999.2222,
-  'float': -333.444,
+  'f64': 99999.2222,
+  'f32': -333.444,
   'slot': {
     blockId: 5,
     itemCount: 56,
