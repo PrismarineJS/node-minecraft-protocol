@@ -18,8 +18,9 @@ automatically logged in and validated against mojang's auth.
  * maxPlayers : default to 20
  * keepAlive : send keep alive packets : default to true
  * version : 1.8 or 1.9 : default to 1.8
+ * customPackets (optional) : an object index by version/state/direction/name, see client_custom_packet for an example
 
-## mc.Server(version)
+## mc.Server(version,[customPackets])
 
 Create a server instance for `version` of minecraft.
 
@@ -74,8 +75,9 @@ Returns a `Client` instance and perform login.
  * keepAlive : send keep alive packets : default to true
  * checkTimeoutInterval : default to `10*1000` (10s), check if keepalive received at that period, disconnect otherwise.
  * version : 1.8 or 1.9 or false (to auto-negotiate): default to 1.8
+ * customPackets (optional) : an object index by version/state/direction/name, see client_custom_packet for an example
 
-## mc.Client(isServer,version)
+## mc.Client(isServer,version,[customPackets])
 
 Create a new client, if `isServer` is true then it is a server-side client, otherwise it's a client-side client.
 Takes a minecraft `version` as second argument.

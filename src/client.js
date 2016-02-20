@@ -10,8 +10,9 @@ const createDeserializer=require("./transforms/serializer").createDeserializer;
 
 class Client extends EventEmitter
 {
-  constructor(isServer,version) {
+  constructor(isServer,version,customPackets) {
     super();
+    this.customPackets=customPackets;
     this.version=version;
     this.isServer = !!isServer;
     this.splitter=framing.createSplitter();
@@ -46,9 +47,9 @@ class Client extends EventEmitter
 
 
   setSerializer(state) {
-    this.serializer = createSerializer({ isServer:this.isServer, version:this.version, state: state});
+    this.serializer = createSerializer({ isServer:this.isServer, version:this.version, state: state,customPackets:this.customPackets});
     this.deserializer = createDeserializer({ isServer:this.isServer, version:this.version, state: state, packetsToParse:
-      this.packetsToParse});
+      this.packetsToParse,customPackets:this.customPackets});
 
     this.splitter.recognizeLegacyPing = state === states.HANDSHAKING;
 

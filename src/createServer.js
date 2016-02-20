@@ -32,7 +32,7 @@ function createServer(options) {
 
   const serverKey = ursa.generatePrivateKey(1024);
 
-  const server = new Server(version.minecraftVersion);
+  const server = new Server(version.minecraftVersion,options.customPackets);
   server.motd = options.motd || "A Minecraft server";
   server.maxPlayers = options['max-players'] || 20;
   server.playerCount = 0;
