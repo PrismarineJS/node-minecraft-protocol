@@ -59,6 +59,10 @@ class Client extends EventEmitter
       const serializerDirection = !this.isServer ? 'toServer' : 'toClient';
       e.field = [this.protocolState, serializerDirection].concat(parts).join(".");
       e.message = `Serialization error for ${e.field} : ${e.message}`;
+      if(!this.compressor)
+        this.serializer.pipe(this.framer);
+      else
+        this.serializer.pipe(this.compressor);
       this.emit('error',e);
     });
 
@@ -69,6 +73,10 @@ class Client extends EventEmitter
       const deserializerDirection = this.isServer ? 'toServer' : 'toClient';
       e.field = [this.protocolState, deserializerDirection].concat(parts).join(".");
       e.message = `Deserialization error for ${e.field} : ${e.message}`;
+      if(!this.compressor)
+        this.splitter.pipe(this.deserializer);
+      else
+        this.decompressor.pipe(this.deserializer);
       this.emit('error',e);
     });
 
