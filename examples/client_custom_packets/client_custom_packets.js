@@ -6,20 +6,22 @@ if(process.argv.length < 4 || process.argv.length > 6) {
 }
 
 var customPackets={
-  "play":{
-    "toClient":{
-      "my_custom_packet": {
-        "id": "0x7A",
-        "fields": [
-          {
-            "name": "age",
-            "type": "i64"
-          },
-          {
-            "name": "time",
-            "type": "i64"
-          }
-        ]
+  "1.8": {
+    "play": {
+      "toClient": {
+        "my_custom_packet": {
+          "id": "0x7A",
+          "fields": [
+            {
+              "name": "age",
+              "type": "i64"
+            },
+            {
+              "name": "time",
+              "type": "i64"
+            }
+          ]
+        }
       }
     }
   }
