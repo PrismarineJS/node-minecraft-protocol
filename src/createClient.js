@@ -25,7 +25,7 @@ function createClient(options) {
   options.majorVersion = version.majorVersion;
   options.protocolVersion = version.version;
 
-  const client = new Client(false, version.minecraftVersion);
+  const client = new Client(false, version.minecraftVersion,options.customPackets);
 
   tcp_dns(client, options);
   caseCorrect(client, options);

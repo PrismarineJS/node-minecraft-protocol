@@ -36,21 +36,23 @@ function createProtocol(types,packets)
   return proto;
 }
 
-function createSerializer({ state = states.HANDSHAKING, isServer = false , version} = {})
+function createSerializer({ state = states.HANDSHAKING, isServer = false , version,customPackets} = {})
 {
   const mcData=require("minecraft-data")(version);
   const direction = !isServer ? 'toServer' : 'toClient';
   const packets = mcData.protocol.states[state][direction];
+  if(customPackets &&  customPackets[state] && customPackets[state][direction]) Object.keys(customPackets[state][direction]).forEach(name => packets[name]=customPackets[state][direction][name]);
   const proto=createProtocol(mcData.protocol.types,packets);
   return new Serializer(proto,"packet");
 }
 
 function createDeserializer({ state = states.HANDSHAKING, isServer = false,
-  packetsToParse = {"packet": true}, version } = {})
+  packetsToParse = {"packet": true}, version,customPackets } = {})
 {
   const mcData=require("minecraft-data")(version);
   const direction = isServer ? "toServer" : "toClient";
   const packets = mcData.protocol.states[state][direction];
+  if(customPackets &&  customPackets[state] && customPackets[state][direction]) Object.keys(customPackets[state][direction]).forEach(name => packets[name]=customPackets[state][direction][name]);
   const proto=createProtocol(mcData.protocol.types,packets);
   return new Parser(proto,"packet");
 }
