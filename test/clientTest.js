@@ -66,7 +66,7 @@ mc.supportedVersions.forEach(function(supportedVersion) {
         });
       });
     });
-    it("connects successfully - online mode", function(done) {
+    it.skip("connects successfully - online mode", function(done) {
       wrap.startServer({'online-mode': 'true'}, function(err) {
         if(err)
           return done(err);
