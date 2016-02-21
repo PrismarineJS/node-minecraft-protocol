@@ -1,5 +1,11 @@
 # History
 
+## 0.18.2
+
+* update protodef
+* custom packets
+* fix tab_complete in 1.9
+
 ## 0.18.1
 
 * update protodef dependency
