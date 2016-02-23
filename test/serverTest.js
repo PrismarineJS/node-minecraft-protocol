@@ -2,6 +2,7 @@ var mc = require('../');
 var assert = require('power-assert');
 
 mc.supportedVersions.forEach(function(supportedVersion){
+  var PORT=Math.round(30000+Math.random()*20000);
   var mcData=require("minecraft-data")(supportedVersion);
   var version=mcData.version;
 
@@ -9,7 +10,8 @@ mc.supportedVersions.forEach(function(supportedVersion){
     it("starts listening and shuts down cleanly", function(done) {
       var server = mc.createServer({
         'online-mode': false,
-        version: version.minecraftVersion
+        version: version.minecraftVersion,
+        port:PORT
       });
       var listening = false;
       server.on('listening', function() {
@@ -26,7 +28,8 @@ mc.supportedVersions.forEach(function(supportedVersion){
         'online-mode': false,
         kickTimeout: 100,
         checkTimeoutInterval: 10,
-        version: version.minecraftVersion
+        version: version.minecraftVersion,
+        port:PORT
       });
       var count = 2;
       server.on('connection', function(client) {
@@ -43,7 +46,7 @@ mc.supportedVersions.forEach(function(supportedVersion){
         client.on('end', function() {
           resolve();
         });
-        client.connect(25565, '127.0.0.1');
+        client.connect(PORT, '127.0.0.1');
       });
 
       function resolve() {
@@ -56,7 +59,8 @@ mc.supportedVersions.forEach(function(supportedVersion){
         'online-mode': false,
         kickTimeout: 100,
         checkTimeoutInterval: 10,
-        version: version.minecraftVersion
+        version: version.minecraftVersion,
+        port:PORT
       });
       var count = 2;
       server.on('connection', function(client) {
@@ -72,7 +76,7 @@ mc.supportedVersions.forEach(function(supportedVersion){
         var client = mc.createClient({
           username: 'superpants',
           host: '127.0.0.1',
-          port: 25565,
+          port: PORT,
           keepAlive: false,
           version: version.minecraftVersion
         });
@@ -90,12 +94,14 @@ mc.supportedVersions.forEach(function(supportedVersion){
         'online-mode': false,
         motd: 'test1234',
         'max-players': 120,
-        version: version.minecraftVersion
+        version: version.minecraftVersion,
+        port:PORT
       });
       server.on('listening', function() {
         mc.ping({
           host: '127.0.0.1',
-          version: version.minecraftVersion
+          version: version.minecraftVersion,
+          port:PORT
         }, function(err, results) {
           if(err) return done(err);
           assert.ok(results.latency >= 0);
@@ -121,7 +127,8 @@ mc.supportedVersions.forEach(function(supportedVersion){
     it("clients can log in and chat", function(done) {
       var server = mc.createServer({
         'online-mode': false,
-        version: version.minecraftVersion
+        version: version.minecraftVersion,
+        port:PORT
       });
       var username = ['player1', 'player2'];
       var index = 0;
@@ -152,7 +159,8 @@ mc.supportedVersions.forEach(function(supportedVersion){
         var player1 = mc.createClient({
           username: 'player1',
           host: '127.0.0.1',
-          version: version.minecraftVersion
+          version: version.minecraftVersion,
+          port:PORT
         });
         player1.on('login', function(packet) {
           assert.strictEqual(packet.gameMode, 1);
@@ -184,7 +192,8 @@ mc.supportedVersions.forEach(function(supportedVersion){
           var player2 = mc.createClient({
             username: 'player2',
             host: '127.0.0.1',
-            version: version.minecraftVersion
+            version: version.minecraftVersion,
+            port:PORT
           });
         });
       });
@@ -202,7 +211,8 @@ mc.supportedVersions.forEach(function(supportedVersion){
     it("kicks clients when invalid credentials", function(done) {
       this.timeout(10000);
       var server = mc.createServer({
-        version: version.minecraftVersion
+        version: version.minecraftVersion,
+        port:PORT
       });
       var count = 4;
       server.on('connection', function(client) {
@@ -219,7 +229,8 @@ mc.supportedVersions.forEach(function(supportedVersion){
         var client = mc.createClient({
           username: 'lalalal',
           host: "127.0.0.1",
-          version: version.minecraftVersion
+          version: version.minecraftVersion,
+          port:PORT
         });
         client.on('end', function() {
           resolve();
@@ -233,7 +244,8 @@ mc.supportedVersions.forEach(function(supportedVersion){
     it("gives correct reason for kicking clients when shutting down", function(done) {
       var server = mc.createServer({
         'online-mode': false,
-        version: version.minecraftVersion
+        version: version.minecraftVersion,
+        port:PORT
       });
       var count = 2;
       server.on('login', function(client) {
@@ -258,7 +270,8 @@ mc.supportedVersions.forEach(function(supportedVersion){
         var client = mc.createClient({
           username: 'lalalal',
           host: '127.0.0.1',
-          version: version.minecraftVersion
+          version: version.minecraftVersion,
+          port:PORT
         });
         client.on('login', function() {
           server.close();

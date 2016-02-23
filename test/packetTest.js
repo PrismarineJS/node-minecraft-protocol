@@ -144,6 +144,7 @@ function getValue(_type, packet) {
 
 
 mc.supportedVersions.forEach(function(supportedVersion){
+  var PORT=Math.round(30000+Math.random()*20000);
   var mcData=require("minecraft-data")(supportedVersion);
   var version=mcData.version;
   var packets = mcData.protocol;
@@ -158,9 +159,9 @@ mc.supportedVersions.forEach(function(supportedVersion){
           done();
         });
         client = new Client(false,version.minecraftVersion);
-        client.setSocket(net.connect(45000, 'localhost'));
+        client.setSocket(net.connect(PORT, 'localhost'));
       });
-      server.listen(45000, 'localhost');
+      server.listen(PORT, 'localhost');
     });
     after(function(done) {
       client.on('end', function() {

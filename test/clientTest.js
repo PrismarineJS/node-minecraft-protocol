@@ -12,6 +12,7 @@ var download = require('minecraft-wrap').download;
 
 
 mc.supportedVersions.forEach(function(supportedVersion) {
+  var PORT=Math.round(30000+Math.random()*20000);
   var mcData = require("minecraft-data")(supportedVersion);
   var version = mcData.version;
   var MC_SERVER_JAR_DIR = process.env.MC_SERVER_JAR_DIR;
@@ -43,12 +44,14 @@ mc.supportedVersions.forEach(function(supportedVersion) {
       });
       wrap.startServer({
         motd: 'test1234',
-        'max-players': 120
+        'max-players': 120,
+        'server-port':PORT
       }, function(err) {
         if(err)
           return done(err);
         mc.ping({
-          version: version.minecraftVersion
+          version: version.minecraftVersion,
+          port:PORT
         }, function(err, results) {
           if(err) return done(err);
           assert.ok(results.latency >= 0);
@@ -67,13 +70,17 @@ mc.supportedVersions.forEach(function(supportedVersion) {
       });
     });
     it.skip("connects successfully - online mode", function(done) {
-      wrap.startServer({'online-mode': 'true'}, function(err) {
+      wrap.startServer({
+        'online-mode': 'true',
+        'server-port':PORT
+      }, function(err) {
         if(err)
           return done(err);
         var client = mc.createClient({
           username: process.env.MC_USERNAME,
           password: process.env.MC_PASSWORD,
-          version: version.minecraftVersion
+          version: version.minecraftVersion,
+          port:PORT
         });
         var lineListener = function(line) {
           var match = line.match(/\[Server thread\/INFO\]: <(.+?)> (.+)/);
@@ -105,12 +112,16 @@ mc.supportedVersions.forEach(function(supportedVersion) {
       });
     });
     it("connects successfully - offline mode", function(done) {
-      wrap.startServer({'online-mode': 'false'}, function(err) {
+      wrap.startServer({
+        'online-mode': 'false',
+        'server-port':PORT
+      }, function(err) {
         if(err)
           return done(err);
         var client = mc.createClient({
           username: 'Player',
-          version: version.minecraftVersion
+          version: version.minecraftVersion,
+          port:PORT
         });
         var lineListener = function(line) {
           var match = line.match(/\[Server thread\/INFO\]: <(.+?)> (.+)/);
@@ -154,12 +165,16 @@ mc.supportedVersions.forEach(function(supportedVersion) {
       });
     });
     it("gets kicked when no credentials supplied in online mode", function(done) {
-      wrap.startServer({'online-mode': 'true'}, function(err) {
+      wrap.startServer({
+        'online-mode': 'true',
+        'server-port':PORT
+      }, function(err) {
         if(err)
           return done(err);
         var client = mc.createClient({
           username: 'Player',
-          version: version.minecraftVersion
+          version: version.minecraftVersion,
+          port:PORT
         });
         var gotKicked = false;
         client.on('disconnect', function(packet) {
@@ -173,12 +188,16 @@ mc.supportedVersions.forEach(function(supportedVersion) {
       });
     });
     it("does not crash for " + SURVIVE_TIME + "ms", function(done) {
-      wrap.startServer({'online-mode': 'false'}, function(err) {
+      wrap.startServer({
+        'online-mode': 'false',
+        'server-port':PORT
+      }, function(err) {
         if(err)
           return done(err);
         var client = mc.createClient({
           username: 'Player',
-          version: version.minecraftVersion
+          version: version.minecraftVersion,
+          port:PORT
         });
         client.on("login", function(packet) {
           client.write("chat", {
