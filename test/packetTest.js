@@ -146,7 +146,7 @@ function getValue(_type, packet) {
 mc.supportedVersions.forEach(function(supportedVersion){
   var mcData=require("minecraft-data")(supportedVersion);
   var version=mcData.version;
-  var packets = mcData.protocol.states;
+  var packets = mcData.protocol;
 
   describe("packets "+version.minecraftVersion, function() {
     var client, server, serverClient;
@@ -158,9 +158,9 @@ mc.supportedVersions.forEach(function(supportedVersion){
           done();
         });
         client = new Client(false,version.minecraftVersion);
-        client.setSocket(net.connect(25565, 'localhost'));
+        client.setSocket(net.connect(45000, 'localhost'));
       });
-      server.listen(25565, 'localhost');
+      server.listen(45000, 'localhost');
     });
     after(function(done) {
       client.on('end', function() {
@@ -169,24 +169,17 @@ mc.supportedVersions.forEach(function(supportedVersion){
       });
       client.end();
     });
-    var packetName, packetInfo, field;
-    for(var state in packets) {
-      if(!packets.hasOwnProperty(state)) continue;
-      for(packetName in packets[state].toServer) {
-        if(!packets[state].toServer.hasOwnProperty(packetName)) continue;
-        packetInfo = packets[state]["toServer"][packetName].fields;
-        packetInfo=packetInfo ? packetInfo : null;
-        it(state + ",ServerBound," + packetName,
-          callTestPacket(packetName, packetInfo, state, true));
-      }
-      for(packetName in packets[state].toClient) {
-        if(!packets[state].toClient.hasOwnProperty(packetName)) continue;
-        packetInfo = packets[state]["toClient"][packetName].fields;
-        packetInfo=packetInfo ? packetInfo : null;
-        it(state + ",ClientBound," + packetName,
-          callTestPacket(packetName, packetInfo, state, false));
-      }
-    }
+    var packetInfo, field;
+    Object.keys(packets).filter(function(state){return state!="types"}).forEach(function(state){
+      Object.keys(packets[state]).forEach(function(direction){
+        Object.keys(packets[state][direction].types).filter(function(packetName){return packetName!="packet"}).forEach(function(packetName){
+          packetInfo = packets[state][direction].types[packetName][1];
+          packetInfo=packetInfo ? packetInfo : null;
+          it(state + ","+(direction=="toServer" ? "Server" : "Client")+"Bound," + packetName,
+            callTestPacket(packetName.substr(7), packetInfo, state, direction=="toServer" ));
+        });
+      });
+    });
     function callTestPacket(packetName, packetInfo, state, toServer) {
       return function(done) {
         client.state = state;
