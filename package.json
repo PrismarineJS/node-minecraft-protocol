@@ -43,14 +43,16 @@
   },
   "dependencies": {
     "buffer-equal": "1.0.0",
-    "minecraft-data": "^1.0.3",
+    "endian-toggle": "0.0.0",
+    "lodash.get": "^4.1.2",
+    "lodash.merge": "^4.3.0",
+    "minecraft-data": "~1.1.0",
     "prismarine-nbt": "0.2.1",
     "protodef": "^1.1.1",
     "readable-stream": "^2.0.5",
     "ursa-purejs": "0.0.3",
     "uuid-1345": "^0.99.6",
-    "yggdrasil": "0.1.0",
-    "endian-toggle": "0.0.0"
+    "yggdrasil": "0.1.0"
   },
   "optionalDependencies": {
     "ursa": "~0.9.1"

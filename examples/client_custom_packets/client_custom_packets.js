@@ -9,17 +9,47 @@ var customPackets={
   "1.8": {
     "play": {
       "toClient": {
-        "my_custom_packet": {
-          "id": "0x7A",
-          "fields": [
-            {
-              "name": "age",
-              "type": "i64"
-            },
-            {
-              "name": "time",
-              "type": "i64"
-            }
+        "types": {
+          "packet_custom_name": [
+            "container",[
+              {
+                "name": "age",
+                "type": "i64"
+              },
+              {
+                "name": "time",
+                "type": "i64"
+              }
+            ]
+          ],
+          "packet": [
+            "container",
+            [
+              {
+                "name": "name",
+                "type": [
+                  "mapper",
+                  {
+                    "type": "varint",
+                    "mappings": {
+                      "0x7A": "custom_name"
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "params",
+                "type": [
+                  "switch",
+                  {
+                    "compareTo": "name",
+                    "fields": {
+                      "custom_name": "packet_custom_name"
+                    }
+                  }
+                ]
+              }
+            ]
           ]
         }
       }
@@ -51,6 +81,6 @@ client.on('login',function(){
 
 });
 
-client.on('my_custom_packet',function(packet){
+client.on('custom_name',function(packet){
   console.log(packet);
 });
