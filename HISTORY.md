@@ -1,5 +1,9 @@
 # History
 
+## 0.18.3
+
+* update protodef and minecraft-data for new protocol schema
+
 ## 0.18.2
 
 * update protodef
