@@ -1,7 +1,6 @@
 machine:
   environment:
     MC_SERVER_JAR_DIR: /home/ubuntu/node-minecraft-protocol/minecraft-server/
-    NODE_DEBUG: minecraft-protocol
   node:
     version: 4
   java:
