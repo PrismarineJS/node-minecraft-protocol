@@ -48,7 +48,7 @@
     "lodash.merge": "^4.3.0",
     "minecraft-data": "~1.1.0",
     "prismarine-nbt": "0.2.1",
-    "protodef": "^1.1.1",
+    "protodef": "^1.1.2",
     "readable-stream": "^2.0.5",
     "ursa-purejs": "0.0.3",
     "uuid-1345": "^0.99.6",
