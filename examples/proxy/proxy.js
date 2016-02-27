@@ -132,10 +132,10 @@ srv.on('login', function(client) {
     var packetBuff = client.serializer.createPacketBuffer({name:meta.name, params:packetData});
     if(!bufferEqual(buffer, packetBuff)) {
       console.log("client<-server: Error in packet " + meta.state + "." + meta.name);
-      console.log(buffer.toString('hex'));
-      console.log(packetBuff.toString('hex'));
-      console.log(buffer.length);
-      console.log(packetBuff.length);
+      console.log("received buffer",buffer.toString('hex'));
+      console.log("produced buffer",packetBuff.toString('hex'));
+      console.log("received length",buffer.length);
+      console.log("produced length",packetBuff.length);
     }
     /*if (client.state == states.PLAY && brokenPackets.indexOf(packetId.value) !== -1)
      {
@@ -152,10 +152,10 @@ srv.on('login', function(client) {
     var packetBuff = targetClient.serializer.createPacketBuffer({name:meta.name, params:packetData});
     if(!bufferEqual(buffer, packetBuff)) {
       console.log("client->server: Error in packet " + meta.state + "." + meta.name);
-      console.log(buffer.toString('hex'));
-      console.log(packetBuff.toString('hex'));
-      console.log(buffer.length);
-      console.log(packetBuff.length);
+      console.log("received buffer",buffer.toString('hex'));
+      console.log("produced buffer",packetBuff.toString('hex'));
+      console.log("received length",buffer.length);
+      console.log("produced length",packetBuff.length);
     }
   });
   targetClient.on('end', function() {
