@@ -1,5 +1,5 @@
 # minecraft protocol
-[![NPM version](https://img.shields.io/npm/v/minecraft-protocol.svg)](http://npmjs.com/package/minecraft-protocol)
+[![NPM version](https://img.shields.io/npm/v/minecraft-protocol.svg)](https://www.npmjs.com/package/minecraft-protocol)
 [![Build Status](https://img.shields.io/circleci/project/PrismarineJS/node-minecraft-protocol/master.svg)](https://circleci.com/gh/PrismarineJS/node-minecraft-protocol)
 [![Join the chat at https://gitter.im/PrismarineJS/node-minecraft-protocol](https://img.shields.io/badge/gitter-join%20chat-brightgreen.svg)](https://gitter.im/PrismarineJS/node-minecraft-protocol)
 
@@ -117,7 +117,7 @@ URSA, an optional dependency, should improve login times
 for servers. However, it can be somewhat complicated to install.
 
 Follow the instructions from
-[Obvious/ursa](https://github.com/Obvious/ursa)
+[Obvious/ursa](https://github.com/quartzjer/ursa)
 
 ## Documentation
 
