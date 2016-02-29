@@ -1,5 +1,9 @@
 # History
 
+## 0.19.1
+
+* update mcdata, support 1.9 release
+
 ## 0.19.0
 
 * update minecraft-data, support 1.9-pre4
