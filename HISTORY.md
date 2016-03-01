@@ -1,5 +1,9 @@
 # History
 
+## 0.19.3
+
+* update mcdata again : u8 not byte
+
 ## 0.19.2
 
 * some fixes in 1.9 protocol
