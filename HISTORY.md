@@ -1,5 +1,9 @@
 # History
 
+## 0.19.2
+
+* some fixes in 1.9 protocol
+
 ## 0.19.1
 
 * update mcdata, support 1.9 release
