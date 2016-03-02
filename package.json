@@ -45,7 +45,7 @@
     "buffer-equal": "1.0.0",
     "endian-toggle": "0.0.0",
     "lodash.get": "^4.1.2",
-    "lodash.merge": "^4.3.0",
+    "lodash.merge": "^4.3.2",
     "minecraft-data": "~1.2.4",
     "prismarine-nbt": "0.2.1",
     "protodef": "^1.1.2",
