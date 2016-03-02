@@ -1,5 +1,9 @@
 # History
 
+## 0.19.4
+
+* fix spawn_painting in 1.9
+
 ## 0.19.3
 
 * update mcdata again : u8 not byte
