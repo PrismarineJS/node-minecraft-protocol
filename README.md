@@ -7,7 +7,7 @@ Parse and serialize minecraft packets, plus authentication and encryption.
 
 ## Features
 
- * Supports Minecraft version 1.7.10, 1.8.8 and 1.9 (15w40b and 1.9)
+ * Supports Minecraft version 1.7.10, 1.8.8 and 1.9 (15w40b, 1.9 and 1.9.1-pre2)
  * Parses all packets and emits events with packet fields as JavaScript
    objects.
  * Send a packet by supplying fields as a JavaScript object.
