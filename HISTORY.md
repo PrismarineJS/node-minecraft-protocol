@@ -1,5 +1,9 @@
 # History
 
+## 0.19.5
+
+* check if e.field is defined when completing serializer/deserializer errors
+
 ## 0.19.4
 
 * fix spawn_painting in 1.9
