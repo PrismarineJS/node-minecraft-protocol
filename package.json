@@ -35,7 +35,7 @@
     "gulp-plumber": "^1.0.1",
     "gulp-sourcemaps": "^1.6.0",
     "intelli-espower-loader": "^1.0.0",
-    "minecraft-wrap": "~0.7.1",
+    "minecraft-wrap": "~1.0.0",
     "mocha": "~2.4.5",
     "power-assert": "^1.0.0",
     "require-self": "^0.1.0",
