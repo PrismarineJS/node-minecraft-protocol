@@ -54,8 +54,13 @@ class Client extends EventEmitter
     this.splitter.recognizeLegacyPing = state === states.HANDSHAKING;
 
     this.serializer.on('error', (e) => {
-      const parts=e.field.split(".");
-      parts.shift();
+      let parts;
+      if(e.field) {
+        parts = e.field.split(".");
+        parts.shift();
+      }
+      else
+        parts=[];
       const serializerDirection = !this.isServer ? 'toServer' : 'toClient';
       e.field = [this.protocolState, serializerDirection].concat(parts).join(".");
       e.message = `Serialization error for ${e.field} : ${e.message}`;
@@ -68,8 +73,13 @@ class Client extends EventEmitter
 
 
     this.deserializer.on('error', (e) => {
-      const parts=e.field.split(".");
-      parts.shift();
+      let parts;
+      if(e.field) {
+        parts = e.field.split(".");
+        parts.shift();
+      }
+      else
+        parts=[];
       const deserializerDirection = this.isServer ? 'toServer' : 'toClient';
       e.field = [this.protocolState, deserializerDirection].concat(parts).join(".");
       e.message = `Deserialization error for ${e.field} : ${e.message}`;
