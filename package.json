@@ -35,26 +35,26 @@
     "gulp-plumber": "^1.0.1",
     "gulp-sourcemaps": "^1.6.0",
     "intelli-espower-loader": "^1.0.0",
-    "minecraft-wrap": "~1.0.0",
-    "mocha": "~2.4.5",
+    "minecraft-wrap": "^1.0.0",
+    "mocha": "^2.4.5",
     "power-assert": "^1.0.0",
     "require-self": "^0.1.0",
     "source-map-support": "^0.4.0"
   },
   "dependencies": {
-    "buffer-equal": "1.0.0",
-    "endian-toggle": "0.0.0",
+    "buffer-equal": "^1.0.0",
+    "endian-toggle": "^0.0.0",
     "lodash.get": "^4.1.2",
     "lodash.merge": "^4.3.0",
-    "minecraft-data": "~1.2.6",
-    "prismarine-nbt": "0.2.1",
+    "minecraft-data": "^1.2.6",
+    "prismarine-nbt": "^0.2.2",
     "protodef": "^1.1.2",
     "readable-stream": "^2.0.5",
-    "ursa-purejs": "0.0.3",
+    "ursa-purejs": "^0.0.3",
     "uuid-1345": "^0.99.6",
-    "yggdrasil": "0.1.0"
+    "yggdrasil": "^0.1.0"
   },
   "optionalDependencies": {
-    "ursa": "~0.9.1"
+    "ursa": "^0.9.1"
   }
 }
