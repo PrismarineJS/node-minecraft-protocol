@@ -180,6 +180,6 @@ function shouldDump(name, direction) {
   return matches(printNameWhitelist[name]);
 
   function matches(result) {
-    return result !== null && result.indexOf(direction) !== -1;
+    return result != null && result.indexOf(direction) !== -1;
   }
 }
