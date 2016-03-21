@@ -27,7 +27,7 @@ if(process.argv.length < 4) {
 }
 
 process.argv.forEach(function(val) {
-  if(val == "-h") {
+  if(val === "-h") {
     printHelpAndExit(0);
   }
 });
@@ -44,15 +44,15 @@ var printNameBlacklist = {};
   for(var i = 0; i < args.length; i++) {
     var option = args[i];
     if(!/^-/.test(option)) break;
-    if(option == "--dump-all") {
+    if(option === "--dump-all") {
       printAllNames = true;
       continue;
     }
     i++;
     var name = args[i];
-    if(option == "--dump") {
+    if(option === "--dump") {
       printNameWhitelist[name] = "io";
-    } else if(option == "-x") {
+    } else if(option === "-x") {
       printNameBlacklist[name] = "io";
     } else {
       printHelpAndExit(1);
@@ -63,7 +63,7 @@ var printNameBlacklist = {};
   version = args[i++];
 })();
 
-if(host.indexOf(':') != -1) {
+if(host.indexOf(':') !== -1) {
   port = host.substring(host.indexOf(':') + 1);
   host = host.substring(0, host.indexOf(':'));
 }
@@ -100,7 +100,7 @@ srv.on('login', function(client) {
     version:version
   });
   client.on('packet', function(data, meta) {
-    if(targetClient.state == states.PLAY && meta.state == states.PLAY) {
+    if(targetClient.state === states.PLAY && meta.state === states.PLAY) {
       if(shouldDump(meta.name, "o")) {
         console.log("client->server:",
           client.state + " "+ meta.name + " :",
@@ -111,7 +111,7 @@ srv.on('login', function(client) {
     }
   });
   targetClient.on('packet', function(data, meta) {
-    if(meta.state == states.PLAY && client.state == states.PLAY) {
+    if(meta.state === states.PLAY && client.state === states.PLAY) {
       if(shouldDump(meta.name, "i")) {
         console.log("client<-server:",
           targetClient.state + "." + meta.name + " :" +
@@ -119,14 +119,15 @@ srv.on('login', function(client) {
       }
       if(!endedClient) {
         client.write(meta.name, data);
-        if (meta.name === 'set_compression') // Set compression
+        if(meta.name === 'set_compression'){
           client.compressionThreshold = data.threshold;
+        } // Set compression
       }
     }
   });
   var bufferEqual = require('buffer-equal');
   targetClient.on('raw', function(buffer, meta) {
-    if(client.state != states.PLAY || meta.state != states.PLAY)
+    if(client.state !== states.PLAY || meta.state !== states.PLAY)
       return;
     var packetData = targetClient.deserializer.parsePacketBuffer(buffer).data.params;
     var packetBuff = client.serializer.createPacketBuffer({name:meta.name, params:packetData});
@@ -137,7 +138,7 @@ srv.on('login', function(client) {
       console.log("received length",buffer.length);
       console.log("produced length",packetBuff.length);
     }
-    /*if (client.state == states.PLAY && brokenPackets.indexOf(packetId.value) !== -1)
+    /*if (client.state === states.PLAY && brokenPackets.indexOf(packetId.value) !=== -1)
      {
      console.log(`client<-server: raw packet);
      console.log(packetData);
@@ -146,7 +147,7 @@ srv.on('login', function(client) {
      }*/
   });
   client.on('raw', function(buffer, meta) {
-    if(meta.state != states.PLAY || targetClient.state != states.PLAY)
+    if(meta.state !== states.PLAY || targetClient.state !== states.PLAY)
       return;
     var packetData = client.deserializer.parsePacketBuffer(buffer).data.params;
     var packetBuff = targetClient.serializer.createPacketBuffer({name:meta.name, params:packetData});
@@ -179,6 +180,6 @@ function shouldDump(name, direction) {
   return matches(printNameWhitelist[name]);
 
   function matches(result) {
-    return result != null && result.indexOf(direction) !== -1;
+    return result !== null && result.indexOf(direction) !== -1;
   }
 }
