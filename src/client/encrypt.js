@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const yggserver = require('yggdrasil').server({});
 const ursa=require("../ursa");
-const debug = require("../debug");
+const debug = require('debug')('minecraft-protocol');
 
 module.exports = function(client, options) {
   client.once('encryption_begin', onEncryptionKeyRequest);

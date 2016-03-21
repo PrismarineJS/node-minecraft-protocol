@@ -131,10 +131,10 @@ See [doc](doc/README.md)
 
 ## Debugging
 
-You can enable some protocol debugging output using `NODE_DEBUG` environment variable:
+You can enable some protocol debugging output using `DEBUG` environment variable:
 
 ```bash
-NODE_DEBUG="minecraft-protocol" node [...]
+DEBUG="minecraft-protocol" node [...]
 ```
 
 ## History

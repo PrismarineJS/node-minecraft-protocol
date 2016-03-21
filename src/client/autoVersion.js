@@ -1,5 +1,5 @@
 const ping = require('../ping');
-const debug = require('../debug');
+const debug = require('debug')('minecraft-protocol');
 const states = require('../states');
 const assert = require('assert');
 const minecraft_data = require('minecraft-data');
