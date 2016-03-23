@@ -1,5 +1,5 @@
 const EventEmitter = require('events').EventEmitter;
-const debug = require('./debug');
+const debug = require('debug')('minecraft-protocol');
 const compression = require('./transforms/compression');
 const framing = require('./transforms/framing');
 const crypto = require('crypto');
