@@ -1,5 +1,11 @@
 # History
 
+## 0.19.6
+
+* update mcwrap
+* use caret in dependencies
+* use debug package
+
 ## 0.19.5
 
 * check if e.field is defined when completing serializer/deserializer errors
