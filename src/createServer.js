@@ -37,6 +37,7 @@ function createServer(options) {
   server.maxPlayers = options['max-players'] || 20;
   server.playerCount = 0;
   server.onlineModeExceptions = {};
+  server.favicon = options.favicon || 0;
   server.on("connection", function(client) {
     client.once('set_protocol', onHandshake);
     client.once('login_start', onLogin);
