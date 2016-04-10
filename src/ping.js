@@ -1,16 +1,16 @@
-const net = require('net');
-const Client = require('./client');
-const states = require("./states");
-const tcp_dns = require('./client/tcp_dns');
+import net from 'net';
+import Client from './client';
+import states from "./states";
+import tcp_dns from './client/tcp_dns';
 
-module.exports = ping;
+export default ping;
 
 function ping(options, cb) {
   options.host = options.host || 'localhost';
   options.port = options.port || 25565;
   const optVersion = options.version || require("./version").defaultVersion;
   const mcData=require("minecraft-data")(optVersion);
-  const version = mcData.version;
+  const { version } = mcData;
   options.majorVersion = version.majorVersion;
   options.protocolVersion = version.version;
 

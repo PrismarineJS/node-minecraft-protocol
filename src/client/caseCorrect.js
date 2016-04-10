@@ -1,7 +1,7 @@
 const yggdrasil = require('yggdrasil')({});
-const UUID = require('uuid-1345');
+import UUID from 'uuid-1345';
 
-module.exports = function(client, options) {
+export default function(client, options) {
   const clientToken = options.clientToken || UUID.v4().toString();
   options.accessToken = null;
   options.haveCredentials = options.password != null || (clientToken != null && options.session != null);

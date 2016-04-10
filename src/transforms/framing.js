@@ -1,13 +1,13 @@
 const [readVarInt, writeVarInt, sizeOfVarInt] = require("protodef").types.varint;
-const Transform = require("readable-stream").Transform;
+import { Transform } from "readable-stream";
 
-module.exports.createSplitter = function() {
+export function createSplitter() {
   return new Splitter();
-};
+}
 
-module.exports.createFramer = function() {
+export function createFramer() {
   return new Framer();
-};
+}
 
 class Framer extends Transform {
   constructor() {

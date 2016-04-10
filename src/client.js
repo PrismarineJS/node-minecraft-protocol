@@ -1,12 +1,13 @@
-const EventEmitter = require('events').EventEmitter;
+import { EventEmitter } from 'events';
 const debug = require('debug')('minecraft-protocol');
-const compression = require('./transforms/compression');
-const framing = require('./transforms/framing');
-const crypto = require('crypto');
-const states = require("./states");
+import {createCompressor,createDecompressor} from './transforms/compression';
+import {createSplitter,createFramer} from './transforms/framing';
+import  {createCipheriv,createDecipheriv} from 'crypto';
+import states from "./states";
+import tcp_dns from './client/tcp_dns';
 
-const createSerializer=require("./transforms/serializer").createSerializer;
-const createDeserializer=require("./transforms/serializer").createDeserializer;
+import { createSerializer } from "./transforms/serializer";
+import { createDeserializer } from "./transforms/serializer";
 
 class Client extends EventEmitter
 {
@@ -15,12 +16,12 @@ class Client extends EventEmitter
     this.customPackets=customPackets;
     this.version=version;
     this.isServer = !!isServer;
-    this.splitter=framing.createSplitter();
+    this.splitter=createSplitter();
     this.setSerializer(states.HANDSHAKING);
     this.packetsToParse={};
     this.serializer;
     this.compressor=null;
-    this.framer=framing.createFramer();
+    this.framer=createFramer();
     this.cipher=null;
     this.decipher=null;
     this.decompressor=null;
@@ -47,8 +48,8 @@ class Client extends EventEmitter
 
 
   setSerializer(state) {
-    this.serializer = createSerializer({ isServer:this.isServer, version:this.version, state: state,customPackets:this.customPackets});
-    this.deserializer = createDeserializer({ isServer:this.isServer, version:this.version, state: state, packetsToParse:
+    this.serializer = createSerializer({ isServer:this.isServer, version:this.version, state,customPackets:this.customPackets});
+    this.deserializer = createDeserializer({ isServer:this.isServer, version:this.version, state, packetsToParse:
       this.packetsToParse,customPackets:this.customPackets});
 
     this.splitter.recognizeLegacyPing = state === states.HANDSHAKING;
@@ -94,11 +95,11 @@ class Client extends EventEmitter
       parsed.metadata.name=parsed.data.name;
       parsed.data=parsed.data.params;
       parsed.metadata.state=state;
-      debug("read packet " + state + "." + parsed.metadata.name);
+      debug(`read packet ${state}.${parsed.metadata.name}`);
       debug(parsed.data);
       this.emit('packet', parsed.data, parsed.metadata);
       this.emit(parsed.metadata.name, parsed.data, parsed.metadata);
-      this.emit('raw.' + parsed.metadata.name, parsed.buffer, parsed.metadata);
+      this.emit(`raw.${parsed.metadata.name}`, parsed.buffer, parsed.metadata);
       this.emit('raw', parsed.buffer, parsed.metadata);
     });
   }
@@ -192,11 +193,11 @@ class Client extends EventEmitter
   setEncryption(sharedSecret) {
     if (this.cipher != null)
       throw new Error("Set encryption twice !");
-    this.cipher = crypto.createCipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
+    this.cipher = createCipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
     this.cipher.on('error', (err) => this.emit('error', err));
     this.framer.unpipe(this.socket);
     this.framer.pipe(this.cipher).pipe(this.socket);
-    this.decipher = crypto.createDecipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
+    this.decipher = createDecipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
     this.decipher.on('error', (err) => this.emit('error', err));
     this.socket.unpipe(this.splitter);
     this.socket.pipe(this.decipher).pipe(this.splitter);
@@ -204,11 +205,11 @@ class Client extends EventEmitter
 
   setCompressionThreshold(threshold) {
     if (this.compressor == null) {
-      this.compressor = compression.createCompressor(threshold);
+      this.compressor = createCompressor(threshold);
       this.compressor.on('error', (err) => this.emit('error', err));
       this.serializer.unpipe(this.framer);
       this.serializer.pipe(this.compressor).pipe(this.framer);
-      this.decompressor = compression.createDecompressor(threshold);
+      this.decompressor = createDecompressor(threshold);
       this.decompressor.on('error', (err) => this.emit('error', err));
       this.splitter.unpipe(this.deserializer);
       this.splitter.pipe(this.decompressor).pipe(this.deserializer);
@@ -221,7 +222,7 @@ class Client extends EventEmitter
   write(name, params) {
     if(this.ended)
       return;
-    debug("writing packet " + this.state + "." + name);
+    debug(`writing packet ${this.state}.${name}`);
     debug(params);
     this.serializer.write({ name, params });
   }
@@ -239,9 +240,9 @@ class Client extends EventEmitter
   connect(port, host) {
     const options = {port, host};
     if (!this.options) this.options = options;
-    require('./client/tcp_dns')(this, options);
+    tcp_dns(this, options);
     options.connect(this);
   }
 }
 
-module.exports = Client;
+export default Client;

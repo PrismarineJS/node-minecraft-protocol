@@ -6,4 +6,4 @@ try {
   console.log("Your performance might be subpar. Please consider installing URSA");
   ursa = require("ursa-purejs");
 }
-module.exports=ursa;
+export default ursa;

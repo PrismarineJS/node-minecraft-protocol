@@ -1,13 +1,13 @@
-const ursa=require("./ursa");
-const crypto = require('crypto');
+import ursa from "./ursa";
+import crypto from 'crypto';
 const yggserver = require('yggdrasil').server({});
-const states = require("./states");
-const bufferEqual = require('buffer-equal');
-const Server = require('./server');
-const UUID = require('uuid-1345');
-const endianToggle = require('endian-toggle');
+import states from "./states";
+import bufferEqual from 'buffer-equal';
+import Server from './server';
+import UUID from 'uuid-1345';
+import endianToggle from 'endian-toggle';
 
-module.exports=createServer;
+export default createServer;
 
 function createServer(options) {
   options = options || {};
@@ -27,8 +27,7 @@ function createServer(options) {
   const enableKeepAlive = options.keepAlive == null ? true : options.keepAlive;
 
   const optVersion = options.version || require("./version").defaultVersion;
-  const mcData=require("minecraft-data")(optVersion);
-  const version = mcData.version;
+  const { version } = require("minecraft-data")(optVersion);
 
   const serverKey = ursa.generatePrivateKey(1024);
 
@@ -146,7 +145,7 @@ function createServer(options) {
 
         const responseBuffer = utf16be(responseString);
 
-        const length = responseString.length; // UCS2 characters, not bytes
+        const { length } = responseString; // UCS2 characters, not bytes
         const lengthBuffer = new Buffer(2);
         lengthBuffer.writeUInt16BE(length);
 
@@ -173,7 +172,7 @@ function createServer(options) {
         client.publicKey = new Buffer(publicKeyStr, 'base64');
         client.once('encryption_begin', onEncryptionKeyResponse);
         client.write('encryption_begin', {
-          serverId: serverId,
+          serverId,
           publicKey: client.publicKey,
           verifyToken: client.verifyToken
         });
@@ -193,7 +192,7 @@ function createServer(options) {
       }
       if(client.protocolVersion!=version.version)
       {
-        client.end("Wrong protocol version, expected: "+version.version+" and you are using: "+client.protocolVersion);
+        client.end(`Wrong protocol version, expected: ${version.version} and you are using: ${client.protocolVersion}`);
       }
     }
 
@@ -246,7 +245,7 @@ function createServer(options) {
 
     function nameToMcOfflineUUID(name)
     {
-      return (new UUID(javaUUID("OfflinePlayer:"+name))).toString();
+      return (new UUID(javaUUID(`OfflinePlayer:${name}`))).toString();
     }
 
     function loginClient() {

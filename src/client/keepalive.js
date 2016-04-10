@@ -1,4 +1,4 @@
-module.exports = function(client, options) {
+export default function(client, options) {
   const keepAlive = options.keepAlive == null ? true : options.keepAlive;
   if (!keepAlive) return;
 

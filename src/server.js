@@ -1,7 +1,7 @@
-const net = require('net');
-const EventEmitter = require('events').EventEmitter;
-const Client = require('./client');
-const states = require("./states");
+import net from 'net';
+import { EventEmitter } from 'events';
+import Client from './client';
+import states from "./states";
 
 class Server extends EventEmitter
 {
@@ -23,7 +23,7 @@ class Server extends EventEmitter
       const client = new Client(true,this.version,this.customPackets);
       client._end = client.end;
       client.end = function end(endReason) {
-        endReason='{"text":"'+endReason+'"}';
+        endReason=`{"text":"${endReason}"}`;
         if(client.state === states.PLAY) {
           client.write('kick_disconnect', {reason: endReason});
         } else if(client.state === states.LOGIN) {
@@ -60,4 +60,4 @@ class Server extends EventEmitter
   }
 }
 
-module.exports = Server;
+export default Server;
