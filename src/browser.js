@@ -1,12 +1,7 @@
-const Client = require('./client');
-const Server = require('./server');
-const serializer = require("./transforms/serializer");
+import Client from './client';
+import Server from './server';
+import { createSerializer, createDeserializer } from "./transforms/serializer";
+import states from "./states";
+import { supportedVersions } from "./version";
 
-module.exports = {
-  Client: Client,
-  Server: Server,
-  states: require("./states"),
-  createSerializer:serializer.createSerializer,
-  createDeserializer:serializer.createDeserializer,
-  supportedVersions:require("./version").supportedVersions
-};
+export { Client, Server, states, createSerializer, createDeserializer, supportedVersions };

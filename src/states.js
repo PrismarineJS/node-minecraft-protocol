@@ -5,4 +5,4 @@ const states = {
   "PLAY": "play"
 };
 
-module.exports=states;
+export default states;

@@ -1,6 +1,6 @@
-const states = require("../states");
+import states from "../states";
 
-module.exports = function(client, options) {
+export default function(client, options) {
   client.on('connect', onConnect);
 
   function onConnect() {

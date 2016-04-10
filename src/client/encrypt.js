@@ -1,9 +1,9 @@
-const crypto = require('crypto');
+import crypto from 'crypto';
 const yggserver = require('yggdrasil').server({});
-const ursa=require("../ursa");
+import ursa from "../ursa";
 const debug = require('debug')('minecraft-protocol');
 
-module.exports = function(client, options) {
+export default function(client, options) {
   client.once('encryption_begin', onEncryptionKeyRequest);
 
   function onEncryptionKeyRequest(packet) {

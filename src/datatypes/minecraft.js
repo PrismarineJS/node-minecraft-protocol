@@ -1,8 +1,8 @@
-const nbt = require('prismarine-nbt');
-const UUID = require('uuid-1345');
-const zlib = require('zlib');
+import nbt from 'prismarine-nbt';
+import UUID from 'uuid-1345';
+import zlib from 'zlib';
 
-module.exports = {
+const datatypes = {
   'UUID': [readUUID, writeUUID, 16],
   'nbt': [readNbt, writeNbt, sizeOfNbt],
   'optionalNbt':[readOptionalNbt,writeOptionalNbt,sizeOfOptionalNbt],
@@ -10,7 +10,10 @@ module.exports = {
   'restBuffer': [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
   'entityMetadataLoop': [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata]
 };
-var PartialReadError=require('protodef').utils.PartialReadError;
+
+export default datatypes;
+
+const { PartialReadError }=require('protodef').utils;
 
 function readUUID(buffer, offset) {
   if(offset+16>buffer.length)

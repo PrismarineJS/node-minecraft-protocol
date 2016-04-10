@@ -1,14 +1,14 @@
 const [readVarInt, writeVarInt, sizeOfVarInt] = require("protodef").types.varint;
-const zlib = require("zlib");
-const Transform = require("readable-stream").Transform;
+import zlib from "zlib";
+import { Transform } from "readable-stream";
 
-module.exports.createCompressor = function(threshold) {
+export function createCompressor(threshold) {
   return new Compressor(threshold);
-};
+}
 
-module.exports.createDecompressor = function(threshold) {
+export function createDecompressor(threshold) {
   return new Decompressor(threshold);
-};
+}
 
 class Compressor extends Transform {
   constructor(compressionThreshold = -1) {

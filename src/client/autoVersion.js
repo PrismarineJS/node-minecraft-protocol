@@ -1,10 +1,10 @@
-const ping = require('../ping');
+import ping from '../ping';
 const debug = require('debug')('minecraft-protocol');
-const states = require('../states');
-const assert = require('assert');
-const minecraft_data = require('minecraft-data');
+import states from '../states';
+import assert from 'assert';
+import minecraft_data from 'minecraft-data';
 
-module.exports = function(client, options) {
+export default function(client, options) {
   client.wait_connect = true; // don't let src/client/setProtocol proceed on socket 'connect' until 'connect_allowed'
   debug('pinging',options.host);
   const pingOptions = {host: options.host, port: options.port};

@@ -1,11 +1,11 @@
-const ProtoDef = require("protodef").ProtoDef;
-const Serializer = require("protodef").Serializer;
-const Parser = require("protodef").Parser;
+import { ProtoDef } from "protodef";
+import { Serializer } from "protodef";
+import { Parser } from "protodef";
 
-const minecraft = require("../datatypes/minecraft");
-const states = require("../states");
-const merge=require("lodash.merge");
-const get=require("lodash.get");
+import minecraft from "../datatypes/minecraft";
+import states from "../states";
+import merge from "lodash.merge";
+import get from "lodash.get";
 
 function recursiveAddTypes(protocol,protocolData,path)
 {
@@ -35,7 +35,4 @@ function createDeserializer({ state = states.HANDSHAKING, isServer = false,versi
   return new Parser(createProtocol(state,isServer ? "toServer" : "toClient",version,customPackets),"packet");
 }
 
-module.exports = {
-  createSerializer:createSerializer,
-  createDeserializer:createDeserializer
-};
+export { createSerializer, createDeserializer };
