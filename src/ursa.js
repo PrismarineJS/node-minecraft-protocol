@@ -1,3 +1,5 @@
+'use strict';
+
 let ursa;
 try {
   ursa = require("ursa");

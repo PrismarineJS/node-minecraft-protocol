@@ -1,3 +1,5 @@
+'use strict';
+
 const ping = require('../ping');
 const debug = require('debug')('minecraft-protocol');
 const states = require('../states');

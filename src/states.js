@@ -1,3 +1,5 @@
+'use strict';
+
 const states = {
   "HANDSHAKING": "handshaking",
   "STATUS": "status",
