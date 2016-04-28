@@ -1,3 +1,5 @@
+'use strict';
+
 const EventEmitter = require('events').EventEmitter;
 const debug = require('debug')('minecraft-protocol');
 const compression = require('./transforms/compression');

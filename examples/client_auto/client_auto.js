@@ -1,3 +1,5 @@
+'use strict';
+
 var mc = require('minecraft-protocol');
 
 if(process.argv.length < 4 || process.argv.length > 6) {

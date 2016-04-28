@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = function(client, options) {
   const keepAlive = options.keepAlive == null ? true : options.keepAlive;
   if (!keepAlive) return;

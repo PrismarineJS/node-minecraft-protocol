@@ -1,3 +1,5 @@
+'use strict';
+
 const Client = require('./client');
 const Server = require('./server');
 const serializer = require("./transforms/serializer");

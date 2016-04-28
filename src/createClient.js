@@ -1,6 +1,7 @@
+'use strict';
+
 const Client = require('./client');
 const assert = require('assert');
-
 
 const encrypt = require('./client/encrypt');
 const keepalive = require('./client/keepalive');

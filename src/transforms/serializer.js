@@ -1,3 +1,5 @@
+'use strict';
+
 const ProtoDef = require("protodef").ProtoDef;
 const Serializer = require("protodef").Serializer;
 const Parser = require("protodef").Parser;
