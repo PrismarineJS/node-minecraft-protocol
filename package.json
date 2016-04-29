@@ -50,7 +50,7 @@
     "minecraft-data": "^1.2.6",
     "prismarine-nbt": "^1.0.0",
     "protodef": "^1.1.2",
-    "readable-stream": "^2.0.5",
+    "readable-stream": "^2.1.0",
     "ursa-purejs": "^0.0.3",
     "uuid-1345": "^0.99.6",
     "yggdrasil": "^0.1.0"
