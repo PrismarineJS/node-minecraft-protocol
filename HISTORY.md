@@ -1,5 +1,13 @@
 # History
 
+## 1.0.0
+
+* update prismarine-nbt
+* fixed options.favicon in createServer
+* enable strict mode
+* update to minecraft-data 2.0.0
+* finally move to a major version
+
 ## 0.19.6
 
 * update mcwrap
