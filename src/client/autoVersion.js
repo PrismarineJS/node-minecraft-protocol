@@ -33,7 +33,7 @@ module.exports = function(client, options) {
       minecraftVersion = brandedMinecraftVersion;
     }
 
-    const versionInfo = minecraft_data.versionsByMinecraftVersion[minecraftVersion];
+    const versionInfo = minecraft_data.versionsByMinecraftVersion[minecraftVersion]["pc"];
     if (!versionInfo) throw new Error(`unsupported/unknown protocol version: ${protocolVersion}, update minecraft-data`);
 
     options.version = minecraftVersion;
