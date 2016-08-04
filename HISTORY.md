@@ -1,5 +1,9 @@
 # History
 
+## 1.0.1
+
+* a small fix to autoversion
+
 ## 1.0.0
 
 * update prismarine-nbt
