@@ -11,6 +11,7 @@ const setProtocol = require('./client/setProtocol');
 const play = require('./client/play');
 const tcp_dns = require('./client/tcp_dns');
 const autoVersion = require('./client/autoVersion');
+const pluginChannels = require('./client/pluginChannels');
 
 module.exports=createClient;
 
@@ -36,6 +37,7 @@ function createClient(options) {
   encrypt(client, options);
   play(client, options);
   compress(client, options);
+  pluginChannels(client, options);
 
   return client;
 }
