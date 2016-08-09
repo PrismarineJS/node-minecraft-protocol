@@ -1,6 +1,6 @@
 {
   "name": "minecraft-protocol",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Parse and serialize minecraft packets, plus authentication and encryption.",
   "main": "index.js",
   "repository": {
@@ -36,7 +36,7 @@
     "gulp-sourcemaps": "^1.6.0",
     "intelli-espower-loader": "^1.0.0",
     "minecraft-wrap": "^1.0.0",
-    "mocha": "^2.4.5",
+    "mocha": "^3.0.2",
     "power-assert": "^1.0.0",
     "require-self": "^0.1.0",
     "source-map-support": "^0.4.0"
