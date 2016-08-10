@@ -8,11 +8,7 @@ var server = mc.createServer({
   version: '1.10'
 });
 
-
-
 server.on('login', function(client) {
-  client.registerChannel('MC|Brand',['string',[]]);
-  client.on('MC|Brand',console.log);
   client.write('login', {
     entityId: client.id,
     levelType: 'default',
@@ -22,6 +18,8 @@ server.on('login', function(client) {
     maxPlayers: server.maxPlayers,
     reducedDebugInfo: false
   });
+  client.registerChannel('CUSTOM|ChannelOne',['i32',[]],true);
+  client.registerChannel('CUSTOM|ChannelTwo',['i32',[]],true);
   client.write('position', {
     x: 0,
     y: 1.62,
@@ -30,5 +28,6 @@ server.on('login', function(client) {
     pitch: 0,
     flags: 0x00
   });
-  client.writeChannel('MC|Brand', "vanilla");
+  client.writeChannel('CUSTOM|ChannelTwo', 10);
+  client.on('CUSTOM|ChannelOne',console.log);
 });

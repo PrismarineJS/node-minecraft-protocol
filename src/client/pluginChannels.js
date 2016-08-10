@@ -11,15 +11,24 @@ module.exports = function(client, options) {
   client.unregisterChannel = unregisterChannel;
   client.writeChannel = writeChannel;
 
+  client.registerChannel("REGISTER",["string",[]]);
+  client.registerChannel("UNREGISTER",["string",[]]);
 
-  function registerChannel(name, parser) {
+
+  function registerChannel(name, parser, custom) {
+    if(custom) {
+      client.writeChannel("REGISTER",name);
+    }
     if (parser) proto.addType(name, parser);
     channels.push(name);
     if (channels.length === 1)
       client.on('custom_payload', onCustomPayload);
   }
 
-  function unregisterChannel(channel) {
+  function unregisterChannel(channel, custom) {
+    if(custom) {
+      client.writeChannel("UNREGISTER",channel);
+    }
     var index = channels.find(function(name) {
       return channel === name;
     });
