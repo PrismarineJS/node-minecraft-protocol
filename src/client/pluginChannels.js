@@ -2,14 +2,16 @@ var ProtoDef = require('protodef').ProtoDef;
 var minecraft = require('../datatypes/minecraft');
 
 module.exports = function(client, options) {
-  var mcdata = require('minecraft-data')(options.version);
+  var mcdata = require('minecraft-data')(options.version || require("../version").defaultVersion);
   var channels = [];
   var proto = new ProtoDef();
   proto.addTypes(mcdata.protocol.types);
   proto.addTypes(minecraft);
   client.registerChannel = registerChannel;
   client.unregisterChannel = unregisterChannel;
-  return client;
+  client.writeChannel = writeChannel;
+
+
   function registerChannel(name, parser) {
     if (parser) proto.addType(name, parser);
     channels.push(name);
@@ -38,6 +40,13 @@ module.exports = function(client, options) {
         packet.data = proto.parsePacketBuffer(channel, packet.data).data;
       client.emit(channel, packet.data);
     }
+  }
+
+  function writeChannel(channel,params) {
+    client.write("custom_payload",{
+        channel:channel,
+        data:proto.createPacketBuffer(channel,params)
+      });
   }
 };
 
