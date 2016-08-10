@@ -8,6 +8,7 @@ const bufferEqual = require('buffer-equal');
 const Server = require('./server');
 const UUID = require('uuid-1345');
 const endianToggle = require('endian-toggle');
+const pluginChannels = require('./client/pluginChannels');
 
 module.exports=createServer;
 
@@ -40,6 +41,7 @@ function createServer(options) {
   server.playerCount = 0;
   server.onlineModeExceptions = {};
   server.favicon = options.favicon || undefined;
+  
   server.on("connection", function(client) {
     client.once('set_protocol', onHandshake);
     client.once('login_start', onLogin);
@@ -272,6 +274,7 @@ function createServer(options) {
       client.once('end', function() {
         server.playerCount -= 1;
       });
+      pluginChannels(client, options);
       server.emit('login', client);
     }
   });
