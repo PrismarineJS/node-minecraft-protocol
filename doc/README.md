@@ -82,6 +82,10 @@ Returns a `Client` instance and perform login.
 Create a new client, if `isServer` is true then it is a server-side client, otherwise it's a client-side client.
 Takes a minecraft `version` as second argument.
 
+### client.write(name, params)
+
+write a packet
+
 ### client.state
 
 The internal state that is used to figure out which protocol state we are in during
@@ -136,6 +140,23 @@ parameters.
 ### per-packet events
 
 Check out the [minecraft-data docs](https://prismarinejs.github.io/minecraft-data/?v=1.8&d=protocol) to know the event names and data field names.
+
+
+### client.writeChannel(channel, params)
+
+write a packet to a plugin channel
+
+
+### client.registerChannel(name, typeDefinition, [custom])
+
+Register a channel `name` using the protodef `typeDefinition` and sending the register packet if `custom` is true.
+
+Start emitting channel events of the given name on the client object.
+
+### client.unregisterChannel(name, [custom])
+
+Unregister a channel `name` and send the unregister packet if `custom` is true.
+
 
 ## Not Immediately Obvious Data Type Formats
 
