@@ -86,6 +86,10 @@ Takes a minecraft `version` as second argument.
 
 write a packet
 
+### client.end(reason)
+
+ends the connection with `reason`
+
 ### client.state
 
 The internal state that is used to figure out which protocol state we are in during
