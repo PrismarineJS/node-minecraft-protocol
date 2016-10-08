@@ -1,5 +1,10 @@
 # History
 
+## 1.1.0
+
+* added plugin channel support (thanks @plexigras)
+* add doc for client.end
+
 ## 1.0.1
 
 * a small fix to autoversion
