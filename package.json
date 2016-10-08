@@ -47,7 +47,7 @@
     "endian-toggle": "^0.0.0",
     "lodash.get": "^4.1.2",
     "lodash.merge": "^4.3.0",
-    "minecraft-data": "^2.5.1",
+    "minecraft-data": "^2.7.0",
     "prismarine-nbt": "^1.0.0",
     "protodef": "^1.2.3",
     "readable-stream": "^2.0.5",
