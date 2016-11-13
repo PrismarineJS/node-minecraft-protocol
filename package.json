@@ -29,7 +29,7 @@
   "browser": "browser.js",
   "devDependencies": {
     "babel-preset-es2015": "^6.3.13",
-    "espower-loader": "^1.0.0",
+    "espower-loader": "^1.2.0",
     "gulp": "^3.9.0",
     "gulp-babel": "^6.1.1",
     "gulp-plumber": "^1.0.1",
