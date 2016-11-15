@@ -53,7 +53,7 @@
     "readable-stream": "^2.0.5",
     "ursa-purejs": "^0.0.3",
     "uuid-1345": "^0.99.6",
-    "yggdrasil": "^0.1.0"
+    "yggdrasil": "^0.2.0"
   },
   "optionalDependencies": {
     "ursa": "^0.9.1"

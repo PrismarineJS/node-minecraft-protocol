@@ -21,11 +21,11 @@ module.exports = function(client, options) {
     };
 
     if (options.session) {
-      yggdrasil.validate(options.session.accessToken, function(ok) {
-        if (ok)
+      yggdrasil.validate(options.session.accessToken, function(err) {
+        if (!err)
           cb(null, options.session);
         else
-          yggdrasil.refresh(options.session.accessToken, options.session.clientToken, function(err, _, data) {
+          yggdrasil.refresh(options.session.accessToken, options.session.clientToken, function(err, data) {
             cb(err, data);
           });
       });
