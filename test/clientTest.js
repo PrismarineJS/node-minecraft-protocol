@@ -17,7 +17,7 @@ mc.supportedVersions.forEach(function(supportedVersion) {
   var version = mcData.version;
   var MC_SERVER_JAR_DIR = process.env.MC_SERVER_JAR_DIR;
   var MC_SERVER_JAR = MC_SERVER_JAR_DIR + "/minecraft_server." + version.minecraftVersion + ".jar";
-  var wrap = new Wrap(MC_SERVER_JAR, MC_SERVER_PATH);
+  var wrap = new Wrap(MC_SERVER_JAR, MC_SERVER_PATH+"_"+supportedVersion);
 
   describe("client " + version.minecraftVersion, function() {
     this.timeout(10 * 60 * 1000);
