@@ -7,11 +7,22 @@ var MC_SERVER_PATH = path.join(__dirname, 'server');
 
 var Wrap = require('minecraft-wrap').Wrap;
 
+var nodeIndex=process.env.CIRCLE_NODE_INDEX;
+var nodeTotal=process.env.CIRCLE_NODE_TOTAL;
+var parallel=nodeIndex && nodeTotal;
+var versionsByNode,firstVersion,lastVersion;
 
+if(parallel) {
+  versionsByNode=Math.floor(mc.supportedVersions.length/nodeTotal);
+  firstVersion=nodeIndex*versionsByNode;
+  lastVersion=(nodeIndex+1)*versionsByNode-1+(nodeIndex==(nodeTotal-1) ? (mc.supportedVersions.length-versionsByNode*nodeTotal) : 0);
+}
 var download = require('minecraft-wrap').download;
 
+mc.supportedVersions.forEach(function(supportedVersion,i) {
+  if(parallel && !(i>=firstVersion && i<=lastVersion))
+    return;
 
-mc.supportedVersions.forEach(function(supportedVersion) {
   var PORT=Math.round(30000+Math.random()*20000);
   var mcData = require("minecraft-data")(supportedVersion);
   var version = mcData.version;
