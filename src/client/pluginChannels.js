@@ -7,12 +7,14 @@ module.exports = function(client, options) {
   var proto = new ProtoDef();
   proto.addTypes(mcdata.protocol.types);
   proto.addTypes(minecraft);
+  proto.addTypes({'registerarr': [readDumbArr, writeDumbArr, sizeOfDumbArr]});
+
   client.registerChannel = registerChannel;
   client.unregisterChannel = unregisterChannel;
   client.writeChannel = writeChannel;
 
-  client.registerChannel("REGISTER",["string",[]]);
-  client.registerChannel("UNREGISTER",["string",[]]);
+  client.registerChannel("REGISTER",["registerarr",[]]);
+  client.registerChannel("UNREGISTER",["registerarr",[]]);
 
 
   function registerChannel(name, parser, custom) {
@@ -56,6 +58,36 @@ module.exports = function(client, options) {
         channel:channel,
         data:proto.createPacketBuffer(channel,params)
       });
+  }
+
+  function readDumbArr(buf, offset) {
+    var ret = {
+      value: [],
+      size: 0
+    };
+    let results;
+    while (offset < buf.length) {
+      if (buf.indexOf(0x0, offset) == -1)
+        results = this.read(buf, offset, "restBuffer", {});
+      else
+        results = this.read(buf, offset, "cstring", {});
+      ret.size += results.size;
+      ret.value.push(results.value.toString());
+      offset += results.size;
+    }
+    return ret;
+  }
+
+  function writeDumbArr(value, buf, offset) {
+    // TODO: Remove trailing \0
+    value.forEach(function(v) {
+      offset += this.write(v, buf, offset, "cstring", {});
+    });
+    return offset;
+  }
+
+  function sizeOfDumbArr(value) {
+    return value.reduce((acc, v) => acc + this.sizeOf(v, "cstring", {}), 0);
   }
 };
 
