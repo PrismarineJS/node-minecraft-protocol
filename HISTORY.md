@@ -1,5 +1,10 @@
 # History
 
+## 1.1.1
+
+* update to yggdrasil 0.2.0
+* Fix the REGISTER channel type
+
 ## 1.1.0
 
 * added plugin channel support (thanks @plexigras)

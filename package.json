@@ -1,6 +1,6 @@
 {
   "name": "minecraft-protocol",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Parse and serialize minecraft packets, plus authentication and encryption.",
   "main": "index.js",
   "repository": {
