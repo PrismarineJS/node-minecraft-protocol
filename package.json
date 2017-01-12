@@ -33,7 +33,7 @@
     "gulp": "^3.9.0",
     "gulp-babel": "^6.1.1",
     "gulp-plumber": "^1.0.1",
-    "gulp-sourcemaps": "^2.0.0",
+    "gulp-sourcemaps": "^2.4.0",
     "intelli-espower-loader": "^1.0.0",
     "minecraft-wrap": "^1.0.0",
     "mocha": "^3.0.2",
