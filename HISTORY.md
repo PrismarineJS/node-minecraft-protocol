@@ -1,5 +1,9 @@
 # History
 
+## 1.1.2 (UNRELEASED)
+
+* Added a errorHandler option to createServer.
+
 ## 1.1.1
 
 * update to yggdrasil 0.2.0

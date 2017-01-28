@@ -19,6 +19,9 @@ function createServer(options) {
     options['server-port'] != null ?
       options['server-port'] :
       25565;
+  const clientErrorHandler = options.errorHandler || function(client, err) {
+    client.end();
+  };
   const host = options.host || '0.0.0.0';
   const kickTimeout = options.kickTimeout || 30 * 1000;
   const checkTimeoutInterval = options.checkTimeoutInterval || 4 * 1000;
@@ -47,6 +50,9 @@ function createServer(options) {
     client.once('login_start', onLogin);
     client.once('ping_start', onPing);
     client.once('legacy_server_list_ping', onLegacyPing);
+    client.on('error', function(err) {
+      clientErrorHandler(client, err);
+    });
     client.on('end', onEnd);
 
     let keepAlive = false;
