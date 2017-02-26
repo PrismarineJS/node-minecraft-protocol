@@ -18,12 +18,18 @@ function recursiveAddTypes(protocol,protocolData,path)
   recursiveAddTypes(protocol,get(protocolData,path.shift()),path);
 }
 
+const protocols={};
+
 function createProtocol(state,direction,version,customPackets)
 {
+  const key=state+";"+direction+";"+version;
+  if(protocols[key])
+    return protocols[key];
   const proto = new ProtoDef();
   proto.addTypes(minecraft);
   const mcData=require("minecraft-data")(version);
   recursiveAddTypes(proto,merge(mcData.protocol,get(customPackets,[mcData.version.majorVersion])),[state,direction]);
+  protocols[key]=proto;
   return proto;
 }
 

@@ -7,7 +7,7 @@ module.exports = function(client, options) {
   var proto = new ProtoDef();
   proto.addTypes(mcdata.protocol.types);
   proto.addTypes(minecraft);
-  proto.addTypes({'registerarr': [readDumbArr, writeDumbArr, sizeOfDumbArr]});
+  proto.addType('registerarr',[readDumbArr, writeDumbArr, sizeOfDumbArr]);
 
   client.registerChannel = registerChannel;
   client.unregisterChannel = unregisterChannel;
