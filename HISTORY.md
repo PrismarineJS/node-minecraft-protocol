@@ -1,5 +1,9 @@
 # History
 
+## 1.1.2
+
+* use last protodef
+
 ## 1.1.1
 
 * update to yggdrasil 0.2.0
