@@ -1,5 +1,9 @@
 # History
 
+## 1.1.3
+
+* requires node 6
+
 ## 1.1.2
 
 * use last protodef
