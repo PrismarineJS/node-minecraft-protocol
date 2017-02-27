@@ -1,14 +1,14 @@
 {
   "name": "minecraft-protocol",
-  "version": "1.1.1",
+  "version": "1.1.3",
   "description": "Parse and serialize minecraft packets, plus authentication and encryption.",
-  "main": "index.js",
+  "main": "src/index.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/PrismarineJS/node-minecraft-protocol.git"
   },
   "scripts": {
-    "prepublish": "gulp && require-self",
+    "prepublish": "require-self",
     "test": "mocha --recursive --reporter spec"
   },
   "keywords": [
@@ -24,22 +24,16 @@
   "author": "Andrew Kelley",
   "license": "BSD-3-Clause",
   "engines": {
-    "node": ">=4"
+    "node": ">=6"
   },
-  "browser": "browser.js",
+  "browser": "src/browser.js",
   "devDependencies": {
-    "babel-preset-es2015": "^6.3.13",
     "espower-loader": "^1.0.0",
-    "gulp": "^3.9.0",
-    "gulp-babel": "^6.1.1",
-    "gulp-plumber": "^1.0.1",
-    "gulp-sourcemaps": "^2.0.0",
     "intelli-espower-loader": "^1.0.0",
     "minecraft-wrap": "^1.0.0",
     "mocha": "^3.0.2",
     "power-assert": "^1.0.0",
-    "require-self": "^0.1.0",
-    "source-map-support": "^0.4.0"
+    "require-self": "^0.1.0"
   },
   "dependencies": {
     "buffer-equal": "^1.0.0",
@@ -49,7 +43,7 @@
     "lodash.merge": "^4.3.0",
     "minecraft-data": "^2.11.0",
     "prismarine-nbt": "^1.0.0",
-    "protodef": "^1.2.3",
+    "protodef": "^1.3.0",
     "readable-stream": "^2.0.5",
     "ursa-purejs": "^0.0.3",
     "uuid-1345": "^0.99.6",

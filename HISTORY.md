@@ -1,8 +1,16 @@
 # History
 
-## 1.1.2 (UNRELEASED)
+## 1.1.4 (UNRELEASED)
 
 * Added a errorHandler option to createServer.
+
+## 1.1.3
+
+* requires node 6
+
+## 1.1.2
+
+* use last protodef
 
 ## 1.1.1
 
