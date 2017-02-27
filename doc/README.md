@@ -19,6 +19,8 @@ automatically logged in and validated against mojang's auth.
  * keepAlive : send keep alive packets : default to true
  * version : 1.8 or 1.9 : default to 1.8
  * customPackets (optional) : an object index by version/state/direction/name, see client_custom_packet for an example
+ * errorHandler : A way to override the default error handler for client errors. A function that takes a Client and an error.
+ The default kicks the client.
 
 ## mc.Server(version,[customPackets])
 

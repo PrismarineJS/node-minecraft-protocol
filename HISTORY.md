@@ -1,5 +1,9 @@
 # History
 
+## 1.1.4 (UNRELEASED)
+
+* Added a errorHandler option to createServer.
+
 ## 1.1.3
 
 * requires node 6
