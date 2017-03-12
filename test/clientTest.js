@@ -221,5 +221,29 @@ mc.supportedVersions.forEach(function(supportedVersion) {
         });
       });
     });
+
+    it("produce a decent error when connecting with the wrong version",function(done) {
+      wrap.startServer({
+        'online-mode': 'false',
+        'server-port':PORT
+      }, function(err) {
+        if(err)
+          return done(err);
+        var client = mc.createClient({
+          username: 'Player',
+          version: version.minecraftVersion=="1.8.8" ? "1.11.2" : "1.8.8",
+          port:PORT
+        });
+        client.once("error",function(err) {
+          if(err.message.startsWith("This server is version")) {
+            console.log("Correctly got an error for wrong version : "+err.message);
+            done();
+          }
+          else {
+            done(err);
+          }
+        });
+      })
+    })
   });
 });

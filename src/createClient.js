@@ -12,6 +12,7 @@ const play = require('./client/play');
 const tcp_dns = require('./client/tcp_dns');
 const autoVersion = require('./client/autoVersion');
 const pluginChannels = require('./client/pluginChannels');
+const versionChecking = require('./client/versionChecking');
 
 module.exports=createClient;
 
@@ -38,6 +39,7 @@ function createClient(options) {
   play(client, options);
   compress(client, options);
   pluginChannels(client, options);
+  versionChecking(client,options);
 
   return client;
 }
