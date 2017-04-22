@@ -9,15 +9,6 @@ const states = require("../states");
 const merge=require("lodash.merge");
 const get=require("lodash.get");
 
-function recursiveAddTypes(protocol,protocolData,path)
-{
-  if(protocolData===undefined)
-    return;
-  if(protocolData.types)
-    protocol.addTypes(protocolData.types);
-  recursiveAddTypes(protocol,get(protocolData,path.shift()),path);
-}
-
 const protocols={};
 
 function createProtocol(state,direction,version,customPackets)
@@ -25,10 +16,10 @@ function createProtocol(state,direction,version,customPackets)
   const key=state+";"+direction+";"+version;
   if(protocols[key])
     return protocols[key];
-  const proto = new ProtoDef();
+  const proto = new ProtoDef(false);
   proto.addTypes(minecraft);
   const mcData=require("minecraft-data")(version);
-  recursiveAddTypes(proto,merge(mcData.protocol,get(customPackets,[mcData.version.majorVersion])),[state,direction]);
+  proto.addProtocol(merge(mcData.protocol,get(customPackets,[mcData.version.majorVersion])),[state,direction]);
   protocols[key]=proto;
   return proto;
 }
