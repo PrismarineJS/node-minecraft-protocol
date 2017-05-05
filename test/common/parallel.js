@@ -1,7 +1,9 @@
-var nodeIndex=process.env.CIRCLE_NODE_INDEX;
-var nodeTotal=process.env.CIRCLE_NODE_TOTAL;
-var parallel=nodeIndex && nodeTotal;
+const nodeIndex=process.env.CIRCLE_NODE_INDEX;
+const nodeTotal=process.env.CIRCLE_NODE_TOTAL;
+const parallel=nodeIndex && nodeTotal;
 const {firstVersion,lastVersion}=parallel ? testedRange(nodeIndex,nodeTotal,mc.supportedVersions.length) : {firstVersion:0,lastVersion:mc.supportedVersions.length-1};
+const mc = require("../../");
+
 
 // expected values :
 // (0,4,10) -> (0,2)
