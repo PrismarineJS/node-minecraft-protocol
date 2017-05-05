@@ -1,7 +1,6 @@
 const nodeIndex=process.env.CIRCLE_NODE_INDEX;
 const nodeTotal=process.env.CIRCLE_NODE_TOTAL;
 const parallel=nodeIndex && nodeTotal;
-const {firstVersion,lastVersion}=parallel ? testedRange(nodeIndex,nodeTotal,mc.supportedVersions.length) : {firstVersion:0,lastVersion:mc.supportedVersions.length-1};
 const mc = require("../../");
 
 
@@ -17,5 +16,7 @@ function testedRange(nodeIndex,nodeTotal,numberOfVersions) {
 
   return {firstVersion:nodeIndex*nbFirsts,lastVersion:(nodeIndex+1)*nbFirsts-1};
 }
+
+const {firstVersion,lastVersion}=parallel ? testedRange(nodeIndex,nodeTotal,mc.supportedVersions.length) : {firstVersion:0,lastVersion:mc.supportedVersions.length-1};
 
 module.exports={firstVersion,lastVersion};
