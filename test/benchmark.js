@@ -13,6 +13,7 @@ var testDataWrite = [
 
 
 const {firstVersion,lastVersion}=require("./common/parallel");
+console.log({firstVersion,lastVersion});
 
 mc.supportedVersions.forEach(function(supportedVersion,i){
   if(!(i>=firstVersion && i<=lastVersion))
