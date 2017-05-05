@@ -16,6 +16,7 @@ if(parallel) {
   versionsByNode=Math.floor(mc.supportedVersions.length/nodeTotal);
   firstVersion=nodeIndex*versionsByNode;
   lastVersion=(nodeIndex+1)*versionsByNode-1+(nodeIndex==(nodeTotal-1) ? (mc.supportedVersions.length-versionsByNode*nodeTotal) : 0);
+  console.log("env",process.env);
   console.log("nodeIndex",nodeIndex);
   console.log("nodeTotal",nodeTotal);
   console.log("firstVersion",firstVersion);
