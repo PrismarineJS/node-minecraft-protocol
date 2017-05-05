@@ -7,27 +7,13 @@ var MC_SERVER_PATH = path.join(__dirname, 'server');
 
 var Wrap = require('minecraft-wrap').Wrap;
 
-var nodeIndex=process.env.CIRCLE_NODE_INDEX;
-var nodeTotal=process.env.CIRCLE_NODE_TOTAL;
-var parallel=nodeIndex && nodeTotal;
-var versionsByNode,firstVersion,lastVersion;
+const {firstVersion,lastVersion}=require("./common/parallel");
 
-if(parallel) {
-  versionsByNode=Math.floor(mc.supportedVersions.length/nodeTotal);
-  firstVersion=nodeIndex*versionsByNode;
-  lastVersion=(nodeIndex+1)*versionsByNode-1+(nodeIndex==(nodeTotal-1) ? (mc.supportedVersions.length-versionsByNode*nodeTotal) : 0);
-  console.log("env",process.env);
-  console.log("nodeIndex",nodeIndex);
-  console.log("nodeTotal",nodeTotal);
-  console.log("firstVersion",firstVersion);
-  console.log("lastVersion",lastVersion);
-  console.log("versionsByNode",versionsByNode);
-  console.log("parallel",parallel);
-}
+
 var download = require('minecraft-wrap').download;
 
 mc.supportedVersions.forEach(function(supportedVersion,i) {
-  if(parallel && !(i>=firstVersion && i<=lastVersion))
+  if(!(i>=firstVersion && i<=lastVersion))
     return;
 
   var PORT=Math.round(30000+Math.random()*20000);

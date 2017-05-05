@@ -11,7 +11,13 @@ var testDataWrite = [
   // TODO: add more packets for better quality data
 ];
 
-mc.supportedVersions.forEach(function(supportedVersion){
+
+const {firstVersion,lastVersion}=require("./common/parallel");
+
+mc.supportedVersions.forEach(function(supportedVersion,i){
+  if(!(i>=firstVersion && i<=lastVersion))
+    return;
+  
   var mcData=require("minecraft-data")(supportedVersion);
   var version=mcData.version;
   describe("benchmark "+version.minecraftVersion,function(){

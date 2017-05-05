@@ -1,7 +1,12 @@
 var mc = require('../');
 var assert = require('power-assert');
 
-mc.supportedVersions.forEach(function(supportedVersion){
+const {firstVersion,lastVersion}=require("./common/parallel");
+
+mc.supportedVersions.forEach(function(supportedVersion,i){
+  if(!(i>=firstVersion && i<=lastVersion))
+    return;
+  
   var PORT=Math.round(30000+Math.random()*20000);
   var mcData=require("minecraft-data")(supportedVersion);
   var version=mcData.version;
