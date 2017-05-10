@@ -1,6 +1,6 @@
 const nodeIndex=parseInt(process.env.CIRCLE_NODE_INDEX);
 const nodeTotal=parseInt(process.env.CIRCLE_NODE_TOTAL);
-const parallel=nodeIndex && nodeTotal;
+const parallel=process.env.CIRCLE_NODE_INDEX!==undefined && process.env.CIRCLE_NODE_TOTAL!==undefined;
 const mc = require("../../");
 
 
