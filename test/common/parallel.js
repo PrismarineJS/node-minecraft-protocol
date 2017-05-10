@@ -10,7 +10,7 @@ const mc = require("../../");
 // (2,4,10) -> (6,8)
 // (3,4,10) -> (9,9)
 function testedRange(nodeIndex,nodeTotal,numberOfVersions) {
-  const nbFirsts=Math.floor(numberOfVersions/nodeTotal);
+  const nbFirsts=Math.ceil(numberOfVersions/nodeTotal);
   if(nodeIndex==(nodeTotal-1))
     return {firstVersion:nbFirsts*nodeIndex,lastVersion:numberOfVersions-1};
 
