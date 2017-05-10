@@ -142,8 +142,12 @@ function getValue(_type, packet) {
     throw new Error("No value for type " + fieldInfo.type);
 }
 
+const {firstVersion,lastVersion}=require("./common/parallel");
 
-mc.supportedVersions.forEach(function(supportedVersion){
+mc.supportedVersions.forEach(function(supportedVersion,i){
+  if(!(i>=firstVersion && i<=lastVersion))
+    return;
+  
   var PORT=Math.round(30000+Math.random()*20000);
   var mcData=require("minecraft-data")(supportedVersion);
   var version=mcData.version;

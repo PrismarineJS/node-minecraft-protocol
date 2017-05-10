@@ -7,11 +7,15 @@ var MC_SERVER_PATH = path.join(__dirname, 'server');
 
 var Wrap = require('minecraft-wrap').Wrap;
 
+const {firstVersion,lastVersion}=require("./common/parallel");
+
 
 var download = require('minecraft-wrap').download;
 
+mc.supportedVersions.forEach(function(supportedVersion,i) {
+  if(!(i>=firstVersion && i<=lastVersion))
+    return;
 
-mc.supportedVersions.forEach(function(supportedVersion) {
   var PORT=Math.round(30000+Math.random()*20000);
   var mcData = require("minecraft-data")(supportedVersion);
   var version = mcData.version;
