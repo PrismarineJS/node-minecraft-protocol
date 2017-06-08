@@ -1,7 +1,9 @@
 # History
 
-## 1.1.4 (UNRELEASED)
+## 1.2.0
 
+* some 1.12 snapshots support
+* disable validator for protocol (use too much memory and cpu, and already validated in mcdata tests)
 * Added a errorHandler option to createServer.
 
 ## 1.1.3
