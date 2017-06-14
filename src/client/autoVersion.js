@@ -22,19 +22,22 @@ module.exports = function(client, options) {
     // The version string is interpreted by https://github.com/PrismarineJS/node-minecraft-data
     const brandedMinecraftVersion = response.version.name;        // 1.8.9, 1.7.10
     const protocolVersion = response.version.protocol;//    47,      5
-
-    debug(`Server version: ${brandedMinecraftVersion}, protocol: ${protocolVersion}`);
-
-    let minecraftVersion;
-    if (brandedMinecraftVersion.indexOf(' ') !== -1) {
-      // Spigot and Glowstone++ prepend their name; strip it off
-      minecraftVersion = brandedMinecraftVersion.split(' ')[1];
-    } else {
-      minecraftVersion = brandedMinecraftVersion;
+    let versions = brandedMinecraftVersion.match(/((\d+\.)+\d+)/g).map(function (version) {
+      return minecraft_data.versionsByMinecraftVersion["pc"][version]
+    }).filter(function (info) {
+      return info
+    }).sort(function (a, b) {
+      return b.version - a.version
+    })
+    if (versions.length === 0) {
+      versions = minecraft_data.postNettyVersionsByProtocolVersion["pc"][protocolVersion];
+      if (!versions) {
+        throw new Error(`unsupported/unknown protocol version: ${protocolVersion}, update minecraft-data`);
+      }
     }
+    const minecraftVersion = versions[0].minecraftVersion;
 
-    const versionInfo = minecraft_data.versionsByMinecraftVersion["pc"][minecraftVersion];
-    if (!versionInfo) throw new Error(`unsupported/unknown protocol version: ${protocolVersion}, update minecraft-data`);
+    debug(`Server version: ${minecraftVersion}, protocol: ${protocolVersion}`);
 
     options.version = minecraftVersion;
     options.protocolVersion = protocolVersion;
