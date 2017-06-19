@@ -182,7 +182,7 @@ mc.supportedVersions.forEach(function(supportedVersion,i) {
         });
         var gotKicked = false;
         client.on('disconnect', function(packet) {
-          assert.ok(packet.reason.indexOf('"Failed to verify username!"') != -1);
+          assert.ok(packet.reason.indexOf('"Failed to verify username!"') != -1 || packet.reason.indexOf('multiplayer.disconnect.unverified_username') != -1);
           gotKicked = true;
         });
         client.on('end', function() {
