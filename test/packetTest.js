@@ -17,7 +17,7 @@ var values = {
   'i32': 123456,
   'i16': -123,
   'u16': 123,
-  'varint': 25992,
+  'varint': 1,
   'i8': -10,
   'u8': 8,
   'string': "hi hi this is my client string",
@@ -42,7 +42,15 @@ var values = {
       "..": context
     };
     Object.keys(typeArgs).forEach(function(index){
-      results[typeArgs[index].name] = getValue(typeArgs[index].type, results);
+      const v=getValue(typeArgs[index].type, results);
+      if(typeArgs[index].anon) {
+        Object.keys(v).forEach(key => {
+          results[key]=v[key];
+        })
+      }
+      else {
+        results[typeArgs[index].name] = v;
+      }
     });
     delete context[".."];
     return results;
@@ -129,6 +137,13 @@ var values = {
   },
   'option': function(typeArgs, context) {
     return getValue(typeArgs, context);
+  },
+  'bitfield': function(typeArgs) {
+    var results={};
+    Object.keys(typeArgs).forEach(function(index){
+      results[typeArgs[index].name] = 1;
+    });
+    return results;
   }
 };
 
@@ -178,7 +193,7 @@ mc.supportedVersions.forEach(function(supportedVersion,i){
     Object.keys(packets).filter(function(state){return state!="types"}).forEach(function(state){
       Object.keys(packets[state]).forEach(function(direction){
         Object.keys(packets[state][direction].types).filter(function(packetName){return packetName!="packet"}).forEach(function(packetName){
-          packetInfo = packets[state][direction].types[packetName][1];
+          packetInfo = packets[state][direction].types[packetName];
           packetInfo=packetInfo ? packetInfo : null;
           it(state + ","+(direction=="toServer" ? "Server" : "Client")+"Bound," + packetName,
             callTestPacket(packetName.substr(7), packetInfo, state, direction=="toServer" ));
@@ -195,10 +210,7 @@ mc.supportedVersions.forEach(function(supportedVersion,i){
 
     function testPacket(packetName, packetInfo, state, toServer, done) {
       // empty object uses default values
-      var packet = {};
-      packetInfo.forEach(function(field) {
-        packet[field.name] = getValue(field.type, packet);
-      });
+      var packet = getValue(packetInfo, {});
       if(toServer) {
         serverClient.once(packetName, function(receivedPacket) {
           try {
