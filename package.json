@@ -33,7 +33,7 @@
     "minecraft-wrap": "^1.0.0",
     "mocha": "^3.0.2",
     "power-assert": "^1.0.0",
-    "require-self": "^0.1.0"
+    "require-self": "^0.2.1"
   },
   "dependencies": {
     "buffer-equal": "^1.0.0",
