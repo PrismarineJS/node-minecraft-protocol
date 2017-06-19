@@ -1,5 +1,10 @@
 # History
 
+## 1.3.1
+
+* improve autoversion support
+* fix tests
+
 ## 1.3.0
 
 * 1.12 support
