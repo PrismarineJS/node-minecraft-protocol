@@ -18,7 +18,6 @@ class Client extends EventEmitter
     this.version=version;
     this.isServer = !!isServer;
     this.splitter=framing.createSplitter();
-    this.setSerializer(states.HANDSHAKING);
     this.packetsToParse={};
     this.serializer;
     this.compressor=null;
@@ -28,7 +27,6 @@ class Client extends EventEmitter
     this.decompressor=null;
     this.deserializer;
     this.isServer;
-    this.protocolState=states.HANDSHAKING;
     this.ended=true;
     this.latency=0;
 
@@ -41,6 +39,8 @@ class Client extends EventEmitter
       const direction = this.isServer ? 'toServer' : 'toClient';
       this.packetsToParse[event] -= 1;
     });
+
+    this.state=states.HANDSHAKING;
   }
 
   get state(){
@@ -109,19 +109,19 @@ class Client extends EventEmitter
     const oldProperty = this.protocolState;
     this.protocolState = newProperty;
 
-    if(!this.compressor)
-    {
-      this.serializer.unpipe(this.framer);
-      this.splitter.unpipe(this.deserializer);
-    }
-    else
-    {
-      this.serializer.unpipe(this.compressor);
-      this.decompressor.unpipe(this.deserializer);
-    }
+    if(this.serializer) {
+      if (!this.compressor) {
+        this.serializer.unpipe();
+        this.splitter.unpipe(this.deserializer);
+      }
+      else {
+        this.serializer.unpipe(this.compressor);
+        this.decompressor.unpipe(this.deserializer);
+      }
 
-    this.serializer.removeAllListeners();
-    this.deserializer.removeAllListeners();
+      this.serializer.removeAllListeners();
+      this.deserializer.removeAllListeners();
+    }
     this.setSerializer(this.protocolState);
 
     if(!this.compressor)
@@ -180,8 +180,8 @@ class Client extends EventEmitter
     this.framer.on('error', onError);
     this.splitter.on('error', onError);
 
-    this.socket.pipe(this.splitter).pipe(this.deserializer);
-    this.serializer.pipe(this.framer).pipe(this.socket);
+    this.socket.pipe(this.splitter);
+    this.framer.pipe(this.socket);
   }
 
   end(reason) {
