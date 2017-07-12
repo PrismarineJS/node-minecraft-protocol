@@ -53,6 +53,7 @@ module.exports = function(client, options) {
 
     // Finished configuring client object, let connection proceed
     client.emit('connect_allowed');
+    client.wait_connect = false;
   });
   return client;
 };

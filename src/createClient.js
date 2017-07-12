@@ -19,6 +19,8 @@ module.exports=createClient;
 function createClient(options) {
   assert.ok(options, "options is required");
   assert.ok(options.username, "username is required");
+  if(!options.version)
+    options.version=false;
 
   // TODO: avoid setting default version if autoVersion is enabled
   const optVersion = options.version || require("./version").defaultVersion;
