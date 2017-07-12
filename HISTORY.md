@@ -1,5 +1,9 @@
 # History
 
+## 1.3.2
+
+* fix autoversion in online mode
+
 ## 1.3.1
 
 * improve autoversion support
