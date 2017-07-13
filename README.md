@@ -142,3 +142,7 @@ DEBUG="minecraft-protocol" node [...]
 ## History
 
 See [history](HISTORY.md)
+
+## Related
+
+* [node-rcon](https://github.com/pushrax/node-rcon) can be used to access the rcon server in the minecraft server
