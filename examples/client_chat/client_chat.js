@@ -1,10 +1,10 @@
-var readline = require('readline');
-var color = require("ansi-color").set;
-var mc = require('minecraft-protocol');
-var states = mc.states;
-var util = require('util');
+const readline = require('readline');
+const color = require("ansi-color").set;
+const mc = require('minecraft-protocol');
+const states = mc.states;
+const util = require('util');
 
-var colors = {
+const colors = {
   "black": 'black+white_bg',
   "dark_blue": 'blue',
   "dark_green": 'green',
@@ -29,7 +29,7 @@ var colors = {
   "reset": 'white+black_bg'
 };
 
-var dictionary = {
+const dictionary = {
   "chat.stream.emote": "(%s) * %s %s",
   "chat.stream.text": "(%s) <%s> %s",
   "chat.type.achievement": "%s has just earned the achievement %s",
@@ -39,7 +39,7 @@ var dictionary = {
   "chat.type.text": "<%s> %s"
 };
 
-var rl = readline.createInterface({
+const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
   terminal: false
@@ -56,18 +56,18 @@ if(process.argv.length < 5) {
 }
 
 process.argv.forEach(function(val) {
-  if(val == "-h") {
+  if(val === "-h") {
     print_help();
     process.exit(0);
   }
 });
 
-var host = process.argv[2];
-var port = parseInt(process.argv[3]);
-var user = process.argv[4];
-var passwd = process.argv[5];
+let host = process.argv[2];
+let port = parseInt(process.argv[3]);
+const user = process.argv[4];
+const passwd = process.argv[5];
 
-if(host.indexOf(':') != -1) {
+if(host.indexOf(':') !== -1) {
   port = host.substring(host.indexOf(':') + 1);
   host = host.substring(0, host.indexOf(':'));
 }
@@ -75,7 +75,7 @@ if(host.indexOf(':') != -1) {
 console.log("connecting to " + host + ":" + port);
 console.log("user: " + user);
 
-var client = mc.createClient({
+const client = mc.createClient({
   host: host,
   port: port,
   username: user,
@@ -87,7 +87,7 @@ client.on('kick_disconnect', function(packet) {
   process.exit(1);
 });
 
-var chats = [];
+const chats = [];
 
 client.on('connect', function() {
   console.info(color('Successfully connected to ' + host + ':' + port, "blink+green"));
@@ -117,13 +117,13 @@ client.on('state', function(newState) {
 });
 
 rl.on('line', function(line) {
-  if(line == '') {
+  if(line === '') {
     return;
-  } else if(line == '/quit') {
+  } else if(line === '/quit') {
     console.info('Disconnected from ' + host + ':' + port);
     client.end();
     return;
-  } else if(line == '/end') {
+  } else if(line === '/end') {
     console.info('Forcibly ended client');
     process.exit(0);
     return;
@@ -134,14 +134,14 @@ rl.on('line', function(line) {
 });
 
 client.on('chat', function(packet) {
-  var j = JSON.parse(packet.message);
-  var chat = parseChat(j, {});
+  const j = JSON.parse(packet.message);
+  const chat = parseChat(j, {});
   console.info(chat);
 });
 
 function parseChat(chatObj, parentState) {
   function getColorize(parentState) {
-    var myColor = "";
+    let myColor = "";
     if('color' in parentState) myColor += colors[parentState.color] + "+";
     if(parentState.bold) myColor += "bold+";
     if(parentState.underlined) myColor += "underline+";
@@ -153,7 +153,7 @@ function parseChat(chatObj, parentState) {
   if(typeof chatObj === "string") {
     return color(chatObj, getColorize(parentState));
   } else {
-    var chat = "";
+    let chat = "";
     if('color' in chatObj) parentState.color = chatObj['color'];
     if('bold' in chatObj) parentState.bold = chatObj['bold'];
     if('italic' in chatObj) parentState.italic = chatObj['italic'];
@@ -164,7 +164,7 @@ function parseChat(chatObj, parentState) {
     if('text' in chatObj) {
       chat += color(chatObj.text, getColorize(parentState));
     } else if('translate' in chatObj && dictionary.hasOwnProperty(chatObj.translate)) {
-      var args = [dictionary[chatObj.translate]];
+      const args = [dictionary[chatObj.translate]];
       chatObj['with'].forEach(function(s) {
         args.push(parseChat(s, parentState));
       });

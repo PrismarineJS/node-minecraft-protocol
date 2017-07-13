@@ -1,17 +1,17 @@
-var mc = require('minecraft-protocol');
+const mc = require('minecraft-protocol');
 
-var options = {
+const options = {
   motd: 'Vox Industries',
   'max-players': 127,
   port: 25565,
   'online-mode': false
 };
 
-var server = mc.createServer(options);
+const server = mc.createServer(options);
 
 server.on('login', function(client) {
   broadcast(client.username + ' joined the game.');
-  var addr = client.socket.remoteAddress + ':' + client.socket.remotePort;
+  const addr = client.socket.remoteAddress + ':' + client.socket.remotePort;
   console.log(client.username + ' connected', '(' + addr + ')');
 
   client.on('end', function() {
@@ -39,7 +39,7 @@ server.on('login', function(client) {
   });
 
   client.on('chat', function(data) {
-    var message = '<' + client.username + '>' + ' ' + data.message;
+    const message = '<' + client.username + '>' + ' ' + data.message;
     broadcast(message, null, client.username);
     console.log(message);
   });
@@ -54,15 +54,15 @@ server.on('listening', function() {
 });
 
 function broadcast(message, exclude, username) {
-  var client, translate;
+  let client, translate;
   translate = username ? 'chat.type.announcement' : 'chat.type.text';
   username = username || 'Server';
-  for(var clientId in server.clients) {
+  for(const clientId in server.clients) {
     if(!server.clients.hasOwnProperty(clientId)) continue;
 
     client = server.clients[clientId];
     if(client !== exclude) {
-      var msg = {
+      const msg = {
         translate: translate,
         "with": [
           username,

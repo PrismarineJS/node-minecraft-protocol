@@ -1,6 +1,6 @@
-var mc = require('minecraft-protocol');
+const mc = require('minecraft-protocol');
 
-var server = mc.createServer({
+const server = mc.createServer({
   'online-mode': false,   // optional
   encryption: false,      // optional
   host: '0.0.0.0',       // optional

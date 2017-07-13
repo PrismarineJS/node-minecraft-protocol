@@ -1,6 +1,6 @@
-var mc = require('minecraft-protocol');
+const mc = require('minecraft-protocol');
 
-var states = mc.states;
+const states = mc.states;
 function printHelpAndExit(exitCode) {
   console.log("usage: node proxy.js [<options>...] <target_srv> <version>");
   console.log("options:");
@@ -32,24 +32,24 @@ process.argv.forEach(function(val) {
   }
 });
 
-var args = process.argv.slice(2);
-var host;
-var port = 25565;
-var version;
+const args = process.argv.slice(2);
+let host;
+let port = 25565;
+let version;
 
-var printAllNames = false;
-var printNameWhitelist = {};
-var printNameBlacklist = {};
+let printAllNames = false;
+const printNameWhitelist = {};
+const printNameBlacklist = {};
 (function() {
-  for(var i = 0; i < args.length; i++) {
-    var option = args[i];
+  for(let i = 0; i < args.length; i++) {
+    const option = args[i];
     if(!/^-/.test(option)) break;
     if(option === "--dump-all") {
       printAllNames = true;
       continue;
     }
     i++;
-    var name = args[i];
+    const name = args[i];
     if(option === "--dump") {
       printNameWhitelist[name] = "io";
     } else if(option === "-x") {
@@ -68,17 +68,17 @@ if(host.indexOf(':') !== -1) {
   host = host.substring(0, host.indexOf(':'));
 }
 
-var srv = mc.createServer({
+const srv = mc.createServer({
   'online-mode': false,
   port: 25566,
   keepAlive: false,
   version:version
 });
 srv.on('login', function(client) {
-  var addr = client.socket.remoteAddress;
+  const addr = client.socket.remoteAddress;
   console.log('Incoming connection', '(' + addr + ')');
-  var endedClient = false;
-  var endedTargetClient = false;
+  let endedClient = false;
+  let endedTargetClient = false;
   client.on('end', function() {
     endedClient = true;
     console.log('Connection closed by client', '(' + addr + ')');
@@ -92,7 +92,7 @@ srv.on('login', function(client) {
     if(!endedTargetClient)
       targetClient.end("Error");
   });
-  var targetClient = mc.createClient({
+  const targetClient = mc.createClient({
     host: host,
     port: port,
     username: client.username,
@@ -125,12 +125,12 @@ srv.on('login', function(client) {
       }
     }
   });
-  var bufferEqual = require('buffer-equal');
+  const bufferEqual = require('buffer-equal');
   targetClient.on('raw', function(buffer, meta) {
     if(client.state !== states.PLAY || meta.state !== states.PLAY)
       return;
-    var packetData = targetClient.deserializer.parsePacketBuffer(buffer).data.params;
-    var packetBuff = client.serializer.createPacketBuffer({name:meta.name, params:packetData});
+    const packetData = targetClient.deserializer.parsePacketBuffer(buffer).data.params;
+    const packetBuff = client.serializer.createPacketBuffer({name:meta.name, params:packetData});
     if(!bufferEqual(buffer, packetBuff)) {
       console.log("client<-server: Error in packet " + meta.state + "." + meta.name);
       console.log("received buffer",buffer.toString('hex'));
@@ -149,8 +149,8 @@ srv.on('login', function(client) {
   client.on('raw', function(buffer, meta) {
     if(meta.state !== states.PLAY || targetClient.state !== states.PLAY)
       return;
-    var packetData = client.deserializer.parsePacketBuffer(buffer).data.params;
-    var packetBuff = targetClient.serializer.createPacketBuffer({name:meta.name, params:packetData});
+    const packetData = client.deserializer.parsePacketBuffer(buffer).data.params;
+    const packetBuff = targetClient.serializer.createPacketBuffer({name:meta.name, params:packetData});
     if(!bufferEqual(buffer, packetBuff)) {
       console.log("client->server: Error in packet " + meta.state + "." + meta.name);
       console.log("received buffer",buffer.toString('hex'));
@@ -180,6 +180,6 @@ function shouldDump(name, direction) {
   return matches(printNameWhitelist[name]);
 
   function matches(result) {
-    return result != null && result.indexOf(direction) !== -1;
+    return result !== null && result.indexOf(direction) !== -1;
   }
 }

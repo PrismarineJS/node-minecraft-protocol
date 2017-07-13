@@ -1,13 +1,13 @@
-var mc = require('minecraft-protocol');
+const mc = require('minecraft-protocol');
 
-var options = {
+const options = {
   'online-mode': true
 };
 
-var server = mc.createServer(options);
+const server = mc.createServer(options);
 
 server.on('login', function(client) {
-  var addr = client.socket.remoteAddress;
+  const addr = client.socket.remoteAddress;
   console.log('Incoming connection', '(' + addr + ')');
 
   client.on('end', function() {
@@ -38,7 +38,7 @@ server.on('login', function(client) {
     flags: 0x00
   });
 
-  var msg = {
+  const msg = {
     translate: 'chat.type.announcement',
     "with": [
       'Server',

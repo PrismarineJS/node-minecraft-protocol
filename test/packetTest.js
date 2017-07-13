@@ -1,11 +1,11 @@
-var mc = require('../');
-var states = mc.states;
-var Client = mc.Client;
-var Server = mc.Server;
-var net = require('net');
-var assert = require('power-assert');
-var getFieldInfo = require('protodef').utils.getFieldInfo;
-var getField = require('protodef').utils.getField;
+const mc = require('../');
+const states = mc.states;
+const Client = mc.Client;
+const Server = mc.Server;
+const net = require('net');
+const assert = require('power-assert');
+const getFieldInfo = require('protodef').utils.getFieldInfo;
+const getField = require('protodef').utils.getField;
 
 function evalCount(count, fields) {
   if(fields[count["field"]] in count["map"])
@@ -13,7 +13,7 @@ function evalCount(count, fields) {
   return count["default"];
 }
 
-var values = {
+const values = {
   'i32': 123456,
   'i16': -123,
   'u16': 123,
@@ -23,14 +23,14 @@ var values = {
   'string': "hi hi this is my client string",
   'buffer': new Buffer(8),
   'array': function(typeArgs, context) {
-    var count;
+    let count;
     if (typeof typeArgs.count === "object")
       count = evalCount(typeArgs.count, context);
     else if (typeof typeArgs.count !== "undefined")
       count = getField(typeArgs.count, context);
     else if (typeof typeArgs.countType !== "undefined")
       count = 1;
-    var arr = [];
+    const arr = [];
     while (count > 0) {
       arr.push(getValue(typeArgs.type, context));
       count--;
@@ -38,7 +38,7 @@ var values = {
     return arr;
   },
   'container': function(typeArgs, context) {
-    var results = {
+    const results = {
       "..": context
     };
     Object.keys(typeArgs).forEach(function(index){
@@ -129,7 +129,7 @@ var values = {
   'position_iii': {x: 12, y: 100, z: 4382821},
   'restBuffer': new Buffer(0),
   'switch': function(typeArgs, context) {
-    var i = typeArgs.fields[getField(typeArgs.compareTo, context)];
+    const i = typeArgs.fields[getField(typeArgs.compareTo, context)];
     if (typeof i === "undefined")
       return getValue(typeArgs.default, context);
     else
@@ -139,7 +139,7 @@ var values = {
     return getValue(typeArgs, context);
   },
   'bitfield': function(typeArgs) {
-    var results={};
+    const results={};
     Object.keys(typeArgs).forEach(function(index){
       results[typeArgs[index].name] = 1;
     });
@@ -148,7 +148,7 @@ var values = {
 };
 
 function getValue(_type, packet) {
-  var fieldInfo = getFieldInfo(_type);
+  const fieldInfo = getFieldInfo(_type);
   if (typeof values[fieldInfo.type] === "function")
     return values[fieldInfo.type](fieldInfo.typeArgs, packet);
   else if (values[fieldInfo.type] !== "undefined")
@@ -163,13 +163,13 @@ mc.supportedVersions.forEach(function(supportedVersion,i){
   if(!(i>=firstVersion && i<=lastVersion))
     return;
   
-  var PORT=Math.round(30000+Math.random()*20000);
-  var mcData=require("minecraft-data")(supportedVersion);
-  var version=mcData.version;
-  var packets = mcData.protocol;
+  const PORT=Math.round(30000+Math.random()*20000);
+  const mcData=require("minecraft-data")(supportedVersion);
+  const version=mcData.version;
+  const packets = mcData.protocol;
 
   describe("packets "+version.minecraftVersion, function() {
-    var client, server, serverClient;
+    let client, server, serverClient;
     before(function(done) {
       server = new Server(version.minecraftVersion);
       server.once('listening', function() {
@@ -189,14 +189,14 @@ mc.supportedVersions.forEach(function(supportedVersion,i){
       });
       client.end();
     });
-    var packetInfo, field;
-    Object.keys(packets).filter(function(state){return state!="types"}).forEach(function(state){
+    let packetInfo, field;
+    Object.keys(packets).filter(function(state){return state!=="types"}).forEach(function(state){
       Object.keys(packets[state]).forEach(function(direction){
-        Object.keys(packets[state][direction].types).filter(function(packetName){return packetName!="packet"}).forEach(function(packetName){
+        Object.keys(packets[state][direction].types).filter(function(packetName){return packetName!=="packet"}).forEach(function(packetName){
           packetInfo = packets[state][direction].types[packetName];
           packetInfo=packetInfo ? packetInfo : null;
-          it(state + ","+(direction=="toServer" ? "Server" : "Client")+"Bound," + packetName,
-            callTestPacket(packetName.substr(7), packetInfo, state, direction=="toServer" ));
+          it(state + ","+(direction==="toServer" ? "Server" : "Client")+"Bound," + packetName,
+            callTestPacket(packetName.substr(7), packetInfo, state, direction==="toServer" ));
         });
       });
     });
@@ -210,7 +210,7 @@ mc.supportedVersions.forEach(function(supportedVersion,i){
 
     function testPacket(packetName, packetInfo, state, toServer, done) {
       // empty object uses default values
-      var packet = getValue(packetInfo, {});
+      const packet = getValue(packetInfo, {});
       if(toServer) {
         serverClient.once(packetName, function(receivedPacket) {
           try {
