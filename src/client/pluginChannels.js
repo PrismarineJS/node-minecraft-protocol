@@ -1,10 +1,11 @@
-var ProtoDef = require('protodef').ProtoDef;
-var minecraft = require('../datatypes/minecraft');
+const ProtoDef = require('protodef').ProtoDef;
+const minecraft = require('../datatypes/minecraft');
+const debug = require('debug')('minecraft-protocol');
 
 module.exports = function(client, options) {
-  var mcdata = require('minecraft-data')(options.version || require("../version").defaultVersion);
-  var channels = [];
-  var proto = new ProtoDef();
+  const mcdata = require('minecraft-data')(options.version || require("../version").defaultVersion);
+  const channels = [];
+  const proto = new ProtoDef();
   proto.addTypes(mcdata.protocol.types);
   proto.addTypes(minecraft);
   proto.addType('registerarr',[readDumbArr, writeDumbArr, sizeOfDumbArr]);
@@ -31,7 +32,7 @@ module.exports = function(client, options) {
     if(custom) {
       client.writeChannel("UNREGISTER",channel);
     }
-    var index = channels.find(function(name) {
+    const index = channels.find(function(name) {
       return channel === name;
     });
     if (index) {
@@ -43,17 +44,19 @@ module.exports = function(client, options) {
   }
 
   function onCustomPayload(packet) {
-    var channel = channels.find(function(channel) {
+    const channel = channels.find(function(channel) {
       return channel === packet.channel;
     });
     if (channel) {
       if (proto.types[channel])
         packet.data = proto.parsePacketBuffer(channel, packet.data).data;
+      debug("read custom payload "+channel+" "+packet.data);
       client.emit(channel, packet.data);
     }
   }
 
   function writeChannel(channel,params) {
+    debug("write custom payload "+channel+" "+params);
     client.write("custom_payload",{
         channel:channel,
         data:proto.createPacketBuffer(channel,params)
@@ -61,13 +64,13 @@ module.exports = function(client, options) {
   }
 
   function readDumbArr(buf, offset) {
-    var ret = {
+    const ret = {
       value: [],
       size: 0
     };
     let results;
     while (offset < buf.length) {
-      if (buf.indexOf(0x0, offset) == -1)
+      if (buf.indexOf(0x0, offset) === -1)
         results = this.read(buf, offset, "restBuffer", {});
       else
         results = this.read(buf, offset, "cstring", {});
