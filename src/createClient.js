@@ -6,7 +6,7 @@ const assert = require('assert');
 const encrypt = require('./client/encrypt');
 const keepalive = require('./client/keepalive');
 const compress = require('./client/compress');
-const caseCorrect = require('./client/caseCorrect');
+const auth = require('./client/auth');
 const setProtocol = require('./client/setProtocol');
 const play = require('./client/play');
 const tcp_dns = require('./client/tcp_dns');
@@ -33,7 +33,7 @@ function createClient(options) {
   const client = new Client(false, version.minecraftVersion,options.customPackets);
 
   tcp_dns(client, options);
-  caseCorrect(client, options);
+  auth(client, options);
   if (options.version === false) autoVersion(client, options);
   setProtocol(client, options);
   keepalive(client, options);
