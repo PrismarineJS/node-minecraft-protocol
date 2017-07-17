@@ -2,7 +2,7 @@ const mc = require('minecraft-protocol');
 const Socks  = require("socks5-client");
 
 if(process.argv.length < 6 || process.argv.length > 8) {
-  console.log("Usage : node echo.js <host> <port> <proxyHost> <proxyPort> [<name>] [<password>]");
+  console.log("Usage : node client_socks_proxy.js <host> <port> <proxyHost> <proxyPort> [<name>] [<password>]");
   process.exit(1);
 }
 
