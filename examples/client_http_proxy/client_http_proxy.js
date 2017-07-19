@@ -15,6 +15,7 @@ const req = Http.request({
   method: 'CONNECT',
   path: process.argv[2] + ":" + parseInt(process.argv[3])
 });
+req.end();
 
 req.on("connect", function(res, stream) {
   const client = mc.createClient({
