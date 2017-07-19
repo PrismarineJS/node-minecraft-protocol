@@ -5,7 +5,8 @@ module.exports = function(client, options) {
   options.port = options.port || 25565;
   options.host = options.host || 'localhost';
 
-  options.connect = (client) => {
+  if(!options.connect)
+    options.connect = (client) => {
     if (options.stream) {
       client.setSocket(options.stream);
       client.emit('connect');

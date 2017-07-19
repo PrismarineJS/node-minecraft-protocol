@@ -21,6 +21,9 @@ automatically logged in and validated against mojang's auth.
  * customPackets (optional) : an object index by version/state/direction/name, see client_custom_packet for an example
  * errorHandler : A way to override the default error handler for client errors. A function that takes a Client and an error.
  The default kicks the client.
+ * stream : a stream to use as connection
+ * connect : a function taking the client as parameter and that should client.setSocket(socket) 
+ and client.emit('connect') when appropriate (see the proxy examples for an example of use)
 
 ## mc.Server(version,[customPackets])
 
