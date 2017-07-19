@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "socks5-client": "^1.2.5"
+    "socks": "^1.1.10"
   },
   "description": "A node-minecraft-protocol example"
 }
