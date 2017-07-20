@@ -1,6 +1,5 @@
 'use strict';
 
-const ursa=require("./ursa");
 const crypto = require('crypto');
 const yggserver = require('yggdrasil').server({});
 const states = require("./states");
@@ -9,6 +8,7 @@ const Server = require('./server');
 const UUID = require('uuid-1345');
 const endianToggle = require('endian-toggle');
 const pluginChannels = require('./client/pluginChannels');
+const keypair = require('keypair');
 
 module.exports=createServer;
 
@@ -36,7 +36,7 @@ function createServer(options) {
   const mcData=require("minecraft-data")(optVersion);
   const version = mcData.version;
 
-  const serverKey = ursa.generatePrivateKey(1024);
+  const serverKey = keypair({bits:1024});
 
   const server = new Server(version.minecraftVersion,options.customPackets);
   server.motd = options.motd || "A Minecraft server";
@@ -175,7 +175,7 @@ function createServer(options) {
       if(needToVerify) {
         serverId = crypto.randomBytes(4).toString('hex');
         client.verifyToken = crypto.randomBytes(4);
-        const publicKeyStrArr = serverKey.toPublicPem("utf8").split("\n");
+        const publicKeyStrArr = serverKey.public.split("\n");
         let publicKeyStr = "";
         for(let i = 1; i < publicKeyStrArr.length - 2; i++) {
           publicKeyStr += publicKeyStrArr[i]
@@ -210,12 +210,12 @@ function createServer(options) {
     function onEncryptionKeyResponse(packet) {
       let sharedSecret;
       try {
-        const verifyToken = serverKey.decrypt(packet.verifyToken, undefined, undefined, ursa.RSA_PKCS1_PADDING);
+        const verifyToken = crypto.privateDecrypt({key:serverKey.private,padding:crypto.constants.RSA_PKCS1_PADDING},packet.verifyToken);
         if(!bufferEqual(client.verifyToken, verifyToken)) {
           client.end('DidNotEncryptVerifyTokenProperly');
           return;
         }
-        sharedSecret = serverKey.decrypt(packet.sharedSecret, undefined, undefined, ursa.RSA_PKCS1_PADDING);
+        sharedSecret = crypto.privateDecrypt({key:serverKey.private,padding:crypto.constants.RSA_PKCS1_PADDING},packet.sharedSecret);
       } catch(e) {
         client.end('DidNotEncryptVerifyTokenProperly');
         return;
