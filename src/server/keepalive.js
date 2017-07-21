@@ -1,8 +1,12 @@
-module.exports=function(client,server,{kickTimeout = 30 * 1000,checkTimeoutInterval = 4 * 1000}) {
+module.exports=function(client,server,{
+  kickTimeout = 30 * 1000,
+  checkTimeoutInterval = 4 * 1000,
+  keepAlive : enableKeepAlive = true
+}) {
 
   let keepAlive = false;
   let lastKeepAlive = null;
-  client._keepAliveTimer = null;
+  let keepAliveTimer = null;
   let sendKeepAliveTime;
 
 
@@ -27,11 +31,20 @@ module.exports=function(client,server,{kickTimeout = 30 * 1000,checkTimeoutInter
     lastKeepAlive = new Date();
   }
 
-  client._startKeepAlive= () => {
+  function startKeepAlive() {
     keepAlive = true;
     lastKeepAlive = new Date();
-    client._keepAliveTimer = setInterval(keepAliveLoop, checkTimeoutInterval);
+    keepAliveTimer = setInterval(keepAliveLoop, checkTimeoutInterval);
     client.on('keep_alive', onKeepAlive);
   }
+
+  if(enableKeepAlive) client.on('state',state => {
+    if(state === "play") {
+      startKeepAlive();
+    }
+  });
+
+
+  client.on('end', () => clearInterval(keepAliveTimer));
 
 };

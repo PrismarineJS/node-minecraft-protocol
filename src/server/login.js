@@ -9,7 +9,6 @@ module.exports=function(client,server,options) {
   const {
     'online-mode' : onlineMode = true,
       kickTimeout = 30 * 1000,
-      keepAlive : enableKeepAlive = true,
       errorHandler : clientErrorHandler=(client,err) => client.end(),
   } = options;
 
@@ -18,13 +17,9 @@ module.exports=function(client,server,options) {
   client.on('error', function(err) {
     clientErrorHandler(client, err);
   });
-  client.on('end', onEnd);
-
-
-  function onEnd() {
-    clearInterval(client._keepAliveTimer);
+  client.on('end', () => {
     clearTimeout(loginKickTimer);
-  }
+  });
 
 
   client.once('login_start', onLogin);
@@ -127,7 +122,6 @@ module.exports=function(client,server,options) {
     client.write('success', {uuid: client.uuid, username: client.username});
     client.state = states.PLAY;
     loggedIn = true;
-    if(enableKeepAlive) client._startKeepAlive();
 
     clearTimeout(loginKickTimer);
     loginKickTimer = null;
