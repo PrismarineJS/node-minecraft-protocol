@@ -18,17 +18,19 @@ function createServer(options={}) {
     port = serverPort || 25565,
     motd = "A Minecraft server",
     'max-players' : maxPlayers = 20,
-    version : optVersion = require("./version").defaultVersion,
+    version,
     favicon,
     customPackets
   } = options;
 
+  const optVersion = version===undefined || version===false ? require("./version").defaultVersion : version;
+
   const mcData=require("minecraft-data")(optVersion);
-  const version = mcData.version;
+  const mcversion = mcData.version;
 
 
-  const server = new Server(version.minecraftVersion,customPackets);
-  server.mcversion=version;
+  const server = new Server(mcversion.minecraftVersion,customPackets);
+  server.mcversion=mcversion;
   server.motd = motd;
   server.maxPlayers = maxPlayers;
   server.playerCount = 0;
