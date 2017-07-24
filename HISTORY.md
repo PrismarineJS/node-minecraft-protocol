@@ -1,5 +1,12 @@
 # History
 
+## 1.4.0
+
+* add http and socks proxy example and related fixes
+* remove ursa, use node-rsa and node crypto module instead
+* modularize createServer
+* dynamic version detection for the server
+
 ## 1.3.2
 
 * fix autoversion in online mode
