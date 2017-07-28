@@ -115,12 +115,6 @@ server.on('login', function(client) {
 
 `npm install minecraft-protocol`
 
-URSA, an optional dependency, should improve login times
-for servers. However, it can be somewhat complicated to install.
-
-Follow the instructions from
-[Obvious/ursa](https://github.com/quartzjer/ursa)
-
 ## Documentation
 
 See [doc](doc/README.md)
