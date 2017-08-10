@@ -41,7 +41,8 @@ let printAllNames = false;
 const printNameWhitelist = {};
 const printNameBlacklist = {};
 (function() {
-  for(let i = 0; i < args.length; i++) {
+  let i = 0;
+  for(i = 0; i < args.length; i++) {
     const option = args[i];
     if(!/^-/.test(option)) break;
     if(option === "--dump-all") {
@@ -180,6 +181,6 @@ function shouldDump(name, direction) {
   return matches(printNameWhitelist[name]);
 
   function matches(result) {
-    return result !== null && result.indexOf(direction) !== -1;
+    return result !== undefined && result !== null && result.indexOf(direction) !== -1;
   }
 }
