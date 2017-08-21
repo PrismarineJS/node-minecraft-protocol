@@ -47,6 +47,6 @@
     "protodef": "^1.5.1",
     "readable-stream": "^2.0.5",
     "uuid-1345": "^0.99.6",
-    "yggdrasil": "^1.0.0"
+    "yggdrasil": "1.0.0"
   }
 }
