@@ -1,5 +1,10 @@
 # History
 
+## 1.4.1
+
+* lock yggdrasil until issue with 1.1.0 is fixed
+* support 1.12.1
+
 ## 1.4.0
 
 * add http and socks proxy example and related fixes
