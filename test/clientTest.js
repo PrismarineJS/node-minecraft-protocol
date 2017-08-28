@@ -19,7 +19,7 @@ mc.supportedVersions.forEach(function(supportedVersion,i) {
   const PORT=Math.round(30000+Math.random()*20000);
   const mcData = require("minecraft-data")(supportedVersion);
   const version = mcData.version;
-  const MC_SERVER_JAR_DIR = process.env.MC_SERVER_JAR_DIR;
+  const MC_SERVER_JAR_DIR = process.env.MC_SERVER_JAR_DIR || '/tmp';
   const MC_SERVER_JAR = MC_SERVER_JAR_DIR + "/minecraft_server." + version.minecraftVersion + ".jar";
   const wrap = new Wrap(MC_SERVER_JAR, MC_SERVER_PATH+"_"+supportedVersion);
   wrap.on('line', function(line) {
