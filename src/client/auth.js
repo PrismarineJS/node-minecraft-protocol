@@ -2,7 +2,7 @@ const yggdrasil = require('yggdrasil')({});
 const UUID = require('uuid-1345');
 
 module.exports = function(client, options) {
-  const clientToken = options.clientToken || UUID.v4().toString();
+  const clientToken = options.clientToken || (options.session && options.session.clientToken) || UUID.v4().toString();
   options.accessToken = null;
   options.haveCredentials = options.password != null || (clientToken != null && options.session != null);
 
@@ -26,7 +26,17 @@ module.exports = function(client, options) {
           cb(null, options.session);
         else
           yggdrasil.refresh(options.session.accessToken, options.session.clientToken, function(err, data) {
-            cb(err, data);
+            if (!err) {
+              cb(null, data);
+            } else if (options.username && options.password) {
+              yggdrasil.auth({
+                user: options.username,
+                pass: options.password,
+                token: clientToken
+              }, cb);
+            } else {
+              cb(err, data);
+            }
           });
       });
     }
