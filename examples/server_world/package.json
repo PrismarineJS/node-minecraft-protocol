@@ -1,0 +1,11 @@
+{
+  "name": "node-minecraft-protocol-example",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "prismarine-chunk": "^1.7.0",
+    "vec3": "^0.1.3"
+  },
+  "description": "A node-minecraft-protocol example",
+  "author": "Oscar Beaumont"
+}
