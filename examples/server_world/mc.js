@@ -6,6 +6,7 @@ var server = mc.createServer({
   encryption: true,
   host: '0.0.0.0',
   port: 25565,
+  version:"1.12.1",
 });
 var chunk = new Chunk();
 
