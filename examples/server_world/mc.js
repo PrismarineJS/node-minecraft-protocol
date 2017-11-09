@@ -28,14 +28,6 @@ server.on('login', function(client) {
     maxPlayers: server.maxPlayers,
     reducedDebugInfo: false
   });
-  client.write('position', {
-    x: 15,
-    y: 101,
-    z: 15,
-    yaw: 137,
-    pitch: 0,
-    flags: 0x00
-  });
   client.write('map_chunk', {
     x: 0,
     z: 0,
@@ -43,5 +35,13 @@ server.on('login', function(client) {
     bitMap: 0xffff,
     chunkData: chunk.dump(),
     blockEntities: []
+  });
+  client.write('position', {
+    x: 15,
+    y: 101,
+    z: 15,
+    yaw: 137,
+    pitch: 0,
+    flags: 0x00
   });
 });
