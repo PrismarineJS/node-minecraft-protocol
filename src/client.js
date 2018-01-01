@@ -97,7 +97,7 @@ class Client extends EventEmitter
       parsed.data=parsed.data.params;
       parsed.metadata.state=state;
       debug("read packet " + state + "." + parsed.metadata.name);
-      debug(parsed.data);
+      debug(JSON.stringify(parsed.data,null,2));
       this.emit('packet', parsed.data, parsed.metadata);
       this.emit(parsed.metadata.name, parsed.data, parsed.metadata);
       this.emit('raw.' + parsed.metadata.name, parsed.buffer, parsed.metadata);
