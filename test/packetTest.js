@@ -42,7 +42,7 @@ const values = {
       "..": context
     };
     Object.keys(typeArgs).forEach(function(index){
-      const v=getValue(typeArgs[index].type, results);
+      const v=typeArgs[index].name==="type" && typeArgs[index].type==="string"  ? "crafting_shapeless" : getValue(typeArgs[index].type, results);
       if(typeArgs[index].anon) {
         Object.keys(v).forEach(key => {
           results[key]=v[key];
@@ -130,21 +130,26 @@ const values = {
   'restBuffer': new Buffer(0),
   'switch': function(typeArgs, context) {
     const i = typeArgs.fields[getField(typeArgs.compareTo, context)];
-    if (typeof i === "undefined")
+    if (typeof i === "undefined") {
+      if(typeArgs.default === undefined)
+        throw new Error("couldn't find the field "+typeArgs.compareTo+" of the compareTo and the default is not defined");
       return getValue(typeArgs.default, context);
+    }
     else
       return getValue(i, context);
   },
   'option': function(typeArgs, context) {
     return getValue(typeArgs, context);
   },
-  'bitfield': function(typeArgs) {
+  'bitfield': function(typeArgs, context) {
     const results={};
     Object.keys(typeArgs).forEach(function(index){
       results[typeArgs[index].name] = 1;
+      context[typeArgs[index].name] = 1;
     });
     return results;
-  }
+  },
+  'tags':[{'tagName':'hi','entries':[1,2,3,4,5]}]
 };
 
 function getValue(_type, packet) {
@@ -192,7 +197,9 @@ mc.supportedVersions.forEach(function(supportedVersion,i){
     let packetInfo, field;
     Object.keys(packets).filter(function(state){return state!=="types"}).forEach(function(state){
       Object.keys(packets[state]).forEach(function(direction){
-        Object.keys(packets[state][direction].types).filter(function(packetName){return packetName!=="packet"}).forEach(function(packetName){
+        Object.keys(packets[state][direction].types)
+          .filter(function(packetName){return packetName!=="packet" && packetName.startsWith("packet_")})
+          .forEach(function(packetName){
           packetInfo = packets[state][direction].types[packetName];
           packetInfo=packetInfo ? packetInfo : null;
           it(state + ","+(direction==="toServer" ? "Server" : "Client")+"Bound," + packetName,

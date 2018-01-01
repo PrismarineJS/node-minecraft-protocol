@@ -117,15 +117,15 @@ mc.supportedVersions.forEach(function(supportedVersion,i) {
             assert.strictEqual(message.translate, "chat.type.text");
             assert.deepEqual(message["with"][0].clickEvent, {
               action: "suggest_command",
-              value: "/msg Player "
+              value: mcData.version.version>340 ? "/tell Player " : "/msg Player "
             });
             assert.deepEqual(message["with"][0].text, "Player");
             assert.strictEqual(message["with"][1], "hello everyone; I have logged in.");
           } else if (chatCount === 2) {
             assert.strictEqual(message.translate, "chat.type.announcement");
             assert.strictEqual(message["with"][0].text ? message["with"][0].text : message["with"][0], "Server");
-            assert.deepEqual(message["with"][1].extra[0].text ?
-              message["with"][1].extra[0].text : message["with"][1].extra[0], "hello");
+            assert.deepEqual(message["with"][1].extra ? (message["with"][1].extra[0].text ?
+              message["with"][1].extra[0].text : message["with"][1].extra[0]) : message["with"][1].text, "hello");
             wrap.removeListener('line', lineListener);
             client.end();
             done();
