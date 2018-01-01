@@ -153,7 +153,6 @@ const values = {
 };
 
 function getValue(_type, packet) {
-  console.log(_type);
   const fieldInfo = getFieldInfo(_type);
   if (typeof values[fieldInfo.type] === "function")
     return values[fieldInfo.type](fieldInfo.typeArgs, packet);
