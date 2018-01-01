@@ -2,7 +2,7 @@
 
 const ProtoDef = require("protodef").ProtoDef;
 const Serializer = require("protodef").Serializer;
-const Parser = require("protodef").Parser;
+const Parser = require("protodef").FullPacketParser;
 
 const minecraft = require("../datatypes/minecraft");
 const states = require("../states");
