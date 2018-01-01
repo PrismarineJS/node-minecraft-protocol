@@ -1,5 +1,10 @@
 # History
 
+## 1.5.0
+
+* support 17w50a (first 1.13 snapshot supported)
+* full packet parser for better parsing errors
+
 ## 1.4.1
 
 * lock yggdrasil until issue with 1.1.0 is fixed
