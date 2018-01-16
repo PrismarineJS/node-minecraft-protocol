@@ -11,7 +11,7 @@ module.exports = function(client, options) {
   debug('pinging',options.host);
   // TODO: use 0xfe ping instead for better compatibility/performance? https://github.com/deathcap/node-minecraft-ping
   ping(options, function(err, response) {
-    if (err) throw err; // hmm
+    client.emit('error',err);
     debug('ping response',response);
     // TODO: could also use ping pre-connect to save description, type, max players, etc.
     const motd = response.description;
@@ -30,7 +30,7 @@ module.exports = function(client, options) {
     .sort(function (a, b) { return b.version - a.version })
     .concat(minecraft_data.postNettyVersionsByProtocolVersion["pc"][protocolVersion]||[])
     if (versions.length === 0) {
-      throw new Error(`unsupported/unknown protocol version: ${protocolVersion}, update minecraft-data`);
+      client.emit('error',`unsupported/unknown protocol version: ${protocolVersion}, update minecraft-data`);
     }
     const minecraftVersion = versions[0].minecraftVersion;
 
