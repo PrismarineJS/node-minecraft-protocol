@@ -194,7 +194,7 @@ class Client extends EventEmitter
 
   setEncryption(sharedSecret) {
     if (this.cipher != null)
-      throw new Error("Set encryption twice !");
+      this.emit('error','Set encryption twice!');
     this.cipher = crypto.createCipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
     this.cipher.on('error', (err) => this.emit('error', err));
     this.framer.unpipe(this.socket);
