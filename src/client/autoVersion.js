@@ -30,7 +30,7 @@ module.exports = function(client, options) {
     .sort(function (a, b) { return b.version - a.version })
     .concat(minecraft_data.postNettyVersionsByProtocolVersion["pc"][protocolVersion]||[])
     if (versions.length === 0) {
-      client.emit('error',`unsupported/unknown protocol version: ${protocolVersion}, update minecraft-data`);
+      client.emit('error', new Error(`unsupported/unknown protocol version: ${protocolVersion}, update minecraft-data`));
     }
     const minecraftVersion = versions[0].minecraftVersion;
 
