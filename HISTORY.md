@@ -1,5 +1,10 @@
 # History
 
+## 1.5.1
+
+* Update autoVersion.js to emit errors instead of throwing
+* update mcdata and protodef for fixes : packet_title fix + packet_title fixes
+
 ## 1.5.0
 
 * support 17w50a (first 1.13 snapshot supported)
