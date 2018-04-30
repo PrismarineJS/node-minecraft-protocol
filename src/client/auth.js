@@ -25,7 +25,7 @@ module.exports = function(client, options) {
         if (!err)
           cb(null, options.session);
         else
-          yggdrasil.refresh(options.session.accessToken, options.session.clientToken, function(err, data) {
+          yggdrasil.refresh(options.session.accessToken, options.session.clientToken, function(err, accessToken, data) {
             if (!err) {
               cb(null, data);
             } else if (options.username && options.password) {
