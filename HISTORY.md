@@ -1,5 +1,10 @@
 # History
 
+## 1.5.2
+
+* fix issue with auth.js
+* Increase checkoutTimeoutInterval default to 30s in client
+
 ## 1.5.1
 
 * Update autoVersion.js to emit errors instead of throwing
