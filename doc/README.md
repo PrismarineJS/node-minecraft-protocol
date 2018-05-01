@@ -78,7 +78,7 @@ Returns a `Client` instance and perform login.
  * clientToken : generated if a password is given
  * accessToken : generated if a password is given
  * keepAlive : send keep alive packets : default to true
- * checkTimeoutInterval : default to `10*1000` (10s), check if keepalive received at that period, disconnect otherwise.
+ * checkTimeoutInterval : default to `30*1000` (30s), check if keepalive received at that period, disconnect otherwise.
  * version : 1.8 or 1.9 or false (to auto-negotiate): default to 1.8
  * customPackets (optional) : an object index by version/state/direction/name, see client_custom_packet for an example
 
