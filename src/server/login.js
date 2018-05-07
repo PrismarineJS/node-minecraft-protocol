@@ -1,5 +1,4 @@
 const yggserver = require('yggdrasil').server({});
-const UUID = require('uuid-1345');
 const bufferEqual = require('buffer-equal');
 const crypto = require('crypto');
 const pluginChannels = require('../client/pluginChannels');
@@ -102,12 +101,15 @@ module.exports=function(client,server,options) {
     const buffer = hash.digest();
     buffer[6] = (buffer[6] & 0x0f) | 0x30;
     buffer[8] = (buffer[8] & 0x3f) | 0x80;
-    return buffer;
+    
+    const hex = buffer.toString('hex');
+    const parts = [hex.substring(0, 8), hex.substring(8, 12), hex.substring(12, 16), hex.substring(16, 20), hex.substring(20)];
+    return parts.join('-');
   }
 
   function nameToMcOfflineUUID(name)
   {
-    return (new UUID(javaUUID("OfflinePlayer:"+name))).toString();
+    return javaUUID("OfflinePlayer:"+name);
   }
 
   function loginClient() {
