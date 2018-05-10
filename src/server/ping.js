@@ -6,17 +6,17 @@ module.exports=function(client,server,{beforePing = null}) {
 
   function onPing() {
     const response = {
-      "version": {
-        "name": server.mcversion.minecraftVersion,
-        "protocol": server.mcversion.version
+      'version': {
+        'name': server.mcversion.minecraftVersion,
+        'protocol': server.mcversion.version
       },
-      "players": {
-        "max": server.maxPlayers,
-        "online": server.playerCount,
-        "sample": []
+      'players': {
+        'max': server.maxPlayers,
+        'online': server.playerCount,
+        'sample': []
       },
-      "description": {"text": server.motd},
-      "favicon": server.favicon
+      'description': {'text': server.motd},
+      'favicon': server.favicon
     };
 
     function answerToPing(err, response) {
@@ -44,7 +44,7 @@ module.exports=function(client,server,{beforePing = null}) {
     if (packet.payload === 1) {
       const pingVersion = 1;
       sendPingResponse('\xa7' + [pingVersion, server.mcversion.version, server.mcversion.minecraftVersion,
-          server.motd, server.playerCount.toString(), server.maxPlayers.toString()].join('\0'));
+        server.motd, server.playerCount.toString(), server.maxPlayers.toString()].join('\0'));
     } else {
       // ping type 0
       sendPingResponse([server.motd, server.playerCount.toString(), server.maxPlayers.toString()].join('\xa7'));

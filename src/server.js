@@ -1,20 +1,19 @@
 'use strict';
 
 const net = require('net');
-const EventEmitter = require('events').EventEmitter;
 const Client = require('./client');
-const states = require("./states");
+const states = require('./states');
+const { EventEmitter } = require('events');
 
-class Server extends EventEmitter
-{
+class Server extends EventEmitter {
   constructor(version,customPackets) {
     super();
-    this.version=version;
-    this.socketServer=null;
-    this.cipher=null;
-    this.decipher=null;
-    this.clients={};
-    this.customPackets=customPackets;
+    this.version = version;
+    this.socketServer = null;
+    this.cipher = null;
+    this.decipher = null;
+    this.clients = {};
+    this.customPackets = customPackets;
   }
 
   listen(port, host) {
@@ -25,11 +24,11 @@ class Server extends EventEmitter
       const client = new Client(true,this.version,this.customPackets);
       client._end = client.end;
       client.end = function end(endReason) {
-        endReason='{"text":"'+endReason+'"}';
+        endReason = '{"text":"' + endReason + '"}';
         if(client.state === states.PLAY) {
-          client.write('kick_disconnect', {reason: endReason});
+          client.write('kick_disconnect', { reason: endReason });
         } else if(client.state === states.LOGIN) {
-          client.write('disconnect', {reason: endReason});
+          client.write('disconnect', { reason: endReason });
         }
         client._end(endReason);
       };

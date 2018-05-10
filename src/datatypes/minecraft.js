@@ -30,15 +30,15 @@ function writeUUID(value, buffer, offset) {
 }
 
 function readNbt(buffer, offset) {
-  return nbt.proto.read(buffer,offset,"nbt");
+  return nbt.proto.read(buffer,offset,'nbt');
 }
 
 function writeNbt(value, buffer, offset) {
-  return nbt.proto.write(value,buffer,offset,"nbt");
+  return nbt.proto.write(value,buffer,offset,'nbt');
 }
 
 function sizeOfNbt(value) {
-  return nbt.proto.sizeOf(value,"nbt");
+  return nbt.proto.sizeOf(value,'nbt');
 }
 
 
@@ -46,7 +46,7 @@ function readOptionalNbt(buffer, offset) {
   if(offset+1>buffer.length)
     throw new PartialReadError();
   if(buffer.readInt8(offset) == 0) return {size:1};
-  return nbt.proto.read(buffer,offset,"nbt");
+  return nbt.proto.read(buffer,offset,'nbt');
 }
 
 function writeOptionalNbt(value, buffer, offset) {
@@ -54,13 +54,13 @@ function writeOptionalNbt(value, buffer, offset) {
     buffer.writeInt8(0,offset);
     return offset+1;
   }
-  return nbt.proto.write(value,buffer,offset,"nbt");
+  return nbt.proto.write(value,buffer,offset,'nbt');
 }
 
 function sizeOfOptionalNbt(value) {
   if(value==undefined)
     return 1;
-  return nbt.proto.sizeOf(value,"nbt");
+  return nbt.proto.sizeOf(value,'nbt');
 }
 
 // Length-prefixed compressed NBT, see differences: http://wiki.vg/index.php?title=Slot_Data&diff=6056&oldid=4753
@@ -76,7 +76,7 @@ function readCompressedNbt(buffer, offset) {
 
   const nbtBuffer = zlib.gunzipSync(compressedNbt); // TODO: async
 
-  const results=nbt.proto.read(nbtBuffer,0,"nbt");
+  const results=nbt.proto.read(nbtBuffer,0,'nbt');
   return {
     size:length+2,
     value:results.value
@@ -89,7 +89,7 @@ function writeCompressedNbt(value, buffer, offset) {
     return offset+2;
   }
   const nbtBuffer = new Buffer(sizeOfNbt(value));
-  nbt.proto.write(value,nbtBuffer,0,"nbt");
+  nbt.proto.write(value,nbtBuffer,0,'nbt');
 
   const compressedNbt = zlib.gzipSync(nbtBuffer); // TODO: async
   compressedNbt.writeUInt8(0, 9); // clear the OS field to match MC
@@ -103,8 +103,8 @@ function sizeOfCompressedNbt(value) {
   if(value==undefined)
     return 2;
 
-  const nbtBuffer = new Buffer(sizeOfNbt(value,"nbt"));
-  nbt.proto.write(value,nbtBuffer,0,"nbt");
+  const nbtBuffer = new Buffer(sizeOfNbt(value,'nbt'));
+  nbt.proto.write(value,nbtBuffer,0,'nbt');
 
   const compressedNbt = zlib.gzipSync(nbtBuffer); // TODO: async
 

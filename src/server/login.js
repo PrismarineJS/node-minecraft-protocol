@@ -3,13 +3,13 @@ const UUID = require('uuid-1345');
 const bufferEqual = require('buffer-equal');
 const crypto = require('crypto');
 const pluginChannels = require('../client/pluginChannels');
-const states = require("../states");
+const states = require('../states');
 
 module.exports=function(client,server,options) {
   const {
-    'online-mode' : onlineMode = true,
-      kickTimeout = 30 * 1000,
-      errorHandler : clientErrorHandler=(client,err) => client.end(),
+    onlineMode = true,
+    kickTimeout = 30 * 1000,
+    errorHandler : clientErrorHandler=(client,err) => client.end(),
   } = options;
 
   let serverId;
@@ -36,8 +36,8 @@ module.exports=function(client,server,options) {
     if(needToVerify) {
       serverId = crypto.randomBytes(4).toString('hex');
       client.verifyToken = crypto.randomBytes(4);
-      const publicKeyStrArr = server.serverKey.exportKey('pkcs8-public-pem').split("\n");
-      let publicKeyStr = "";
+      const publicKeyStrArr = server.serverKey.exportKey('pkcs8-public-pem').split('\n');
+      let publicKeyStr = '';
       for(let i = 1; i < publicKeyStrArr.length - 1; i++) {
         publicKeyStr += publicKeyStrArr[i]
       }
@@ -81,12 +81,12 @@ module.exports=function(client,server,options) {
     function verifyUsername() {
       yggserver.hasJoined(client.username, serverId, sharedSecret, client.publicKey, function(err, profile) {
         if(err) {
-          client.end("Failed to verify username!");
+          client.end('Failed to verify username!');
           return;
         }
         // Convert to a valid UUID until the session server updates and does
         // it automatically
-        client.uuid = profile.id.replace(/(\w{8})(\w{4})(\w{4})(\w{4})(\w{12})/, "$1-$2-$3-$4-$5");
+        client.uuid = profile.id.replace(/(\w{8})(\w{4})(\w{4})(\w{4})(\w{12})/, '$1-$2-$3-$4-$5');
         client.profile = profile;
         loginClient();
       });
@@ -97,7 +97,7 @@ module.exports=function(client,server,options) {
   // https://github.com/openjdk-mirror/jdk7u-jdk/blob/f4d80957e89a19a29bb9f9807d2a28351ed7f7df/src/share/classes/java/util/UUID.java#L163
   function javaUUID(s)
   {
-    const hash = crypto.createHash("md5");
+    const hash = crypto.createHash('md5');
     hash.update(s, 'utf8');
     const buffer = hash.digest();
     buffer[6] = (buffer[6] & 0x0f) | 0x30;
@@ -107,7 +107,7 @@ module.exports=function(client,server,options) {
 
   function nameToMcOfflineUUID(name)
   {
-    return (new UUID(javaUUID("OfflinePlayer:"+name))).toString();
+    return (new UUID(javaUUID('OfflinePlayer:'+name))).toString();
   }
 
   function loginClient() {

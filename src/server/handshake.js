@@ -1,4 +1,4 @@
-const states = require("../states");
+const states = require('../states');
 
 module.exports=function(client,server,{version}) {
 
@@ -14,7 +14,7 @@ module.exports=function(client,server,{version}) {
       client.version=client.protocolVersion;
     }
     else if (client.protocolVersion !== server.mcversion.version) {
-      client.end("Wrong protocol version, expected: " + server.mcversion.version + " and you are using: " + client.protocolVersion);
+      client.end('Wrong protocol version, expected: ' + server.mcversion.version + ' and you are using: ' + client.protocolVersion);
     }
 
     if (packet.nextState === 1) {

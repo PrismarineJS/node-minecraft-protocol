@@ -1,33 +1,28 @@
 const mc = require('../');
 const os = require('os');
-const Server = mc.Server;
 const path = require('path');
 const assert = require('power-assert');
 const SURVIVE_TIME = 10000;
 const MC_SERVER_PATH = path.join(__dirname, 'server');
-
-const Wrap = require('minecraft-wrap').Wrap;
-
-const {firstVersion,lastVersion}=require("./common/parallel");
-
-
-const download = require('minecraft-wrap').download;
+const { Wrap } = require('minecraft-wrap');
+const { firstVersion,lastVersion } = require('./common/parallel');
+const { download } = require('minecraft-wrap');
 
 mc.supportedVersions.forEach(function(supportedVersion,i) {
-  if(!(i>=firstVersion && i<=lastVersion))
+  if(!(i >= firstVersion && i <= lastVersion))
     return;
 
-  const PORT=Math.round(30000+Math.random()*20000);
-  const mcData = require("minecraft-data")(supportedVersion);
-  const version = mcData.version;
+  const PORT = Math.round(30000 + Math.random() * 20000);
+  const mcData = require('minecraft-data')(supportedVersion);
+  const { version } = mcData;
   const MC_SERVER_JAR_DIR = process.env.MC_SERVER_JAR_DIR || os.tmpdir();
-  const MC_SERVER_JAR = MC_SERVER_JAR_DIR + "/minecraft_server." + version.minecraftVersion + ".jar";
-  const wrap = new Wrap(MC_SERVER_JAR, MC_SERVER_PATH+"_"+supportedVersion);
+  const MC_SERVER_JAR = MC_SERVER_JAR_DIR + '/minecraft_server.' + version.minecraftVersion + '.jar';
+  const wrap = new Wrap(MC_SERVER_JAR, MC_SERVER_PATH + '_' + supportedVersion);
   wrap.on('line', function(line) {
     console.log(line);
   });
 
-  describe("client " + version.minecraftVersion, function() {
+  describe('client ' + version.minecraftVersion, function() {
     this.timeout(10 * 60 * 1000);
 
     before(download.bind(null, version.minecraftVersion, MC_SERVER_JAR));
@@ -40,7 +35,7 @@ mc.supportedVersions.forEach(function(supportedVersion,i) {
       });
     });
 
-    describe("offline", function () {
+    describe('offline', function () {
       before(function (done) {
         wrap.startServer({
           'online-mode': 'false',
@@ -63,7 +58,7 @@ mc.supportedVersions.forEach(function(supportedVersion,i) {
       });
 
 
-      it("pings the server", function (done) {
+      it('pings the server', function (done) {
         mc.ping({
           version: version.minecraftVersion,
           port: PORT
@@ -85,7 +80,7 @@ mc.supportedVersions.forEach(function(supportedVersion,i) {
       });
 
 
-      it("connects successfully - offline mode", function (done) {
+      it('connects successfully - offline mode', function (done) {
         const client = mc.createClient({
           username: 'Player',
           version: version.minecraftVersion,
@@ -95,8 +90,8 @@ mc.supportedVersions.forEach(function(supportedVersion,i) {
           const match = line.match(/\[Server thread\/INFO\]: <(.+?)> (.+)/);
           if (!match) return;
           assert.strictEqual(match[1], 'Player');
-          assert.strictEqual(match[2], "hello everyone; I have logged in.");
-          wrap.writeServer("say hello\n");
+          assert.strictEqual(match[2], 'hello everyone; I have logged in.');
+          wrap.writeServer('say hello\n');
         };
         wrap.on('line', lineListener);
         let chatCount = 0;
@@ -106,7 +101,7 @@ mc.supportedVersions.forEach(function(supportedVersion,i) {
           assert.strictEqual(packet.dimension, 0);
           assert.strictEqual(packet.gameMode, 0);
           client.write('chat', {
-            message: "hello everyone; I have logged in."
+            message: 'hello everyone; I have logged in.'
           });
         });
         client.on('chat', function (packet) {
@@ -114,18 +109,18 @@ mc.supportedVersions.forEach(function(supportedVersion,i) {
           assert.ok(chatCount <= 2);
           const message = JSON.parse(packet.message);
           if (chatCount === 1) {
-            assert.strictEqual(message.translate, "chat.type.text");
-            assert.deepEqual(message["with"][0].clickEvent, {
-              action: "suggest_command",
-              value: mcData.version.version>340 ? "/tell Player " : "/msg Player "
+            assert.strictEqual(message.translate, 'chat.type.text');
+            assert.deepEqual(message['with'][0].clickEvent, {
+              action: 'suggest_command',
+              value: mcData.version.version > 340 ? '/tell Player ' : '/msg Player '
             });
-            assert.deepEqual(message["with"][0].text, "Player");
-            assert.strictEqual(message["with"][1], "hello everyone; I have logged in.");
+            assert.deepEqual(message['with'][0].text, 'Player');
+            assert.strictEqual(message['with'][1], 'hello everyone; I have logged in.');
           } else if (chatCount === 2) {
-            assert.strictEqual(message.translate, "chat.type.announcement");
-            assert.strictEqual(message["with"][0].text ? message["with"][0].text : message["with"][0], "Server");
-            assert.deepEqual(message["with"][1].extra ? (message["with"][1].extra[0].text ?
-              message["with"][1].extra[0].text : message["with"][1].extra[0]) : message["with"][1].text, "hello");
+            assert.strictEqual(message.translate, 'chat.type.announcement');
+            assert.strictEqual(message['with'][0].text ? message['with'][0].text : message['with'][0], 'Server');
+            assert.deepEqual(message['with'][1].extra ? (message['with'][1].extra[0].text ?
+              message['with'][1].extra[0].text : message['with'][1].extra[0]) : message['with'][1].text, 'hello');
             wrap.removeListener('line', lineListener);
             client.end();
             done();
@@ -134,20 +129,20 @@ mc.supportedVersions.forEach(function(supportedVersion,i) {
       });
 
 
-      it("does not crash for " + SURVIVE_TIME + "ms", function (done) {
+      it('does not crash for ' + SURVIVE_TIME + 'ms', function (done) {
         const client = mc.createClient({
           username: 'Player',
           version: version.minecraftVersion,
           port: PORT
         });
-        client.on("login", function (packet) {
-          client.write("chat", {
-            message: "hello everyone; I have logged in."
+        client.on('login', function () {
+          client.write('chat', {
+            message: 'hello everyone; I have logged in.'
           });
         });
-        client.on("chat", function (packet) {
+        client.on('chat', function (packet) {
           const message = JSON.parse(packet.message);
-          assert.strictEqual(message.translate, "chat.type.text");
+          assert.strictEqual(message.translate, 'chat.type.text');
           /*assert.deepEqual(message["with"][0], {
            clickEvent: {
            action: "suggest_command",
@@ -155,7 +150,7 @@ mc.supportedVersions.forEach(function(supportedVersion,i) {
            },
            text: "Player"
            });*/
-          assert.strictEqual(message["with"][1], "hello everyone; I have logged in.");
+          assert.strictEqual(message['with'][1], 'hello everyone; I have logged in.');
           setTimeout(function () {
             client.end();
             done();
@@ -163,18 +158,17 @@ mc.supportedVersions.forEach(function(supportedVersion,i) {
         });
       });
 
-      it("produce a decent error when connecting with the wrong version", function (done) {
+      it('produce a decent error when connecting with the wrong version', function (done) {
         const client = mc.createClient({
           username: 'Player',
-          version: version.minecraftVersion === "1.8.8" ? "1.11.2" : "1.8.8",
+          version: version.minecraftVersion === '1.8.8' ? '1.11.2' : '1.8.8',
           port: PORT
         });
-        client.once("error", function (err) {
-          if (err.message.startsWith("This server is version")) {
-            console.log("Correctly got an error for wrong version : " + err.message);
+        client.once('error', function (err) {
+          if (err.message.startsWith('This server is version')) {
+            console.log('Correctly got an error for wrong version : ' + err.message);
             done();
-          }
-          else {
+          } else {
             done(err);
           }
         });
@@ -182,7 +176,7 @@ mc.supportedVersions.forEach(function(supportedVersion,i) {
 
     });
 
-    describe("online", function () {
+    describe('online', function () {
       before(function (done) {
         wrap.startServer({
           'online-mode': 'true',
@@ -202,7 +196,7 @@ mc.supportedVersions.forEach(function(supportedVersion,i) {
         });
       });
 
-      it.skip("connects successfully - online mode", function (done) {
+      it.skip('connects successfully - online mode', function (done) {
         const client = mc.createClient({
           username: process.env.MC_USERNAME,
           password: process.env.MC_PASSWORD,
@@ -213,8 +207,8 @@ mc.supportedVersions.forEach(function(supportedVersion,i) {
           const match = line.match(/\[Server thread\/INFO\]: <(.+?)> (.+)/);
           if (!match) return;
           assert.strictEqual(match[1], client.username);
-          assert.strictEqual(match[2], "hello everyone; I have logged in.");
-          wrap.writeServer("say hello\n");
+          assert.strictEqual(match[2], 'hello everyone; I have logged in.');
+          wrap.writeServer('say hello\n');
         };
         wrap.on('line', lineListener);
         client.on('login', function (packet) {
@@ -223,11 +217,11 @@ mc.supportedVersions.forEach(function(supportedVersion,i) {
           assert.strictEqual(packet.dimension, 0);
           assert.strictEqual(packet.gameMode, 0);
           client.write('chat', {
-            message: "hello everyone; I have logged in."
+            message: 'hello everyone; I have logged in.'
           });
         });
         let chatCount = 0;
-        client.on('chat', function (packet) {
+        client.on('chat', function () {
           chatCount += 1;
           assert.ok(chatCount <= 2);
           if (chatCount === 2) {
@@ -239,7 +233,7 @@ mc.supportedVersions.forEach(function(supportedVersion,i) {
         });
       });
 
-      it("gets kicked when no credentials supplied in online mode", function (done) {
+      it('gets kicked when no credentials supplied in online mode', function (done) {
         const client = mc.createClient({
           username: 'Player',
           version: version.minecraftVersion,
