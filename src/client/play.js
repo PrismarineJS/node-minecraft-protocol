@@ -1,4 +1,4 @@
-const states = require("../states");
+const states = require('../states');
 
 module.exports = function(client, options) {
   client.once('success', onLogin);

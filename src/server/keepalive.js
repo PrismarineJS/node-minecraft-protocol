@@ -39,7 +39,7 @@ module.exports=function(client,server,{
   }
 
   if(enableKeepAlive) client.on('state',state => {
-    if(state === "play") {
+    if(state === 'play') {
       startKeepAlive();
     }
   });

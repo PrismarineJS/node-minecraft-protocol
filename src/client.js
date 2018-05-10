@@ -1,38 +1,35 @@
 'use strict';
 
-const EventEmitter = require('events').EventEmitter;
+const { EventEmitter } = require('events');
 const debug = require('debug')('minecraft-protocol');
 const compression = require('./transforms/compression');
 const framing = require('./transforms/framing');
 const crypto = require('crypto');
-const states = require("./states");
+const states = require('./states');
+const { createSerializer, createDeserializer } = require('./transforms/serializer');
 
-const createSerializer=require("./transforms/serializer").createSerializer;
-const createDeserializer=require("./transforms/serializer").createDeserializer;
-
-class Client extends EventEmitter
-{
+class Client extends EventEmitter {
   constructor(isServer,version,customPackets) {
     super();
-    this.customPackets=customPackets;
-    this.version=version;
+    this.customPackets = customPackets;
+    this.version = version;
     this.isServer = !!isServer;
-    this.splitter=framing.createSplitter();
-    this.packetsToParse={};
+    this.splitter = framing.createSplitter();
+    this.packetsToParse = {};
     this.serializer;
-    this.compressor=null;
-    this.framer=framing.createFramer();
-    this.cipher=null;
-    this.decipher=null;
-    this.decompressor=null;
+    this.compressor = null;
+    this.framer = framing.createFramer();
+    this.cipher = null;
+    this.decipher = null;
+    this.decompressor = null;
     this.deserializer;
     this.isServer;
-    this.ended=true;
-    this.latency=0;
+    this.ended = true;
+    this.latency = 0;
 
     this.on('newListener', function(event, listener) {
       const direction = this.isServer ? 'toServer' : 'toClient';
-      if(typeof this.packetsToParse[event] === "undefined") this.packetsToParse[event] = 1;
+      if(typeof this.packetsToParse[event] === 'undefined') this.packetsToParse[event] = 1;
       else this.packetsToParse[event] += 1;
     });
     this.on('removeListener', function(event, listener) {
@@ -40,31 +37,30 @@ class Client extends EventEmitter
       this.packetsToParse[event] -= 1;
     });
 
-    this.state=states.HANDSHAKING;
+    this.state = states.HANDSHAKING;
   }
 
-  get state(){
+  get state() {
     return this.protocolState;
   }
 
 
   setSerializer(state) {
-    this.serializer = createSerializer({ isServer:this.isServer, version:this.version, state: state,customPackets:this.customPackets});
-    this.deserializer = createDeserializer({ isServer:this.isServer, version:this.version, state: state, packetsToParse:
-      this.packetsToParse,customPackets:this.customPackets});
+    this.serializer = createSerializer({ isServer: this.isServer, version: this.version, state: state,customPackets: this.customPackets });
+    this.deserializer = createDeserializer({ isServer: this.isServer, version: this.version, state: state, packetsToParse:
+      this.packetsToParse,customPackets: this.customPackets });
 
     this.splitter.recognizeLegacyPing = state === states.HANDSHAKING;
 
     this.serializer.on('error', (e) => {
       let parts;
       if(e.field) {
-        parts = e.field.split(".");
+        parts = e.field.split('.');
         parts.shift();
-      }
-      else
-        parts=[];
+      } else
+        parts = [];
       const serializerDirection = !this.isServer ? 'toServer' : 'toClient';
-      e.field = [this.protocolState, serializerDirection].concat(parts).join(".");
+      e.field = [this.protocolState, serializerDirection].concat(parts).join('.');
       e.message = `Serialization error for ${e.field} : ${e.message}`;
       if(!this.compressor)
         this.serializer.pipe(this.framer);
@@ -77,13 +73,12 @@ class Client extends EventEmitter
     this.deserializer.on('error', (e) => {
       let parts;
       if(e.field) {
-        parts = e.field.split(".");
+        parts = e.field.split('.');
         parts.shift();
-      }
-      else
-        parts=[];
+      } else
+        parts = [];
       const deserializerDirection = this.isServer ? 'toServer' : 'toClient';
-      e.field = [this.protocolState, deserializerDirection].concat(parts).join(".");
+      e.field = [this.protocolState, deserializerDirection].concat(parts).join('.');
       e.message = `Deserialization error for ${e.field} : ${e.message}`;
       if(!this.compressor)
         this.splitter.pipe(this.deserializer);
@@ -93,11 +88,11 @@ class Client extends EventEmitter
     });
 
     this.deserializer.on('data', (parsed) => {
-      parsed.metadata.name=parsed.data.name;
-      parsed.data=parsed.data.params;
-      parsed.metadata.state=state;
-      debug("read packet " + state + "." + parsed.metadata.name);
-      const s=JSON.stringify(parsed.data,null,2);
+      parsed.metadata.name = parsed.data.name;
+      parsed.data = parsed.data.params;
+      parsed.metadata.state = state;
+      debug('read packet ' + state + '.' + parsed.metadata.name);
+      const s = JSON.stringify(parsed.data,null,2);
       debug(s.length > 10000 ? parsed.data : s);
       this.emit('packet', parsed.data, parsed.metadata);
       this.emit(parsed.metadata.name, parsed.data, parsed.metadata);
@@ -114,8 +109,7 @@ class Client extends EventEmitter
       if (!this.compressor) {
         this.serializer.unpipe();
         this.splitter.unpipe(this.deserializer);
-      }
-      else {
+      } else {
         this.serializer.unpipe(this.compressor);
         this.decompressor.unpipe(this.deserializer);
       }
@@ -125,13 +119,10 @@ class Client extends EventEmitter
     }
     this.setSerializer(this.protocolState);
 
-    if(!this.compressor)
-    {
+    if(!this.compressor) {
       this.serializer.pipe(this.framer);
       this.splitter.pipe(this.deserializer);
-    }
-    else
-    {
+    } else {
       this.serializer.pipe(this.compressor);
       this.decompressor.pipe(this.deserializer);
     }
@@ -224,7 +215,7 @@ class Client extends EventEmitter
   write(name, params) {
     if(this.ended)
       return;
-    debug("writing packet " + this.state + "." + name);
+    debug('writing packet ' + this.state + '.' + name);
     debug(params);
     this.serializer.write({ name, params });
   }
@@ -240,7 +231,7 @@ class Client extends EventEmitter
 
   // TCP/IP-specific (not generic Stream) method for backwards-compatibility
   connect(port, host) {
-    const options = {port, host};
+    const options = { port, host };
     if (!this.options) this.options = options;
     require('./client/tcp_dns')(this, options);
     options.connect(this);

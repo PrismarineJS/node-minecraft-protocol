@@ -1,8 +1,8 @@
 const mc = require('minecraft-protocol');
 
 const server = mc.createServer({
-  'online-mode': false,   // optional
-  encryption: false,      // optional
+  onlineMode: false,     // optional
+  encryption: false,     // optional
   host: '0.0.0.0',       // optional
   port: 25565,           // optional
   version: '1.10'
@@ -30,5 +30,5 @@ server.on('login', function(client) {
     pitch: 0,
     flags: 0x00
   });
-  client.writeChannel('MC|Brand', "vanilla");
+  client.writeChannel('MC|Brand', 'vanilla');
 });

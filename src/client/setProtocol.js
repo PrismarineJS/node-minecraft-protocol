@@ -1,6 +1,6 @@
 'use strict';
 
-const states = require("../states");
+const states = require('../states');
 
 module.exports = function(client, options) {
   client.on('connect', onConnect);

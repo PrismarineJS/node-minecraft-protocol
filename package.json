@@ -28,6 +28,7 @@
   },
   "browser": "src/browser.js",
   "devDependencies": {
+    "eslint": "^4.19.1",
     "espower-loader": "^1.0.0",
     "intelli-espower-loader": "^1.0.0",
     "minecraft-wrap": "^1.0.0",
@@ -48,5 +49,22 @@
     "readable-stream": "^2.0.5",
     "uuid-1345": "^0.99.6",
     "yggdrasil": "^1.1.1"
+  },
+  "eslintConfig": {
+    "env": {
+      "es6": true,
+      "node": true
+    },
+    "rules": {
+      "indent": ["warn", 2],
+      "quotes": ["warn", "single"],
+      "no-unused-vars": ["warn", "all"],
+      "space-before-blocks": ["warn", "always"],
+      "object-curly-spacing": ["warn", "always"],
+      "key-spacing": ["warn", { "beforeColon": false }],
+      "space-infix-ops": ["warn", { "int32Hint": false }],
+      "brace-style": ["warn", "1tbs", { "allowSingleLine": true }],
+      "prefer-destructuring": ["warn", {"object": true, "array": false}]
+    }
   }
 }

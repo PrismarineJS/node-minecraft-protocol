@@ -10,7 +10,7 @@ automatically logged in and validated against mojang's auth.
  * host : default to localhost
  * kickTimeout : default to `10*1000` (10s), kick client that doesn't answer to keepalive after that time
  * checkTimeoutInterval : default to `4*1000` (4s), send keepalive packet at that period
- * online-mode : default to true
+ * onlineMode : default to true
  * beforePing : allow customisation of the answer to ping the server does. 
  It takes a function with argument response and client, response is the default json response, and client is client who sent a ping.
  It can take as third argument a callback. If the callback is passed, the function should pass its result to the callback, if not it should return.

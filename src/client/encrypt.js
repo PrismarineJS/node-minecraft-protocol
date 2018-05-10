@@ -37,7 +37,7 @@ module.exports = function(client, options) {
 
       function joinServerRequest(cb) {
         yggserver.join(options.accessToken, client.session.selectedProfile.id,
-            packet.serverId, sharedSecret, packet.publicKey, cb);
+          packet.serverId, sharedSecret, packet.publicKey, cb);
       }
 
       function sendEncryptionKeyResponse() {
@@ -55,13 +55,13 @@ module.exports = function(client, options) {
 };
 
 function mcPubKeyToPem(mcPubKeyBuffer) {
-  let pem = "-----BEGIN PUBLIC KEY-----\n";
+  let pem = '-----BEGIN PUBLIC KEY-----\n';
   let base64PubKey = mcPubKeyBuffer.toString('base64');
   const maxLineLength = 65;
   while(base64PubKey.length > 0) {
-    pem += base64PubKey.substring(0, maxLineLength) + "\n";
+    pem += base64PubKey.substring(0, maxLineLength) + '\n';
     base64PubKey = base64PubKey.substring(maxLineLength);
   }
-  pem += "-----END PUBLIC KEY-----\n";
+  pem += '-----END PUBLIC KEY-----\n';
   return pem;
 }

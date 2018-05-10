@@ -23,13 +23,13 @@ module.exports = function(client, options) {
     const brandedMinecraftVersion = response.version.name;        // 1.8.9, 1.7.10
     const protocolVersion = response.version.protocol;//    47,      5
     let versions = [brandedMinecraftVersion]
-    .concat(brandedMinecraftVersion.match(/((\d+\.)+\d+)/g)||[])
-    .map(function (version) {
-      return minecraft_data.versionsByMinecraftVersion["pc"][version]
-    })
-    .filter(function (info) { return info })
-    .sort(function (a, b) { return b.version - a.version })
-    .concat(minecraft_data.postNettyVersionsByProtocolVersion["pc"][protocolVersion]||[])
+      .concat(brandedMinecraftVersion.match(/((\d+\.)+\d+)/g)||[])
+      .map(function (version) {
+        return minecraft_data.versionsByMinecraftVersion['pc'][version]
+      })
+      .filter(function (info) { return info })
+      .sort(function (a, b) { return b.version - a.version })
+      .concat(minecraft_data.postNettyVersionsByProtocolVersion['pc'][protocolVersion]||[])
     if (versions.length === 0) {
       client.emit('error', new Error(`unsupported/unknown protocol version: ${protocolVersion}, update minecraft-data`));
     }

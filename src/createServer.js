@@ -9,36 +9,36 @@ const plugins = [
   require('./server/ping')
 ];
 
-module.exports=createServer;
+module.exports = createServer;
 
-function createServer(options={}) {
+function createServer(options = {}) {
   const {
     host = '0.0.0.0',
-    'server-port':serverPort,
+    'server-port': serverPort,
     port = serverPort || 25565,
-    motd = "A Minecraft server",
-    'max-players' : maxPlayers = 20,
+    motd = 'A Minecraft server',
+    maxPlayers = 20,
     version,
     favicon,
     customPackets
   } = options;
 
-  const optVersion = version===undefined || version===false ? require("./version").defaultVersion : version;
+  const optVersion = version === undefined || version === false ? require('./version').defaultVersion : version;
 
-  const mcData=require("minecraft-data")(optVersion);
+  const mcData = require('minecraft-data')(optVersion);
   const mcversion = mcData.version;
 
 
   const server = new Server(mcversion.minecraftVersion,customPackets);
-  server.mcversion=mcversion;
+  server.mcversion = mcversion;
   server.motd = motd;
   server.maxPlayers = maxPlayers;
   server.playerCount = 0;
   server.onlineModeExceptions = {};
   server.favicon = favicon;
-  server.serverKey = new NodeRSA({b: 1024});
+  server.serverKey = new NodeRSA({ b: 1024 });
   
-  server.on("connection", function(client) {
+  server.on('connection', function(client) {
     plugins.forEach(plugin => plugin(client,server,options));
   });
   server.listen(port, host);

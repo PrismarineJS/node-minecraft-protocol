@@ -2,7 +2,6 @@
 
 const Client = require('./client');
 const assert = require('assert');
-
 const encrypt = require('./client/encrypt');
 const keepalive = require('./client/keepalive');
 const compress = require('./client/compress');
@@ -14,19 +13,19 @@ const autoVersion = require('./client/autoVersion');
 const pluginChannels = require('./client/pluginChannels');
 const versionChecking = require('./client/versionChecking');
 
-module.exports=createClient;
+module.exports = createClient;
 
 function createClient(options) {
-  assert.ok(options, "options is required");
-  assert.ok(options.username, "username is required");
+  assert.ok(options, 'options is required');
+  assert.ok(options.username, 'username is required');
   if(!options.version)
-    options.version=false;
+    options.version = false;
 
   // TODO: avoid setting default version if autoVersion is enabled
-  const optVersion = options.version || require("./version").defaultVersion;
-  const mcData=require("minecraft-data")(optVersion);
+  const optVersion = options.version || require('./version').defaultVersion;
+  const mcData = require('minecraft-data')(optVersion);
   if (!mcData) throw new Error(`unsupported protocol version: ${optVersion}`);
-  const version = mcData.version;
+  const { version } = mcData;
   options.majorVersion = version.majorVersion;
   options.protocolVersion = version.version;
 

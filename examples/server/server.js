@@ -2,9 +2,9 @@ const mc = require('minecraft-protocol');
 
 const options = {
   motd: 'Vox Industries',
-  'max-players': 127,
+  maxPlayers: 127,
   port: 25565,
-  'online-mode': false
+  onlineMode: false
 };
 
 const server = mc.createServer(options);
@@ -64,7 +64,7 @@ function broadcast(message, exclude, username) {
     if(client !== exclude) {
       const msg = {
         translate: translate,
-        "with": [
+        'with': [
           username,
           message
         ]

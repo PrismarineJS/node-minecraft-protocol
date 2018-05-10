@@ -1,7 +1,7 @@
 const mc = require('minecraft-protocol');
 
 const options = {
-  'online-mode': true
+  onlineMode: true
 };
 
 const server = mc.createServer(options);
@@ -40,7 +40,7 @@ server.on('login', function(client) {
 
   const msg = {
     translate: 'chat.type.announcement',
-    "with": [
+    'with': [
       'Server',
       'Hello, world!'
     ]
