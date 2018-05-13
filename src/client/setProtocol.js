@@ -1,31 +1,31 @@
-'use strict';
+'use strict'
 
-const states = require("../states");
+const states = require('../states')
 
-module.exports = function(client, options) {
-  client.on('connect', onConnect);
+module.exports = function (client, options) {
+  client.on('connect', onConnect)
 
-  function onConnect() {
+  function onConnect () {
     if (client.wait_connect) {
-      client.on('connect_allowed', next);
+      client.on('connect_allowed', next)
     } else {
-      next();
+      next()
     }
 
-    function next() {
-      let taggedHost = options.host;
-      if (client.tagHost) taggedHost += client.tagHost;
+    function next () {
+      let taggedHost = options.host
+      if (client.tagHost) taggedHost += client.tagHost
 
       client.write('set_protocol', {
         protocolVersion: options.protocolVersion,
         serverHost: taggedHost,
         serverPort: options.port,
         nextState: 2
-      });
-      client.state = states.LOGIN;
+      })
+      client.state = states.LOGIN
       client.write('login_start', {
         username: client.username
-      });
+      })
     }
   }
-};
+}

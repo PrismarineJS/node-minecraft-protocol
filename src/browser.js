@@ -1,14 +1,14 @@
-'use strict';
+'use strict'
 
-const Client = require('./client');
-const Server = require('./server');
-const serializer = require("./transforms/serializer");
+const Client = require('./client')
+const Server = require('./server')
+const serializer = require('./transforms/serializer')
 
 module.exports = {
   Client: Client,
   Server: Server,
-  states: require("./states"),
-  createSerializer:serializer.createSerializer,
-  createDeserializer:serializer.createDeserializer,
-  supportedVersions:require("./version").supportedVersions
-};
+  states: require('./states'),
+  createSerializer: serializer.createSerializer,
+  createDeserializer: serializer.createDeserializer,
+  supportedVersions: require('./version').supportedVersions
+}

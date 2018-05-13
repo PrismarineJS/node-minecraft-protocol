@@ -9,7 +9,9 @@
   },
   "scripts": {
     "prepublish": "require-self",
-    "test": "mocha --recursive --reporter spec"
+    "test": "mocha --recursive --reporter spec",
+    "lint": "standard",
+    "pretest": "npm run lint"
   },
   "keywords": [
     "minecraft",
@@ -33,7 +35,8 @@
     "minecraft-wrap": "^1.0.0",
     "mocha": "^5.0.5",
     "power-assert": "^1.0.0",
-    "require-self": "^0.2.1"
+    "require-self": "^0.2.1",
+    "standard": "^11.0.1"
   },
   "dependencies": {
     "buffer-equal": "^1.0.0",

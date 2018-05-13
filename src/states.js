@@ -1,10 +1,10 @@
-'use strict';
+'use strict'
 
 const states = {
-  "HANDSHAKING": "handshaking",
-  "STATUS": "status",
-  "LOGIN": "login",
-  "PLAY": "play"
-};
+  'HANDSHAKING': 'handshaking',
+  'STATUS': 'status',
+  'LOGIN': 'login',
+  'PLAY': 'play'
+}
 
-module.exports=states;
+module.exports = states

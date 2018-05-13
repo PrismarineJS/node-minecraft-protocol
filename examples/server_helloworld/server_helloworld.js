@@ -1,22 +1,22 @@
-const mc = require('minecraft-protocol');
+const mc = require('minecraft-protocol')
 
 const options = {
   'online-mode': true
-};
+}
 
-const server = mc.createServer(options);
+const server = mc.createServer(options)
 
-server.on('login', function(client) {
-  const addr = client.socket.remoteAddress;
-  console.log('Incoming connection', '(' + addr + ')');
+server.on('login', function (client) {
+  const addr = client.socket.remoteAddress
+  console.log('Incoming connection', '(' + addr + ')')
 
-  client.on('end', function() {
-    console.log('Connection closed', '(' + addr + ')');
-  });
+  client.on('end', function () {
+    console.log('Connection closed', '(' + addr + ')')
+  })
 
-  client.on('error', function(error) {
-    console.log('Error:', error);
-  });
+  client.on('error', function (error) {
+    console.log('Error:', error)
+  })
 
   // send init data so client will start rendering world
   client.write('login', {
@@ -27,7 +27,7 @@ server.on('login', function(client) {
     difficulty: 2,
     maxPlayers: server.maxPlayers,
     reducedDebugInfo: false
-  });
+  })
 
   client.write('position', {
     x: 0,
@@ -36,22 +36,22 @@ server.on('login', function(client) {
     yaw: 0,
     pitch: 0,
     flags: 0x00
-  });
+  })
 
   const msg = {
     translate: 'chat.type.announcement',
-    "with": [
+    'with': [
       'Server',
       'Hello, world!'
     ]
-  };
-  client.write('chat', {message: JSON.stringify(msg), position: 0});
-});
+  }
+  client.write('chat', {message: JSON.stringify(msg), position: 0})
+})
 
-server.on('error', function(error) {
-  console.log('Error:', error);
-});
+server.on('error', function (error) {
+  console.log('Error:', error)
+})
 
-server.on('listening', function() {
-  console.log('Server listening on port', server.socketServer.address().port);
-});
+server.on('listening', function () {
+  console.log('Server listening on port', server.socketServer.address().port)
+})

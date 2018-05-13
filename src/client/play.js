@@ -1,11 +1,11 @@
-const states = require("../states");
+const states = require('../states')
 
-module.exports = function(client, options) {
-  client.once('success', onLogin);
+module.exports = function (client, options) {
+  client.once('success', onLogin)
 
-  function onLogin(packet) {
-    client.state = states.PLAY;
-    client.uuid = packet.uuid;
-    client.username = packet.username;
+  function onLogin (packet) {
+    client.state = states.PLAY
+    client.uuid = packet.uuid
+    client.username = packet.username
   }
-};
+}

@@ -1,250 +1,220 @@
-'use strict';
+'use strict'
 
-const EventEmitter = require('events').EventEmitter;
-const debug = require('debug')('minecraft-protocol');
-const compression = require('./transforms/compression');
-const framing = require('./transforms/framing');
-const crypto = require('crypto');
-const states = require("./states");
+const EventEmitter = require('events').EventEmitter
+const debug = require('debug')('minecraft-protocol')
+const compression = require('./transforms/compression')
+const framing = require('./transforms/framing')
+const crypto = require('crypto')
+const states = require('./states')
 
-const createSerializer=require("./transforms/serializer").createSerializer;
-const createDeserializer=require("./transforms/serializer").createDeserializer;
+const createSerializer = require('./transforms/serializer').createSerializer
+const createDeserializer = require('./transforms/serializer').createDeserializer
 
-class Client extends EventEmitter
-{
-  constructor(isServer,version,customPackets) {
-    super();
-    this.customPackets=customPackets;
-    this.version=version;
-    this.isServer = !!isServer;
-    this.splitter=framing.createSplitter();
-    this.packetsToParse={};
-    this.serializer;
-    this.compressor=null;
-    this.framer=framing.createFramer();
-    this.cipher=null;
-    this.decipher=null;
-    this.decompressor=null;
-    this.deserializer;
-    this.isServer;
-    this.ended=true;
-    this.latency=0;
+class Client extends EventEmitter {
+  constructor (isServer, version, customPackets) {
+    super()
+    this.customPackets = customPackets
+    this.version = version
+    this.isServer = !!isServer
+    this.splitter = framing.createSplitter()
+    this.packetsToParse = {}
+    this.serializer = undefined
+    this.compressor = null
+    this.framer = framing.createFramer()
+    this.cipher = null
+    this.decipher = null
+    this.decompressor = null
+    this.deserializer = undefined
+    this.isServer = undefined
+    this.ended = true
+    this.latency = 0
 
-    this.on('newListener', function(event, listener) {
-      const direction = this.isServer ? 'toServer' : 'toClient';
-      if(typeof this.packetsToParse[event] === "undefined") this.packetsToParse[event] = 1;
-      else this.packetsToParse[event] += 1;
-    });
-    this.on('removeListener', function(event, listener) {
-      const direction = this.isServer ? 'toServer' : 'toClient';
-      this.packetsToParse[event] -= 1;
-    });
-
-    this.state=states.HANDSHAKING;
+    this.state = states.HANDSHAKING
   }
 
-  get state(){
-    return this.protocolState;
+  get state () {
+    return this.protocolState
   }
 
+  setSerializer (state) {
+    this.serializer = createSerializer({isServer: this.isServer, version: this.version, state: state, customPackets: this.customPackets})
+    this.deserializer = createDeserializer({isServer: this.isServer,
+      version: this.version,
+      state: state,
+      packetsToParse:
+      this.packetsToParse,
+      customPackets: this.customPackets})
 
-  setSerializer(state) {
-    this.serializer = createSerializer({ isServer:this.isServer, version:this.version, state: state,customPackets:this.customPackets});
-    this.deserializer = createDeserializer({ isServer:this.isServer, version:this.version, state: state, packetsToParse:
-      this.packetsToParse,customPackets:this.customPackets});
-
-    this.splitter.recognizeLegacyPing = state === states.HANDSHAKING;
+    this.splitter.recognizeLegacyPing = state === states.HANDSHAKING
 
     this.serializer.on('error', (e) => {
-      let parts;
-      if(e.field) {
-        parts = e.field.split(".");
-        parts.shift();
-      }
-      else
-        parts=[];
-      const serializerDirection = !this.isServer ? 'toServer' : 'toClient';
-      e.field = [this.protocolState, serializerDirection].concat(parts).join(".");
-      e.message = `Serialization error for ${e.field} : ${e.message}`;
-      if(!this.compressor)
-        this.serializer.pipe(this.framer);
-      else
-        this.serializer.pipe(this.compressor);
-      this.emit('error',e);
-    });
-
+      let parts
+      if (e.field) {
+        parts = e.field.split('.')
+        parts.shift()
+      } else { parts = [] }
+      const serializerDirection = !this.isServer ? 'toServer' : 'toClient'
+      e.field = [this.protocolState, serializerDirection].concat(parts).join('.')
+      e.message = `Serialization error for ${e.field} : ${e.message}`
+      if (!this.compressor) { this.serializer.pipe(this.framer) } else { this.serializer.pipe(this.compressor) }
+      this.emit('error', e)
+    })
 
     this.deserializer.on('error', (e) => {
-      let parts;
-      if(e.field) {
-        parts = e.field.split(".");
-        parts.shift();
-      }
-      else
-        parts=[];
-      const deserializerDirection = this.isServer ? 'toServer' : 'toClient';
-      e.field = [this.protocolState, deserializerDirection].concat(parts).join(".");
-      e.message = `Deserialization error for ${e.field} : ${e.message}`;
-      if(!this.compressor)
-        this.splitter.pipe(this.deserializer);
-      else
-        this.decompressor.pipe(this.deserializer);
-      this.emit('error',e);
-    });
+      let parts
+      if (e.field) {
+        parts = e.field.split('.')
+        parts.shift()
+      } else { parts = [] }
+      const deserializerDirection = this.isServer ? 'toServer' : 'toClient'
+      e.field = [this.protocolState, deserializerDirection].concat(parts).join('.')
+      e.message = `Deserialization error for ${e.field} : ${e.message}`
+      if (!this.compressor) { this.splitter.pipe(this.deserializer) } else { this.decompressor.pipe(this.deserializer) }
+      this.emit('error', e)
+    })
 
     this.deserializer.on('data', (parsed) => {
-      parsed.metadata.name=parsed.data.name;
-      parsed.data=parsed.data.params;
-      parsed.metadata.state=state;
-      debug("read packet " + state + "." + parsed.metadata.name);
-      const s=JSON.stringify(parsed.data,null,2);
-      debug(s.length > 10000 ? parsed.data : s);
-      this.emit('packet', parsed.data, parsed.metadata);
-      this.emit(parsed.metadata.name, parsed.data, parsed.metadata);
-      this.emit('raw.' + parsed.metadata.name, parsed.buffer, parsed.metadata);
-      this.emit('raw', parsed.buffer, parsed.metadata);
-    });
+      parsed.metadata.name = parsed.data.name
+      parsed.data = parsed.data.params
+      parsed.metadata.state = state
+      debug('read packet ' + state + '.' + parsed.metadata.name)
+      const s = JSON.stringify(parsed.data, null, 2)
+      debug(s.length > 10000 ? parsed.data : s)
+      this.emit('packet', parsed.data, parsed.metadata)
+      this.emit(parsed.metadata.name, parsed.data, parsed.metadata)
+      this.emit('raw.' + parsed.metadata.name, parsed.buffer, parsed.metadata)
+      this.emit('raw', parsed.buffer, parsed.metadata)
+    })
   }
 
-  set state(newProperty) {
-    const oldProperty = this.protocolState;
-    this.protocolState = newProperty;
+  set state (newProperty) {
+    const oldProperty = this.protocolState
+    this.protocolState = newProperty
 
-    if(this.serializer) {
+    if (this.serializer) {
       if (!this.compressor) {
-        this.serializer.unpipe();
-        this.splitter.unpipe(this.deserializer);
+        this.serializer.unpipe()
+        this.splitter.unpipe(this.deserializer)
+      } else {
+        this.serializer.unpipe(this.compressor)
+        this.decompressor.unpipe(this.deserializer)
       }
-      else {
-        this.serializer.unpipe(this.compressor);
-        this.decompressor.unpipe(this.deserializer);
-      }
 
-      this.serializer.removeAllListeners();
-      this.deserializer.removeAllListeners();
+      this.serializer.removeAllListeners()
+      this.deserializer.removeAllListeners()
     }
-    this.setSerializer(this.protocolState);
+    this.setSerializer(this.protocolState)
 
-    if(!this.compressor)
-    {
-      this.serializer.pipe(this.framer);
-      this.splitter.pipe(this.deserializer);
-    }
-    else
-    {
-      this.serializer.pipe(this.compressor);
-      this.decompressor.pipe(this.deserializer);
+    if (!this.compressor) {
+      this.serializer.pipe(this.framer)
+      this.splitter.pipe(this.deserializer)
+    } else {
+      this.serializer.pipe(this.compressor)
+      this.decompressor.pipe(this.deserializer)
     }
 
-    this.emit('state', newProperty, oldProperty);
+    this.emit('state', newProperty, oldProperty)
   }
 
-  get compressionThreshold() {
-    return this.compressor == null ? -2 : this.compressor.compressionThreshold;
+  get compressionThreshold () {
+    return this.compressor == null ? -2 : this.compressor.compressionThreshold
   }
 
-  set compressionThreshold(threshold) {
-    this.setCompressionThreshold(threshold);
+  set compressionThreshold (threshold) {
+    this.setCompressionThreshold(threshold)
   }
 
-  setSocket(socket) {
-    this.ended = false;
+  setSocket (socket) {
+    this.ended = false
 
     // TODO : A lot of other things needs to be done.
     const endSocket = () => {
-      if(this.ended) return;
-      this.ended = true;
-      this.socket.removeListener('close', endSocket);
-      this.socket.removeListener('end', endSocket);
-      this.socket.removeListener('timeout', endSocket);
-      this.emit('end', this._endReason);
-    };
+      if (this.ended) return
+      this.ended = true
+      this.socket.removeListener('close', endSocket)
+      this.socket.removeListener('end', endSocket)
+      this.socket.removeListener('timeout', endSocket)
+      this.emit('end', this._endReason)
+    }
 
     const onFatalError = (err) => {
-      this.emit('error', err);
-      endSocket();
-    };
+      this.emit('error', err)
+      endSocket()
+    }
 
-    const onError = (err) => this.emit('error', err);
+    const onError = (err) => this.emit('error', err)
 
-    this.socket = socket;
+    this.socket = socket
 
-    if(this.socket.setNoDelay)
-      this.socket.setNoDelay(true);
+    if (this.socket.setNoDelay) { this.socket.setNoDelay(true) }
 
-    this.socket.on('connect', () => this.emit('connect'));
+    this.socket.on('connect', () => this.emit('connect'))
 
-    this.socket.on('error', onFatalError);
-    this.socket.on('close', endSocket);
-    this.socket.on('end', endSocket);
-    this.socket.on('timeout', endSocket);
-    this.framer.on('error', onError);
-    this.splitter.on('error', onError);
+    this.socket.on('error', onFatalError)
+    this.socket.on('close', endSocket)
+    this.socket.on('end', endSocket)
+    this.socket.on('timeout', endSocket)
+    this.framer.on('error', onError)
+    this.splitter.on('error', onError)
 
-    this.socket.pipe(this.splitter);
-    this.framer.pipe(this.socket);
+    this.socket.pipe(this.splitter)
+    this.framer.pipe(this.socket)
   }
 
-  end(reason) {
-    this._endReason = reason;
-    if(this.cipher) this.cipher.unpipe();
-    if(this.framer) this.framer.unpipe();
-    if(this.socket) this.socket.end();
+  end (reason) {
+    this._endReason = reason
+    if (this.cipher) this.cipher.unpipe()
+    if (this.framer) this.framer.unpipe()
+    if (this.socket) this.socket.end()
   }
 
-  setEncryption(sharedSecret) {
-    if (this.cipher != null)
-      this.emit('error', new Error('Set encryption twice!'));
-    this.cipher = crypto.createCipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
-    this.cipher.on('error', (err) => this.emit('error', err));
-    this.framer.unpipe(this.socket);
-    this.framer.pipe(this.cipher).pipe(this.socket);
-    this.decipher = crypto.createDecipheriv('aes-128-cfb8', sharedSecret, sharedSecret);
-    this.decipher.on('error', (err) => this.emit('error', err));
-    this.socket.unpipe(this.splitter);
-    this.socket.pipe(this.decipher).pipe(this.splitter);
+  setEncryption (sharedSecret) {
+    if (this.cipher != null) { this.emit('error', new Error('Set encryption twice!')) }
+    this.cipher = crypto.createCipheriv('aes-128-cfb8', sharedSecret, sharedSecret)
+    this.cipher.on('error', (err) => this.emit('error', err))
+    this.framer.unpipe(this.socket)
+    this.framer.pipe(this.cipher).pipe(this.socket)
+    this.decipher = crypto.createDecipheriv('aes-128-cfb8', sharedSecret, sharedSecret)
+    this.decipher.on('error', (err) => this.emit('error', err))
+    this.socket.unpipe(this.splitter)
+    this.socket.pipe(this.decipher).pipe(this.splitter)
   }
 
-  setCompressionThreshold(threshold) {
+  setCompressionThreshold (threshold) {
     if (this.compressor == null) {
-      this.compressor = compression.createCompressor(threshold);
-      this.compressor.on('error', (err) => this.emit('error', err));
-      this.serializer.unpipe(this.framer);
-      this.serializer.pipe(this.compressor).pipe(this.framer);
-      this.decompressor = compression.createDecompressor(threshold);
-      this.decompressor.on('error', (err) => this.emit('error', err));
-      this.splitter.unpipe(this.deserializer);
-      this.splitter.pipe(this.decompressor).pipe(this.deserializer);
+      this.compressor = compression.createCompressor(threshold)
+      this.compressor.on('error', (err) => this.emit('error', err))
+      this.serializer.unpipe(this.framer)
+      this.serializer.pipe(this.compressor).pipe(this.framer)
+      this.decompressor = compression.createDecompressor(threshold)
+      this.decompressor.on('error', (err) => this.emit('error', err))
+      this.splitter.unpipe(this.deserializer)
+      this.splitter.pipe(this.decompressor).pipe(this.deserializer)
     } else {
-      this.decompressor.threshold = threshold;
-      this.compressor.threshold = threshold;
+      this.decompressor.threshold = threshold
+      this.compressor.threshold = threshold
     }
   }
 
-  write(name, params) {
-    if(this.ended)
-      return;
-    debug("writing packet " + this.state + "." + name);
-    debug(params);
-    this.serializer.write({ name, params });
+  write (name, params) {
+    if (this.ended) { return }
+    debug('writing packet ' + this.state + '.' + name)
+    debug(params)
+    this.serializer.write({ name, params })
   }
 
-  writeRaw(buffer) {
-    if(this.ended)
-      return;
-    if (this.compressor === null)
-      this.framer.write(buffer);
-    else
-      this.compressor.write(buffer);
+  writeRaw (buffer) {
+    if (this.ended) { return }
+    if (this.compressor === null) { this.framer.write(buffer) } else { this.compressor.write(buffer) }
   }
 
   // TCP/IP-specific (not generic Stream) method for backwards-compatibility
-  connect(port, host) {
-    const options = {port, host};
-    if (!this.options) this.options = options;
-    require('./client/tcp_dns')(this, options);
-    options.connect(this);
+  connect (port, host) {
+    const options = {port, host}
+    if (!this.options) this.options = options
+    require('./client/tcp_dns')(this, options)
+    options.connect(this)
   }
 }
 
-module.exports = Client;
+module.exports = Client
