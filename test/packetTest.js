@@ -24,7 +24,13 @@ const values = {
   'buffer': Buffer.alloc(8),
   'array': function (typeArgs, context) {
     let count
-    if (typeof typeArgs.count === 'object') { count = evalCount(typeArgs.count, context) } else if (typeof typeArgs.count !== 'undefined') { count = getField(typeArgs.count, context) } else if (typeof typeArgs.countType !== 'undefined') { count = 1 }
+    if (typeof typeArgs.count === 'object') {
+      count = evalCount(typeArgs.count, context)
+    } else if (typeArgs.count !== undefined) {
+      count = getField(typeArgs.count, context)
+    } else if (typeArgs.countType !== undefined) {
+      count = 1
+    }
     const arr = []
     while (count > 0) {
       arr.push(getValue(typeArgs.type, context))
@@ -37,7 +43,9 @@ const values = {
       '..': context
     }
     Object.keys(typeArgs).forEach(function (index) {
-      const v = typeArgs[index].name === 'type' && typeArgs[index].type === 'string' ? 'crafting_shapeless' : getValue(typeArgs[index].type, results)
+      const v = typeArgs[index].name === 'type' && typeArgs[index].type === 'string'
+        ? 'crafting_shapeless'
+        : getValue(typeArgs[index].type, results)
       if (typeArgs[index].anon) {
         Object.keys(v).forEach(key => {
           results[key] = v[key]
@@ -128,8 +136,11 @@ const values = {
   'restBuffer': Buffer.alloc(0),
   'switch': function (typeArgs, context) {
     const i = typeArgs.fields[getField(typeArgs.compareTo, context)]
-    if (typeof i === 'undefined') {
-      if (typeArgs.default === undefined) { throw new Error("couldn't find the field " + typeArgs.compareTo + ' of the compareTo and the default is not defined') }
+    if (i === undefined) {
+      if (typeArgs.default === undefined) {
+        throw new Error("couldn't find the field " + typeArgs.compareTo +
+          ' of the compareTo and the default is not defined')
+      }
       return getValue(typeArgs.default, context)
     } else { return getValue(i, context) }
   },
@@ -149,7 +160,13 @@ const values = {
 
 function getValue (_type, packet) {
   const fieldInfo = getFieldInfo(_type)
-  if (typeof values[fieldInfo.type] === 'function') { return values[fieldInfo.type](fieldInfo.typeArgs, packet) } else if (values[fieldInfo.type] !== 'undefined') { return values[fieldInfo.type] } else if (fieldInfo.type !== 'void') { throw new Error('No value for type ' + fieldInfo.type) }
+  if (typeof values[fieldInfo.type] === 'function') {
+    return values[fieldInfo.type](fieldInfo.typeArgs, packet)
+  } else if (values[fieldInfo.type] !== undefined) {
+    return values[fieldInfo.type]
+  } else if (fieldInfo.type !== 'void') {
+    throw new Error('No value for type ' + fieldInfo.type)
+  }
 }
 
 const {firstVersion, lastVersion} = require('./common/parallel')
@@ -184,18 +201,22 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
       client.end()
     })
     let packetInfo
-    Object.keys(packets).filter(function (state) { return state !== 'types' }).forEach(function (state) {
-      Object.keys(packets[state]).forEach(function (direction) {
-        Object.keys(packets[state][direction].types)
-          .filter(function (packetName) { return packetName !== 'packet' && packetName.startsWith('packet_') })
-          .forEach(function (packetName) {
-            packetInfo = packets[state][direction].types[packetName]
-            packetInfo = packetInfo || null
-            it(state + ',' + (direction === 'toServer' ? 'Server' : 'Client') + 'Bound,' + packetName,
-              callTestPacket(packetName.substr(7), packetInfo, state, direction === 'toServer'))
-          })
+    Object.keys(packets).filter(function (state) { return state !== 'types' })
+      .forEach(function (state) {
+        Object.keys(packets[state]).forEach(function (direction) {
+          Object.keys(packets[state][direction].types)
+            .filter(function (packetName) {
+              return packetName !== 'packet' &&
+              packetName.startsWith('packet_')
+            })
+            .forEach(function (packetName) {
+              packetInfo = packets[state][direction].types[packetName]
+              packetInfo = packetInfo || null
+              it(state + ',' + (direction === 'toServer' ? 'Server' : 'Client') + 'Bound,' + packetName,
+                callTestPacket(packetName.substr(7), packetInfo, state, direction === 'toServer'))
+            })
+        })
       })
-    })
     function callTestPacket (packetName, packetInfo, state, toServer) {
       return function (done) {
         client.state = state
@@ -232,10 +253,14 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         assert.deepEqual(p1[field], p2[field])
       })
       Object.keys(p1).forEach(function (field) {
-        if (p1[field] !== undefined) { assert.ok(field in p2, 'field ' + field + ' missing in p2, in p1 it has value ' + JSON.stringify(p1[field])) }
+        if (p1[field] !== undefined) {
+          assert.ok(field in p2, 'field ' + field +
+            ' missing in p2, in p1 it has value ' + JSON.stringify(p1[field]))
+        }
       })
       Object.keys(p2).forEach(function (field) {
-        assert.ok(field in p1, 'field ' + field + ' missing in p1, in p2 it has value ' + JSON.stringify(p2[field]))
+        assert.ok(field in p1, 'field ' + field + ' missing in p1, in p2 it has value ' +
+          JSON.stringify(p2[field]))
       })
     }
   })

@@ -9,7 +9,7 @@ module.exports = function (client, server, options) {
   const {
     'online-mode': onlineMode = true,
     kickTimeout = 30 * 1000,
-    errorHandler: clientErrorHandler = (client, err) => client.end()
+    errorHandler: clientErrorHandler = (client, err) => client.end(err)
   } = options
 
   let serverId

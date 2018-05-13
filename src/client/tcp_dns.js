@@ -10,7 +10,7 @@ module.exports = function (client, options) {
       if (options.stream) {
         client.setSocket(options.stream)
         client.emit('connect')
-      } else if (options.port === 25565 && net.isIP(options.host) === 0) {
+      } else if (options.port === 25565 && net.isIP(options.host) === 0 && options.host !== 'localhost') {
         dns.resolveSrv('_minecraft._tcp.' + options.host, function (err, addresses) {
           if (err) {
             console.log(err)
