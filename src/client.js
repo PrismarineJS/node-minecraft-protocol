@@ -18,14 +18,11 @@ class Client extends EventEmitter {
     this.isServer = !!isServer
     this.splitter = framing.createSplitter()
     this.packetsToParse = {}
-    this.serializer = undefined
     this.compressor = null
     this.framer = framing.createFramer()
     this.cipher = null
     this.decipher = null
     this.decompressor = null
-    this.deserializer = undefined
-    this.isServer = undefined
     this.ended = true
     this.latency = 0
 
