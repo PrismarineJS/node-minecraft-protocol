@@ -1,5 +1,10 @@
 # History
 
+## 1.5.3
+
+* make decompression more reliable : print an error if a server send a wrong packet instead of crashing
+* change codestyle to standard
+
 ## 1.5.2
 
 * fix issue with auth.js
