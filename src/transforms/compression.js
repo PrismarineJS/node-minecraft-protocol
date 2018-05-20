@@ -52,7 +52,17 @@ class Decompressor extends Transform {
       return cb()
     } else {
       zlib.inflate(chunk.slice(size), (err, newBuf) => {
-        if (err) { return cb(err) }
+        if (err) {
+          console.error('problem inflating chunk')
+          console.error('uncompressed length ' + value)
+          console.error('compressed length ' + chunk.length)
+          console.error('hex ' + chunk.toString('hex'))
+          console.log(err)
+          return cb()
+        }
+        if (newBuf.length !== value) {
+          console.error('uncompressed length should be ' + value + ' but is ' + newBuf.length)
+        }
         this.push(newBuf)
         return cb()
       })
