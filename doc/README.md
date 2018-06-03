@@ -66,6 +66,7 @@ Called when a client connects, but before any login has happened. Takes a
 
 Called when a client is logged in against server. Takes a `Client` parameter.
 
+
 ## mc.createClient(options)
 
 Returns a `Client` instance and perform login.
@@ -145,6 +146,10 @@ and the packet metadata (name, state)
 
 Called when the protocol changes state. Takes the new state and old state as
 parameters.
+
+### `session` event
+
+Called when user authentication is resolved. Takes session data as parameter.
 
 ### per-packet events
 
