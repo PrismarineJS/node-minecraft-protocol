@@ -2,6 +2,7 @@
 
 const crypto = require('crypto')
 const yggserver = require('yggdrasil').server({})
+const mcleaks = require('node-mcleaks');
 const debug = require('debug')('minecraft-protocol')
 
 module.exports = function (client, options) {
@@ -35,10 +36,22 @@ module.exports = function (client, options) {
         }
       }
 
-      function joinServerRequest (cb) {
-        yggserver.join(options.accessToken, client.session.selectedProfile.id,
-          packet.serverId, sharedSecret, packet.publicKey, cb)
+      function joinServerRequest(cb) {
+        if (options.mcLeaks){
+          mcleaks.join({
+            session: options.accessToken,
+            mcname: client.username,
+            server: (options.host || 'localhost')+":"+options.port||'25565',
+            serverid: packet.serverId,
+            sharedsecret: sharedSecret,
+            serverkey: packet.publicKey
+          },cb);
+        }else{
+          yggserver.join(options.accessToken, client.session.selectedProfile.id,
+              packet.serverId, sharedSecret, packet.publicKey, cb);
+        }
       }
+
 
       function sendEncryptionKeyResponse () {
         const pubKey = mcPubKeyToPem(packet.publicKey)

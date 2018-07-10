@@ -20,7 +20,9 @@ module.exports = function (client, options) {
       }
     }
 
-    if (options.session) {
+    if (options.mcLeaks && options.session) {
+      cb(null, options.session);
+    } else if (options.session) {
       yggdrasil.validate(options.session.accessToken, function (err) {
         if (!err) { cb(null, options.session) } else {
           yggdrasil.refresh(options.session.accessToken, options.session.clientToken, function (err, accessToken, data) {
