@@ -1,5 +1,10 @@
 # History
 
+## 1.6.0
+
+* added session data to session event
+* add hideError option
+
 ## 1.5.3
 
 * make decompression more reliable : print an error if a server send a wrong packet instead of crashing
