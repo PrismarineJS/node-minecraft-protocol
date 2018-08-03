@@ -45,7 +45,7 @@
     "lodash.get": "^4.1.2",
     "lodash.merge": "^4.3.0",
     "minecraft-data": "^2.26.0",
-    "node-rsa": "^0.4.2",
+    "node-rsa": "^1.0.0",
     "prismarine-nbt": "^1.2.0",
     "protodef": "^1.6.7",
     "readable-stream": "^2.0.5",
