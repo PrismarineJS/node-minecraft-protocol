@@ -28,8 +28,9 @@ function createClient (options) {
   const version = mcData.version
   options.majorVersion = version.majorVersion
   options.protocolVersion = version.version
+  const hideErrors = options.hideErrors || false
 
-  const client = new Client(false, version.minecraftVersion, options.customPackets)
+  const client = new Client(false, version.minecraftVersion, options.customPackets, hideErrors)
 
   tcpDns(client, options)
   auth(client, options)

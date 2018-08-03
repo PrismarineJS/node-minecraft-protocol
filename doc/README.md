@@ -24,6 +24,7 @@ automatically logged in and validated against mojang's auth.
  * stream : a stream to use as connection
  * connect : a function taking the client as parameter and that should client.setSocket(socket) 
  and client.emit('connect') when appropriate (see the proxy examples for an example of use)
+ * hideErrors : do not display errors, default to false
 
 ## mc.Server(version,[customPackets])
 
@@ -82,6 +83,7 @@ Returns a `Client` instance and perform login.
  * checkTimeoutInterval : default to `30*1000` (30s), check if keepalive received at that period, disconnect otherwise.
  * version : 1.8 or 1.9 or false (to auto-negotiate): default to 1.8
  * customPackets (optional) : an object index by version/state/direction/name, see client_custom_packet for an example
+ * hideErrors : do not display errors, default to false
 
 ## mc.Client(isServer,version,[customPackets])
 

@@ -6,7 +6,7 @@ const Client = require('./client')
 const states = require('./states')
 
 class Server extends EventEmitter {
-  constructor (version, customPackets) {
+  constructor (version, customPackets, hideErrors = false) {
     super()
     this.version = version
     this.socketServer = null
@@ -14,6 +14,7 @@ class Server extends EventEmitter {
     this.decipher = null
     this.clients = {}
     this.customPackets = customPackets
+    this.hideErrors = hideErrors
   }
 
   listen (port, host) {
@@ -21,7 +22,7 @@ class Server extends EventEmitter {
     let nextId = 0
     self.socketServer = net.createServer()
     self.socketServer.on('connection', socket => {
-      const client = new Client(true, this.version, this.customPackets)
+      const client = new Client(true, this.version, this.customPackets, this.hideErrors)
       client._end = client.end
       client.end = function end (endReason) {
         endReason = '{"text":"' + endReason + '"}'

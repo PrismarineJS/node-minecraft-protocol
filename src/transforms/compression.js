@@ -8,8 +8,8 @@ module.exports.createCompressor = function (threshold) {
   return new Compressor(threshold)
 }
 
-module.exports.createDecompressor = function (threshold) {
-  return new Decompressor(threshold)
+module.exports.createDecompressor = function (threshold, hideErrors) {
+  return new Decompressor(threshold, hideErrors)
 }
 
 class Compressor extends Transform {
@@ -39,9 +39,10 @@ class Compressor extends Transform {
 }
 
 class Decompressor extends Transform {
-  constructor (compressionThreshold = -1) {
+  constructor (compressionThreshold = -1, hideErrors = false) {
     super()
     this.compressionThreshold = compressionThreshold
+    this.hideErrors = hideErrors
   }
 
   _transform (chunk, enc, cb) {
@@ -53,14 +54,16 @@ class Decompressor extends Transform {
     } else {
       zlib.inflate(chunk.slice(size), (err, newBuf) => {
         if (err) {
-          console.error('problem inflating chunk')
-          console.error('uncompressed length ' + value)
-          console.error('compressed length ' + chunk.length)
-          console.error('hex ' + chunk.toString('hex'))
-          console.log(err)
+          if (!this.hideErrors) {
+            console.error('problem inflating chunk')
+            console.error('uncompressed length ' + value)
+            console.error('compressed length ' + chunk.length)
+            console.error('hex ' + chunk.toString('hex'))
+            console.log(err)
+          }
           return cb()
         }
-        if (newBuf.length !== value) {
+        if (newBuf.length !== value && !this.hideErrors) {
           console.error('uncompressed length should be ' + value + ' but is ' + newBuf.length)
         }
         this.push(newBuf)

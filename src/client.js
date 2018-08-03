@@ -11,7 +11,7 @@ const createSerializer = require('./transforms/serializer').createSerializer
 const createDeserializer = require('./transforms/serializer').createDeserializer
 
 class Client extends EventEmitter {
-  constructor (isServer, version, customPackets) {
+  constructor (isServer, version, customPackets, hideErrors = false) {
     super()
     this.customPackets = customPackets
     this.version = version
@@ -25,6 +25,7 @@ class Client extends EventEmitter {
     this.decompressor = null
     this.ended = true
     this.latency = 0
+    this.hideErrors = hideErrors
 
     this.state = states.HANDSHAKING
   }
@@ -183,7 +184,7 @@ class Client extends EventEmitter {
       this.compressor.on('error', (err) => this.emit('error', err))
       this.serializer.unpipe(this.framer)
       this.serializer.pipe(this.compressor).pipe(this.framer)
-      this.decompressor = compression.createDecompressor(threshold)
+      this.decompressor = compression.createDecompressor(threshold, this.hideErrors)
       this.decompressor.on('error', (err) => this.emit('error', err))
       this.splitter.unpipe(this.deserializer)
       this.splitter.pipe(this.decompressor).pipe(this.deserializer)

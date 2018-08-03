@@ -27,8 +27,9 @@ function createServer (options = {}) {
 
   const mcData = require('minecraft-data')(optVersion)
   const mcversion = mcData.version
+  const hideErrors = options.hideErrors || false
 
-  const server = new Server(mcversion.minecraftVersion, customPackets)
+  const server = new Server(mcversion.minecraftVersion, customPackets, hideErrors)
   server.mcversion = mcversion
   server.motd = motd
   server.maxPlayers = maxPlayers
