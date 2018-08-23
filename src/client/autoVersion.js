@@ -10,7 +10,7 @@ module.exports = function (client, options) {
   debug('pinging', options.host)
   // TODO: use 0xfe ping instead for better compatibility/performance? https://github.com/deathcap/node-minecraft-ping
   ping(options, function (err, response) {
-    if (err) { client.emit('error', err) }
+    if (err) { return client.emit('error', err) }
     debug('ping response', response)
     // TODO: could also use ping pre-connect to save description, type, max players, etc.
     const motd = response.description
