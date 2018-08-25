@@ -1,5 +1,11 @@
 # History
 
+## 1.7.0
+
+* 1.13 support (thanks @lluiscab)
+* fix autoversion bug
+* fix srv record resolution
+
 ## 1.6.0
 
 * added session data to session event
