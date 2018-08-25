@@ -13,6 +13,25 @@ function evalCount (count, fields) {
   return count['default']
 }
 
+const slotValue = {
+  blockId: 5,
+  itemCount: 56,
+  itemDamage: 2,
+  nbtData: {
+    type: 'compound',
+    name: 'test',
+    value: {
+      test1: {type: 'int', value: 4},
+      test2: {type: 'long', value: [12, 42]},
+      test3: {type: 'byteArray', value: [32]},
+      test4: {type: 'string', value: 'ohi'},
+      test5: {type: 'list', value: {type: 'int', value: [4]}},
+      test6: {type: 'compound', value: {test: {type: 'int', value: 4}}},
+      test7: {type: 'intArray', value: [12, 42]}
+    }
+  }
+}
+
 const values = {
   'i32': 123456,
   'i16': -123,
@@ -61,24 +80,7 @@ const values = {
   'bool': true,
   'f64': 99999.2222,
   'f32': -333.444,
-  'slot': {
-    blockId: 5,
-    itemCount: 56,
-    itemDamage: 2,
-    nbtData: {
-      type: 'compound',
-      name: 'test',
-      value: {
-        test1: {type: 'int', value: 4},
-        test2: {type: 'long', value: [12, 42]},
-        test3: {type: 'byteArray', value: [32]},
-        test4: {type: 'string', value: 'ohi'},
-        test5: {type: 'list', value: {type: 'int', value: [4]}},
-        test6: {type: 'compound', value: {test: {type: 'int', value: 4}}},
-        test7: {type: 'intArray', value: [12, 42]}
-      }
-    }
-  },
+  'slot': slotValue,
   'nbt': {
     type: 'compound',
     name: 'test',
@@ -156,7 +158,9 @@ const values = {
     })
     return results
   },
-  'tags': [{'tagName': 'hi', 'entries': [1, 2, 3, 4, 5]}]
+  'tags': [{'tagName': 'hi', 'entries': [1, 2, 3, 4, 5]}],
+  'ingredient': [slotValue],
+  'particleData': null
 }
 
 function getValue (_type, packet) {

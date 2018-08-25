@@ -32,7 +32,7 @@
   "devDependencies": {
     "espower-loader": "^1.0.0",
     "intelli-espower-loader": "^1.0.0",
-    "minecraft-wrap": "^1.0.0",
+    "minecraft-wrap": "^1.2.0",
     "mocha": "^5.0.5",
     "power-assert": "^1.0.0",
     "require-self": "^0.2.1",
@@ -44,7 +44,7 @@
     "endian-toggle": "^0.0.0",
     "lodash.get": "^4.1.2",
     "lodash.merge": "^4.3.0",
-    "minecraft-data": "^2.26.0",
+    "minecraft-data": "^2.27.0",
     "node-rsa": "^0.4.2",
     "prismarine-nbt": "^1.2.0",
     "protodef": "^1.6.7",
