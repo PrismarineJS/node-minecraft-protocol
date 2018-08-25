@@ -48,7 +48,7 @@
     "node-rsa": "^0.4.2",
     "prismarine-nbt": "^1.2.0",
     "protodef": "^1.6.7",
-    "readable-stream": "^2.0.5",
+    "readable-stream": "^3.0.0",
     "uuid-1345": "^0.99.6",
     "yggdrasil": "^1.1.1"
   }
