@@ -165,8 +165,10 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         client.once('error', function (err) {
           if (err.message.startsWith('This server is version')) {
             console.log('Correctly got an error for wrong version : ' + err.message)
+            client.end()
             done()
           } else {
+            client.end()
             done(err)
           }
         })
@@ -241,6 +243,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         })
         client.on('end', function () {
           assert.ok(gotKicked)
+          client.end()
           done()
         })
       })
