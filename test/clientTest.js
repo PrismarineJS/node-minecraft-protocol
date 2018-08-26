@@ -21,7 +21,10 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
   const version = mcData.version
   const MC_SERVER_JAR_DIR = process.env.MC_SERVER_JAR_DIR || os.tmpdir()
   const MC_SERVER_JAR = MC_SERVER_JAR_DIR + '/minecraft_server.' + version.minecraftVersion + '.jar'
-  const wrap = new Wrap(MC_SERVER_JAR, MC_SERVER_PATH + '_' + supportedVersion)
+  const wrap = new Wrap(MC_SERVER_JAR, MC_SERVER_PATH + '_' + supportedVersion, {
+    minMem: 1024,
+    maxMem: 1024
+  })
   wrap.on('line', function (line) {
     console.log(line)
   })
@@ -40,6 +43,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
 
     describe('offline', function () {
       before(function (done) {
+        console.log(new Date() + 'starting server ' + version.minecraftVersion)
         wrap.startServer({
           'online-mode': 'false',
           'server-port': PORT,
@@ -47,13 +51,16 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           'max-players': 120
         }, function (err) {
           if (err) { console.log(err) }
+          console.log(new Date() + 'started server ' + version.minecraftVersion)
           done(err)
         })
       })
 
       after(function (done) {
+        console.log(new Date() + 'stopping server' + version.minecraftVersion)
         wrap.stopServer(function (err) {
           if (err) { console.log(err) }
+          console.log(new Date() + 'stopped server ' + version.minecraftVersion)
           done(err)
         })
       })
@@ -85,6 +92,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           version: version.minecraftVersion,
           port: PORT
         })
+        client.on('error', err => done(err))
         const lineListener = function (line) {
           const match = line.match(/\[Server thread\/INFO\]: <(.+?)> (.+)/)
           if (!match) return
@@ -133,22 +141,11 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           version: version.minecraftVersion,
           port: PORT
         })
-        client.on('login', function (packet) {
+        client.on('error', err => done(err))
+        client.on('login', function () {
           client.write('chat', {
             message: 'hello everyone; I have logged in.'
           })
-        })
-        client.on('chat', function (packet) {
-          const message = JSON.parse(packet.message)
-          assert.strictEqual(message.translate, 'chat.type.text')
-          /* assert.deepEqual(message["with"][0], {
-           clickEvent: {
-           action: "suggest_command",
-           value: "/msg Player "
-           },
-           text: "Player"
-           }); */
-          assert.strictEqual(message['with'][1], 'hello everyone; I have logged in.')
           setTimeout(function () {
             client.end()
             done()
@@ -164,31 +161,40 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         })
         client.once('error', function (err) {
           if (err.message.startsWith('This server is version')) {
-            console.log('Correctly got an error for wrong version : ' + err.message)
+            console.log(new Date() + 'Correctly got an error for wrong version : ' + err.message)
             client.end()
             done()
           } else {
             client.end()
             done(err)
           }
+          client.on('error', err => {
+            if (err.message.indexOf('ECONNRESET') === -1) {
+              done(err)
+            }
+          })
         })
       })
     })
 
     describe('online', function () {
       before(function (done) {
+        console.log(new Date() + 'starting server ' + version.minecraftVersion)
         wrap.startServer({
           'online-mode': 'true',
           'server-port': PORT
         }, function (err) {
           if (err) { console.log(err) }
+          console.log(new Date() + 'started server ' + version.minecraftVersion)
           done(err)
         })
       })
 
       after(function (done) {
+        console.log(new Date() + 'stopping server ' + version.minecraftVersion)
         wrap.stopServer(function (err) {
           if (err) { console.log(err) }
+          console.log(new Date() + 'stopped server ' + version.minecraftVersion)
           done(err)
         })
       })
@@ -200,6 +206,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           version: version.minecraftVersion,
           port: PORT
         })
+        client.on('error', err => done(err))
         const lineListener = function (line) {
           const match = line.match(/\[Server thread\/INFO\]: <(.+?)> (.+)/)
           if (!match) return
@@ -236,6 +243,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           version: version.minecraftVersion,
           port: PORT
         })
+        client.on('error', err => done(err))
         let gotKicked = false
         client.on('disconnect', function (packet) {
           assert.ok(packet.reason.indexOf('"Failed to verify username!"') !== -1 || packet.reason.indexOf('multiplayer.disconnect.unverified_username') !== -1)

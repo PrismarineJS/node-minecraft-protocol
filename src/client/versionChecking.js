@@ -11,6 +11,7 @@ module.exports = function (client, options) {
     }
 
     if (!versionRequired) { return }
+    client.end()
     client.emit('error', new Error('This server is version ' + versionRequired +
       ', you are using version ' + client.version + ', please specify the correct version in the options.'))
   })
