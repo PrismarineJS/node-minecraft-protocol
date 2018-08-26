@@ -1,5 +1,10 @@
 # History
 
+## 1.8.0
+
+* 1.13.1 support
+* better tests
+
 ## 1.7.0
 
 * 1.13 support (thanks @lluiscab)
