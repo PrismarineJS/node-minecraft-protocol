@@ -133,6 +133,10 @@ You can enable some protocol debugging output using `DEBUG` environment variable
 DEBUG="minecraft-protocol" node [...]
 ```
 
+## Contribute
+
+Please read https://github.com/PrismarineJS/prismarine-contribute
+
 ## History
 
 See [history](HISTORY.md)
