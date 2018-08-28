@@ -13,39 +13,32 @@ const testDataWrite = [
 ]
 
 const {firstVersion, lastVersion} = require('./common/parallel')
-console.log({firstVersion, lastVersion})
+console.log(`Testing versions from ${firstVersion} to ${lastVersion}`)
 
 mc.supportedVersions.forEach(function (supportedVersion, i) {
   if (!(i >= firstVersion && i <= lastVersion)) { return }
 
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
-  describe('benchmark ' + version.minecraftVersion, function () {
+  describe(`Benchmark for ${version.minecraftVersion}`, function () {
     this.timeout(60 * 1000)
     const inputData = []
-    it('bench serializing', function (done) {
+    it('Bench serializing', function (done) {
       const serializer = mc.createSerializer({state: states.PLAY, isServer: false, version: version.minecraftVersion})
-      let start, i, j
-      console.log('Beginning write test')
-      start = Date.now()
+      let i, j
       for (i = 0; i < ITERATIONS; i++) {
         for (j = 0; j < testDataWrite.length; j++) {
           inputData.push(serializer.createPacketBuffer(testDataWrite[j]))
         }
       }
-      const result = (Date.now() - start) / 1000
-      console.log('Finished write test in ' + result + ' seconds')
       done()
     })
 
-    it('bench parsing', function (done) {
+    it('Bench parsing', function (done) {
       const deserializer = mc.createDeserializer({state: states.PLAY, isServer: true, version: version.minecraftVersion})
-      console.log('Beginning read test')
-      const start = Date.now()
       for (let j = 0; j < inputData.length; j++) {
         deserializer.parsePacketBuffer(inputData[j])
       }
-      console.log('Finished read test in ' + (Date.now() - start) / 1000 + ' seconds')
       done()
     })
   })
