@@ -7,16 +7,17 @@ const assert = require('power-assert')
 const SURVIVE_TIME = 10000
 const MC_SERVER_PATH = path.join(__dirname, 'server')
 
-const Wrap = require('minecraft-wrap').Wrap
+const { Wrap, download } = require('minecraft-wrap')
 
 const {firstVersion, lastVersion} = require('./common/parallel')
 
-const download = require('minecraft-wrap').download
+
 
 mc.supportedVersions.forEach(function (supportedVersion, i) {
-  if (!(i >= firstVersion && i <= lastVersion)) { return }
+  if (!(i >= firstVersion && i <= lastVersion)) return
 
   const PORT = Math.round(30000 + Math.random() * 20000)
+  const MOTD = 'test1234'
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
   const MC_SERVER_JAR_DIR = process.env.MC_SERVER_JAR_DIR || os.tmpdir()
@@ -25,11 +26,9 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
     minMem: 1024,
     maxMem: 1024
   })
-  wrap.on('line', function (line) {
-    console.log(line)
-  })
+  // wrap.on('line', console.log);
 
-  describe('client ' + version.minecraftVersion, function () {
+  describe(`Testing minecraft client ${version.minecraftVersion}`, function () {
     this.timeout(10 * 60 * 1000)
 
     before(download.bind(null, version.minecraftVersion, MC_SERVER_JAR))
@@ -41,31 +40,31 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
       })
     })
 
-    describe('offline', function () {
+    describe('Offline mode tests', function () {
       before(function (done) {
-        console.log(new Date() + 'starting server ' + version.minecraftVersion)
+        console.log(`      Starting minecraft server for ${version.minecraftVersion}`)
         wrap.startServer({
           'online-mode': 'false',
           'server-port': PORT,
-          'motd': 'test1234',
+          'motd': MOTD,
           'max-players': 120
         }, function (err) {
           if (err) { console.log(err) }
-          console.log(new Date() + 'started server ' + version.minecraftVersion)
+          console.log(`      Started minecraft server for ${version.minecraftVersion}`)
           done(err)
         })
       })
 
       after(function (done) {
-        console.log(new Date() + 'stopping server' + version.minecraftVersion)
+        console.log(`      Stopping minecraft server for ${version.minecraftVersion}`)
         wrap.stopServer(function (err) {
           if (err) { console.log(err) }
-          console.log(new Date() + 'stopped server ' + version.minecraftVersion)
+          console.log(`      Stopped minecraft server for ${version.minecraftVersion}`)
           done(err)
         })
       })
 
-      it('pings the server', function (done) {
+      it('Can ping the server', function (done) {
         mc.ping({
           version: version.minecraftVersion,
           port: PORT
@@ -74,19 +73,20 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           assert.ok(results.latency >= 0)
           assert.ok(results.latency <= 1000)
           delete results.latency
-          delete results.favicon // too lazy to figure it out
-          /*        assert.deepEqual(results, {
-           version: {
-           name: '1.7.4',
-           protocol: 4
-           },
-           description: { text: "test1234" }
-           }); */
+          delete results.favicon
+          delete results.players
+          delete results.version.protocol
+          assert.deepEqual(results, {
+            version: {
+              name: version.minecraftVersion
+            },
+            description: MOTD
+          })
           done()
         })
       })
 
-      it('connects successfully - offline mode', function (done) {
+      it('Connects successfully in offline mode', function (done) {
         const client = mc.createClient({
           username: 'Player',
           version: version.minecraftVersion,
@@ -135,7 +135,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         })
       })
 
-      it('does not crash for ' + SURVIVE_TIME + 'ms', function (done) {
+      it('Does not crash for ' + SURVIVE_TIME + 'ms', function (done) {
         const client = mc.createClient({
           username: 'Player',
           version: version.minecraftVersion,
@@ -153,7 +153,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         })
       })
 
-      it('produce a decent error when connecting with the wrong version', function (done) {
+      it('Produces a decent error when connecting with the wrong version', function (done) {
         const client = mc.createClient({
           username: 'Player',
           version: version.minecraftVersion === '1.8.8' ? '1.11.2' : '1.8.8',
@@ -161,7 +161,6 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         })
         client.once('error', function (err) {
           if (err.message.startsWith('This server is version')) {
-            console.log(new Date() + 'Correctly got an error for wrong version : ' + err.message)
             client.end()
             done()
           } else {
@@ -177,29 +176,29 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
       })
     })
 
-    describe('online', function () {
+    describe('Online mode tests', function () {
       before(function (done) {
-        console.log(new Date() + 'starting server ' + version.minecraftVersion)
+        console.log(`      Starting minecraft server for ${version.minecraftVersion}`)
         wrap.startServer({
           'online-mode': 'true',
           'server-port': PORT
         }, function (err) {
           if (err) { console.log(err) }
-          console.log(new Date() + 'started server ' + version.minecraftVersion)
+          console.log(`      Started minecraft server for ${version.minecraftVersion}`)
           done(err)
         })
       })
 
       after(function (done) {
-        console.log(new Date() + 'stopping server ' + version.minecraftVersion)
+        console.log(`      Stopping minecraft server for ${version.minecraftVersion}`)
         wrap.stopServer(function (err) {
           if (err) { console.log(err) }
-          console.log(new Date() + 'stopped server ' + version.minecraftVersion)
+          console.log(`      Stopped minecraft server for ${version.minecraftVersion}`)
           done(err)
         })
       })
 
-      it.skip('connects successfully - online mode', function (done) {
+      it.skip('Connects successfully in online mode', function (done) {
         const client = mc.createClient({
           username: process.env.MC_USERNAME,
           password: process.env.MC_PASSWORD,
@@ -237,7 +236,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         })
       })
 
-      it('gets kicked when no credentials supplied in online mode', function (done) {
+      it('Gets kicked when no credentials supplied in online mode', function (done) {
         const client = mc.createClient({
           username: 'Player',
           version: version.minecraftVersion,
