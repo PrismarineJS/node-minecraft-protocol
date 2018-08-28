@@ -12,7 +12,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
 
-  describe(`Testing minecraft server ${version.minecraftVersion}`, function () {
+  describe(`Testing minecraft-protocol server ${version.minecraftVersion}`, function () {
     this.timeout(5000)
     it('Starts listening and shuts down cleanly', function (done) {
       const server = mc.createServer({

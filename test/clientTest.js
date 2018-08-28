@@ -26,7 +26,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
   })
   // wrap.on('line', console.log);
 
-  describe(`Testing minecraft client ${version.minecraftVersion}`, function () {
+  describe(`Testing minecraft-protocol client ${version.minecraftVersion}`, function () {
     this.timeout(10 * 60 * 1000)
 
     before(download.bind(null, version.minecraftVersion, MC_SERVER_JAR))
