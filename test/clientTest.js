@@ -78,7 +78,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
               name: version.minecraftVersion,
               protocol: version.version
             },
-            description: results.version.protocol > 5 ? { text: MOTD } : MOTD
+            description: results.version.protocol > 47 ? { text: MOTD } : MOTD // Post 1.8 MOTD is sent as object
           })
           done()
         })
@@ -241,15 +241,10 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           port: PORT
         })
         client.on('error', err => done(err))
-        let gotKicked = false
         client.on('disconnect', function (packet) {
           assert.ok(packet.reason.indexOf('"Failed to verify username!"') !== -1 || packet.reason.indexOf('multiplayer.disconnect.unverified_username') !== -1)
-          gotKicked = true
-        })
-        client.on('end', function () {
-          assert.ok(gotKicked)
-          client.end()
-          done()
+          client.end();
+          done();
         })
       })
     })
