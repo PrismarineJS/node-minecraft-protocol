@@ -11,8 +11,6 @@ const { Wrap, download } = require('minecraft-wrap')
 
 const {firstVersion, lastVersion} = require('./common/parallel')
 
-
-
 mc.supportedVersions.forEach(function (supportedVersion, i) {
   if (!(i >= firstVersion && i <= lastVersion)) return
 
@@ -75,12 +73,12 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           delete results.latency
           delete results.favicon
           delete results.players
-          delete results.version.protocol
           assert.deepEqual(results, {
             version: {
-              name: version.minecraftVersion
+              name: version.minecraftVersion,
+              protocol: version.version
             },
-            description: MOTD
+            description: results.version.protocol > 5 ? { text: MOTD } : MOTD
           })
           done()
         })
