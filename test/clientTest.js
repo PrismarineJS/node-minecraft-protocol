@@ -243,8 +243,8 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         client.on('error', err => done(err))
         client.on('disconnect', function (packet) {
           assert.ok(packet.reason.indexOf('"Failed to verify username!"') !== -1 || packet.reason.indexOf('multiplayer.disconnect.unverified_username') !== -1)
-          client.end();
-          done();
+          client.end()
+          done()
         })
       })
     })
