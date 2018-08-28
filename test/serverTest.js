@@ -12,9 +12,9 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
 
-  describe('mc-server ' + version.minecraftVersion, function () {
+  describe(`Testing minecraft-protocol server ${version.minecraftVersion}`, function () {
     this.timeout(5000)
-    it('starts listening and shuts down cleanly', function (done) {
+    it('Starts listening and shuts down cleanly', function (done) {
       const server = mc.createServer({
         'online-mode': false,
         version: version.minecraftVersion,
@@ -30,7 +30,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         done()
       })
     })
-    it('kicks clients that do not log in', function (done) {
+    it('Kicks clients that do not log in', function (done) {
       const server = mc.createServer({
         'online-mode': false,
         kickTimeout: 100,
@@ -61,7 +61,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         if (count <= 0) done()
       }
     })
-    it('kicks clients that do not send keepalive packets', function (done) {
+    it('Kicks clients that do not send keepalive packets', function (done) {
       const server = mc.createServer({
         'online-mode': false,
         kickTimeout: 100,
@@ -96,7 +96,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         if (count <= 0) done()
       }
     })
-    it('responds to ping requests', function (done) {
+    it('Responds to ping requests', function (done) {
       const server = mc.createServer({
         'online-mode': false,
         motd: 'test1234',
@@ -131,7 +131,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
       })
       server.on('close', done)
     })
-    it('clients can log in and chat', function (done) {
+    it('Clients can log in and chat', function (done) {
       const server = mc.createServer({
         'online-mode': false,
         version: version.minecraftVersion,
@@ -215,7 +215,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         }
       }
     })
-    it('kicks clients when invalid credentials', function (done) {
+    it('Kicks clients when invalid credentials', function (done) {
       this.timeout(10000)
       const server = mc.createServer({
         version: version.minecraftVersion,
@@ -248,7 +248,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         if (count <= 0) done()
       }
     })
-    it('gives correct reason for kicking clients when shutting down', function (done) {
+    it('Gives correct reason for kicking clients when shutting down', function (done) {
       const server = mc.createServer({
         'online-mode': false,
         version: version.minecraftVersion,

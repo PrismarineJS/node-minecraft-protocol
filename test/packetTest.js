@@ -184,7 +184,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
   const version = mcData.version
   const packets = mcData.protocol
 
-  describe('packets ' + version.minecraftVersion, function () {
+  describe(`Testing packets for minecraft ${version.minecraftVersion}`, function () {
     let client, server, serverClient
     before(function (done) {
       server = new Server(version.minecraftVersion)

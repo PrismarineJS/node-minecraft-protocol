@@ -14,7 +14,7 @@ function testedRange (nodeIndex, nodeTotal, numberOfVersions) {
 
   return {firstVersion: nodeIndex * nbFirsts, lastVersion: (nodeIndex + 1) * nbFirsts - 1}
 }
-console.log({nodeIndex, nodeTotal, versions: mc.supportedVersions.length})
+// console.log({nodeIndex, nodeTotal, versions: mc.supportedVersions.length})
 const {firstVersion, lastVersion} = parallel ? testedRange(nodeIndex, nodeTotal, mc.supportedVersions.length) : {firstVersion: 0, lastVersion: mc.supportedVersions.length - 1}
 
 module.exports = {firstVersion, lastVersion}
