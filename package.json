@@ -3,6 +3,7 @@
   "version": "1.8.0",
   "description": "Parse and serialize minecraft packets, plus authentication and encryption.",
   "main": "src/index.js",
+  "types": "index.d.ts",
   "repository": {
     "type": "git",
     "url": "git://github.com/PrismarineJS/node-minecraft-protocol.git"
@@ -30,6 +31,7 @@
   },
   "browser": "src/browser.js",
   "devDependencies": {
+    "@types/node": "^10.5.8",
     "espower-loader": "^1.0.0",
     "intelli-espower-loader": "^1.0.0",
     "minecraft-wrap": "^1.2.0",

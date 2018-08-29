@@ -3,3 +3,4 @@ test/npm-debug.log
 test/server
 package-lock.json
 versions/
+.idea/
