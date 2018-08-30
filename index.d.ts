@@ -9,11 +9,6 @@ declare enum EnumStates {
   PLAY = 'play',
 }
 
-
-export interface IResponse {
-
-}
-
 export interface IPacketMeta {
   name: string
   state: EnumStates
