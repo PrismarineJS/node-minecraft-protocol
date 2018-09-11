@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "buffer-equal": "^1.0.0",
-    "debug": "^3.0.0",
+    "debug": "^4.0.0",
     "endian-toggle": "^0.0.0",
     "lodash.get": "^4.1.2",
     "lodash.merge": "^4.3.0",
