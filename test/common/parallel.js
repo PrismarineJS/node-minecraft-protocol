@@ -10,11 +10,11 @@ const mc = require('../../')
 // (3,4,10) -> (9,9)
 function testedRange (nodeIndex, nodeTotal, numberOfVersions) {
   const nbFirsts = Math.ceil(numberOfVersions / nodeTotal)
-  if (nodeIndex === (nodeTotal - 1)) { return {firstVersion: nbFirsts * nodeIndex, lastVersion: numberOfVersions - 1} }
+  if (nodeIndex === (nodeTotal - 1)) { return { firstVersion: nbFirsts * nodeIndex, lastVersion: numberOfVersions - 1 } }
 
-  return {firstVersion: nodeIndex * nbFirsts, lastVersion: (nodeIndex + 1) * nbFirsts - 1}
+  return { firstVersion: nodeIndex * nbFirsts, lastVersion: (nodeIndex + 1) * nbFirsts - 1 }
 }
-console.log({nodeIndex, nodeTotal, versions: mc.supportedVersions.length})
-const {firstVersion, lastVersion} = parallel ? testedRange(nodeIndex, nodeTotal, mc.supportedVersions.length) : {firstVersion: 0, lastVersion: mc.supportedVersions.length - 1}
+console.log({ nodeIndex, nodeTotal, versions: mc.supportedVersions.length })
+const { firstVersion, lastVersion } = parallel ? testedRange(nodeIndex, nodeTotal, mc.supportedVersions.length) : { firstVersion: 0, lastVersion: mc.supportedVersions.length - 1 }
 
-module.exports = {firstVersion, lastVersion}
+module.exports = { firstVersion, lastVersion }

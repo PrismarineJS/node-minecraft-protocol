@@ -127,7 +127,7 @@ srv.on('login', function (client) {
   targetClient.on('raw', function (buffer, meta) {
     if (client.state !== states.PLAY || meta.state !== states.PLAY) { return }
     const packetData = targetClient.deserializer.parsePacketBuffer(buffer).data.params
-    const packetBuff = client.serializer.createPacketBuffer({name: meta.name, params: packetData})
+    const packetBuff = client.serializer.createPacketBuffer({ name: meta.name, params: packetData })
     if (!bufferEqual(buffer, packetBuff)) {
       console.log('client<-server: Error in packet ' + meta.state + '.' + meta.name)
       console.log('received buffer', buffer.toString('hex'))
@@ -146,7 +146,7 @@ srv.on('login', function (client) {
   client.on('raw', function (buffer, meta) {
     if (meta.state !== states.PLAY || targetClient.state !== states.PLAY) { return }
     const packetData = client.deserializer.parsePacketBuffer(buffer).data.params
-    const packetBuff = targetClient.serializer.createPacketBuffer({name: meta.name, params: packetData})
+    const packetBuff = targetClient.serializer.createPacketBuffer({ name: meta.name, params: packetData })
     if (!bufferEqual(buffer, packetBuff)) {
       console.log('client->server: Error in packet ' + meta.state + '.' + meta.name)
       console.log('received buffer', buffer.toString('hex'))

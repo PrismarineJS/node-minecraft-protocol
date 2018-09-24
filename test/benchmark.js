@@ -6,14 +6,14 @@ const mc = require('../')
 const states = mc.states
 
 const testDataWrite = [
-  {name: 'keep_alive', params: {keepAliveId: 957759560}},
-  {name: 'chat', params: {message: '<Bob> Hello World!'}},
-  {name: 'position_look', params: {x: 6.5, y: 65.62, stance: 67.24, z: 7.5, yaw: 0, pitch: 0, onGround: true}}
+  { name: 'keep_alive', params: { keepAliveId: 957759560 } },
+  { name: 'chat', params: { message: '<Bob> Hello World!' } },
+  { name: 'position_look', params: { x: 6.5, y: 65.62, stance: 67.24, z: 7.5, yaw: 0, pitch: 0, onGround: true } }
   // TODO: add more packets for better quality data
 ]
 
-const {firstVersion, lastVersion} = require('./common/parallel')
-console.log({firstVersion, lastVersion})
+const { firstVersion, lastVersion } = require('./common/parallel')
+console.log({ firstVersion, lastVersion })
 
 mc.supportedVersions.forEach(function (supportedVersion, i) {
   if (!(i >= firstVersion && i <= lastVersion)) { return }
@@ -24,7 +24,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
     this.timeout(60 * 1000)
     const inputData = []
     it('bench serializing', function (done) {
-      const serializer = mc.createSerializer({state: states.PLAY, isServer: false, version: version.minecraftVersion})
+      const serializer = mc.createSerializer({ state: states.PLAY, isServer: false, version: version.minecraftVersion })
       let start, i, j
       console.log('Beginning write test')
       start = Date.now()
@@ -39,7 +39,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
     })
 
     it('bench parsing', function (done) {
-      const deserializer = mc.createDeserializer({state: states.PLAY, isServer: true, version: version.minecraftVersion})
+      const deserializer = mc.createDeserializer({ state: states.PLAY, isServer: true, version: version.minecraftVersion })
       console.log('Beginning read test')
       const start = Date.now()
       for (let j = 0; j < inputData.length; j++) {

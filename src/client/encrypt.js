@@ -42,8 +42,8 @@ module.exports = function (client, options) {
 
       function sendEncryptionKeyResponse () {
         const pubKey = mcPubKeyToPem(packet.publicKey)
-        const encryptedSharedSecretBuffer = crypto.publicEncrypt({key: pubKey, padding: crypto.constants.RSA_PKCS1_PADDING}, sharedSecret)
-        const encryptedVerifyTokenBuffer = crypto.publicEncrypt({key: pubKey, padding: crypto.constants.RSA_PKCS1_PADDING}, packet.verifyToken)
+        const encryptedSharedSecretBuffer = crypto.publicEncrypt({ key: pubKey, padding: crypto.constants.RSA_PKCS1_PADDING }, sharedSecret)
+        const encryptedVerifyTokenBuffer = crypto.publicEncrypt({ key: pubKey, padding: crypto.constants.RSA_PKCS1_PADDING }, packet.verifyToken)
         client.write('encryption_begin', {
           sharedSecret: encryptedSharedSecretBuffer,
           verifyToken: encryptedVerifyTokenBuffer

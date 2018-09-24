@@ -42,7 +42,7 @@ function sizeOfNbt (value) {
 
 function readOptionalNbt (buffer, offset) {
   if (offset + 1 > buffer.length) { throw new PartialReadError() }
-  if (buffer.readInt8(offset) === 0) return {size: 1}
+  if (buffer.readInt8(offset) === 0) return { size: 1 }
   return nbt.proto.read(buffer, offset, 'nbt')
 }
 
@@ -63,7 +63,7 @@ function sizeOfOptionalNbt (value) {
 function readCompressedNbt (buffer, offset) {
   if (offset + 2 > buffer.length) { throw new PartialReadError() }
   const length = buffer.readInt16BE(offset)
-  if (length === -1) return {size: 2}
+  if (length === -1) return { size: 2 }
   if (offset + 2 + length > buffer.length) { throw new PartialReadError() }
 
   const compressedNbt = buffer.slice(offset + 2, offset + 2 + length)
@@ -120,7 +120,7 @@ function sizeOfRestBuffer (value) {
   return value.length
 }
 
-function readEntityMetadata (buffer, offset, {type, endVal}) {
+function readEntityMetadata (buffer, offset, { type, endVal }) {
   let cursor = offset
   const metadata = []
   let item
@@ -139,7 +139,7 @@ function readEntityMetadata (buffer, offset, {type, endVal}) {
   }
 }
 
-function writeEntityMetadata (value, buffer, offset, {type, endVal}) {
+function writeEntityMetadata (value, buffer, offset, { type, endVal }) {
   const self = this
   value.forEach(function (item) {
     offset = self.write(item, buffer, offset, type, {})
@@ -148,7 +148,7 @@ function writeEntityMetadata (value, buffer, offset, {type, endVal}) {
   return offset + 1
 }
 
-function sizeOfEntityMetadata (value, {type}) {
+function sizeOfEntityMetadata (value, { type }) {
   let size = 1
   for (let i = 0; i < value.length; ++i) {
     size += this.sizeOf(value[i], type, {})

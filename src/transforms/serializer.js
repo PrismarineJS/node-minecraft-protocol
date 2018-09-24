@@ -22,11 +22,11 @@ function createProtocol (state, direction, version, customPackets) {
   return proto
 }
 
-function createSerializer ({state = states.HANDSHAKING, isServer = false, version, customPackets} = {}) {
+function createSerializer ({ state = states.HANDSHAKING, isServer = false, version, customPackets } = {}) {
   return new Serializer(createProtocol(state, !isServer ? 'toServer' : 'toClient', version, customPackets), 'packet')
 }
 
-function createDeserializer ({state = states.HANDSHAKING, isServer = false, version, customPackets} = {}) {
+function createDeserializer ({ state = states.HANDSHAKING, isServer = false, version, customPackets } = {}) {
   return new Parser(createProtocol(state, isServer ? 'toServer' : 'toClient', version, customPackets), 'packet')
 }
 

@@ -1,6 +1,6 @@
 const states = require('../states')
 
-module.exports = function (client, server, {version}) {
+module.exports = function (client, server, { version }) {
   client.once('set_protocol', onHandshake)
 
   function onHandshake (packet) {

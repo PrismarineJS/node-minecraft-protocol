@@ -3,7 +3,7 @@
 const mc = require('../')
 const assert = require('power-assert')
 
-const {firstVersion, lastVersion} = require('./common/parallel')
+const { firstVersion, lastVersion } = require('./common/parallel')
 
 mc.supportedVersions.forEach(function (supportedVersion, i) {
   if (!(i >= firstVersion && i <= lastVersion)) { return }
@@ -124,7 +124,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
               online: 0,
               sample: []
             },
-            description: {text: 'test1234'}
+            description: { text: 'test1234' }
           })
           server.close()
         })
@@ -192,9 +192,9 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
                 player2.end()
               }
 
-              player1.write('chat', {message: 'hello'})
+              player1.write('chat', { message: 'hello' })
             })
-            player2.write('chat', {message: 'hi'})
+            player2.write('chat', { message: 'hi' })
           })
           const player2 = mc.createClient({
             username: 'player2',
@@ -211,7 +211,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           if (!server.clients.hasOwnProperty(clientId)) continue
 
           client = server.clients[clientId]
-          if (client !== exclude) client.write('chat', {message: JSON.stringify({text: message}), position: 0})
+          if (client !== exclude) client.write('chat', { message: JSON.stringify({ text: message }), position: 0 })
         }
       }
     })

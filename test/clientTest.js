@@ -9,7 +9,7 @@ const MC_SERVER_PATH = path.join(__dirname, 'server')
 
 const Wrap = require('minecraft-wrap').Wrap
 
-const {firstVersion, lastVersion} = require('./common/parallel')
+const { firstVersion, lastVersion } = require('./common/parallel')
 
 const download = require('minecraft-wrap').download
 

@@ -56,12 +56,12 @@ module.exports = function (client, server, options) {
   function onEncryptionKeyResponse (packet) {
     let sharedSecret
     try {
-      const verifyToken = crypto.privateDecrypt({key: server.serverKey.exportKey(), padding: crypto.constants.RSA_PKCS1_PADDING}, packet.verifyToken)
+      const verifyToken = crypto.privateDecrypt({ key: server.serverKey.exportKey(), padding: crypto.constants.RSA_PKCS1_PADDING }, packet.verifyToken)
       if (!bufferEqual(client.verifyToken, verifyToken)) {
         client.end('DidNotEncryptVerifyTokenProperly')
         return
       }
-      sharedSecret = crypto.privateDecrypt({key: server.serverKey.exportKey(), padding: crypto.constants.RSA_PKCS1_PADDING}, packet.sharedSecret)
+      sharedSecret = crypto.privateDecrypt({ key: server.serverKey.exportKey(), padding: crypto.constants.RSA_PKCS1_PADDING }, packet.sharedSecret)
     } catch (e) {
       client.end('DidNotEncryptVerifyTokenProperly')
       return
@@ -111,7 +111,7 @@ module.exports = function (client, server, options) {
       client.write('compress', { threshold: 256 }) // Default threshold is 256
       client.compressionThreshold = 256
     }
-    client.write('success', {uuid: client.uuid, username: client.username})
+    client.write('success', { uuid: client.uuid, username: client.username })
     client.state = states.PLAY
 
     clearTimeout(loginKickTimer)

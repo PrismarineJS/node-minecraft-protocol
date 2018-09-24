@@ -3,6 +3,7 @@
   "version": "1.8.0",
   "description": "Parse and serialize minecraft packets, plus authentication and encryption.",
   "main": "src/index.js",
+  "types": "src/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git://github.com/PrismarineJS/node-minecraft-protocol.git"
@@ -30,17 +31,18 @@
   },
   "browser": "src/browser.js",
   "devDependencies": {
+    "@types/node": "^10.5.8",
     "espower-loader": "^1.0.0",
     "intelli-espower-loader": "^1.0.0",
     "minecraft-wrap": "^1.2.0",
     "mocha": "^5.0.5",
     "power-assert": "^1.0.0",
     "require-self": "^0.2.1",
-    "standard": "^11.0.1"
+    "standard": "^12.0.0"
   },
   "dependencies": {
     "buffer-equal": "^1.0.0",
-    "debug": "^3.0.0",
+    "debug": "^4.0.0",
     "endian-toggle": "^0.0.0",
     "lodash.get": "^4.1.2",
     "lodash.merge": "^4.3.0",

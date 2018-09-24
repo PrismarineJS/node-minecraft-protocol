@@ -48,7 +48,7 @@ class Splitter extends Transform {
     let value, size
     let stop = false
     try {
-      ({value, size} = readVarInt(this.buffer, offset))
+      ({ value, size } = readVarInt(this.buffer, offset))
     } catch (e) {
       if (!(e.partialReadError)) {
         throw e
@@ -59,7 +59,7 @@ class Splitter extends Transform {
         try {
           this.push(this.buffer.slice(offset + size, offset + size + value))
           offset += size + value;
-          ({value, size} = readVarInt(this.buffer, offset))
+          ({ value, size } = readVarInt(this.buffer, offset))
         } catch (e) {
           if (e.partialReadError) {
             break

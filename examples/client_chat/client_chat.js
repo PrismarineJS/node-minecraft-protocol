@@ -111,7 +111,7 @@ client.on('error', function (err) {
 client.on('state', function (newState) {
   if (newState === states.PLAY) {
     chats.forEach(function (chat) {
-      client.write('chat', {message: chat})
+      client.write('chat', { message: chat })
     })
   }
 })
@@ -127,7 +127,7 @@ rl.on('line', function (line) {
     console.info('Forcibly ended client')
     process.exit(0)
   }
-  if (!client.write('chat', {message: line})) {
+  if (!client.write('chat', { message: line })) {
     chats.push(line)
   }
 })
