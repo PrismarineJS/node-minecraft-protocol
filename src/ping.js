@@ -28,7 +28,7 @@ function ping (options, cb) {
       cb(null, data)
       client.end()
     })
-    client.write('ping', {time: [0, 0]})
+    client.write('ping', { time: [0, 0] })
   })
 
   client.on('state', function (newState) {

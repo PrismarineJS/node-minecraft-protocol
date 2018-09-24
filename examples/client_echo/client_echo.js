@@ -27,6 +27,6 @@ client.on('chat', function (packet) {
     const username = jsonMsg.with[0].text
     const msg = jsonMsg.with[1]
     if (username === client.username) return
-    client.write('chat', {message: msg})
+    client.write('chat', { message: msg })
   }
 })

@@ -35,13 +35,13 @@ class Client extends EventEmitter {
   }
 
   setSerializer (state) {
-    this.serializer = createSerializer({isServer: this.isServer, version: this.version, state: state, customPackets: this.customPackets})
-    this.deserializer = createDeserializer({isServer: this.isServer,
+    this.serializer = createSerializer({ isServer: this.isServer, version: this.version, state: state, customPackets: this.customPackets })
+    this.deserializer = createDeserializer({ isServer: this.isServer,
       version: this.version,
       state: state,
       packetsToParse:
       this.packetsToParse,
-      customPackets: this.customPackets})
+      customPackets: this.customPackets })
 
     this.splitter.recognizeLegacyPing = state === states.HANDSHAKING
 
@@ -208,7 +208,7 @@ class Client extends EventEmitter {
 
   // TCP/IP-specific (not generic Stream) method for backwards-compatibility
   connect (port, host) {
-    const options = {port, host}
+    const options = { port, host }
     if (!this.options) this.options = options
     require('./client/tcp_dns')(this, options)
     options.connect(this)

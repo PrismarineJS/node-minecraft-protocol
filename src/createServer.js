@@ -36,7 +36,7 @@ function createServer (options = {}) {
   server.playerCount = 0
   server.onlineModeExceptions = {}
   server.favicon = favicon
-  server.serverKey = new NodeRSA({b: 1024})
+  server.serverKey = new NodeRSA({ b: 1024 })
 
   server.on('connection', function (client) {
     plugins.forEach(plugin => plugin(client, server, options))

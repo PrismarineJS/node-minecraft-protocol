@@ -45,7 +45,7 @@ server.on('login', function (client) {
       'Hello, world!'
     ]
   }
-  client.write('chat', {message: JSON.stringify(msg), position: 0})
+  client.write('chat', { message: JSON.stringify(msg), position: 0 })
 })
 
 server.on('error', function (error) {

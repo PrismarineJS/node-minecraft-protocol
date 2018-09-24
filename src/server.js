@@ -27,9 +27,9 @@ class Server extends EventEmitter {
       client.end = function end (endReason) {
         endReason = '{"text":"' + endReason + '"}'
         if (client.state === states.PLAY) {
-          client.write('kick_disconnect', {reason: endReason})
+          client.write('kick_disconnect', { reason: endReason })
         } else if (client.state === states.LOGIN) {
-          client.write('disconnect', {reason: endReason})
+          client.write('disconnect', { reason: endReason })
         }
         client._end(endReason)
       }
