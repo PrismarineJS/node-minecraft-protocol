@@ -1,5 +1,9 @@
 # History
 
+## 1.8.1
+
+* update mcdata : fix loadpath bug for 1.13.1
+
 ## 1.8.0
 
 * 1.13.1 support
