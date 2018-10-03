@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
 import { Socket } from 'net'
 import * as Stream from 'stream'
+import { on } from 'cluster';
 
 declare module 'minecraft-protocol' {
 	export class Client extends EventEmitter {
@@ -18,6 +19,7 @@ declare module 'minecraft-protocol' {
 		unregisterChannel(name: string): void
 		write(name: string, params: any): void
 		writeChannel(channel: any, params: any): void
+		on(event: 'error', listener: (error: Error) => void): this
 		on(event: 'packet', handler: (data: any, packetMeta: PacketMeta) => void): this
 		on(event: 'raw', handler: (data: any, packetMeta: PacketMeta) => void): this
 		on(event: 'session', handler: (session: any) => void): this
@@ -47,6 +49,7 @@ declare module 'minecraft-protocol' {
 		onlineModeExceptions: object
 		playerCount: number
 		on(event: 'connection', handler: (client: Client) => void): this
+		on(event: 'error', listener: (error: Error) => void): this
 		on(event: 'login', handler: (client: Client) => void): this
 	}
 
