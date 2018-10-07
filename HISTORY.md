@@ -1,5 +1,9 @@
 # History
 
+## 1.8.2
+
+* fix tcp_dns.js checking for SRV lookup
+
 ## 1.8.1
 
 * update mcdata : fix loadpath bug for 1.13.1
