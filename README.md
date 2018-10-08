@@ -117,7 +117,7 @@ server.on('login', function(client) {
 
 ## Documentation
 
-See [doc](doc/README.md)
+See [doc](docs/API.md)
 
 
 ## Testing
