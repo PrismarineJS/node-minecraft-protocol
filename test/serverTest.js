@@ -8,7 +8,7 @@ const { firstVersion, lastVersion } = require('./common/parallel')
 mc.supportedVersions.forEach(function (supportedVersion, i) {
   if (!(i >= firstVersion && i <= lastVersion)) { return }
 
-  const PORT = Math.round(30000 + Math.random() * 20000)
+  const port = 0
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
 
@@ -18,7 +18,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
       const server = mc.createServer({
         'online-mode': false,
         version: version.minecraftVersion,
-        port: PORT
+        port: port
       })
       let listening = false
       server.on('listening', function () {
@@ -36,7 +36,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         kickTimeout: 100,
         checkTimeoutInterval: 10,
         version: version.minecraftVersion,
-        port: PORT
+        port: port
       })
       let count = 2
       server.on('connection', function (client) {
@@ -53,7 +53,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         client.on('end', function () {
           resolve()
         })
-        client.connect(PORT, '127.0.0.1')
+        client.connect(port, '127.0.0.1')
       })
 
       function resolve () {
@@ -67,7 +67,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         kickTimeout: 100,
         checkTimeoutInterval: 10,
         version: version.minecraftVersion,
-        port: PORT
+        port: port
       })
       let count = 2
       server.on('connection', function (client) {
@@ -83,7 +83,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         const client = mc.createClient({
           username: 'superpants',
           host: '127.0.0.1',
-          port: PORT,
+          port: port,
           keepAlive: false,
           version: version.minecraftVersion
         })
@@ -102,13 +102,13 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         motd: 'test1234',
         'max-players': 120,
         version: version.minecraftVersion,
-        port: PORT
+        port: port
       })
       server.on('listening', function () {
         mc.ping({
           host: '127.0.0.1',
           version: version.minecraftVersion,
-          port: PORT
+          port: port
         }, function (err, results) {
           if (err) return done(err)
           assert.ok(results.latency >= 0)
@@ -135,7 +135,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
       const server = mc.createServer({
         'online-mode': false,
         version: version.minecraftVersion,
-        port: PORT
+        port: port
       })
       const username = ['player1', 'player2']
       let index = 0
@@ -167,7 +167,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           username: 'player1',
           host: '127.0.0.1',
           version: version.minecraftVersion,
-          port: PORT
+          port: port
         })
         player1.on('login', function (packet) {
           assert.strictEqual(packet.gameMode, 1)
@@ -200,7 +200,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
             username: 'player2',
             host: '127.0.0.1',
             version: version.minecraftVersion,
-            port: PORT
+            port: port
           })
         })
       })
@@ -219,7 +219,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
       this.timeout(10000)
       const server = mc.createServer({
         version: version.minecraftVersion,
-        port: PORT
+        port: port
       })
       let count = 4
       server.on('connection', function (client) {
@@ -237,7 +237,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           username: 'lalalal',
           host: '127.0.0.1',
           version: version.minecraftVersion,
-          port: PORT
+          port: port
         })
         client.on('end', function () {
           resolve()
@@ -252,7 +252,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
       const server = mc.createServer({
         'online-mode': false,
         version: version.minecraftVersion,
-        port: PORT
+        port: port
       })
       let count = 2
       server.on('login', function (client) {
@@ -278,7 +278,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           username: 'lalalal',
           host: '127.0.0.1',
           version: version.minecraftVersion,
-          port: PORT
+          port: port
         })
         client.on('login', function () {
           server.close()

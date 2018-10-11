@@ -16,7 +16,7 @@ const download = require('minecraft-wrap').download
 mc.supportedVersions.forEach(function (supportedVersion, i) {
   if (!(i >= firstVersion && i <= lastVersion)) { return }
 
-  const PORT = Math.round(30000 + Math.random() * 20000)
+  const port = 0
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
   const MC_SERVER_JAR_DIR = process.env.MC_SERVER_JAR_DIR || os.tmpdir()
@@ -46,7 +46,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         console.log(new Date() + 'starting server ' + version.minecraftVersion)
         wrap.startServer({
           'online-mode': 'false',
-          'server-port': PORT,
+          'server-port': port,
           'motd': 'test1234',
           'max-players': 120
         }, function (err) {
@@ -68,7 +68,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
       it('pings the server', function (done) {
         mc.ping({
           version: version.minecraftVersion,
-          port: PORT
+          port: port
         }, function (err, results) {
           if (err) return done(err)
           assert.ok(results.latency >= 0)
@@ -90,7 +90,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         const client = mc.createClient({
           username: 'Player',
           version: version.minecraftVersion,
-          port: PORT
+          port: port
         })
         client.on('error', err => done(err))
         const lineListener = function (line) {
@@ -139,7 +139,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         const client = mc.createClient({
           username: 'Player',
           version: version.minecraftVersion,
-          port: PORT
+          port: port
         })
         client.on('error', err => done(err))
         client.on('login', function () {
@@ -157,7 +157,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         const client = mc.createClient({
           username: 'Player',
           version: version.minecraftVersion === '1.8.8' ? '1.11.2' : '1.8.8',
-          port: PORT
+          port: port
         })
         client.once('error', function (err) {
           if (err.message.startsWith('This server is version')) {
@@ -182,7 +182,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         console.log(new Date() + 'starting server ' + version.minecraftVersion)
         wrap.startServer({
           'online-mode': 'true',
-          'server-port': PORT
+          'server-port': port
         }, function (err) {
           if (err) { console.log(err) }
           console.log(new Date() + 'started server ' + version.minecraftVersion)
@@ -204,7 +204,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           username: process.env.MC_USERNAME,
           password: process.env.MC_PASSWORD,
           version: version.minecraftVersion,
-          port: PORT
+          port: port
         })
         client.on('error', err => done(err))
         const lineListener = function (line) {
@@ -241,7 +241,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         const client = mc.createClient({
           username: 'Player',
           version: version.minecraftVersion,
-          port: PORT
+          port: port
         })
         client.on('error', err => done(err))
         let gotKicked = false
