@@ -84,6 +84,7 @@ Returns a `Client` instance and perform login.
  * version : 1.8 or 1.9 or false (to auto-negotiate): default to 1.8
  * customPackets (optional) : an object index by version/state/direction/name, see client_custom_packet for an example
  * hideErrors : do not display errors, default to false
+ * skipValidation : do not try to validate given session, defaults to false
 
 ## mc.Client(isServer,version,[customPackets])
 
