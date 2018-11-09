@@ -40,6 +40,9 @@ module.exports = function (client, options) {
             })
           }
         })
+      } else {
+        // trust that the provided session is a working one
+        cb(null, options.session)
       }
     } else {
       yggdrasil.auth({
