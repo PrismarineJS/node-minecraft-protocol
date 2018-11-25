@@ -1,7 +1,9 @@
 # minecraft protocol
 [![NPM version](https://img.shields.io/npm/v/minecraft-protocol.svg)](https://www.npmjs.com/package/minecraft-protocol)
 [![Build Status](https://img.shields.io/circleci/project/github/PrismarineJS/node-minecraft-protocol/master.svg)](https://circleci.com/gh/PrismarineJS/node-minecraft-protocol)
-[![Join the chat at https://gitter.im/PrismarineJS/node-minecraft-protocol](https://img.shields.io/badge/gitter-join%20chat-brightgreen.svg)](https://gitter.im/PrismarineJS/node-minecraft-protocol)
+[![Discord](https://img.shields.io/badge/chat-on%20discord-brightgreen.svg)](https://discord.gg/GsEFRM8)
+[![Gitter](https://img.shields.io/badge/chat-on%20gitter-brightgreen.svg)](https://gitter.im/PrismarineJS/general)
+[![Irc](https://img.shields.io/badge/chat-on%20irc-brightgreen.svg)](https://irc.gitter.im/)
 [![Greenkeeper badge](https://badges.greenkeeper.io/PrismarineJS/node-minecraft-protocol.svg)](https://greenkeeper.io/)
 
 Parse and serialize minecraft packets, plus authentication and encryption.
