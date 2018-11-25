@@ -135,6 +135,12 @@ You can enable some protocol debugging output using `DEBUG` environment variable
 DEBUG="minecraft-protocol" node [...]
 ```
 
+On windows :
+```
+set DEBUG=minecraft-protocol
+node your_script.js
+```
+
 ## Contribute
 
 Please read https://github.com/PrismarineJS/prismarine-contribute
