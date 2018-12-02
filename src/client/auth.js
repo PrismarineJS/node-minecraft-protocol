@@ -3,6 +3,7 @@ const UUID = require('uuid-1345')
 
 module.exports = function (client, options) {
   const clientToken = options.clientToken || (options.session && options.session.clientToken) || UUID.v4().toString()
+  const skipValidation = false || options.skipValidation
   options.accessToken = null
   options.haveCredentials = options.password != null || (clientToken != null && options.session != null)
 
@@ -21,23 +22,28 @@ module.exports = function (client, options) {
     }
 
     if (options.session) {
-      yggdrasil.validate(options.session.accessToken, function (err) {
-        if (!err) { cb(null, options.session) } else {
-          yggdrasil.refresh(options.session.accessToken, options.session.clientToken, function (err, accessToken, data) {
-            if (!err) {
-              cb(null, data)
-            } else if (options.username && options.password) {
-              yggdrasil.auth({
-                user: options.username,
-                pass: options.password,
-                token: clientToken
-              }, cb)
-            } else {
-              cb(err, data)
-            }
-          })
-        }
-      })
+      if (!skipValidation) {
+        yggdrasil.validate(options.session.accessToken, function (err) {
+          if (!err) { cb(null, options.session) } else {
+            yggdrasil.refresh(options.session.accessToken, options.session.clientToken, function (err, accessToken, data) {
+              if (!err) {
+                cb(null, data)
+              } else if (options.username && options.password) {
+                yggdrasil.auth({
+                  user: options.username,
+                  pass: options.password,
+                  token: clientToken
+                }, cb)
+              } else {
+                cb(err, data)
+              }
+            })
+          }
+        })
+      } else {
+        // trust that the provided session is a working one
+        cb(null, options.session)
+      }
     } else {
       yggdrasil.auth({
         user: options.username,
