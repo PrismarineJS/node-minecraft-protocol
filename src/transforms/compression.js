@@ -52,7 +52,7 @@ class Decompressor extends Transform {
       this.push(chunk.slice(size))
       return cb()
     } else {
-      zlib.inflate(chunk.slice(size), (err, newBuf) => {
+      zlib.unzip(chunk.slice(size), { finishFlush: zlib.constants.Z_SYNC_FLUSH }, (err, newBuf) => { /** Fix by lefela4. */
         if (err) {
           if (!this.hideErrors) {
             console.error('problem inflating chunk')
