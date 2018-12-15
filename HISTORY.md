@@ -1,5 +1,11 @@
 # History
 
+## 1.8.3
+
+* 1.13.2 tested and supported
+* add skipValidation flag for authentication thanks @vlakreeh
+* fix compression.js (use Z_SYNC_FLUSH) thanks @lefela4
+
 ## 1.8.2
 
 * fix tcp_dns.js checking for SRV lookup
