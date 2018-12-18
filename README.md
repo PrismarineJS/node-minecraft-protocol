@@ -152,3 +152,6 @@ See [history](HISTORY.md)
 ## Related
 
 * [node-rcon](https://github.com/pushrax/node-rcon) can be used to access the rcon server in the minecraft server
+* [map-colors][aresmapcolor] can be used to convert any image into a buffer of minecraft compatible colors
+
+[aresmapcolor]: https://github.com/AresRPG/aresrpg-map-colors
