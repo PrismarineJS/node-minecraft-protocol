@@ -14,16 +14,19 @@ declare module 'minecraft-protocol' {
 		state: States
 		username: string
 		uuid: string
+		protocolVersion: number
 		end(reason: string): void
 		registerChannel(name: string, typeDefinition: any, custom?: boolean): void
 		unregisterChannel(name: string): void
 		write(name: string, params: any): void
+		writeRaw(buffer: any): void
 		writeChannel(channel: any, params: any): void
 		on(event: 'error', listener: (error: Error) => void): this
 		on(event: 'packet', handler: (data: any, packetMeta: PacketMeta) => void): this
 		on(event: 'raw', handler: (data: any, packetMeta: PacketMeta) => void): this
 		on(event: 'session', handler: (session: any) => void): this
 		on(event: 'state', handler: (newState: States, oldState: States) => void): this
+		on(event: 'end', handler: (reason: string) => void): this
 	}
 
 	export interface ClientOptions {
