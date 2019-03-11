@@ -17,6 +17,10 @@ function createProtocol (state, direction, version, customPackets) {
   const proto = new ProtoDef(false)
   proto.addTypes(minecraft)
   const mcData = require('minecraft-data')(version)
+  if (mcData === null) {
+    // Unsupported protocol
+    return createProtocol(state, direction, "1.13.2", customPackets)
+  }
   proto.addProtocol(merge(mcData.protocol, get(customPackets, [mcData.version.majorVersion])), [state, direction])
   protocols[key] = proto
   return proto
