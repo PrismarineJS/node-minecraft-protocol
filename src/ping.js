@@ -15,7 +15,7 @@ function ping (options, cb) {
   options.majorVersion = version.majorVersion
   options.protocolVersion = version.version
 
-  const client = new Client(false, options.majorVersion)
+  const client = new Client(false, version.minecraftVersion)
   client.on('error', function (err) {
     cb(err)
   })

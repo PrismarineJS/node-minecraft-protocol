@@ -104,7 +104,6 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         let chatCount = 0
         client.on('login', function (packet) {
           assert.strictEqual(packet.levelType, 'default')
-          assert.strictEqual(packet.difficulty, 1)
           assert.strictEqual(packet.dimension, 0)
           assert.strictEqual(packet.gameMode, 0)
           client.write('chat', {
