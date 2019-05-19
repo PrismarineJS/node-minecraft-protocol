@@ -1,5 +1,9 @@
 # History
 
+## 1.9.0
+
+* 1.14.1 support
+
 ## 1.8.3
 
 * 1.13.2 tested and supported
