@@ -64,7 +64,7 @@ const values = {
     }
     Object.keys(typeArgs).forEach(function (index) {
       const v = typeArgs[index].name === 'type' && typeArgs[index].type === 'string'
-        ? 'crafting_shapeless'
+        ? 'minecraft:crafting_shapeless'
         : getValue(typeArgs[index].type, results)
       if (typeArgs[index].anon) {
         Object.keys(v).forEach(key => {
