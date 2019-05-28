@@ -31,7 +31,7 @@
   },
   "browser": "src/browser.js",
   "devDependencies": {
-    "@types/node": "^11.9.0",
+    "@types/node": "^12.0.3",
     "espower-loader": "^1.0.0",
     "intelli-espower-loader": "^1.0.0",
     "minecraft-wrap": "^1.2.3",
