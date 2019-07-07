@@ -17,11 +17,14 @@ function createServer (options = {}) {
     'server-port': serverPort,
     port = serverPort || 25565,
     motd = 'A Minecraft server',
-    'max-players': maxPlayers = 20,
+    'max-players': maxPlayersOld = 20,
+    maxPlayers: maxPlayersNew = 20,
     version,
     favicon,
     customPackets
   } = options
+
+  const maxPlayers = options['max-players'] !== undefined ? maxPlayersOld : maxPlayersNew
 
   const optVersion = version === undefined || version === false ? require('./version').defaultVersion : version
 
