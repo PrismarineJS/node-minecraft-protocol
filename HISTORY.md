@@ -1,5 +1,9 @@
 # History
 
+## 1.9.1
+
+* throw an unsupported protocol version in createServer when asking for an unsupported version
+
 ## 1.9.0
 
 * 1.14.1 support
