@@ -1,5 +1,9 @@
 # History
 
+## 1.9.3
+
+* handle both max-players and maxPlayers in createServer options
+
 ## 1.9.2
 
 * check whether version is supported in server auto version detection
