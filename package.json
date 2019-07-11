@@ -12,6 +12,7 @@
     "prepublish": "require-self",
     "test": "mocha --recursive --reporter spec",
     "lint": "standard",
+    "fix": "standard fix",
     "pretest": "npm run lint"
   },
   "keywords": [
@@ -38,7 +39,7 @@
     "mocha": "^6.0.0",
     "power-assert": "^1.0.0",
     "require-self": "^0.2.1",
-    "standard": "^12.0.0"
+    "standard": "^13.1.0"
   },
   "dependencies": {
     "buffer-equal": "^1.0.0",
