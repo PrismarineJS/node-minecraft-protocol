@@ -5,6 +5,7 @@
 [![Gitter](https://img.shields.io/badge/chat-on%20gitter-brightgreen.svg)](https://gitter.im/PrismarineJS/general)
 [![Irc](https://img.shields.io/badge/chat-on%20irc-brightgreen.svg)](https://irc.gitter.im/)
 [![Greenkeeper badge](https://badges.greenkeeper.io/PrismarineJS/node-minecraft-protocol.svg)](https://greenkeeper.io/)
+[![Try it on gitpod](https://img.shields.io/badge/try-on%20gitpod-brightgreen.svg)](https://gitpod.io/#https://github.com/PrismarineJS/node-minecraft-protocol)
 
 Parse and serialize minecraft packets, plus authentication and encryption.
 
@@ -31,7 +32,7 @@ Parse and serialize minecraft packets, plus authentication and encryption.
    - Ping status
  * Robust test coverage.
  * Optimized for rapidly staying up to date with Minecraft protocol updates.
- 
+
 ## Third Party Plugins
 
 node-minecraft-protocol is pluggable.
