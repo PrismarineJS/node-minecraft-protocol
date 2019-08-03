@@ -1,5 +1,9 @@
 # History
 
+## 1.9.4
+
+* add reference to node types in typescript types
+
 ## 1.9.3
 
 * handle both max-players and maxPlayers in createServer options
@@ -313,7 +317,7 @@
  * Updated protocol version to support 1.7.6
 
 ## 0.12.0
- 
+
  * Updated protocol version to support 1.7.2
  * Overhaul the serializer backend to be more general-purpose and future-proof.
  * Support listening packets by name (thanks [deathcap](https://github.com/deathcap))
