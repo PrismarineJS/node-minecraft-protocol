@@ -6,45 +6,45 @@ if (process.argv.length < 4 || process.argv.length > 6) {
 }
 
 const customPackets = {
-  '1.8': {
-    'play': {
-      'toClient': {
-        'types': {
-          'packet_custom_name': [
+  1.8: {
+    play: {
+      toClient: {
+        types: {
+          packet_custom_name: [
             'container', [
               {
-                'name': 'age',
-                'type': 'i64'
+                name: 'age',
+                type: 'i64'
               },
               {
-                'name': 'time',
-                'type': 'i64'
+                name: 'time',
+                type: 'i64'
               }
             ]
           ],
-          'packet': [
+          packet: [
             'container',
             [
               {
-                'name': 'name',
-                'type': [
+                name: 'name',
+                type: [
                   'mapper',
                   {
-                    'type': 'varint',
-                    'mappings': {
+                    type: 'varint',
+                    mappings: {
                       '0x7A': 'custom_name'
                     }
                   }
                 ]
               },
               {
-                'name': 'params',
-                'type': [
+                name: 'params',
+                type: [
                   'switch',
                   {
-                    'compareTo': 'name',
-                    'fields': {
-                      'custom_name': 'packet_custom_name'
+                    compareTo: 'name',
+                    fields: {
+                      custom_name: 'packet_custom_name'
                     }
                   }
                 ]

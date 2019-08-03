@@ -6,17 +6,17 @@ module.exports = function (client, server, { beforePing = null }) {
 
   function onPing () {
     const response = {
-      'version': {
-        'name': server.mcversion.minecraftVersion,
-        'protocol': server.mcversion.version
+      version: {
+        name: server.mcversion.minecraftVersion,
+        protocol: server.mcversion.version
       },
-      'players': {
-        'max': server.maxPlayers,
-        'online': server.playerCount,
-        'sample': []
+      players: {
+        max: server.maxPlayers,
+        online: server.playerCount,
+        sample: []
       },
-      'description': { 'text': server.motd },
-      'favicon': server.favicon
+      description: { text: server.motd },
+      favicon: server.favicon
     }
 
     function answerToPing (err, response) {

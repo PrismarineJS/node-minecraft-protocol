@@ -20,7 +20,7 @@ module.exports = function (client, options) {
     // The version string is interpreted by https://github.com/PrismarineJS/node-minecraft-data
     const brandedMinecraftVersion = response.version.name // 1.8.9, 1.7.10
     const protocolVersion = response.version.protocol//    47,      5
-    let versions = [brandedMinecraftVersion]
+    const versions = [brandedMinecraftVersion]
       .concat(brandedMinecraftVersion.match(/((\d+\.)+\d+)/g) || [])
       .map(function (version) {
         return minecraftData.versionsByMinecraftVersion['pc'][version]

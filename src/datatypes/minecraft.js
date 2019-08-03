@@ -5,12 +5,12 @@ const UUID = require('uuid-1345')
 const zlib = require('zlib')
 
 module.exports = {
-  'UUID': [readUUID, writeUUID, 16],
-  'nbt': [readNbt, writeNbt, sizeOfNbt],
-  'optionalNbt': [readOptionalNbt, writeOptionalNbt, sizeOfOptionalNbt],
-  'compressedNbt': [readCompressedNbt, writeCompressedNbt, sizeOfCompressedNbt],
-  'restBuffer': [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
-  'entityMetadataLoop': [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata]
+  UUID: [readUUID, writeUUID, 16],
+  nbt: [readNbt, writeNbt, sizeOfNbt],
+  optionalNbt: [readOptionalNbt, writeOptionalNbt, sizeOfOptionalNbt],
+  compressedNbt: [readCompressedNbt, writeCompressedNbt, sizeOfCompressedNbt],
+  restBuffer: [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
+  entityMetadataLoop: [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata]
 }
 var PartialReadError = require('protodef').utils.PartialReadError
 

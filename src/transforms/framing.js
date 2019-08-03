@@ -30,6 +30,7 @@ class Splitter extends Transform {
     this.buffer = Buffer.alloc(0)
     this.recognizeLegacyPing = false
   }
+
   _transform (chunk, enc, cb) {
     this.buffer = Buffer.concat([this.buffer, chunk])
 

@@ -207,7 +207,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
       function broadcast (message, exclude) {
         let client
         for (const clientId in server.clients) {
-          if (!server.clients.hasOwnProperty(clientId)) continue
+          if (server.clients[clientId] === undefined) continue
 
           client = server.clients[clientId]
           if (client !== exclude) client.write('chat', { message: JSON.stringify({ text: message }), position: 0 })

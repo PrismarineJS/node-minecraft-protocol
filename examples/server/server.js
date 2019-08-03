@@ -54,17 +54,17 @@ server.on('listening', function () {
 })
 
 function broadcast (message, exclude, username) {
-  let client, translate
-  translate = username ? 'chat.type.announcement' : 'chat.type.text'
+  let client
+  const translate = username ? 'chat.type.announcement' : 'chat.type.text'
   username = username || 'Server'
   for (const clientId in server.clients) {
-    if (!server.clients.hasOwnProperty(clientId)) continue
+    if (server.clients[clientId] === undefined) continue
 
     client = server.clients[clientId]
     if (client !== exclude) {
       const msg = {
         translate: translate,
-        'with': [
+        with: [
           username,
           message
         ]

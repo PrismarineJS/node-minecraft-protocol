@@ -34,15 +34,15 @@ const slotValue = {
 }
 
 const values = {
-  'i32': 123456,
-  'i16': -123,
-  'u16': 123,
-  'varint': 1,
-  'i8': -10,
-  'u8': 8,
-  'string': 'hi hi this is my client string',
-  'buffer': Buffer.alloc(8),
-  'array': function (typeArgs, context) {
+  i32: 123456,
+  i16: -123,
+  u16: 123,
+  varint: 1,
+  i8: -10,
+  u8: 8,
+  string: 'hi hi this is my client string',
+  buffer: Buffer.alloc(8),
+  array: function (typeArgs, context) {
     let count
     if (typeof typeArgs.count === 'object') {
       count = evalCount(typeArgs.count, context)
@@ -58,7 +58,7 @@ const values = {
     }
     return arr
   },
-  'container': function (typeArgs, context) {
+  container: function (typeArgs, context) {
     const results = {
       '..': context
     }
@@ -78,12 +78,12 @@ const values = {
     delete context['..']
     return results
   },
-  'count': 1, // TODO : might want to set this to a correct value
-  'bool': true,
-  'f64': 99999.2222,
-  'f32': -333.444,
-  'slot': slotValue,
-  'nbt': {
+  count: 1, // TODO : might want to set this to a correct value
+  bool: true,
+  f64: 99999.2222,
+  f32: -333.444,
+  slot: slotValue,
+  nbt: {
     type: 'compound',
     name: 'test',
     value: {
@@ -96,7 +96,7 @@ const values = {
       test7: { type: 'intArray', value: [12, 42] }
     }
   },
-  'optionalNbt': {
+  optionalNbt: {
     type: 'compound',
     name: 'test',
     value: {
@@ -109,7 +109,7 @@ const values = {
       test7: { type: 'intArray', value: [12, 42] }
     }
   },
-  'compressedNbt': {
+  compressedNbt: {
     type: 'compound',
     name: 'test',
     value: {
@@ -122,24 +122,24 @@ const values = {
       test7: { type: 'intArray', value: [12, 42] }
     }
   },
-  'i64': [0, 1],
-  'u64': [0, 1],
-  'entityMetadata': [
+  i64: [0, 1],
+  u64: [0, 1],
+  entityMetadata: [
     { key: 17, value: 0, type: 0 }
   ],
-  'objectData': {
+  objectData: {
     intField: 9,
     velocityX: 1,
     velocityY: 2,
     velocityZ: 3
   },
-  'UUID': '00112233-4455-6677-8899-aabbccddeeff',
-  'position': { x: 12, y: 100, z: 4382821 },
-  'position_ibi': { x: 12, y: 100, z: 4382821 },
-  'position_isi': { x: 12, y: 100, z: 4382821 },
-  'position_iii': { x: 12, y: 100, z: 4382821 },
-  'restBuffer': Buffer.alloc(0),
-  'switch': function (typeArgs, context) {
+  UUID: '00112233-4455-6677-8899-aabbccddeeff',
+  position: { x: 12, y: 100, z: 4382821 },
+  position_ibi: { x: 12, y: 100, z: 4382821 },
+  position_isi: { x: 12, y: 100, z: 4382821 },
+  position_iii: { x: 12, y: 100, z: 4382821 },
+  restBuffer: Buffer.alloc(0),
+  switch: function (typeArgs, context) {
     const i = typeArgs.fields[getField(typeArgs.compareTo, context)]
     if (i === undefined) {
       if (typeArgs.default === undefined) {
@@ -149,10 +149,10 @@ const values = {
       return getValue(typeArgs.default, context)
     } else { return getValue(i, context) }
   },
-  'option': function (typeArgs, context) {
+  option: function (typeArgs, context) {
     return getValue(typeArgs, context)
   },
-  'bitfield': function (typeArgs, context) {
+  bitfield: function (typeArgs, context) {
     const results = {}
     Object.keys(typeArgs).forEach(function (index) {
       results[typeArgs[index].name] = 1
@@ -160,9 +160,9 @@ const values = {
     })
     return results
   },
-  'tags': [{ 'tagName': 'hi', 'entries': [1, 2, 3, 4, 5] }],
-  'ingredient': [slotValue],
-  'particleData': null
+  tags: [{ tagName: 'hi', entries: [1, 2, 3, 4, 5] }],
+  ingredient: [slotValue],
+  particleData: null
 }
 
 function getValue (_type, packet) {

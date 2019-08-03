@@ -5,28 +5,28 @@ const states = mc.states
 const util = require('util')
 
 const colors = {
-  'black': 'black+white_bg',
-  'dark_blue': 'blue',
-  'dark_green': 'green',
-  'dark_aqua': 'cyan',
-  'dark_red': 'red',
-  'dark_purple': 'magenta',
-  'gold': 'yellow',
-  'gray': 'black+white_bg',
-  'dark_gray': 'black+white_bg',
-  'blue': 'blue',
-  'green': 'green',
-  'aqua': 'cyan',
-  'red': 'red',
-  'light_purple': 'magenta',
-  'yellow': 'yellow',
-  'white': 'white',
-  'obfuscated': 'blink',
-  'bold': 'bold',
-  'strikethrough': '',
-  'underlined': 'underlined',
-  'italic': '',
-  'reset': 'white+black_bg'
+  black: 'black+white_bg',
+  dark_blue: 'blue',
+  dark_green: 'green',
+  dark_aqua: 'cyan',
+  dark_red: 'red',
+  dark_purple: 'magenta',
+  gold: 'yellow',
+  gray: 'black+white_bg',
+  dark_gray: 'black+white_bg',
+  blue: 'blue',
+  green: 'green',
+  aqua: 'cyan',
+  red: 'red',
+  light_purple: 'magenta',
+  yellow: 'yellow',
+  white: 'white',
+  obfuscated: 'blink',
+  bold: 'bold',
+  strikethrough: '',
+  underlined: 'underlined',
+  italic: '',
+  reset: 'white+black_bg'
 }
 
 const dictionary = {
@@ -162,7 +162,7 @@ function parseChat (chatObj, parentState) {
 
     if ('text' in chatObj) {
       chat += color(chatObj.text, getColorize(parentState))
-    } else if ('translate' in chatObj && dictionary.hasOwnProperty(chatObj.translate)) {
+    } else if ('translate' in chatObj && dictionary[chatObj.translate] !== undefined) {
       const args = [dictionary[chatObj.translate]]
       chatObj['with'].forEach(function (s) {
         args.push(parseChat(s, parentState))

@@ -25,9 +25,9 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
     const inputData = []
     it('bench serializing', function (done) {
       const serializer = mc.createSerializer({ state: states.PLAY, isServer: false, version: version.minecraftVersion })
-      let start, i, j
+      let i, j
       console.log('Beginning write test')
-      start = Date.now()
+      const start = Date.now()
       for (i = 0; i < ITERATIONS; i++) {
         for (j = 0; j < testDataWrite.length; j++) {
           inputData.push(serializer.createPacketBuffer(testDataWrite[j]))

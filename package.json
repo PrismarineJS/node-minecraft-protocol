@@ -12,7 +12,7 @@
     "prepublish": "require-self",
     "test": "mocha --recursive --reporter spec",
     "lint": "standard",
-    "fix": "standard fix",
+    "fix": "standard --fix",
     "pretest": "npm run lint"
   },
   "keywords": [

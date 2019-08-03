@@ -47,7 +47,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         wrap.startServer({
           'online-mode': 'false',
           'server-port': PORT,
-          'motd': 'test1234',
+          motd: 'test1234',
           'max-players': 120
         }, function (err) {
           if (err) { console.log(err) }

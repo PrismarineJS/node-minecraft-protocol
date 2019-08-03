@@ -40,7 +40,7 @@ server.on('login', function (client) {
 
   const msg = {
     translate: 'chat.type.announcement',
-    'with': [
+    with: [
       'Server',
       'Hello, world!'
     ]
