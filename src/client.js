@@ -142,7 +142,7 @@ class Client extends EventEmitter {
 
     const onError = (err) => this.emit('error', err)
 
-    this.socket = socket
+    this.socket = socket.socket
 
     if (this.socket.setNoDelay) { this.socket.setNoDelay(true) }
 
