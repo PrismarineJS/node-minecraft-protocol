@@ -23,11 +23,11 @@ module.exports = function (client, options) {
     const versions = [brandedMinecraftVersion]
       .concat(brandedMinecraftVersion.match(/((\d+\.)+\d+)/g) || [])
       .map(function (version) {
-        return minecraftData.versionsByMinecraftVersion['pc'][version]
+        return minecraftData.versionsByMinecraftVersion.pc[version]
       })
       .filter(function (info) { return info })
       .sort(function (a, b) { return b.version - a.version })
-      .concat(minecraftData.postNettyVersionsByProtocolVersion['pc'][protocolVersion] || [])
+      .concat(minecraftData.postNettyVersionsByProtocolVersion.pc[protocolVersion] || [])
     if (versions.length === 0) {
       client.emit('error', new Error(`unsupported/unknown protocol version: ${protocolVersion}, update minecraft-data`))
     }

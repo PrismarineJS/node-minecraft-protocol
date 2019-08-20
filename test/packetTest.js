@@ -9,8 +9,8 @@ const getFieldInfo = require('protodef').utils.getFieldInfo
 const getField = require('protodef').utils.getField
 
 function evalCount (count, fields) {
-  if (fields[count['field']] in count['map']) { return count['map'][fields[count['field']]] }
-  return count['default']
+  if (fields[count.field] in count.map) { return count.map[fields[count.field]] }
+  return count.default
 }
 
 const slotValue = {
@@ -64,8 +64,8 @@ const values = {
     }
     Object.keys(typeArgs).forEach(function (index) {
       const v = typeArgs[index].name === 'type' && typeArgs[index].type === 'string' && typeArgs[2] !== undefined &&
-      typeArgs[2]['type'] !== undefined
-        ? (typeArgs[2]['type'][1]['fields']['minecraft:crafting_shapeless'] === undefined ? 'crafting_shapeless' : 'minecraft:crafting_shapeless')
+      typeArgs[2].type !== undefined
+        ? (typeArgs[2].type[1].fields['minecraft:crafting_shapeless'] === undefined ? 'crafting_shapeless' : 'minecraft:crafting_shapeless')
         : getValue(typeArgs[index].type, results)
       if (typeArgs[index].anon) {
         Object.keys(v).forEach(key => {

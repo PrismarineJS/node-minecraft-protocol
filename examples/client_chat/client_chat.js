@@ -153,18 +153,18 @@ function parseChat (chatObj, parentState) {
     return color(chatObj, getColorize(parentState))
   } else {
     let chat = ''
-    if ('color' in chatObj) parentState.color = chatObj['color']
-    if ('bold' in chatObj) parentState.bold = chatObj['bold']
-    if ('italic' in chatObj) parentState.italic = chatObj['italic']
-    if ('underlined' in chatObj) parentState.underlined = chatObj['underlined']
-    if ('strikethrough' in chatObj) parentState.strikethrough = chatObj['strikethrough']
-    if ('obfuscated' in chatObj) parentState.obfuscated = chatObj['obfuscated']
+    if ('color' in chatObj) parentState.color = chatObj.color
+    if ('bold' in chatObj) parentState.bold = chatObj.bold
+    if ('italic' in chatObj) parentState.italic = chatObj.italic
+    if ('underlined' in chatObj) parentState.underlined = chatObj.underlined
+    if ('strikethrough' in chatObj) parentState.strikethrough = chatObj.strikethrough
+    if ('obfuscated' in chatObj) parentState.obfuscated = chatObj.obfuscated
 
     if ('text' in chatObj) {
       chat += color(chatObj.text, getColorize(parentState))
     } else if ('translate' in chatObj && dictionary[chatObj.translate] !== undefined) {
       const args = [dictionary[chatObj.translate]]
-      chatObj['with'].forEach(function (s) {
+      chatObj.with.forEach(function (s) {
         args.push(parseChat(s, parentState))
       })
 
