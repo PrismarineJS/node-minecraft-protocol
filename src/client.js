@@ -36,12 +36,14 @@ class Client extends EventEmitter {
 
   setSerializer (state) {
     this.serializer = createSerializer({ isServer: this.isServer, version: this.version, state: state, customPackets: this.customPackets })
-    this.deserializer = createDeserializer({ isServer: this.isServer,
+    this.deserializer = createDeserializer({
+      isServer: this.isServer,
       version: this.version,
       state: state,
       packetsToParse:
       this.packetsToParse,
-      customPackets: this.customPackets })
+      customPackets: this.customPackets
+    })
 
     this.splitter.recognizeLegacyPing = state === states.HANDSHAKING
 
