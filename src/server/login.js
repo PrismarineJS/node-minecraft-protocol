@@ -1,4 +1,4 @@
-const yggserver = require('yggdrasil').server({})
+const yggserver = require('@waff/yggdrasil').server({})
 const UUID = require('uuid-1345')
 const bufferEqual = require('buffer-equal')
 const crypto = require('crypto')

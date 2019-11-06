@@ -1,7 +1,7 @@
 'use strict'
 
 const crypto = require('crypto')
-const yggserver = require('yggdrasil').server({})
+const yggserver = require('@waff/yggdrasil').server({})
 const debug = require('debug')('minecraft-protocol')
 
 module.exports = function (client, options) {

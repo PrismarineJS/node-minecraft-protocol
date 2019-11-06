@@ -1,4 +1,4 @@
-const yggdrasil = require('yggdrasil')({})
+const yggdrasil = require('@waff/yggdrasil')({})
 const UUID = require('uuid-1345')
 
 module.exports = function (client, options) {
