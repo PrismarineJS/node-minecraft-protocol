@@ -172,8 +172,8 @@ class Client extends EventEmitter {
     if (this.socket) {
       this.socket.end()
       this.closeTimer = setTimeout(
-          this.socket.destroy.bind(this.socket),
-          closeTimeout
+        this.socket.destroy.bind(this.socket),
+        closeTimeout
       )
     }
   }
