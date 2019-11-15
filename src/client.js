@@ -10,7 +10,7 @@ const states = require('./states')
 const createSerializer = require('./transforms/serializer').createSerializer
 const createDeserializer = require('./transforms/serializer').createDeserializer
 
-const closeTimeout = 5 * 1000
+const closeTimeout = 30 * 1000
 
 class Client extends EventEmitter {
   constructor (isServer, version, customPackets, hideErrors = false) {
