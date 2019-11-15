@@ -10,6 +10,8 @@ const states = require('./states')
 const createSerializer = require('./transforms/serializer').createSerializer
 const createDeserializer = require('./transforms/serializer').createDeserializer
 
+const closeTimeout = 30 * 1000
+
 class Client extends EventEmitter {
   constructor (isServer, version, customPackets, hideErrors = false) {
     super()
@@ -26,6 +28,7 @@ class Client extends EventEmitter {
     this.ended = true
     this.latency = 0
     this.hideErrors = hideErrors
+    this.closeTimer = null
 
     this.state = states.HANDSHAKING
   }
@@ -131,6 +134,7 @@ class Client extends EventEmitter {
     const endSocket = () => {
       if (this.ended) return
       this.ended = true
+      clearTimeout(this.closeTimer)
       this.socket.removeListener('close', endSocket)
       this.socket.removeListener('end', endSocket)
       this.socket.removeListener('timeout', endSocket)
@@ -165,7 +169,13 @@ class Client extends EventEmitter {
     this._endReason = reason
     if (this.cipher) this.cipher.unpipe()
     if (this.framer) this.framer.unpipe()
-    if (this.socket) this.socket.end()
+    if (this.socket) {
+      this.socket.end()
+      this.closeTimer = setTimeout(
+        this.socket.destroy.bind(this.socket),
+        closeTimeout
+      )
+    }
   }
 
   setEncryption (sharedSecret) {
