@@ -18,6 +18,7 @@ declare module 'minecraft-protocol' {
 		uuid: string
 		protocolVersion: number
 		end(reason: string): void
+		connect(address: string, port: string): void
 		registerChannel(name: string, typeDefinition: any, custom?: boolean): void
 		unregisterChannel(name: string): void
 		write(name: string, params: any): void
