@@ -1,5 +1,11 @@
 # History
 
+## 1.10.0
+
+* 1.15 support
+* socket end timeout (thanks @matthi4s)
+* add connect and close to types (thanks @ShayBox)
+
 ## 1.9.4
 
 * add reference to node types in typescript types
