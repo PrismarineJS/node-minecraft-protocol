@@ -152,9 +152,11 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           levelType: 'default',
           gameMode: 1,
           dimension: 0,
+          hashedSeed: [0, 0],
           difficulty: 2,
           maxPlayers: server.maxPlayers,
-          reducedDebugInfo: 0
+          reducedDebugInfo: 0,
+          enableRespawnScreen: true
         })
         client.on('chat', function (packet) {
           const message = '<' + client.username + '>' + ' ' + packet.message
@@ -264,9 +266,11 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           levelType: 'default',
           gameMode: 1,
           dimension: 0,
+          hashedSeed: [0, 0],
           difficulty: 2,
           maxPlayers: server.maxPlayers,
-          reducedDebugInfo: 0
+          reducedDebugInfo: 0,
+          enableRespawnScreen: true
         })
       })
       server.on('close', function () {

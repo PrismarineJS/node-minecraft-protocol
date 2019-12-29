@@ -26,7 +26,9 @@ server.on('login', function (client) {
     dimension: 0,
     difficulty: 2,
     maxPlayers: server.maxPlayers,
-    reducedDebugInfo: false
+    reducedDebugInfo: false,
+    enableRespawnScreen: true,
+    hashedSeed: [0, 0]
   })
 
   client.write('position', {
