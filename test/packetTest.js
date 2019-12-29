@@ -44,7 +44,9 @@ const values = {
   buffer: Buffer.alloc(8),
   array: function (typeArgs, context) {
     let count
-    if (typeof typeArgs.count === 'object') {
+    if (typeof typeArgs.count === 'number') {
+      count = typeArgs.count
+    } else if (typeof typeArgs.count === 'object') {
       count = evalCount(typeArgs.count, context)
     } else if (typeArgs.count !== undefined) {
       count = getField(typeArgs.count, context)
