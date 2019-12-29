@@ -16,7 +16,9 @@ server.on('login', function (client) {
     dimension: 0,
     difficulty: 2,
     maxPlayers: server.maxPlayers,
-    reducedDebugInfo: false
+    reducedDebugInfo: false,
+    enableRespawnScreen: true,
+    hashedSeed: [0, 0]
   })
   client.registerChannel('CUSTOM|ChannelOne', ['i32', []], true)
   client.registerChannel('CUSTOM|ChannelTwo', ['i32', []], true)

@@ -27,12 +27,14 @@ server.on('login', function (client) {
     dimension: 0,
     difficulty: 2,
     maxPlayers: server.maxPlayers,
-    reducedDebugInfo: false
+    reducedDebugInfo: false,
+    enableRespawnScreen: true,
+    hashedSeed: [0, 0]
   })
   client.write('map_chunk', {
     x: 0,
     z: 0,
-    groundUp: true,
+    groundUp: false,
     bitMap: 0xffff,
     chunkData: chunk.dump(),
     blockEntities: []
