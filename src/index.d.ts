@@ -138,7 +138,7 @@ declare module 'minecraft-protocol' {
 		latency: number
 	}
 
-	export const state: typeof States
+	export const states: typeof States
 	export const supportedVersions: ['1.7', '1.8', '1.9', '1.10', '1.11.2', '1.12.2', '1.13.1']
 
 	export function createServer(options: ServerOptions): Server
