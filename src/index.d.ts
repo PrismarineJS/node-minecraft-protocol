@@ -30,6 +30,7 @@ declare module 'minecraft-protocol' {
 		on(event: 'session', handler: (session: any) => void): this
 		on(event: 'state', handler: (newState: States, oldState: States) => void): this
 		on(event: 'end', handler: (reason: string) => void): this
+		on(event: string, handler: (data: any, packetMeta: PacketMeta)=> unknown): this
 	}
 
 	export interface ClientOptions {
@@ -137,7 +138,7 @@ declare module 'minecraft-protocol' {
 		latency: number
 	}
 
-	export const state: States
+	export const states: typeof States
 	export const supportedVersions: ['1.7', '1.8', '1.9', '1.10', '1.11.2', '1.12.2', '1.13.1']
 
 	export function createServer(options: ServerOptions): Server
