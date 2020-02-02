@@ -42,7 +42,7 @@
     "standard": "^14.0.0"
   },
   "dependencies": {
-    "yggdrasil": "^1.1.4",
+    "yggdrasil": "^1.2.0",
     "buffer-equal": "^1.0.0",
     "debug": "^4.1.0",
     "endian-toggle": "^0.0.0",
