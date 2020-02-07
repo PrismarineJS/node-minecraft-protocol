@@ -2,9 +2,10 @@
 
 const crypto = require('crypto')
 const debug = require('debug')('minecraft-protocol')
+const yggdrasil = require('yggdrasil')
 
 module.exports = function (client, options) {
-  const yggserver = require('yggdrasil').server({ agent: options.agent })
+  const yggdrasilServer = yggdrasil.server({ agent: options.agent })
   client.once('encryption_begin', onEncryptionKeyRequest)
 
   function onEncryptionKeyRequest (packet) {
@@ -36,7 +37,7 @@ module.exports = function (client, options) {
       }
 
       function joinServerRequest (cb) {
-        yggserver.join(options.accessToken, client.session.selectedProfile.id,
+        yggdrasilServer.join(options.accessToken, client.session.selectedProfile.id,
           packet.serverId, sharedSecret, packet.publicKey, cb)
       }
 
