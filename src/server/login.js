@@ -5,7 +5,7 @@ const pluginChannels = require('../client/pluginChannels')
 const states = require('../states')
 
 module.exports = function (client, server, options) {
-  const yggserver = require('yggdrasil').server({agent: options.agent})
+  const yggserver = require('yggdrasil').server({ agent: options.agent })
   const {
     'online-mode': onlineMode = true,
     kickTimeout = 30 * 1000,

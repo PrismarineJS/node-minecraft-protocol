@@ -1,7 +1,7 @@
 const UUID = require('uuid-1345')
 
 module.exports = function (client, options) {
-  const yggdrasil = require('yggdrasil')({agent: options.agent})
+  const yggdrasil = require('yggdrasil')({ agent: options.agent })
   const clientToken = options.clientToken || (options.session && options.session.clientToken) || UUID.v4().toString()
   const skipValidation = false || options.skipValidation
   options.accessToken = null
