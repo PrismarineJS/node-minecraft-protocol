@@ -1,4 +1,3 @@
-const yggserver = require('yggdrasil').server({})
 const UUID = require('uuid-1345')
 const bufferEqual = require('buffer-equal')
 const crypto = require('crypto')
@@ -6,6 +5,7 @@ const pluginChannels = require('../client/pluginChannels')
 const states = require('../states')
 
 module.exports = function (client, server, options) {
+  const yggserver = require('yggdrasil').server({agent: options.agent})
   const {
     'online-mode': onlineMode = true,
     kickTimeout = 30 * 1000,

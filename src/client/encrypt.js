@@ -1,10 +1,10 @@
 'use strict'
 
 const crypto = require('crypto')
-const yggserver = require('yggdrasil').server({})
 const debug = require('debug')('minecraft-protocol')
 
 module.exports = function (client, options) {
+  const yggserver = require('yggdrasil').server({agent: options.agent})
   client.once('encryption_begin', onEncryptionKeyRequest)
 
   function onEncryptionKeyRequest (packet) {
