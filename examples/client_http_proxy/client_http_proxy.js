@@ -1,5 +1,6 @@
 const mc = require('minecraft-protocol')
 const Http = require('http')
+const ProxyAgent = require('proxy-agent')
 
 if (process.argv.length < 6 || process.argv.length > 8) {
   console.log('Usage : node client_http_proxy.js <host> <port> <proxyHost> <proxyPort> [<name>] [<password>]')
@@ -19,11 +20,12 @@ const client = mc.createClient({
     })
     req.end()
 
-    req.on('connect', function (res, stream) {
+    req.on('connect', (res, stream) => {
       client.setSocket(stream)
       client.emit('connect')
     })
   },
+  agent: new ProxyAgent({ protocol: 'http', host: proxyHost, port: proxyPort }),
   username: process.argv[6] ? process.argv[6] : 'echo',
   password: process.argv[7]
 })
