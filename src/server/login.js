@@ -1,11 +1,12 @@
-const yggserver = require('yggdrasil').server({})
 const UUID = require('uuid-1345')
 const bufferEqual = require('buffer-equal')
 const crypto = require('crypto')
 const pluginChannels = require('../client/pluginChannels')
 const states = require('../states')
+const yggdrasil = require('yggdrasil')
 
 module.exports = function (client, server, options) {
+  const yggdrasilServer = yggdrasil.server({ agent: options.agent })
   const {
     'online-mode': onlineMode = true,
     kickTimeout = 30 * 1000,
@@ -74,7 +75,7 @@ module.exports = function (client, server, options) {
     nextStep()
 
     function verifyUsername () {
-      yggserver.hasJoined(client.username, serverId, sharedSecret, client.publicKey, function (err, profile) {
+      yggdrasilServer.hasJoined(client.username, serverId, sharedSecret, client.publicKey, function (err, profile) {
         if (err) {
           client.end('Failed to verify username!')
           return

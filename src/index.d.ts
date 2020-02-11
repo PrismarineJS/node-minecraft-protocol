@@ -3,7 +3,7 @@
 import { EventEmitter } from 'events';
 import { Socket } from 'net'
 import * as Stream from 'stream'
-import { on } from 'cluster';
+import { Agent } from 'http'
 
 declare module 'minecraft-protocol' {
 	export class Client extends EventEmitter {
@@ -46,6 +46,9 @@ declare module 'minecraft-protocol' {
 		username: string
 		version?: string
 		skipValidation?: boolean
+		stream?: Stream
+		connect?: (client: Client) => void
+		agent?: Agent
 	}
 
 	export class Server extends EventEmitter {
@@ -73,11 +76,10 @@ declare module 'minecraft-protocol' {
 		maxPlayers?: number
 		motd?: string
 		port?: number
-		stream?: Stream
 		version?: string
 		beforePing?: (response: any, client: Client, callback?: (result: any) => any) => any
-		connect?: (client: Client) => void
 		errorHandler?: (client: Client, error: Error) => void
+		agent?: Agent
 	}
 
 	export interface SerializerOptions {
