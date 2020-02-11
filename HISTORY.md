@@ -1,5 +1,9 @@
 # History
 
+## 1.11.0
+
+* proxy support in auth (thanks @IdanHo)
+
 ## 1.10.0
 
 * 1.15 support
