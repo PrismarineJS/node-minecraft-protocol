@@ -16,6 +16,7 @@ module.exports = function (client, options) {
       } else {
         client.session = session
         client.username = session.selectedProfile.name
+        options.clientToken = session.clientToken
         options.accessToken = session.accessToken
         client.emit('session', session)
         options.connect(client)
