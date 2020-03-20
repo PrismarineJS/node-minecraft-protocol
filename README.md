@@ -49,6 +49,7 @@ node-minecraft-protocol is pluggable.
    create bots.
  * [flying-squid](https://github.com/PrismarineJS/flying-squid) create minecraft
    servers with a high level API, also a minecraft server by itself.
+ * [minecraft-packet-debugger](https://github.com/wvffle/minecraft-packet-debugger) to easily debug your minecraft packets
 
 ## Usage
 
