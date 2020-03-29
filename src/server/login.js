@@ -83,6 +83,7 @@ module.exports = function (client, server, options) {
         // Convert to a valid UUID until the session server updates and does
         // it automatically
         client.uuid = profile.id.replace(/(\w{8})(\w{4})(\w{4})(\w{4})(\w{12})/, '$1-$2-$3-$4-$5')
+        client.username = profile.name
         client.profile = profile
         loginClient()
       })
