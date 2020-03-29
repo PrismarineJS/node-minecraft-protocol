@@ -42,7 +42,6 @@
     "standard": "^14.0.0"
   },
   "dependencies": {
-    "yggdrasil": "^1.3.0",
     "buffer-equal": "^1.0.0",
     "debug": "^4.1.0",
     "endian-toggle": "^0.0.0",
@@ -51,8 +50,8 @@
     "minecraft-data": "^2.41.0",
     "node-rsa": "^0.4.2",
     "prismarine-nbt": "^1.2.1",
-    "protodef": "^1.6.7",
     "readable-stream": "^3.0.6",
-    "uuid-1345": "^0.99.6"
+    "uuid-1345": "^0.99.6",
+    "yggdrasil": "^1.3.0"
   }
 }

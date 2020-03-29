@@ -1,8 +1,8 @@
-'use strict'
-
-const [readVarInt, writeVarInt, sizeOfVarInt] = require('protodef').types.varint
+const { ProtoDef } = require('protodef-neo')
+const proto = new ProtoDef({ types: { varint: 'native' } })
 const zlib = require('zlib')
 const Transform = require('readable-stream').Transform
+const finishFlush = zlib.constants.Z_SYNC_FLUSH // Fix by lefela4.
 
 module.exports.createCompressor = function (threshold) {
   return new Compressor(threshold)
@@ -15,60 +15,56 @@ module.exports.createDecompressor = function (threshold, hideErrors) {
 class Compressor extends Transform {
   constructor (compressionThreshold = -1) {
     super()
-    this.compressionThreshold = compressionThreshold
+    this.compressionThreshold = compressionThreshold !== -1
+      ? Math.max(compressionThreshold | 0, 64)
+      : Infinity
   }
 
-  _transform (chunk, enc, cb) {
-    if (chunk.length >= this.compressionThreshold) {
+  _transform (chunk, _, cb) {
+    if (chunk.length > this.compressionThreshold) {
       zlib.deflate(chunk, (err, newChunk) => {
-        if (err) { return cb(err) }
-        const buf = Buffer.alloc(sizeOfVarInt(chunk.length) + newChunk.length)
-        const offset = writeVarInt(chunk.length, buf, 0)
-        newChunk.copy(buf, offset)
-        this.push(buf)
-        return cb()
+        cb(err, err || Buffer.concat([
+          proto.createPacketBuffer('varint', chunk.length),
+          newChunk
+        ]))
       })
-    } else {
-      const buf = Buffer.alloc(sizeOfVarInt(0) + chunk.length)
-      const offset = writeVarInt(0, buf, 0)
-      chunk.copy(buf, offset)
-      this.push(buf)
-      return cb()
+      return
     }
+    cb(null, Buffer.concat([
+      proto.createPacketBuffer('varint', 0),
+      chunk
+    ]))
   }
 }
 
 class Decompressor extends Transform {
   constructor (compressionThreshold = -1, hideErrors = false) {
     super()
+    this.enabled = compressionThreshold !== -1
     this.compressionThreshold = compressionThreshold
     this.hideErrors = hideErrors
   }
 
-  _transform (chunk, enc, cb) {
-    const { size, value, error } = readVarInt(chunk, 0)
-    if (error) { return cb(error) }
+  _transform (chunk, _, cb) {
+    const { size, value } = proto.read(chunk, 0, 'varint')
     if (value === 0) {
-      this.push(chunk.slice(size))
-      return cb()
-    } else {
-      zlib.unzip(chunk.slice(size), { finishFlush: zlib.constants.Z_SYNC_FLUSH }, (err, newBuf) => { /** Fix by lefela4. */
-        if (err) {
-          if (!this.hideErrors) {
-            console.error('problem inflating chunk')
-            console.error('uncompressed length ' + value)
-            console.error('compressed length ' + chunk.length)
-            console.error('hex ' + chunk.toString('hex'))
-            console.log(err)
-          }
-          return cb()
-        }
-        if (newBuf.length !== value && !this.hideErrors) {
-          console.error('uncompressed length should be ' + value + ' but is ' + newBuf.length)
-        }
-        this.push(newBuf)
-        return cb()
-      })
+      cb(null, chunk.slice(size))
+      return
     }
+    zlib.unzip(chunk.slice(size), { finishFlush }, (err, newBuf) => {
+      if (err) {
+        if (!this.hideErrors) {
+          console.error('problem inflating chunk\n')
+          console.error(`length uncompressed ${value} / compressed ${chunk.length}`)
+          console.error('hex content -', chunk.inspect())
+          console.log(err)
+        }
+        return cb()
+      }
+      if (newBuf.length !== value && !this.hideErrors) {
+        console.error(`uncompressed length should be ${value} but is ${newBuf.length}`)
+      }
+      return cb(null, newBuf)
+    })
   }
 }

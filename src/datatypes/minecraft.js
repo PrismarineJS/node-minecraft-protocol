@@ -1,157 +1,122 @@
-'use strict'
-
 const nbt = require('prismarine-nbt')
 const UUID = require('uuid-1345')
 const zlib = require('zlib')
+const {
+  ComplexDatatype,
+  CountableDatatype,
+  PartialReadError
+} = require('protodef-neo')
 
-module.exports = {
-  UUID: [readUUID, writeUUID, 16],
-  nbt: [readNbt, writeNbt, sizeOfNbt],
-  optionalNbt: [readOptionalNbt, writeOptionalNbt, sizeOfOptionalNbt],
-  compressedNbt: [readCompressedNbt, writeCompressedNbt, sizeOfCompressedNbt],
-  restBuffer: [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
-  entityMetadataLoop: [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata]
-}
-var PartialReadError = require('protodef').utils.PartialReadError
-
-function readUUID (buffer, offset) {
-  if (offset + 16 > buffer.length) { throw new PartialReadError() }
-  return {
-    value: UUID.stringify(buffer.slice(offset, 16 + offset)),
-    size: 16
+class _UUID {
+  read (buf) { return UUID.stringify(buf.slice(0, 16)) }
+  write (buf, val) { UUID.parse(val).copy(buf) }
+  sizeRead (buf) {
+    if (buf.length < 16) { throw new PartialReadError() }
+    return 16
   }
+
+  sizeWrite () { return 16 }
 }
 
-function writeUUID (value, buffer, offset) {
-  const buf = UUID.parse(value)
-  buf.copy(buffer, offset)
-  return offset + 16
-}
-
-function readNbt (buffer, offset) {
-  return nbt.proto.read(buffer, offset, 'nbt')
-}
-
-function writeNbt (value, buffer, offset) {
-  return nbt.proto.write(value, buffer, offset, 'nbt')
-}
-
-function sizeOfNbt (value) {
-  return nbt.proto.sizeOf(value, 'nbt')
-}
-
-function readOptionalNbt (buffer, offset) {
-  if (offset + 1 > buffer.length) { throw new PartialReadError() }
-  if (buffer.readInt8(offset) === 0) return { size: 1 }
-  return nbt.proto.read(buffer, offset, 'nbt')
-}
-
-function writeOptionalNbt (value, buffer, offset) {
-  if (value === undefined) {
-    buffer.writeInt8(0, offset)
-    return offset + 1
-  }
-  return nbt.proto.write(value, buffer, offset, 'nbt')
-}
-
-function sizeOfOptionalNbt (value) {
-  if (value === undefined) { return 1 }
-  return nbt.proto.sizeOf(value, 'nbt')
+class _nbt {
+  read (buf) { return nbt.proto.read(buf, 0, 'nbt').value }
+  write (buf, val) { return nbt.proto.write(val, buf, 0, 'nbt') }
+  sizeRead (buf) { return nbt.proto.read(buf, 0, 'nbt').size }
+  sizeWrite (val) { return nbt.proto.sizeOf(val, 'nbt') }
 }
 
 // Length-prefixed compressed NBT, see differences: http://wiki.vg/index.php?title=Slot_Data&diff=6056&oldid=4753
-function readCompressedNbt (buffer, offset) {
-  if (offset + 2 > buffer.length) { throw new PartialReadError() }
-  const length = buffer.readInt16BE(offset)
-  if (length === -1) return { size: 2 }
-  if (offset + 2 + length > buffer.length) { throw new PartialReadError() }
+class compressedNbt extends CountableDatatype {
+  constructor ({ type, ...count }, context) {
+    super(count, context)
+    this.type = this.constructDatatype(type)
+  }
 
-  const compressedNbt = buffer.slice(offset + 2, offset + 2 + length)
+  read (buf) {
+    const size = this.sizeReadCount(buf)
+    const length = this.readCount(buf)
+    if (length === -1) return undefined
+    return this.type.read(zlib.gunzipSync(buf.slice(size, length + size)))
+  }
 
-  const nbtBuffer = zlib.gunzipSync(compressedNbt) // TODO: async
+  write (buf, val) {
+    if (val === undefined) return this.writeCount(buf, -1)
+    const nbtBuffer = Buffer.alloc(this.type.sizeWrite(val))
+    this.type.write(nbtBuffer, val)
+    const compressedNbt = zlib.gzipSync(nbtBuffer) // TODO: async
+    compressedNbt.writeUInt8(0, 9) // clear the OS field to match MC
+    this.writeCount(buf, compressedNbt.length)
+    compressedNbt.copy(buf, this.sizeWriteCount(compressedNbt.length))
+  }
 
-  const results = nbt.proto.read(nbtBuffer, 0, 'nbt')
-  return {
-    size: length + 2,
-    value: results.value
+  sizeRead (buf) {
+    const prefixSize = this.sizeReadCount(buf)
+    if (buf.length < prefixSize) { throw new PartialReadError() }
+    const length = this.readCount(buf)
+    if (length === -1) return prefixSize
+    if (buf.length < length + prefixSize) { throw new PartialReadError() }
+    return length + prefixSize
+  }
+
+  sizeWrite (val) {
+    if (val === undefined) return this.sizeWriteCount(-1)
+    const nbtBuffer = Buffer.alloc(this.type.sizeWrite(val))
+    this.type.write(nbtBuffer, val)
+    const compressedNbt = zlib.gzipSync(nbtBuffer) // TODO: async
+    return this.sizeWriteCount(compressedNbt.length) + compressedNbt.length
   }
 }
 
-function writeCompressedNbt (value, buffer, offset) {
-  if (value === undefined) {
-    buffer.writeInt16BE(-1, offset)
-    return offset + 2
+class entityMetadataLoop extends ComplexDatatype {
+  constructor ({ type, endVal }, context) {
+    super(context)
+    this.type = this.constructDatatype(type)
+    this.endVal = endVal
   }
-  const nbtBuffer = Buffer.alloc(sizeOfNbt(value))
-  nbt.proto.write(value, nbtBuffer, 0, 'nbt')
 
-  const compressedNbt = zlib.gzipSync(nbtBuffer) // TODO: async
-  compressedNbt.writeUInt8(0, 9) // clear the OS field to match MC
-
-  buffer.writeInt16BE(compressedNbt.length, offset)
-  compressedNbt.copy(buffer, offset + 2)
-  return offset + 2 + compressedNbt.length
-}
-
-function sizeOfCompressedNbt (value) {
-  if (value === undefined) { return 2 }
-
-  const nbtBuffer = Buffer.alloc(sizeOfNbt(value, 'nbt'))
-  nbt.proto.write(value, nbtBuffer, 0, 'nbt')
-
-  const compressedNbt = zlib.gzipSync(nbtBuffer) // TODO: async
-
-  return 2 + compressedNbt.length
-}
-
-function readRestBuffer (buffer, offset) {
-  return {
-    value: buffer.slice(offset),
-    size: buffer.length - offset
-  }
-}
-
-function writeRestBuffer (value, buffer, offset) {
-  value.copy(buffer, offset)
-  return offset + value.length
-}
-
-function sizeOfRestBuffer (value) {
-  return value.length
-}
-
-function readEntityMetadata (buffer, offset, { type, endVal }) {
-  let cursor = offset
-  const metadata = []
-  let item
-  while (true) {
-    if (offset + 1 > buffer.length) { throw new PartialReadError() }
-    item = buffer.readUInt8(cursor)
-    if (item === endVal) {
-      return {
-        value: metadata,
-        size: cursor + 1 - offset
-      }
+  read (buf) {
+    let i = 0
+    const res = []
+    while (true) {
+      if (buf[i] === this.endVal) return res
+      const view = buf.slice(i)
+      i += this.type.sizeRead(view)
+      res.push(this.type.read(view))
     }
-    const results = this.read(buffer, cursor, type, {})
-    metadata.push(results.value)
-    cursor += results.size
+  }
+
+  write (buf, val) {
+    let b = 0
+    for (let i = 0, l = val.length; i < l; i++) {
+      this.type.write(buf.slice(b), val[i])
+      b += this.type.sizeWrite(val[i])
+    }
+    buf[b] = this.endVal
+  }
+
+  sizeRead (buf) {
+    let i = 0
+    while (true) {
+      if (buf.length < i) { throw new PartialReadError() }
+      if (buf[i] === this.endVal) return i + 1
+      i += this.type.sizeRead(buf.slice(i))
+    }
+  }
+
+  sizeWrite (val) {
+    let size = 1
+    for (let i = 0, l = val.length; i < l; i++) {
+      size += this.type.sizeWrite(val[i])
+    }
+    return size
   }
 }
 
-function writeEntityMetadata (value, buffer, offset, { type, endVal }) {
-  const self = this
-  value.forEach(function (item) {
-    offset = self.write(item, buffer, offset, type, {})
-  })
-  buffer.writeUInt8(endVal, offset)
-  return offset + 1
-}
-
-function sizeOfEntityMetadata (value, { type }) {
-  let size = 1
-  for (let i = 0; i < value.length; ++i) {
-    size += this.sizeOf(value[i], type, {})
-  }
-  return size
+module.exports = {
+  UUID: _UUID,
+  nbt: _nbt,
+  optionalNbt: ['option', _nbt],
+  compressedNbt: [compressedNbt, { countType: 'i16', type: _nbt }],
+  restBuffer: ['buffer', { rest: true }],
+  entityMetadataLoop
 }

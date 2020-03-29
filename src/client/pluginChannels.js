@@ -1,4 +1,4 @@
-const ProtoDef = require('protodef').ProtoDef
+const ProtoDef = require('protodef-neo').ProtoDef
 const minecraft = require('../datatypes/minecraft')
 const debug = require('debug')('minecraft-protocol')
 

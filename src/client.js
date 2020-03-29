@@ -161,8 +161,7 @@ class Client extends EventEmitter {
     this.framer.on('error', onError)
     this.splitter.on('error', onError)
 
-    this.socket.pipe(this.splitter)
-    this.framer.pipe(this.socket)
+    this.framer.pipe(this.socket).pipe(this.splitter)
   }
 
   end (reason) {
