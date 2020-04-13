@@ -1,4 +1,4 @@
-const { ProtoDef } = require('protodef-neo')
+const { ProtoDef } = require('protodef-neo/legacy.cjs')
 const minecraft = require('../datatypes/minecraft')
 const states = require('../states')
 const merge = require('lodash.merge')

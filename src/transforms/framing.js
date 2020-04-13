@@ -1,4 +1,4 @@
-const { ProtoDef } = require('protodef-neo')
+const { ProtoDef } = require('protodef-neo/legacy.cjs')
 const proto = new ProtoDef({ types: { varint: 'native' } })
 const Transform = require('readable-stream').Transform
 
