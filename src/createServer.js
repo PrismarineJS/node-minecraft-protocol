@@ -13,20 +13,23 @@ module.exports = createServer
 
 function createServer (options = {}) {
   const {
-    host = '0.0.0.0',
+    host,
     'server-port': serverPort,
     port = serverPort || 25565,
     motd = 'A Minecraft server',
-    'max-players': maxPlayersOld = 20,
+    'max-players': maxPlayersOld,
     maxPlayers: maxPlayersNew = 20,
     version,
     favicon,
     customPackets
   } = options
 
-  const maxPlayers = options['max-players'] !== undefined ? maxPlayersOld : maxPlayersNew
+  if (serverPort) { console.warn('server-port option is deprecated, use  instead') }
+  if (maxPlayersOld) { console.warn('max-players option is deprecated, use maxPlayers instead') }
 
-  const optVersion = version === undefined || version === false ? require('./version').defaultVersion : version
+  const maxPlayers = maxPlayersOld !== undefined ? maxPlayersOld : maxPlayersNew
+
+  const optVersion = version || require('./version').defaultVersion
 
   const mcData = require('minecraft-data')(optVersion)
   if (!mcData) throw new Error(`unsupported protocol version: ${optVersion}`)
