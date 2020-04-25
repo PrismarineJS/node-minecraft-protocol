@@ -4,12 +4,6 @@ const [readVarInt, writeVarInt, sizeOfVarInt] = require('protodef').types.varint
 const zlib = require('zlib')
 const Transform = require('readable-stream').Transform
 
-if (zlib.constants) { // Doesn't exist in Browserify/Webpack
-  Z_SYNC_FLUSH = zlib.constants.Z_SYNC_FLUSH;
-} else {
-  Z_SYNC_FLUSH = 2;
-}
-
 module.exports.createCompressor = function (threshold) {
   return new Compressor(threshold)
 }
@@ -58,7 +52,7 @@ class Decompressor extends Transform {
       this.push(chunk.slice(size))
       return cb()
     } else {
-      zlib.unzip(chunk.slice(size), { finishFlush: Z_SYNC_FLUSH }, (err, newBuf) => { /** Fix by lefela4. */
+      zlib.unzip(chunk.slice(size), { finishFlush: (Z_SYNC_FLUSH) ? Z_SYNC_FLUSH : 2 }, (err, newBuf) => { /** Fix by lefela4. */
         if (err) {
           if (!this.hideErrors) {
             console.error('problem inflating chunk')
