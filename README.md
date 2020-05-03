@@ -94,8 +94,10 @@ server.on('login', function(client) {
     gameMode: 0,
     dimension: 0,
     difficulty: 2,
+    hashedSeed: [0, 0],
     maxPlayers: server.maxPlayers,
-    reducedDebugInfo: false
+    reducedDebugInfo: false,
+    enableRespawnScreen: true
   });
   client.write('position', {
     x: 0,
