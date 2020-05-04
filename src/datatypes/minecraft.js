@@ -3,8 +3,10 @@
 const nbt = require('prismarine-nbt')
 const UUID = require('uuid-1345')
 const zlib = require('zlib')
+const [readVarInt, writeVarInt, sizeOfVarInt] = require('protodef').types.varint
 
 module.exports = {
+  optvarint: [readOptionalVarInt, writeOptionalVarInt, sizeOfVarInt],
   UUID: [readUUID, writeUUID, 16],
   nbt: [readNbt, writeNbt, sizeOfNbt],
   optionalNbt: [readOptionalNbt, writeOptionalNbt, sizeOfOptionalNbt],
@@ -13,6 +15,36 @@ module.exports = {
   entityMetadataLoop: [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata]
 }
 var PartialReadError = require('protodef').utils.PartialReadError
+
+// optvarint is: 0 for undefined, all other values encoded as actual value +1
+function readOptionalVarInt(buffer, offset) {
+  const varint = readVarInt(buffer, offset)
+  if(varint.value == 0) {
+    varint.value = undefined
+    return varint
+  } else {
+    varint.value--
+    return varint
+  }
+}
+
+function writeOptionalVarInt(value, buffer, offset) {
+  if(value === undefined) {
+    value = 0
+  } else {
+    value++
+  }
+  return writeVarInt(value, buffer, offset)
+}
+
+function sizeOfOptionalVarInt(value) {
+  if(value === undefined) {
+    value = 0
+  } else {
+    value++
+  }
+  return sizeOfVarInt(value)
+}
 
 function readUUID (buffer, offset) {
   if (offset + 16 > buffer.length) { throw new PartialReadError() }
