@@ -33,6 +33,8 @@ Parse and serialize minecraft packets, plus authentication and encryption.
    - Ping status
  * Robust test coverage.
  * Optimized for rapidly staying up to date with Minecraft protocol updates.
+ 
+Want to contribute on something important for PrismarineJS ? go to https://github.com/PrismarineJS/mineflayer/wiki/Big-Prismarine-projects
 
 ## Third Party Plugins
 
