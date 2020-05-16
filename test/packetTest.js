@@ -77,7 +77,7 @@ const values = {
         results[typeArgs[index].name] = v
       }
     })
-    delete context['..']
+    delete results['..']
     return results
   },
   count: 1, // TODO : might want to set this to a correct value
@@ -268,8 +268,10 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         }
       })
       Object.keys(p2).forEach(function (field) {
-        assert.ok(field in p1, 'field ' + field + ' missing in p1, in p2 it has value ' +
-          JSON.stringify(p2[field]))
+        if (p2[field] !== undefined) {
+          assert.ok(field in p1, 'field ' + field + ' missing in p1, in p2 it has value ' +
+            JSON.stringify(p2[field]))
+        }
       })
     }
   })
