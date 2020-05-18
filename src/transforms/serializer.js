@@ -12,35 +12,33 @@ const get = require('lodash.get')
 
 const protocols = {}
 
-function createProtocol (state, direction, version, customPackets) {
-  const key = state + ';' + direction + ';' + version
+function createProtocol (state, direction, version, customPackets, compiled = true) {
+  const key = state + ';' + direction + ';' + version + (compiled ? ';c' : '')
   if (protocols[key]) { return protocols[key] }
   const mcData = require('minecraft-data')(version)
 
-  if (mcData.version.majorVersion === '1.7') {
-    const proto = new ProtoDef(false)
-    proto.addTypes(minecraft)
-    proto.addProtocol(merge(mcData.protocol, get(customPackets, [mcData.version.majorVersion])), [state, direction])
+  if (compiled) {
+    const compiler = new ProtoDefCompiler()
+    compiler.addTypes(require('../datatypes/compiler-minecraft'))
+    compiler.addProtocol(merge(mcData.protocol, get(customPackets, [mcData.version.majorVersion])), [state, direction])
+    const proto = compiler.compileProtoDefSync()
     protocols[key] = proto
     return proto
   }
 
-  const compiler = new ProtoDefCompiler()
-  compiler.addTypes(require('../datatypes/nbt-compound'))
-  compiler.addTypesToCompile(require('../datatypes/nbt.json'))
-  compiler.addTypes(require('../datatypes/compiler-minecraft'))
-  compiler.addProtocol(merge(mcData.protocol, get(customPackets, [mcData.version.majorVersion])), [state, direction])
-  const proto = compiler.compileProtoDefSync()
+  const proto = new ProtoDef(false)
+  proto.addTypes(minecraft)
+  proto.addProtocol(merge(mcData.protocol, get(customPackets, [mcData.version.majorVersion])), [state, direction])
   protocols[key] = proto
   return proto
 }
 
-function createSerializer ({ state = states.HANDSHAKING, isServer = false, version, customPackets } = {}) {
-  return new Serializer(createProtocol(state, !isServer ? 'toServer' : 'toClient', version, customPackets), 'packet')
+function createSerializer ({ state = states.HANDSHAKING, isServer = false, version, customPackets, compiled = true } = {}) {
+  return new Serializer(createProtocol(state, !isServer ? 'toServer' : 'toClient', version, customPackets, compiled), 'packet')
 }
 
-function createDeserializer ({ state = states.HANDSHAKING, isServer = false, version, customPackets } = {}) {
-  return new Parser(createProtocol(state, isServer ? 'toServer' : 'toClient', version, customPackets), 'packet')
+function createDeserializer ({ state = states.HANDSHAKING, isServer = false, version, customPackets, compiled = true } = {}) {
+  return new Parser(createProtocol(state, isServer ? 'toServer' : 'toClient', version, customPackets, compiled), 'packet')
 }
 
 module.exports = {

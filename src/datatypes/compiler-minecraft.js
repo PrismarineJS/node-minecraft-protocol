@@ -1,6 +1,6 @@
 const UUID = require('uuid-1345')
+const minecraft = require('./minecraft')
 
-/* global ctx */
 module.exports = {
   Read: {
     UUID: ['native', (buffer, offset) => {
@@ -15,10 +15,9 @@ module.exports = {
         size: buffer.length - offset
       }
     }],
-    optionalNbt: ['context', (buffer, offset) => {
-      if (ctx.i8(buffer, offset).value === 0) return { value: undefined, size: 1 }
-      return ctx.nbt(buffer, offset)
-    }],
+    nbt: ['native', minecraft.nbt[0]],
+    optionalNbt: ['native', minecraft.optionalNbt[0]],
+    compressedNbt: ['native', minecraft.compressedNbt[0]],
     entityMetadataLoop: ['parametrizable', (compiler, { type, endVal }) => {
       let code = 'let cursor = offset\n'
       code += 'const data = []\n'
@@ -41,12 +40,9 @@ module.exports = {
       value.copy(buffer, offset)
       return offset + value.length
     }],
-    optionalNbt: ['context', (value, buffer, offset) => {
-      if (value === undefined) {
-        return ctx.i8(0, buffer, offset)
-      }
-      return ctx.nbt(value, buffer, offset)
-    }],
+    nbt: ['native', minecraft.nbt[1]],
+    optionalNbt: ['native', minecraft.optionalNbt[1]],
+    compressedNbt: ['native', minecraft.compressedNbt[1]],
     entityMetadataLoop: ['parametrizable', (compiler, { type, endVal }) => {
       let code = 'for (const i in value) {\n'
       code += '  offset = ' + compiler.callType('value[i]', type) + '\n'
@@ -60,10 +56,9 @@ module.exports = {
     restBuffer: ['native', (value) => {
       return value.length
     }],
-    optionalNbt: ['context', (value) => {
-      if (value === undefined) { return 1 }
-      return ctx.nbt(value)
-    }],
+    nbt: ['native', minecraft.nbt[2]],
+    optionalNbt: ['native', minecraft.optionalNbt[2]],
+    compressedNbt: ['native', minecraft.compressedNbt[2]],
     entityMetadataLoop: ['parametrizable', (compiler, { type }) => {
       let code = 'let size = 1\n'
       code += 'for (const i in value) {\n'
