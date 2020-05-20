@@ -1,5 +1,9 @@
 # History
 
+## 1.12.0
+
+* use protodef compiler,  making node-minecraft-protocol 10x faster, thanks for this huge improvement @Karang
+
 ## 1.11.0
 
 * proxy support in auth (thanks @IdanHo)

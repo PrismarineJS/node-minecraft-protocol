@@ -1,6 +1,6 @@
 {
   "name": "minecraft-protocol",
-  "version": "1.11.0",
+  "version": "1.12.0",
   "description": "Parse and serialize minecraft packets, plus authentication and encryption.",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -9,7 +9,6 @@
     "url": "git://github.com/PrismarineJS/node-minecraft-protocol.git"
   },
   "scripts": {
-    "prepublish": "require-self",
     "test": "mocha --recursive --reporter spec --exit",
     "lint": "standard",
     "fix": "standard --fix",
