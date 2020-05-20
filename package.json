@@ -9,6 +9,7 @@
     "url": "git://github.com/PrismarineJS/node-minecraft-protocol.git"
   },
   "scripts": {
+    "prepublish": "require-self",
     "test": "mocha --recursive --reporter spec --exit",
     "lint": "standard",
     "fix": "standard --fix",
