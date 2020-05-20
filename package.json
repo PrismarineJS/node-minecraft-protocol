@@ -10,7 +10,7 @@
   },
   "scripts": {
     "prepublish": "require-self",
-    "test": "mocha --recursive --reporter spec",
+    "test": "mocha --recursive --reporter spec --exit",
     "lint": "standard",
     "fix": "standard --fix",
     "pretest": "npm run lint"
