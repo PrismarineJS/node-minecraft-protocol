@@ -22,7 +22,7 @@ module.exports = function (client, options) {
           // Error resolving domain
           if (err) {
             // Could not resolve SRV lookup, connect directly
-            if (err.code === 'ENODATA' || err.code === 'ENOTFOUND') {
+            if (['ENODATA', 'ENOTFOUND', 'ESERVFAIL'].indexOf(err.code) !== -1) {
               client.setSocket(net.connect(options.port, options.host))
               return
             } else {
