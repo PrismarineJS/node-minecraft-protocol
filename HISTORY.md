@@ -1,5 +1,9 @@
 # History
 
+## 1.12.1
+
+* fix for some servers in tcpdns (thanks @FTOH)
+
 ## 1.12.0
 
 * use protodef compiler,  making node-minecraft-protocol 10x faster, thanks for this huge improvement @Karang
