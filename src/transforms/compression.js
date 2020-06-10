@@ -30,8 +30,8 @@ class Compressor extends Transform {
           const buf = Buffer.allocUnsafe(sizeOfVarInt(chunk.length) + newChunk.length)
           newChunk.copy(buf, writeVarInt(chunk.length, buf, 0))
           return cb(null, buf)
-        } catch (err) { return cb(err) }
-      }
+        }
+      } catch (err) { return cb(err) }
     }
     const buf = Buffer.allocUnsafe(sizeOfVarInt(0) + chunk.length)
     chunk.copy(buf, writeVarInt(0, buf, 0))
@@ -52,9 +52,9 @@ class Decompressor extends Transform {
       if (value === 0) {
         return cb(null, chunk.slice(size))
       }
-      const newBuf = decompress(chunk.slice(size), { finishFlush: 2 /*  Z_SYNC_FLUSH = 2, but when using Browserify/Webpack it doesn't exist */ }
+      const newBuf = decompress(chunk.slice(size), { finishFlush: 2 /*  Z_SYNC_FLUSH = 2, but when using Browserify/Webpack it doesn't exist */ })
       if (newBuf.length !== value && !this.hideErrors) {
-        console.error('uncompressed length should be ' + value + ' but is ' + newBuf.length)
+        throw new Error('uncompressed length should be ' + value + ' but is ' + newBuf.length)
       }
       return cb(null, newBuf)
     } catch (err) {
