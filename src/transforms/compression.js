@@ -25,7 +25,7 @@ class Compressor extends Transform {
   async _transform (chunk, enc, cb) {
     if (chunk.length >= this.compressionThreshold) {
       try {
-        const newChunk = async compress(chunk)
+        const newChunk = await compress(chunk)
         if (newChunk.length < 2097153) {
           const buf = Buffer.allocUnsafe(sizeOfVarInt(chunk.length) + newChunk.length)
           newChunk.copy(buf, writeVarInt(chunk.length, buf, 0))
@@ -52,7 +52,7 @@ class Decompressor extends Transform {
       if (value === 0) {
         return cb(null, chunk.slice(size))
       }
-      const newBuf = decompress(chunk.slice(size), { finishFlush: 2 /*  Z_SYNC_FLUSH = 2, but when using Browserify/Webpack it doesn't exist */ })
+      const newBuf = await decompress(chunk.slice(size), { finishFlush: 2 /*  Z_SYNC_FLUSH = 2, but when using Browserify/Webpack it doesn't exist */ })
       if (newBuf.length !== value && !this.hideErrors) {
         throw new Error('uncompressed length should be ' + value + ' but is ' + newBuf.length)
       }
