@@ -33,6 +33,8 @@ module.exports = function (client, options) {
 
           // SRV Lookup resolved conrrectly
           if (addresses && addresses.length > 0) {
+            options.host = addresses[0].name
+            options.port = addresses[0].port
             client.setSocket(net.connect(addresses[0].port, addresses[0].name))
           } else {
             client.emit('error', new Error('Could not resolve hostname'))
