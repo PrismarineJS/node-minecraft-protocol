@@ -1,5 +1,9 @@
 # History
 
+## 1.12.2
+
+* make SRV record correctly propagate host to serverHost field (fix for tcp shield)
+
 ## 1.12.1
 
 * fix for some servers in tcpdns (thanks @FTOH)
