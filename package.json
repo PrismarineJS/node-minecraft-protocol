@@ -51,7 +51,7 @@
     "minecraft-data": "^2.44.0",
     "node-rsa": "^0.4.2",
     "prismarine-nbt": "^1.3.0",
-    "protodef": "^1.7.0",
+    "@saiv46/protodef": "^1.7.0",
     "readable-stream": "^3.0.6",
     "uuid-1345": "^1.0.1"
   }

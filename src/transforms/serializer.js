@@ -1,9 +1,9 @@
 'use strict'
 
-const ProtoDef = require('protodef').ProtoDef
-const Serializer = require('protodef').Serializer
-const Parser = require('protodef').FullPacketParser
-const { ProtoDefCompiler } = require('protodef').Compiler
+const ProtoDef = require('@saiv46/protodef').ProtoDef
+const Serializer = require('@saiv46/protodef').Serializer
+const Parser = require('@saiv46/protodef').FullPacketParser
+const { ProtoDefCompiler } = require('@saiv46/protodef').Compiler
 
 const minecraft = require('../datatypes/minecraft')
 const states = require('../states')
@@ -12,7 +12,7 @@ const get = require('lodash.get')
 
 const protocols = {}
 
-function createProtocol (state, direction, version, customPackets, compiled = true) {
+function createProtocol (state, direction, version, customPackets, compiled = false) {
   const key = state + ';' + direction + ';' + version + (compiled ? ';c' : '')
   if (protocols[key]) { return protocols[key] }
   const mcData = require('minecraft-data')(version)
@@ -33,11 +33,11 @@ function createProtocol (state, direction, version, customPackets, compiled = tr
   return proto
 }
 
-function createSerializer ({ state = states.HANDSHAKING, isServer = false, version, customPackets, compiled = true } = {}) {
+function createSerializer ({ state = states.HANDSHAKING, isServer = false, version, customPackets, compiled = false } = {}) {
   return new Serializer(createProtocol(state, !isServer ? 'toServer' : 'toClient', version, customPackets, compiled), 'packet')
 }
 
-function createDeserializer ({ state = states.HANDSHAKING, isServer = false, version, customPackets, compiled = true } = {}) {
+function createDeserializer ({ state = states.HANDSHAKING, isServer = false, version, customPackets, compiled = false } = {}) {
   return new Parser(createProtocol(state, isServer ? 'toServer' : 'toClient', version, customPackets, compiled), 'packet')
 }
 
