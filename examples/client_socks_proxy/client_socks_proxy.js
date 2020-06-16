@@ -15,7 +15,7 @@ const client = mc.createClient({
     socks.createConnection({
       proxy: {
         host: proxyHost,
-        port: proxyPort,
+        port: parseInt(proxyPort),
         type: 5
       },
       command: 'connect',
@@ -33,7 +33,7 @@ const client = mc.createClient({
       client.emit('connect')
     })
   },
-  agent: new ProxyAgent({ protocol: 'socks5', host: proxyHost, port: proxyPort }),
+  agent: new ProxyAgent({ protocol: 'socks5:', host: proxyHost, port: proxyPort }),
   username: process.argv[6] ? process.argv[6] : 'echo',
   password: process.argv[7]
 })
