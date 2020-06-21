@@ -45,7 +45,8 @@ class Client extends EventEmitter {
       state: state,
       packetsToParse:
       this.packetsToParse,
-      customPackets: this.customPackets
+      customPackets: this.customPackets,
+      noErrorLogging: this.hideErrors
     })
 
     this.splitter.recognizeLegacyPing = state === states.HANDSHAKING

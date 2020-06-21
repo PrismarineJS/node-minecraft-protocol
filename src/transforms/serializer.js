@@ -37,8 +37,8 @@ function createSerializer ({ state = states.HANDSHAKING, isServer = false, versi
   return new Serializer(createProtocol(state, !isServer ? 'toServer' : 'toClient', version, customPackets, compiled), 'packet')
 }
 
-function createDeserializer ({ state = states.HANDSHAKING, isServer = false, version, customPackets, compiled = true } = {}) {
-  return new Parser(createProtocol(state, isServer ? 'toServer' : 'toClient', version, customPackets, compiled), 'packet')
+function createDeserializer ({ state = states.HANDSHAKING, isServer = false, version, customPackets, compiled = true, noErrorLogging = false } = {}) {
+  return new Parser(createProtocol(state, isServer ? 'toServer' : 'toClient', version, customPackets, compiled), 'packet', noErrorLogging)
 }
 
 module.exports = {
