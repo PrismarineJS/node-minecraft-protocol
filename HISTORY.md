@@ -1,5 +1,9 @@
 # History
 
+## 1.12.4
+
+* better hide errors
+
 ## 1.12.3
 
 * handle SRV record failure better (useful for tcp shield)
