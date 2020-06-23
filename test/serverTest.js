@@ -4,6 +4,60 @@ const mc = require('../')
 const assert = require('power-assert')
 
 const { firstVersion, lastVersion } = require('./common/parallel')
+const w = {
+  piglin_safe: {
+    type: 'byte',
+    value: 0
+  },
+  natural: {
+    type: 'byte',
+    value: 1
+  },
+  ambient_light: {
+    type: 'float',
+    value: 0
+  },
+  infiniburn: {
+    type: 'string',
+    value: 'minecraft:infiniburn_overworld'
+  },
+  respawn_anchor_works: {
+    type: 'byte',
+    value: 0
+  },
+  has_skylight: {
+    type: 'byte',
+    value: 1
+  },
+  bed_works: {
+    type: 'byte',
+    value: 1
+  },
+  has_raids: {
+    type: 'byte',
+    value: 1
+  },
+  name: {
+    type: 'string',
+    value: 'minecraft:overworld'
+  },
+  logical_height: {
+    type: 'int',
+    value: 256
+  },
+  shrunk: {
+    type: 'byte',
+    value: 0
+  },
+  ultrawarm: {
+    type: 'byte',
+    value: 0
+  },
+  has_ceiling: {
+    type: 'byte',
+    value: 0
+  }
+}
 
 mc.supportedVersions.forEach(function (supportedVersion, i) {
   if (!(i >= firstVersion && i <= lastVersion)) { return }
@@ -151,7 +205,11 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           entityId: client.id,
           levelType: 'default',
           gameMode: 1,
-          dimension: 0,
+          previousGameMode: 255,
+          worldNames: ['minecraft:overworld'],
+          dimensionCodec: { name: '', type: 'compound', value: { dimension: { type: 'list', value: { type: 'compound', value: [w] } } } },
+          dimension: version.majorVersion === '1.16' ? 'minecraft:overworld' : 0,
+          worldName: 'minecraft:overworld',
           hashedSeed: [0, 0],
           difficulty: 2,
           maxPlayers: server.maxPlayers,
@@ -212,7 +270,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           if (server.clients[clientId] === undefined) continue
 
           client = server.clients[clientId]
-          if (client !== exclude) client.write('chat', { message: JSON.stringify({ text: message }), position: 0 })
+          if (client !== exclude) client.write('chat', { message: JSON.stringify({ text: message }), position: 0, sender: '0' })
         }
       }
     })
@@ -265,7 +323,11 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           entityId: client.id,
           levelType: 'default',
           gameMode: 1,
-          dimension: 0,
+          previousGameMode: 255,
+          worldNames: ['minecraft:overworld'],
+          dimensionCodec: { name: '', type: 'compound', value: { dimension: { type: 'list', value: { type: 'compound', value: [w] } } } },
+          dimension: version.majorVersion === '1.16' ? 'minecraft:overworld' : 0,
+          worldName: 'minecraft:overworld',
           hashedSeed: [0, 0],
           difficulty: 2,
           maxPlayers: server.maxPlayers,

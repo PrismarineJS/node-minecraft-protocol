@@ -73,7 +73,8 @@ function broadcast (message, exclude, username) {
       }
       client.write('chat', {
         message: JSON.stringify(msg),
-        position: 0
+        position: 0,
+        sender: '0'
       })
     }
   }
