@@ -34,6 +34,7 @@ server.on('login', function (client) {
   client.write('map_chunk', {
     x: 0,
     z: 0,
+    ignoreOldData: true,
     groundUp: false,
     bitMap: 0xffff,
     chunkData: chunk.dump(),
