@@ -1,5 +1,9 @@
 # History
 
+## 1.13.0
+
+* minecraft 1.16 support
+
 ## 1.12.4
 
 * better hide errors
