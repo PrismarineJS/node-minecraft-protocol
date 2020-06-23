@@ -5,7 +5,7 @@ const server = mc.createServer({
   encryption: false, // optional
   host: '0.0.0.0', // optional
   port: 25565, // optional
-  version: '1.16-rc1'
+  version: '1.16'
 })
 
 server.on('login', function (client) {

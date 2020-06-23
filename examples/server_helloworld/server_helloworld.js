@@ -2,7 +2,7 @@ const mc = require('minecraft-protocol')
 
 const options = {
   'online-mode': true,
-  version: '1.16-rc1'
+  version: '1.16'
 }
 
 const server = mc.createServer(options)
