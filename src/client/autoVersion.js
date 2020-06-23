@@ -20,14 +20,14 @@ module.exports = function (client, options) {
     // The version string is interpreted by https://github.com/PrismarineJS/node-minecraft-data
     const brandedMinecraftVersion = response.version.name // 1.8.9, 1.7.10
     const protocolVersion = response.version.protocol//    47,      5
-    const versions = [brandedMinecraftVersion]
+    const guessFromName = [brandedMinecraftVersion]
       .concat(brandedMinecraftVersion.match(/((\d+\.)+\d+)/g) || [])
       .map(function (version) {
         return minecraftData.versionsByMinecraftVersion.pc[version]
       })
       .filter(function (info) { return info })
       .sort(function (a, b) { return b.version - a.version })
-      .concat(minecraftData.postNettyVersionsByProtocolVersion.pc[protocolVersion] || [])
+    const versions = (minecraftData.postNettyVersionsByProtocolVersion.pc[protocolVersion] || []).concat(guessFromName)
     if (versions.length === 0) {
       client.emit('error', new Error(`unsupported/unknown protocol version: ${protocolVersion}, update minecraft-data`))
     }

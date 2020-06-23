@@ -28,6 +28,19 @@ module.exports = {
       code += '  cursor += elem.size\n'
       code += '}'
       return compiler.wrapCode(code)
+    }],
+    topBitSetTerminatedArray: ['parametrizable', (compiler, { type, endVal }) => {
+      let code = 'let cursor = offset\n'
+      code += 'const data = []\n'
+      code += 'while (true) {\n'
+      code += '  const item = ctx.u8(buffer, cursor).value\n'
+      code += '  buffer[cursor] = buffer[cursor] & 127\n'
+      code += '  const elem = ' + compiler.callType(type, 'cursor') + '\n'
+      code += '  data.push(elem.value)\n'
+      code += '  cursor += elem.size\n'
+      code += '  if ((item & 128) === 0) return { value: data, size: cursor - offset }\n'
+      code += '}'
+      return compiler.wrapCode(code)
     }]
   },
   Write: {
@@ -49,6 +62,18 @@ module.exports = {
       code += '}\n'
       code += `return offset + ctx.u8(${endVal}, buffer, offset)`
       return compiler.wrapCode(code)
+    }],
+    topBitSetTerminatedArray: ['parametrizable', (compiler, { type }) => {
+      let code = 'let prevOffset = offset\n'
+      code += 'let ind = 0\n'
+      code += 'for (const i in value) {\n'
+      code += '  prevOffset = offset\n'
+      code += '  offset = ' + compiler.callType('value[i]', type) + '\n'
+      code += '  buffer[prevOffset] = ind !== value.length-1 ? (buffer[prevOffset] | 128) : buffer[prevOffset]\n'
+      code += '  ind++\n'
+      code += '}\n'
+      code += 'return offset'
+      return compiler.wrapCode(code)
     }]
   },
   SizeOf: {
@@ -61,6 +86,14 @@ module.exports = {
     compressedNbt: ['native', minecraft.compressedNbt[2]],
     entityMetadataLoop: ['parametrizable', (compiler, { type }) => {
       let code = 'let size = 1\n'
+      code += 'for (const i in value) {\n'
+      code += '  size += ' + compiler.callType('value[i]', type) + '\n'
+      code += '}\n'
+      code += 'return size'
+      return compiler.wrapCode(code)
+    }],
+    topBitSetTerminatedArray: ['parametrizable', (compiler, { type }) => {
+      let code = 'let size = 0\n'
       code += 'for (const i in value) {\n'
       code += '  size += ' + compiler.callType('value[i]', type) + '\n'
       code += '}\n'
