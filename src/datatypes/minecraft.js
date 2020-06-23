@@ -10,7 +10,8 @@ module.exports = {
   optionalNbt: [readOptionalNbt, writeOptionalNbt, sizeOfOptionalNbt],
   compressedNbt: [readCompressedNbt, writeCompressedNbt, sizeOfCompressedNbt],
   restBuffer: [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
-  entityMetadataLoop: [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata]
+  entityMetadataLoop: [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata],
+  topBitSetTerminatedArray: [readTopBitSetTerminatedArray, writeTopBitSetTerminatedArray, sizeOfTopBitSetTerminatedArray]
 }
 var PartialReadError = require('protodef').utils.PartialReadError
 
@@ -150,6 +151,45 @@ function writeEntityMetadata (value, buffer, offset, { type, endVal }) {
 
 function sizeOfEntityMetadata (value, { type }) {
   let size = 1
+  for (let i = 0; i < value.length; ++i) {
+    size += this.sizeOf(value[i], type, {})
+  }
+  return size
+}
+
+function readTopBitSetTerminatedArray (buffer, offset, { type }) {
+  let cursor = offset
+  const values = []
+  let item
+  while (true) {
+    if (offset + 1 > buffer.length) { throw new PartialReadError() }
+    item = buffer.readUInt8(cursor)
+    buffer[cursor] = buffer[cursor] & 127 // removes top bit
+    const results = this.read(buffer, cursor, type, {})
+    values.push(results.value)
+    cursor += results.size
+    if ((item & 128) === 0) { // check if top bit is set, if not last value
+      return {
+        value: values,
+        size: cursor - offset
+      }
+    }
+  }
+}
+
+function writeTopBitSetTerminatedArray (value, buffer, offset, { type }) {
+  const self = this
+  let prevOffset = offset
+  value.forEach(function (item, i) {
+    prevOffset = offset
+    offset = self.write(item, buffer, offset, type, {})
+    buffer[prevOffset] = i !== value.length - 1 ? (buffer[prevOffset] | 128) : buffer[prevOffset] // set top bit for all values but last
+  })
+  return offset
+}
+
+function sizeOfTopBitSetTerminatedArray (value, { type }) {
+  let size = 0
   for (let i = 0; i < value.length; ++i) {
     size += this.sizeOf(value[i], type, {})
   }

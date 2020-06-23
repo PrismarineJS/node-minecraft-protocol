@@ -129,6 +129,16 @@ const values = {
   entityMetadata: [
     { key: 17, value: 0, type: 0 }
   ],
+  topBitSetTerminatedArray: [
+    {
+      slot: 0,
+      item: slotValue
+    },
+    {
+      slot: 1,
+      item: slotValue
+    }
+  ],
   objectData: {
     intField: 9,
     velocityX: 1,
