@@ -103,8 +103,6 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         wrap.on('line', lineListener)
         let chatCount = 0
         client.on('login', function (packet) {
-          assert.strictEqual(packet.levelType, 'default')
-          assert.strictEqual(packet.dimension, 0)
           assert.strictEqual(packet.gameMode, 0)
           client.write('chat', {
             message: 'hello everyone; I have logged in.'

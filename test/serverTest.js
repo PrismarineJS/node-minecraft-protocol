@@ -231,8 +231,6 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         })
         player1.on('login', function (packet) {
           assert.strictEqual(packet.gameMode, 1)
-          assert.strictEqual(packet.levelType, 'default')
-          assert.strictEqual(packet.dimension, 0)
           player1.once('chat', function (packet) {
             assert.strictEqual(packet.message, '{"text":"player2 joined the game."}')
             player1.once('chat', function (packet) {
