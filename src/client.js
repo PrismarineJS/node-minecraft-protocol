@@ -4,11 +4,10 @@ const EventEmitter = require('events').EventEmitter
 const debug = require('debug')('minecraft-protocol')
 const compression = require('./transforms/compression')
 const framing = require('./transforms/framing')
-const crypto = require('crypto')
 const states = require('./states')
 
-const createSerializer = require('./transforms/serializer').createSerializer
-const createDeserializer = require('./transforms/serializer').createDeserializer
+const { createSerializer, createDeserializer } = require('./transforms/serializer')
+const { createCipher, createDecipher } = require('./transforms/encryption')
 
 const closeTimeout = 30 * 1000
 
@@ -79,11 +78,10 @@ class Client extends EventEmitter {
 
     this.deserializer.on('data', (parsed) => {
       parsed.metadata.name = parsed.data.name
-      parsed.data = parsed.data.params
       parsed.metadata.state = state
+      parsed.data = parsed.data.params
       debug('read packet ' + state + '.' + parsed.metadata.name)
-      const s = JSON.stringify(parsed.data, null, 2)
-      debug(s.length > 10000 ? parsed.data : s)
+      debug(parsed.data)
       this.emit('packet', parsed.data, parsed.metadata)
       this.emit(parsed.metadata.name, parsed.data, parsed.metadata)
       this.emit('raw.' + parsed.metadata.name, parsed.buffer, parsed.metadata)
@@ -181,11 +179,11 @@ class Client extends EventEmitter {
 
   setEncryption (sharedSecret) {
     if (this.cipher != null) { this.emit('error', new Error('Set encryption twice!')) }
-    this.cipher = crypto.createCipheriv('aes-128-cfb8', sharedSecret, sharedSecret)
+    this.cipher = createCipher(sharedSecret)
     this.cipher.on('error', (err) => this.emit('error', err))
     this.framer.unpipe(this.socket)
     this.framer.pipe(this.cipher).pipe(this.socket)
-    this.decipher = crypto.createDecipheriv('aes-128-cfb8', sharedSecret, sharedSecret)
+    this.decipher = createDecipher(sharedSecret)
     this.decipher.on('error', (err) => this.emit('error', err))
     this.socket.unpipe(this.splitter)
     this.socket.pipe(this.decipher).pipe(this.splitter)

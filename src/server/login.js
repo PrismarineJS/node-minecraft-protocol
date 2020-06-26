@@ -1,5 +1,4 @@
 const UUID = require('uuid-1345')
-const bufferEqual = require('buffer-equal')
 const crypto = require('crypto')
 const pluginChannels = require('../client/pluginChannels')
 const states = require('../states')
@@ -58,7 +57,7 @@ module.exports = function (client, server, options) {
     let sharedSecret
     try {
       const verifyToken = crypto.privateDecrypt({ key: server.serverKey.exportKey(), padding: crypto.constants.RSA_PKCS1_PADDING }, packet.verifyToken)
-      if (!bufferEqual(client.verifyToken, verifyToken)) {
+      if (!client.verifyToken.equals(verifyToken)) {
         client.end('DidNotEncryptVerifyTokenProperly')
         return
       }

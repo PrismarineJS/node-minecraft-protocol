@@ -1,7 +1,7 @@
 'use strict'
 
-const [readVarInt, writeVarInt, sizeOfVarInt] = require('protodef').types.varint
-const Transform = require('readable-stream').Transform
+const { varint: [readVarInt, writeVarInt, sizeOfVarInt] } = require('protodef').types
+const { Transform } = require('./_optional')('readable-stream', 'stream')
 
 module.exports.createSplitter = function () {
   return new Splitter()
