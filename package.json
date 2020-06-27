@@ -10,7 +10,7 @@
   },
   "scripts": {
     "prepare": "npm install require-self && require-self",
-    "test": "mocha --recursive --reporter spec --exit --require intelli-espower-loader",
+    "test": "mocha --recursive --reporter spec --exit",
     "lint": "standard",
     "fix": "standard --fix",
     "pretest": "npm run lint",
@@ -34,9 +34,6 @@
   "browser": "src/browser.js",
   "devDependencies": {
     "@types/node": "^14.0.14",
-    "acorn": "^7.3.1",
-    "espower-loader": "^1.2.2",
-    "intelli-espower-loader": "^1.0.1",
     "minecraft-wrap": "^1.2.3",
     "mocha": "^8.0.1",
     "power-assert": "^1.6.1",
