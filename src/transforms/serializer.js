@@ -1,10 +1,11 @@
 'use strict'
 
 const {
-    ProtoDef,
-    Serializer,
-    FullPacketParser: Packet,
-    Compiler: { ProtoDefCompiler }
+  ProtoDef,
+  Serializer,
+  FullPacketParser: Parser,
+  Compiler: { ProtoDefCompiler }
+} = require('protodef')
 
 const minecraft = require('../datatypes/minecraft')
 const states = require('../states')
