@@ -1,8 +1,8 @@
 'use strict'
 
-const aesjs = require('./_optional')('aes-js')
 const crypto = require('crypto')
-const { Transform } = require('./_optional')('readable-stream', 'stream')
+const { Transform } = require('stream')
+let aesjs
 
 if (crypto.getCiphers().indexOf('aes-128-cfb8') !== -1) {
   // Native supported
@@ -13,8 +13,10 @@ if (crypto.getCiphers().indexOf('aes-128-cfb8') !== -1) {
   module.exports.createDecipher = function (secret) {
     return crypto.createDecipheriv('aes-128-cfb8', secret, secret)
   }
-} else if (aesjs) {
+} else {
   // aes-js fallback
+  aesjs = require('aes-js')
+
   module.exports.createCipher = function (secret) {
     return new Cipher(secret)
   }
@@ -22,8 +24,6 @@ if (crypto.getCiphers().indexOf('aes-128-cfb8') !== -1) {
   module.exports.createDecipher = function (secret) {
     return new Decipher(secret)
   }
-} else {
-  throw new Error('Missing dependency - aes-js')
 }
 
 class Cipher extends Transform {

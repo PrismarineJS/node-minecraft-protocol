@@ -2,7 +2,7 @@
 
 const { varint: [readVarInt, writeVarInt, sizeOfVarInt] } = require('protodef').types
 const zlib = require('zlib')
-const { Transform } = require('./_optional')('readable-stream', 'stream')
+const { Transform } = require('stream')
 
 module.exports.createCompressor = function (threshold) {
   return new Compressor(threshold)
