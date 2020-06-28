@@ -2,7 +2,6 @@
 
 const crypto = require('crypto')
 const { Transform } = require('stream')
-let aesjs
 
 if (crypto.getCiphers().indexOf('aes-128-cfb8') !== -1) {
   // Native supported
@@ -15,7 +14,33 @@ if (crypto.getCiphers().indexOf('aes-128-cfb8') !== -1) {
   }
 } else {
   // aes-js fallback
-  aesjs = require('aes-js')
+  const aesjs = require('aes-js')
+
+  class Cipher extends Transform {
+    constructor (key) {
+      super()
+      // eslint-disable-next-line
+      this.aes = new aesjs.ModeOfOperation.cfb(key, key, 8)
+    }
+
+    _transform (chunk, enc, cb) {
+      try {
+        cb(null, this.aes.encrypt(Buffer.concat([chunk, Buffer.alloc(chunk.length % 8)]))
+      } catch (e) {
+        cb(e)
+      }
+    }
+  }
+
+  class Decipher extends Cipher {
+    _transform (chunk, enc, cb) {
+      try {
+        cb(null, this.aes.decrypt(Buffer.concat([chunk, Buffer.alloc(chunk.length % 8)])))
+      } catch (e) {
+        cb(e)
+      }
+    }
+  }
 
   module.exports.createCipher = function (secret) {
     return new Cipher(secret)
@@ -23,31 +48,5 @@ if (crypto.getCiphers().indexOf('aes-128-cfb8') !== -1) {
 
   module.exports.createDecipher = function (secret) {
     return new Decipher(secret)
-  }
-}
-
-class Cipher extends Transform {
-  constructor (key) {
-    super()
-    // eslint-disable-next-line
-    this.aes = new aesjs.ModeOfOperation.cfb(key, key, 8)
-  }
-
-  _transform (chunk, enc, cb) {
-    try {
-      cb(null, this.aes.encrypt(chunk))
-    } catch (e) {
-      cb(e)
-    }
-  }
-}
-
-class Decipher extends Cipher {
-  _transform (chunk, enc, cb) {
-    try {
-      cb(null, this.aes.decrypt(chunk))
-    } catch (e) {
-      cb(e)
-    }
   }
 }
