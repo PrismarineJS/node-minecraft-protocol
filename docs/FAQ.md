@@ -15,4 +15,5 @@ client.on('end', () => {})
 
 * See this example https://github.com/PrismarineJS/node-minecraft-protocol/tree/master/examples/proxy
 * Read this issue https://github.com/PrismarineJS/node-minecraft-protocol/issues/712
+* check out https://github.com/Heath123/pakkit
 * Check out this app https://github.com/wvffle/minecraft-packet-debugger
