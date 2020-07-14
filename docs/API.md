@@ -201,6 +201,8 @@ correct data type. You can figure out the types [here](http://wiki.vg/Entities#E
 
 ## mc.ping(options, callback)
 
+Ping a minecraft server and retrieve information about it
+
 `callback(err, pingResults)`
 
 `pingResults`:
