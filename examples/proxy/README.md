@@ -4,6 +4,13 @@ A proxy, create a nmp server, if you connect to that server with a client, it cr
 
 ## Usage
 
+1. start server locally
+2. start client locally
+
+(you can download them both using `npm install -g minecraft-wrap` and `downloadMinecraft` command)
+
+3. Start the proxy
+
 ```
 usage: node proxy.js [<options>...] <target_srv> <version>
 options:
