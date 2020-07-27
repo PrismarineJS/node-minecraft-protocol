@@ -2,7 +2,7 @@ const UUID = require('uuid-1345')
 const yggdrasil = require('yggdrasil')
 
 module.exports = function (client, options) {
-  const yggdrasilClient = yggdrasil({ agent: options.agent })
+  const yggdrasilClient = yggdrasil({ agent: options.agent, host: options.authServer || 'https://authserver.mojang.com' })
   const clientToken = options.clientToken || (options.session && options.session.clientToken) || UUID.v4().toString()
   const skipValidation = false || options.skipValidation
   options.accessToken = null
