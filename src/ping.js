@@ -4,6 +4,8 @@ const Client = require('./client')
 const states = require('./states')
 const tcpDns = require('./client/tcp_dns')
 
+const closeTimeout = 30 * 1000
+
 module.exports = ping
 
 function ping (options, cb) {
@@ -14,9 +16,11 @@ function ping (options, cb) {
   const version = mcData.version
   options.majorVersion = version.majorVersion
   options.protocolVersion = version.version
+  var closeTimer = null
 
   const client = new Client(false, version.minecraftVersion)
   client.on('error', function (err) {
+    clearTimeout(closeTimer)
     cb(err)
   })
 
@@ -25,6 +29,7 @@ function ping (options, cb) {
     const start = Date.now()
     client.once('ping', function (packet) {
       data.latency = Date.now() - start
+      clearTimeout(closeTimer)
       cb(null, data)
       client.end()
     })
@@ -45,6 +50,13 @@ function ping (options, cb) {
     })
     client.state = states.STATUS
   })
+
+  // timeout against servers that never reply while keeping
+  // the connection open and alive.
+  closeTimer = setTimeout(function () {
+    client.end()
+    cb(new Error('ETIMEDOUT'))
+  }, closeTimeout)
 
   tcpDns(client, options)
   options.connect(client)
