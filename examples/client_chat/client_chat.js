@@ -1,43 +1,6 @@
 const readline = require('readline')
-const color = require('ansi-color').set
 const mc = require('minecraft-protocol')
 const states = mc.states
-const util = require('util')
-
-const colors = {
-  black: 'black+white_bg',
-  dark_blue: 'blue',
-  dark_green: 'green',
-  dark_aqua: 'cyan',
-  dark_red: 'red',
-  dark_purple: 'magenta',
-  gold: 'yellow',
-  gray: 'black+white_bg',
-  dark_gray: 'black+white_bg',
-  blue: 'blue',
-  green: 'green',
-  aqua: 'cyan',
-  red: 'red',
-  light_purple: 'magenta',
-  yellow: 'yellow',
-  white: 'white',
-  obfuscated: 'blink',
-  bold: 'bold',
-  strikethrough: '',
-  underlined: 'underlined',
-  italic: '',
-  reset: 'white+black_bg'
-}
-
-const dictionary = {
-  'chat.stream.emote': '(%s) * %s %s',
-  'chat.stream.text': '(%s) <%s> %s',
-  'chat.type.achievement': '%s has just earned the achievement %s',
-  'chat.type.admin': '[%s: %s]',
-  'chat.type.announcement': '[%s] %s',
-  'chat.type.emote': '* %s %s',
-  'chat.type.text': '<%s> %s'
-}
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -67,6 +30,8 @@ let port = parseInt(process.argv[3])
 const user = process.argv[4]
 const passwd = process.argv[5]
 
+let ChatMessage
+
 if (host.indexOf(':') !== -1) {
   port = host.substring(host.indexOf(':') + 1)
   host = host.substring(0, host.indexOf(':'))
@@ -83,14 +48,15 @@ const client = mc.createClient({
 })
 
 client.on('kick_disconnect', function (packet) {
-  console.info(color('Kicked for ' + packet.reason, 'blink+red'))
+  console.info('Kicked for ' + packet.reason)
   process.exit(1)
 })
 
 const chats = []
 
 client.on('connect', function () {
-  console.info(color('Successfully connected to ' + host + ':' + port, 'blink+green'))
+  ChatMessage = require('prismarine-chat')(client.version)
+  console.info('Successfully connected to ' + host + ':' + port)
 })
 
 client.on('disconnect', function (packet) {
@@ -133,48 +99,8 @@ rl.on('line', function (line) {
 })
 
 client.on('chat', function (packet) {
+  if (!ChatMessage) return // Return if ChatMessage is not loaded yet.
   const j = JSON.parse(packet.message)
-  const chat = parseChat(j, {})
-  console.info(chat)
+  const chat = new ChatMessage(j)
+  console.info(chat.toAnsi())
 })
-
-function parseChat (chatObj, parentState) {
-  function getColorize (parentState) {
-    let myColor = ''
-    if ('color' in parentState) myColor += colors[parentState.color] + '+'
-    if (parentState.bold) myColor += 'bold+'
-    if (parentState.underlined) myColor += 'underline+'
-    if (parentState.obfuscated) myColor += 'obfuscated+'
-    if (myColor.length > 0) myColor = myColor.slice(0, -1)
-    return myColor
-  }
-
-  if (typeof chatObj === 'string') {
-    return color(chatObj, getColorize(parentState))
-  } else {
-    let chat = ''
-    if ('color' in chatObj) parentState.color = chatObj.color
-    if ('bold' in chatObj) parentState.bold = chatObj.bold
-    if ('italic' in chatObj) parentState.italic = chatObj.italic
-    if ('underlined' in chatObj) parentState.underlined = chatObj.underlined
-    if ('strikethrough' in chatObj) parentState.strikethrough = chatObj.strikethrough
-    if ('obfuscated' in chatObj) parentState.obfuscated = chatObj.obfuscated
-
-    if ('text' in chatObj) {
-      chat += color(chatObj.text, getColorize(parentState))
-    } else if ('translate' in chatObj && dictionary[chatObj.translate] !== undefined) {
-      const args = [dictionary[chatObj.translate]]
-      chatObj.with.forEach(function (s) {
-        args.push(parseChat(s, parentState))
-      })
-
-      chat += color(util.format.apply(this, args), getColorize(parentState))
-    }
-    if (chatObj.extra) {
-      chatObj.extra.forEach(function (item) {
-        chat += parseChat(item, parentState)
-      })
-    }
-    return chat
-  }
-}
