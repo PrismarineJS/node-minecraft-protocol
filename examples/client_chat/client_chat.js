@@ -2,7 +2,6 @@ const readline = require('readline')
 const mc = require('minecraft-protocol')
 const states = mc.states
 
-
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
@@ -31,7 +30,7 @@ let port = parseInt(process.argv[3])
 const user = process.argv[4]
 const passwd = process.argv[5]
 
-let ChatMessage;
+let ChatMessage
 
 if (host.indexOf(':') !== -1) {
   port = host.substring(host.indexOf(':') + 1)
