@@ -19,7 +19,7 @@ function createDecipher (secret) {
 class Cipher extends Transform {
   constructor (secret) {
     super()
-    this.aes = new aesjs.ModeOfOperation.cfb(secret, secret, 1) // eslint-disable-line
+    this.aes = new aesjs.ModeOfOperation.cfb(secret, secret, 1) // eslint-disable-line new-cap
   }
 
   _transform (chunk, enc, cb) {
@@ -35,7 +35,7 @@ class Cipher extends Transform {
 class Decipher extends Transform {
   constructor (secret) {
     super()
-    this.aes = new aesjs.ModeOfOperation.cfb(secret, secret, 1) // eslint-disable-line
+    this.aes = new aesjs.ModeOfOperation.cfb(secret, secret, 1) // eslint-disable-line new-cap
   }
 
   _transform (chunk, enc, cb) {
