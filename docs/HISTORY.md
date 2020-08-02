@@ -1,5 +1,9 @@
 # History
 
+## 1.15.0
+
+* options for ping timeout and custom auth server
+
 ## 1.14.0
 
 * electron support using aes-js (thanks @IdanHo)
