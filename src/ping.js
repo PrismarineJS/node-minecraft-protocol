@@ -4,8 +4,6 @@ const Client = require('./client')
 const states = require('./states')
 const tcpDns = require('./client/tcp_dns')
 
-const closeTimeout = 30 * 1000
-
 module.exports = ping
 
 function ping (options, cb) {
@@ -17,6 +15,7 @@ function ping (options, cb) {
   options.majorVersion = version.majorVersion
   options.protocolVersion = version.version
   var closeTimer = null
+  options.closeTimeout = 120 * 1000
 
   const client = new Client(false, version.minecraftVersion)
   client.on('error', function (err) {
@@ -56,7 +55,7 @@ function ping (options, cb) {
   closeTimer = setTimeout(function () {
     client.end()
     cb(new Error('ETIMEDOUT'))
-  }, closeTimeout)
+  }, options.closeTimeout)
 
   tcpDns(client, options)
   options.connect(client)
