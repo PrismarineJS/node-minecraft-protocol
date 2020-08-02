@@ -77,6 +77,8 @@ Returns a `Client` instance and perform login.
  * host : default to localhost
  * clientToken : generated if a password is given
  * accessToken : generated if a password is given
+ * authServer : auth server, default to https://authserver.mojang.com
+ * sessionServer : session server, default to https://sessionserver.mojang.com
  * keepAlive : send keep alive packets : default to true
  * closeTimeout : end the connection after this delay in milliseconds if server doesn't answer to ping, default to `120*1000`
  * checkTimeoutInterval : default to `30*1000` (30s), check if keepalive received at that period, disconnect otherwise.
