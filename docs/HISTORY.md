@@ -1,5 +1,10 @@
 # History
 
+## 1.14.0
+
+* electron support using aes-js (thanks @IdanHo)
+* prevent ping hanging if server never replies
+
 ## 1.13.0
 
 * minecraft 1.16 support
