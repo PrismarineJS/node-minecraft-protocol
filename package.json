@@ -55,5 +55,8 @@
     "protodef": "^1.8.0",
     "readable-stream": "^3.0.6",
     "uuid-1345": "^1.0.1"
+  },
+  "optionalDependencies": {
+    "aes-js": "^3.1.2"
   }
 }
