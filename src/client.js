@@ -4,11 +4,12 @@ const EventEmitter = require('events').EventEmitter
 const debug = require('debug')('minecraft-protocol')
 const compression = require('./transforms/compression')
 const framing = require('./transforms/framing')
-const crypto = require('crypto')
 const states = require('./states')
 
 const createSerializer = require('./transforms/serializer').createSerializer
 const createDeserializer = require('./transforms/serializer').createDeserializer
+const createCipher = require('./transforms/encryption').createCipher
+const createDecipher = require('./transforms/encryption').createDecipher
 
 const closeTimeout = 30 * 1000
 
@@ -181,11 +182,11 @@ class Client extends EventEmitter {
 
   setEncryption (sharedSecret) {
     if (this.cipher != null) { this.emit('error', new Error('Set encryption twice!')) }
-    this.cipher = crypto.createCipheriv('aes-128-cfb8', sharedSecret, sharedSecret)
+    this.cipher = createCipher(sharedSecret)
     this.cipher.on('error', (err) => this.emit('error', err))
     this.framer.unpipe(this.socket)
     this.framer.pipe(this.cipher).pipe(this.socket)
-    this.decipher = crypto.createDecipheriv('aes-128-cfb8', sharedSecret, sharedSecret)
+    this.decipher = createDecipher(sharedSecret)
     this.decipher.on('error', (err) => this.emit('error', err))
     this.socket.unpipe(this.splitter)
     this.socket.pipe(this.decipher).pipe(this.splitter)
