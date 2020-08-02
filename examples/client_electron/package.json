@@ -1,0 +1,17 @@
+{
+  "name": "node-minecraft-protocol-example",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A node-minecraft-protocol example",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "devtron": "^1.4.0"
+  },
+  "dependencies": {
+    "electron": "^3.0.4",
+    "electron-reload": "^1.2.5"
+  }
+}
