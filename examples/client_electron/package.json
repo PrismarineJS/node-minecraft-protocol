@@ -7,11 +7,8 @@
   "scripts": {
     "start": "electron ."
   },
-  "devDependencies": {
-    "devtron": "^1.4.0"
-  },
   "dependencies": {
-    "electron": "^3.0.4",
-    "electron-reload": "^1.2.5"
+    "electron": "^9.1.2",
+    "electron-reload": "^1.5.0"
   }
 }
