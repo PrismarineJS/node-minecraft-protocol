@@ -84,7 +84,7 @@ class Client extends EventEmitter {
       parsed.metadata.state = state
       debug('read packet ' + state + '.' + parsed.metadata.name)
       const s = JSON.stringify(parsed.data, null, 2)
-      debug(s.length > 10000 ? parsed.data : s)
+      debug(s && s.length > 10000 ? parsed.data : s)
       this.emit('packet', parsed.data, parsed.metadata)
       this.emit(parsed.metadata.name, parsed.data, parsed.metadata)
       this.emit('raw.' + parsed.metadata.name, parsed.buffer, parsed.metadata)
