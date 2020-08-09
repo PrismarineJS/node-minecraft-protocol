@@ -14,7 +14,7 @@ module.exports = function (client, server, { version }) {
       } else {
         client.end('Protocol version ' + client.protocolVersion + ' is not supported')
       }
-    } else if (client.protocolVersion !== server.mcversion.version) {
+    } else if (client.protocolVersion !== server.mcversion.version && packet.nextState !== 1) {
       client.end('Wrong protocol version, expected: ' + server.mcversion.version + ' and you are using: ' + client.protocolVersion)
     }
 
