@@ -1,5 +1,9 @@
 # History
 
+## 1.16.0
+
+* add buffer to packet event
+
 ## 1.15.0
 
 * options for ping timeout and custom auth server
