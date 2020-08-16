@@ -168,7 +168,6 @@ const values = {
     const results = {}
     Object.keys(typeArgs).forEach(function (index) {
       results[typeArgs[index].name] = 1
-      context[typeArgs[index].name] = 1
     })
     return results
   },
