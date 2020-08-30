@@ -13,7 +13,7 @@ module.exports = createServer
 
 function createServer (options = {}) {
   const {
-    host = '0.0.0.0',
+    host,
     'server-port': serverPort,
     port = serverPort || 25565,
     motd = 'A Minecraft server',
