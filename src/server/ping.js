@@ -7,7 +7,7 @@ module.exports = function (client, server, { beforePing = null }) {
   function onPing () {
     const response = {
       version: {
-        name: server.mcversion.minecraftVersion,
+        name: `${server.serverBrand} ${server.mcversion.minecraftVersion}`,
         protocol: server.mcversion.version
       },
       players: {
