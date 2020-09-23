@@ -21,7 +21,8 @@ function createServer (options = {}) {
     maxPlayers: maxPlayersNew = 20,
     version,
     favicon,
-    customPackets
+    customPackets,
+    serverBrand = 'node-minecraft-protocol'
   } = options
 
   const maxPlayers = options['max-players'] !== undefined ? maxPlayersOld : maxPlayersNew
@@ -41,6 +42,7 @@ function createServer (options = {}) {
   server.onlineModeExceptions = {}
   server.favicon = favicon
   server.serverKey = new NodeRSA({ b: 1024 })
+  server.serverBrand = serverBrand
 
   server.on('connection', function (client) {
     plugins.forEach(plugin => plugin(client, server, options))

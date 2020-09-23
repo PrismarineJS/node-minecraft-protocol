@@ -124,6 +124,11 @@ module.exports = function (client, server, options) {
       server.playerCount -= 1
     })
     pluginChannels(client, options)
+    client.registerChannel((
+      client.protocolVersion >= 385 // (385 = 1.13-pre3) as of 1.13 (The Flattening), the name of the default channels has changed
+      ? 'brand'
+      : 'MC|Brand'
+    ), ['string', []])
     server.emit('login', client)
   }
 }
