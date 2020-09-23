@@ -31,6 +31,11 @@ declare module 'minecraft-protocol' {
 		on(event: 'state', handler: (newState: States, oldState: States) => void): this
 		on(event: 'end', handler: (reason: string) => void): this
 		on(event: string, handler: (data: any, packetMeta: PacketMeta)=> unknown): this
+		/**
+		 * Send a brand plugin message, if there is no parameter the `server.serverBrand` property will be used
+		 * works only for server side clients `client.isServer === true`
+		 */
+		sendBrand(brand?: string): void
 	}
 
 	export interface ClientOptions {
@@ -80,6 +85,7 @@ declare module 'minecraft-protocol' {
 		beforePing?: (response: any, client: Client, callback?: (result: any) => any) => any
 		errorHandler?: (client: Client, error: Error) => void
 		agent?: Agent
+		serverBrand?: string
 	}
 
 	export interface SerializerOptions {
