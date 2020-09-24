@@ -170,7 +170,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           delete results.latency
           assert.deepEqual(results, {
             version: {
-              name: version.minecraftVersion,
+              name: 'node-minecraft-protocol' + version.minecraftVersion,
               protocol: version.version
             },
             players: {
