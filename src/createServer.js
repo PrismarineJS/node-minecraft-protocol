@@ -13,7 +13,8 @@ module.exports = createServer
 
 function createServer (options = {}) {
   const {
-    host = '0.0.0.0',
+    host = undefined, // undefined means listen to all available ipv4 and ipv6 adresses
+    // (see https://nodejs.org/api/net.html#net_server_listen_port_host_backlog_callback for details)
     'server-port': serverPort,
     port = serverPort || 25565,
     motd = 'A Minecraft server',

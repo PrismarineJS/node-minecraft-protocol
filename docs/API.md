@@ -7,7 +7,8 @@ automatically logged in and validated against mojang's auth.
 
 `options` is an object containing the properties :
  * port : default to 25565
- * host : default to localhost
+ * host : default to undefined which means listen to all available ipv4 and ipv6 adresses
+ (see https://nodejs.org/api/net.html#net_server_listen_port_host_backlog_callback for details)
  * kickTimeout : default to `10*1000` (10s), kick client that doesn't answer to keepalive after that time
  * checkTimeoutInterval : default to `4*1000` (4s), send keepalive packet at that period
  * online-mode : default to true
