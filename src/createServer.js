@@ -20,6 +20,9 @@ function createServer (options = {}) {
     motd = 'A Minecraft server',
     'max-players': maxPlayersOld = 20,
     maxPlayers: maxPlayersNew = 20,
+    baseProtocol,
+    baseVersion,
+    adaptToVersion,
     version,
     favicon,
     customPackets

@@ -1,6 +1,6 @@
 const endianToggle = require('endian-toggle')
 
-module.exports = function (client, server, { beforePing = null }) {
+module.exports = function (client, server, { adaptToProtocol, baseProtocol, beforePing = null }) {
   client.once('ping_start', onPing)
   client.once('legacy_server_list_ping', onLegacyPing)
 
@@ -8,7 +8,7 @@ module.exports = function (client, server, { beforePing = null }) {
     const response = {
       version: {
         name: server.mcversion.minecraftVersion,
-        protocol: server.mcversion.version
+        protocol: adaptToProtocol && client.version >= baseProtocol ? client.version : server.mcversion.version
       },
       players: {
         max: server.maxPlayers,
