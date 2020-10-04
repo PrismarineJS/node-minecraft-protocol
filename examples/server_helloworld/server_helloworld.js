@@ -7,7 +7,7 @@ const options = {
 
 const server = mc.createServer(options)
 const mcData = require('minecraft-data')(server.version)
-let loginPacket = mcData.loginPacket
+const loginPacket = mcData.loginPacket
 
 server.on('login', function (client) {
   const addr = client.socket.remoteAddress

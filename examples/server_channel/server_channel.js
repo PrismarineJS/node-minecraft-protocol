@@ -8,12 +8,12 @@ const server = mc.createServer({
   version: '1.16'
 })
 const mcData = require('minecraft-data')(server.version)
-let loginPacket = mcData.loginPacket
+const loginPacket = mcData.loginPacket
 
 server.on('login', function (client) {
   client.registerChannel('MC|Brand', ['string', []])
   client.on('MC|Brand', console.log)
-  
+
   client.write('login', {
     entityId: client.id,
     isHardcore: false,

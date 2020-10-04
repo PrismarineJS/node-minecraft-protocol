@@ -8,7 +8,7 @@ const server = mc.createServer({
   version: '1.16'
 })
 const mcData = require('minecraft-data')(server.version)
-let loginPacket = mcData.loginPacket
+const loginPacket = mcData.loginPacket
 
 server.on('login', function (client) {
   client.write('login', {

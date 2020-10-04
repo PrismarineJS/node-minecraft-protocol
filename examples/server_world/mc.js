@@ -9,7 +9,7 @@ var server = mc.createServer({
   version: '1.16'
 })
 const mcData = require('minecraft-data')(server.version)
-let loginPacket = mcData.loginPacket
+const loginPacket = mcData.loginPacket
 var chunk = new Chunk()
 
 for (var x = 0; x < 16; x++) {
