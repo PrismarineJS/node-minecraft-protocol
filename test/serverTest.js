@@ -59,6 +59,30 @@ const w = {
   }
 }
 
+let loginPacket = {
+  entityId: client.id,
+  levelType: 'default',
+  gameMode: 1,
+  previousGameMode: 255,
+  worldNames: ['minecraft:overworld'],
+  dimensionCodec: (version.version ? mcData.loginPacket.dimension : { name: '', type: 'compound', value: { dimension: { type: 'list', value: { type: 'compound', value: [w] } } } }),
+  dimension: (version.version ? mcData.loginPacket.dimension : 0),
+  worldName: 'minecraft:overworld',
+  hashedSeed: [0, 0],
+  difficulty: 2,
+  maxPlayers: server.maxPlayers,
+  reducedDebugInfo: (version.version ? false : 0),
+  enableRespawnScreen: true
+}
+if (version.version >= 735) { // 1.16x
+  loginPacket.isDebug = false
+  loginPacket.isFlat = false
+  loginPacket.isHardcore = false
+  loginPacket.viewDistance = 10
+  delete loginPacket.levelType
+  delete loginPacket.difficulty
+}
+
 mc.supportedVersions.forEach(function (supportedVersion, i) {
   if (!(i >= firstVersion && i <= lastVersion)) { return }
 
@@ -201,26 +225,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           broadcast(client.username + ' left the game.', client)
           if (client.username === 'player2') server.close()
         })
-        let loginPacket = {
-          entityId: 0,
-          levelType: 'default',
-          gameMode: 1,
-          previousGameMode: 255,
-          worldNames: ['minecraft:overworld'],
-          dimensionCodec: { name: '', type: 'compound', value: { dimension: { type: 'list', value: { type: 'compound', value: [w] } } } },
-          dimension: 0,
-          worldName: 'minecraft:overworld',
-          hashedSeed: [0, 0],
-          difficulty: 2,
-          maxPlayers: 20,
-          reducedDebugInfo: 0,
-          enableRespawnScreen: true
-        }
-        if (version.version >= 735) { // 1.16x
-          loginPacket = mcData.loginPacket
-        }
-        loginPacket.entityId = client.id
-        loginPacket.maxPlayers = server.maxPlayers
+        
 
         client.write('login', loginPacket)
         client.on('chat', function (packet) {
@@ -324,27 +329,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           assert.strictEqual(reason, '{"text":"ServerShutdown"}')
           resolve()
         })
-        let loginPacket = {
-          entityId: 0,
-          levelType: 'default',
-          gameMode: 1,
-          previousGameMode: 255,
-          worldNames: ['minecraft:overworld'],
-          dimensionCodec: { name: '', type: 'compound', value: { dimension: { type: 'list', value: { type: 'compound', value: [w] } } } },
-          dimension: 0,
-          worldName: 'minecraft:overworld',
-          hashedSeed: [0, 0],
-          difficulty: 2,
-          maxPlayers: 20,
-          reducedDebugInfo: 0,
-          enableRespawnScreen: true
-        }
-        if (version.version >= 735) { // 1.16x
-          loginPacket = mcData.loginPacket
-        }
-        loginPacket.entityId = client.id
-        loginPacket.maxPlayers = server.maxPlayers
-
+        
         client.write('login', loginPacket)
       })
       server.on('close', function () {
