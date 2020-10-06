@@ -207,13 +207,13 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           gameMode: 1,
           previousGameMode: 255,
           worldNames: ['minecraft:overworld'],
-          dimensionCodec: (version.version ? mcData.loginPacket.dimension : { name: '', type: 'compound', value: { dimension: { type: 'list', value: { type: 'compound', value: [w] } } } }),
-          dimension: (version.version ? mcData.loginPacket.dimension : 0),
+          dimensionCodec: (version.version >= 735 ? mcData.loginPacket.dimension : { name: '', type: 'compound', value: { dimension: { type: 'list', value: { type: 'compound', value: [w] } } } }),
+          dimension: (version.version >= 735 ? mcData.loginPacket.dimension : 0),
           worldName: 'minecraft:overworld',
           hashedSeed: [0, 0],
           difficulty: 2,
           maxPlayers: server.maxPlayers,
-          reducedDebugInfo: (version.version ? false : 0),
+          reducedDebugInfo: (version.version >= 735 ? false : 0),
           enableRespawnScreen: true
         }
         if (version.version >= 735) { // 1.16x
@@ -332,13 +332,13 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           gameMode: 1,
           previousGameMode: 255,
           worldNames: ['minecraft:overworld'],
-          dimensionCodec: (version.version ? mcData.loginPacket.dimension : { name: '', type: 'compound', value: { dimension: { type: 'list', value: { type: 'compound', value: [w] } } } }),
-          dimension: (version.version ? mcData.loginPacket.dimension : 0),
+          dimensionCodec: (version.version >= 735 ? mcData.loginPacket.dimension : { name: '', type: 'compound', value: { dimension: { type: 'list', value: { type: 'compound', value: [w] } } } }),
+          dimension: (version.version >= 735 ? mcData.loginPacket.dimension : 0),
           worldName: 'minecraft:overworld',
           hashedSeed: [0, 0],
           difficulty: 2,
           maxPlayers: server.maxPlayers,
-          reducedDebugInfo: (version.version ? false : 0),
+          reducedDebugInfo: (version.version >= 735 ? false : 0),
           enableRespawnScreen: true
         }
         if (version.version >= 735) { // 1.16x
