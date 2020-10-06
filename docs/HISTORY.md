@@ -1,5 +1,9 @@
 # History
 
+## 1.17.0
+
+* minecraft 1.16.2 and 1.16.3 support
+
 ## 1.16.0
 
 * add buffer to packet event
