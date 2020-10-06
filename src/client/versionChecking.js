@@ -2,10 +2,11 @@ module.exports = function (client, options) {
   client.on('disconnect', message => {
     if (!message.reason) { return }
     const parsed = JSON.parse(message.reason)
-    const text = parsed.text ? parsed.text : parsed
+    let text = parsed.text ? parsed.text : parsed
     let versionRequired
 
     if (text.translate && text.translate.startsWith('multiplayer.disconnect.outdated_')) { versionRequired = text.with[0] } else {
+      if (text.extra) text = text.extra[0].text
       versionRequired = /(?:Outdated client! Please use|Outdated server! I'm still on) (.+)/.exec(text)
       versionRequired = versionRequired ? versionRequired[1] : null
     }

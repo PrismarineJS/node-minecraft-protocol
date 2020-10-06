@@ -13,7 +13,7 @@ Parse and serialize minecraft packets, plus authentication and encryption.
 
  * Supports Minecraft PC version 1.7.10, 1.8.8, 1.9 (15w40b, 1.9, 1.9.1-pre2, 1.9.2, 1.9.4),
   1.10 (16w20a, 1.10-pre1, 1.10, 1.10.1, 1.10.2), 1.11 (16w35a, 1.11, 1.11.2), 1.12 (17w15a, 17w18b, 1.12-pre4, 1.12, 1.12.1, 1.12.2), and 1.13 (17w50a, 1.13, 1.13.1, 1.13.2-pre1, 1.13.2-pre2, 1.13.2), 1.14 (1.14, 1.14.1, 1.14.3, 1.14.4)
-  , 1.15 (1.15, 1.15.1, 1.15.2) and 1.16 (20w13b, 20w14a, 1.16-rc1, 1.16, 1.16.1)
+  , 1.15 (1.15, 1.15.1, 1.15.2) and 1.16 (20w13b, 20w14a, 1.16-rc1, 1.16, 1.16.1, 1.16.2, 1.16.3)
  * Parses all packets and emits events with packet fields as JavaScript
    objects.
  * Send a packet by supplying fields as a JavaScript object.
@@ -89,77 +89,30 @@ var server = mc.createServer({
   encryption: true,      // optional
   host: '0.0.0.0',       // optional
   port: 25565,           // optional
-  version: '1.16'
+  version: '1.16.3'
 });
+const mcData = require('minecraft-data')(server.version)
+
 server.on('login', function(client) {
-  const w = {
-    piglin_safe: {
-      type: 'byte',
-      value: 0
-    },
-    natural: {
-      type: 'byte',
-      value: 1
-    },
-    ambient_light: {
-      type: 'float',
-      value: 0
-    },
-    infiniburn: {
-      type: 'string',
-      value: 'minecraft:infiniburn_overworld'
-    },
-    respawn_anchor_works: {
-      type: 'byte',
-      value: 0
-    },
-    has_skylight: {
-      type: 'byte',
-      value: 1
-    },
-    bed_works: {
-      type: 'byte',
-      value: 1
-    },
-    has_raids: {
-      type: 'byte',
-      value: 1
-    },
-    name: {
-      type: 'string',
-      value: 'minecraft:overworld'
-    },
-    logical_height: {
-      type: 'int',
-      value: 256
-    },
-    shrunk: {
-      type: 'byte',
-      value: 0
-    },
-    ultrawarm: {
-      type: 'byte',
-      value: 0
-    },
-    has_ceiling: {
-      type: 'byte',
-      value: 0
-    }
-  }
+  
+  let loginPacket = mcData.loginPacket
+
   client.write('login', {
     entityId: client.id,
-    levelType: 'default',
+    isHardcore: false,
     gameMode: 0,
     previousGameMode: 255,
-    worldNames: ['minecraft:overworld'],
-    dimensionCodec: {name: '', type:'compound', value: {dimension: {type: 'list', value: {type: 'compound', value: [w]}}}},
-    dimension: 'minecraft:overworld',
+    worldNames: loginPacket.worldNames,
+    dimensionCodec: loginPacket.dimensionCodec,
+    dimension: loginPacket.dimension,
     worldName: 'minecraft:overworld',
-    difficulty: 2,
     hashedSeed: [0, 0],
     maxPlayers: server.maxPlayers,
+    viewDistance: 10,
     reducedDebugInfo: false,
-    enableRespawnScreen: true
+    enableRespawnScreen: true,
+    isDebug: false,
+    isFlat: false
   });
   client.write('position', {
     x: 0,
