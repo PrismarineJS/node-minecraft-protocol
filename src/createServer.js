@@ -23,6 +23,7 @@ function createServer (options = {}) {
     baseProtocol,
     baseVersion,
     adaptToVersion,
+    playersSample,
     version,
     favicon,
     customPackets

@@ -1,6 +1,6 @@
 const endianToggle = require('endian-toggle')
 
-module.exports = function (client, server, { adaptToProtocol, baseProtocol, beforePing = null }) {
+module.exports = function (client, server, { adaptToProtocol, baseProtocol, playersSample, beforePing = null }) {
   client.once('ping_start', onPing)
   client.once('legacy_server_list_ping', onLegacyPing)
 
@@ -13,7 +13,7 @@ module.exports = function (client, server, { adaptToProtocol, baseProtocol, befo
       players: {
         max: server.maxPlayers,
         online: server.playerCount,
-        sample: []
+        sample: playersSample || []
       },
       description: { text: server.motd },
       favicon: server.favicon
