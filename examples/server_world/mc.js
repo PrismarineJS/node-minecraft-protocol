@@ -1,5 +1,5 @@
 const mc = require('minecraft-protocol')
-const Chunk = require('prismarine-chunk')('1.16')
+const Chunk = require('prismarine-chunk')('1.16.3')
 const Vec3 = require('vec3')
 var server = mc.createServer({
   'online-mode': true,
