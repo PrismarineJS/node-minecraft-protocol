@@ -40,7 +40,7 @@ server.on('login', function (client) {
     isDebug: false,
     isFlat: false
   })
-   client.write('map_chunk', {
+  client.write('map_chunk', {
     x: 0,
     z: 0,
     groundUp: true,
