@@ -123,8 +123,11 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           } else if (chatCount === 2) {
             assert.strictEqual(message.translate, 'chat.type.announcement')
             assert.strictEqual(message.with[0].text ? message.with[0].text : message.with[0], 'Server')
-            assert.deepEqual(message.with[1].extra ? (message.with[1].extra[0].text
-              ? message.with[1].extra[0].text : message.with[1].extra[0]) : message.with[1].text, 'hello')
+            assert.deepEqual(message.with[1].extra
+              ? (message.with[1].extra[0].text
+                  ? message.with[1].extra[0].text
+                  : message.with[1].extra[0])
+              : message.with[1].text, 'hello')
             wrap.removeListener('line', lineListener)
             client.end()
             done()
