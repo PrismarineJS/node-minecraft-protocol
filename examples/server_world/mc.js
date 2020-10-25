@@ -1,5 +1,5 @@
 const mc = require('minecraft-protocol')
-const Chunk = require('prismarine-chunk')('1.16')
+const Chunk = require('prismarine-chunk')('1.16.3')
 const Vec3 = require('vec3')
 var server = mc.createServer({
   'online-mode': true,
@@ -14,7 +14,8 @@ var chunk = new Chunk()
 
 for (var x = 0; x < 16; x++) {
   for (var z = 0; z < 16; z++) {
-    chunk.setBlockType(new Vec3(x, 100, z), 2)
+    chunk.setBlockType(new Vec3(x, 100, z), mcData.blocksByName.grass_block.id)
+    chunk.setBlockData(new Vec3(x, 100, z), 1)
     for (var y = 0; y < 256; y++) {
       chunk.setSkyLight(new Vec3(x, y, z), 15)
     }
@@ -42,16 +43,18 @@ server.on('login', function (client) {
   client.write('map_chunk', {
     x: 0,
     z: 0,
-    groundUp: false,
-    bitMap: 0xffff,
-    chunkData: chunk.dump(),
-    blockEntities: [],
+    groundUp: true,
+    biomes: chunk.dumpBiomes !== undefined ? chunk.dumpBiomes() : undefined,
     heightmaps: {
-      name: '',
       type: 'compound',
-      value: {}
-    },
-    biomes: []
+      name: '',
+      value: {
+        MOTION_BLOCKING: { type: 'longArray', value: new Array(36).fill([0, 0]) }
+      }
+    }, // send fake heightmap
+    bitMap: chunk.getMask(),
+    chunkData: chunk.dump(),
+    blockEntities: []
   })
   client.write('position', {
     x: 15,
