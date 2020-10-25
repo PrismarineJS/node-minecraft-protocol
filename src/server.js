@@ -24,8 +24,8 @@ class Server extends EventEmitter {
     self.socketServer.on('connection', socket => {
       const client = new Client(true, this.version, this.customPackets, this.hideErrors)
       client._end = client.end
-      client.end = function end (endReason) {
-        endReason = '{"text":"' + endReason + '"}'
+      client.end = function end (endReason, fullReason) {
+        endReason = fullReason !== undefined ? fullReason : '{"text":"' + endReason + '"}'
         if (client.state === states.PLAY) {
           client.write('kick_disconnect', { reason: endReason })
         } else if (client.state === states.LOGIN) {
