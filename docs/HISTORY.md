@@ -1,5 +1,10 @@
 # History
 
+## 1.18.0
+
+* client.end with full reason (thanks @redcarti)
+* allow immediate shutdown when client is ended (thanks @Svebran)
+
 ## 1.17.0
 
 * minecraft 1.16.2 and 1.16.3 support
