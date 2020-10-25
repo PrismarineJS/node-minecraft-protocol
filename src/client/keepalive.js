@@ -9,7 +9,7 @@ module.exports = function (client, options) {
   client.on('keep_alive', onKeepAlive)
 
   let timeout = null
-  
+
   client.on('end', () => clearTimeout(timeout))
 
   function onKeepAlive (packet) {
