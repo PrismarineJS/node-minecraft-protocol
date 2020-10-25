@@ -10,6 +10,8 @@ module.exports = function (client, options) {
 
   let timeout = null
 
+  client.on('end', () => clearTimeout(timeout))
+
   function onKeepAlive (packet) {
     if (timeout) { clearTimeout(timeout) }
     timeout = setTimeout(() => client.end(), checkTimeoutInterval)
