@@ -15,7 +15,8 @@ function ping (options, cb) {
   options.majorVersion = version.majorVersion
   options.protocolVersion = version.version
   var closeTimer = null
-  options.closeTimeout = 120 * 1000
+  options.closeTimeout = options.closeTimeout || 120 * 1000
+  options.noPongTimeout = options.noPongTimeout || 5 * 1000
 
   const client = new Client(false, version.minecraftVersion)
   client.on('error', function (err) {
@@ -26,8 +27,14 @@ function ping (options, cb) {
   client.once('server_info', function (packet) {
     const data = JSON.parse(packet.response)
     const start = Date.now()
+    const maxTime = setTimeout(() => {
+      clearTimeout(closeTimer)
+      cb(null, data)
+      client.end()
+    }, options.noPongTimeout)
     client.once('ping', function (packet) {
       data.latency = Date.now() - start
+      clearTimeout(maxTime)
       clearTimeout(closeTimer)
       cb(null, data)
       client.end()
