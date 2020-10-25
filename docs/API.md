@@ -101,9 +101,12 @@ Takes a minecraft `version` as second argument.
 
 write a packet
 
-### client.end(reason)
+### client.end(reason, fullReason)
 
-ends the connection with `reason`
+Ends the connection with `reason` or `fullReason`
+If `fullReason` is not defined, then the `reason` will be used.
+
+`fullReason` is a JSON object, which represents [chat](https://wiki.vg/Chat) message.
 
 ### client.state
 
