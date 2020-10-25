@@ -1,5 +1,9 @@
 # History
 
+## 1.19.0
+
+* make auto version more robust by giving up after 5s if no answer to ping is given but the version is returned
+
 ## 1.18.0
 
 * client.end with full reason (thanks @redcarti)
