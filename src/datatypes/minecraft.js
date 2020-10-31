@@ -13,7 +13,7 @@ module.exports = {
   entityMetadataLoop: [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata],
   topBitSetTerminatedArray: [readTopBitSetTerminatedArray, writeTopBitSetTerminatedArray, sizeOfTopBitSetTerminatedArray]
 }
-var PartialReadError = require('protodef').utils.PartialReadError
+const PartialReadError = require('protodef').utils.PartialReadError
 
 function readUUID (buffer, offset) {
   if (offset + 16 > buffer.length) { throw new PartialReadError() }

@@ -14,7 +14,7 @@ function ping (options, cb) {
   const version = mcData.version
   options.majorVersion = version.majorVersion
   options.protocolVersion = version.version
-  var closeTimer = null
+  let closeTimer = null
   options.closeTimeout = options.closeTimeout || 120 * 1000
   options.noPongTimeout = options.noPongTimeout || 5 * 1000
 
