@@ -8,6 +8,12 @@ module.exports = function (client, server, { version }) {
     client.serverPort = packet.serverPort
     client.protocolVersion = packet.protocolVersion
 
+    if (packet.nextState === 1) {
+      client.state = states.STATUS
+    } else if (packet.nextState === 2) {
+      client.state = states.LOGIN
+    }
+
     if (version === false || version === undefined) {
       if (require('minecraft-data')(client.protocolVersion)) {
         client.version = client.protocolVersion
@@ -16,12 +22,6 @@ module.exports = function (client, server, { version }) {
       }
     } else if (client.protocolVersion !== server.mcversion.version && packet.nextState !== 1) {
       client.end('Wrong protocol version, expected: ' + server.mcversion.version + ' and you are using: ' + client.protocolVersion)
-    }
-
-    if (packet.nextState === 1) {
-      client.state = states.STATUS
-    } else if (packet.nextState === 2) {
-      client.state = states.LOGIN
     }
   }
 }
