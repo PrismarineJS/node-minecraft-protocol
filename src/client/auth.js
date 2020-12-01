@@ -5,7 +5,7 @@ const fs = require('fs').promises
 module.exports = function (client, options) {
   (async function() {
     const yggdrasilClient = yggdrasil({ agent: options.agent, host: options.authServer || 'https://authserver.mojang.com' })
-    const clientToken = options.clientToken || (options.session && options.session.clientToken) || (options.profilesFolder && (await getLauncherProfiles()).clientToken) || UUID.v4().toString().replace("-", "")
+    const clientToken = options.clientToken || (options.session && options.session.clientToken) || (options.profilesFolder && (await getLauncherProfiles()).clientToken) || UUID.v4().toString().replace(/-/g, "")
     const skipValidation = false || options.skipValidation
     options.accessToken = null
     options.haveCredentials = options.password != null || (clientToken != null && options.session != null) || options.profilesFolder != null
@@ -25,7 +25,7 @@ module.exports = function (client, options) {
       const cb = function (err, session) {
         if (options.profilesFolder) {
           getLauncherProfiles().then((auths) => {
-            let lowerUsername = options.username.toLowerCase()
+            const lowerUsername = options.username.toLowerCase()
             let profile = Object.keys(auths.authenticationDatabase).find(key => 
               auths.authenticationDatabase[key].username.toLowerCase() == lowerUsername
               || Object.values(auths.authenticationDatabase[key].profiles)[0].displayName.toLowerCase() == lowerUsername
@@ -36,14 +36,14 @@ module.exports = function (client, options) {
               }
             } else { // successful login
               if (!profile) {
-                profile = UUID.v4().toString() // create new profile
+                profile = UUID.v4().toString().replace(/-/g, "") // create new profile
               }
               if (!auths.clientToken) {
                 auths.clientToken = clientToken
               }
               
               if (clientToken == auths.clientToken) { // only do something when we can save a new clienttoken or they match
-                let oldProfileObj = auths.authenticationDatabase[profile]
+                const oldProfileObj = auths.authenticationDatabase[profile]
                 let newProfileObj = {
                   accessToken: session.accessToken,
                   profiles: {},
@@ -76,19 +76,19 @@ module.exports = function (client, options) {
       }
 
       if (!options.session && options.profilesFolder) {
-        let auths = await getLauncherProfiles()
+        const auths = await getLauncherProfiles()
 
-        let lowerUsername = options.username.toLowerCase()
-        let profile = Object.keys(auths.authenticationDatabase).find(key => 
+        const lowerUsername = options.username.toLowerCase()
+        const profile = Object.keys(auths.authenticationDatabase).find(key => 
           auths.authenticationDatabase[key].username.toLowerCase() == lowerUsername
           || Object.values(auths.authenticationDatabase[key].profiles)[0].displayName.toLowerCase() == lowerUsername
         )
 
         if (profile) {
-          let newUsername = auths.authenticationDatabase[profile].username
-          let uuid = Object.keys(auths.authenticationDatabase[profile].profiles)[0]
-          let displayName = auths.authenticationDatabase[profile].profiles[uuid].displayName
-          let newProfile = {
+          const newUsername = auths.authenticationDatabase[profile].username
+          const uuid = Object.keys(auths.authenticationDatabase[profile].profiles)[0]
+          const displayName = auths.authenticationDatabase[profile].profiles[uuid].displayName
+          const newProfile = {
             name: displayName,
             id: uuid
           };
