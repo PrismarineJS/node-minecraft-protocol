@@ -1,12 +1,10 @@
 const UUID = require('uuid-1345')
 const yggdrasil = require('yggdrasil')
-const fs = require('mz/fs')
-const promisify = require('es6-promisify')
-const mkdirp = promisify(require('mkdirp'))
+const fs = require('fs').promises
 
 module.exports = async function (client, options) {
   const yggdrasilClient = yggdrasil({ agent: options.agent, host: options.authServer || 'https://authserver.mojang.com' })
-  const clientToken = (options.profilesFolder && (await getLP()).clientToken) || options.clientToken || (options.session && options.session.clientToken) || UUID.v4().toString().replace("-", "")
+  const clientToken = options.clientToken || (options.session && options.session.clientToken) || (options.profilesFolder && (await getLP()).clientToken) || UUID.v4().toString().replace("-", "")
   const skipValidation = false || options.skipValidation
   options.accessToken = null
   options.haveCredentials = options.password != null || (clientToken != null && options.session != null) || options.profilesFolder != null
@@ -16,8 +14,8 @@ module.exports = async function (client, options) {
     try {
       data = JSON.parse(await fs.readFile(options.profilesFolder + '/launcher_profiles.json', 'utf8'))
     } catch (err) {
-      await mkdirp(options.profilesFolder)
-      await fs.writeFile(options.profilesFolder + '/launcher_profiles.json', '')
+      await fs.mkdir(options.profilesFolder, {recursive: true})
+      await fs.writeFile(options.profilesFolder + '/launcher_profiles.json', '{}')
       data = { authenticationDatabase: {} }
     }
     return data
