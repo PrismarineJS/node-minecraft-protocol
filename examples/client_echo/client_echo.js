@@ -11,9 +11,7 @@ const client = mc.createClient({
   username: process.argv[4] ? process.argv[4] : 'echo',
   password: process.argv[5]
 })
-client.on('session', function (session) {
-  console.info('session initialized ', JSON.stringify(session))
-})
+
 client.on('connect', function () {
   console.info('connected')
 })
