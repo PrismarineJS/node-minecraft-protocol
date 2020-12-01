@@ -12,15 +12,13 @@ module.exports = async function (client, options) {
   options.haveCredentials = options.password != null || (clientToken != null && options.session != null) || options.profilesFolder != null
 
   async function getLP () { // get launcher profile
-    let data
     try {
-      data = JSON.parse(await fs.readFile(options.profilesFolder + '/launcher_profiles.json', 'utf8'))
+      return JSON.parse(await fs.readFile(options.profilesFolder + '/launcher_profiles.json', 'utf8'))
     } catch (err) {
       await mkdirp(options.profilesFolder)
       await fs.writeFile(options.profilesFolder + '/launcher_profiles.json', '')
-      data = { authenticationDatabase: {} }
+      return { authenticationDatabase: {} }
     }
-    return data
   }
 
   if (options.haveCredentials) {
