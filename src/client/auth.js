@@ -32,7 +32,7 @@ module.exports = function (client, options) {
             )
             if (err) {
               if (profile) { // profile is invalid, remove
-                delete auth.authenticationDatabase[profile]
+                delete auths.authenticationDatabase[profile]
               }
             } else { // successful login
               if (!profile) {
