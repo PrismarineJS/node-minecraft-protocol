@@ -57,10 +57,10 @@ module.exports = function (client, options) {
               }
             }
             fs.writeFile(options.profilesFolder + '/launcher_profiles.json', JSON.stringify(auths, null, 2)).then(()=>{},(err)=>{
-              console.warn("Couldn't save tokens:\n", err)
+              // console.warn("Couldn't save tokens:\n", err) // not any error, we just don't save the file
             })
           }, (err) => {
-            console.warn("Skipped saving tokens because of error\n", err)
+            // console.warn("Skipped saving tokens because of error\n", err) // not any error, we just don't save the file
           })
         }
         
@@ -141,6 +141,6 @@ module.exports = function (client, options) {
       options.connect(client)
     }
   })().then((res) => {}, (err) => {
-    console.warn("Authentication failed: \n", err)
+    client.emit('error', err)
   })
 }
