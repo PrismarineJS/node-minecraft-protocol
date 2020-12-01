@@ -11,10 +11,6 @@ const client = mc.createClient({
   username: process.argv[4] ? process.argv[4] : 'echo',
   profilesFolder: process.argv[5]
 })
-
-client.on('error', function (err) {
-  console.log(err)
-})
 client.on('session', function (session) {
   console.info('session initialized ', JSON.stringify(session))
 })
