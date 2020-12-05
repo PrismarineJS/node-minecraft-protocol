@@ -10,7 +10,7 @@ const client = mc.createClient({
   port: parseInt(process.argv[3]),
   username: process.argv[4] ? process.argv[4] : 'echo'
 })
-client.on('error', function(err) {
+client.on('error', function (err) {
   console.error(err)
 })
 
