@@ -1,5 +1,11 @@
 # History
 
+## 1.20.0
+
+* Add token auth like the vanilla launcher (save the token) (thanks @ph0t0shop)
+* Only use fullReason for the disconnect packet (thanks @DeltaEvo)
+* End the serializer instead of unpiping streams (thanks @DeltaEvo)
+
 ## 1.19.0
 
 * make auto version more robust by giving up after 5s if no answer to ping is given but the version is returned
