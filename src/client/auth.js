@@ -12,7 +12,7 @@ module.exports = async function (client, options) {
     } catch (ignoreErr) {
       mcFolderExists = false
     }
-    options.profilesFolder = mcFolderExists ? mcDefaultFolderPath : "." // local folder if mc folder doesn't exist
+    options.profilesFolder = mcFolderExists ? mcDefaultFolderPath : '.' // local folder if mc folder doesn't exist
   }
 
   const yggdrasilClient = yggdrasil({ agent: options.agent, host: options.authServer || 'https://authserver.mojang.com' })
@@ -31,7 +31,7 @@ module.exports = async function (client, options) {
     }
   }
 
-  async function hasProfileCredentials() {
+  async function hasProfileCredentials () {
     try {
       const auths = await getLauncherProfiles()
 
@@ -67,7 +67,7 @@ module.exports = async function (client, options) {
               if (!auths.clientToken) {
                 auths.clientToken = clientToken
               }
-  
+
               if (clientToken === auths.clientToken) { // only do something when we can save a new clienttoken or they match
                 const oldProfileObj = auths.authenticationDatabase[profile]
                 const newProfileObj = {
@@ -113,7 +113,7 @@ module.exports = async function (client, options) {
           auths.authenticationDatabase[key].username.toLowerCase() === lowerUsername ||
             Object.values(auths.authenticationDatabase[key].profiles)[0].displayName.toLowerCase() === lowerUsername
         )
-  
+
         if (profile) {
           const newUsername = auths.authenticationDatabase[profile].username
           const uuid = Object.keys(auths.authenticationDatabase[profile].profiles)[0]
@@ -122,7 +122,7 @@ module.exports = async function (client, options) {
             name: displayName,
             id: uuid
           }
-  
+
           options.session = {
             accessToken: auths.authenticationDatabase[profile].accessToken,
             clientToken: auths.clientToken,
