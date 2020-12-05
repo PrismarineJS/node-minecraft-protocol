@@ -95,7 +95,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
       let count = 2
       server.on('connection', function (client) {
         client.on('end', function (reason) {
-          assert.strictEqual(reason, '{"text":"LoginTimeout"}')
+          assert.strictEqual(reason, 'LoginTimeout')
           server.close()
         })
       })
@@ -126,7 +126,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
       let count = 2
       server.on('connection', function (client) {
         client.on('end', function (reason) {
-          assert.strictEqual(reason, '{"text":"KeepAliveTimeout"}')
+          assert.strictEqual(reason, 'KeepAliveTimeout')
           server.close()
         })
       })
@@ -323,7 +323,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
       let count = 2
       server.on('login', function (client) {
         client.on('end', function (reason) {
-          assert.strictEqual(reason, '{"text":"ServerShutdown"}')
+          assert.strictEqual(reason, 'ServerShutdown')
           resolve()
         })
         const loginPacket = {
