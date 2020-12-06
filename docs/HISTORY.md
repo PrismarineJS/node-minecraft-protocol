@@ -1,5 +1,9 @@
 # History
 
+## 1.20.1
+
+* Temporarily revert token auth to fix a bug
+
 ## 1.20.0
 
 * Add token auth like the vanilla launcher (save the token) (thanks @ph0t0shop)
