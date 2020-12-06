@@ -1,5 +1,9 @@
 # History
 
+## 1.20.2
+
+* add back token auth now that mineflayer is fixed
+
 ## 1.20.1
 
 * Temporarily revert token auth to fix a bug
