@@ -4,7 +4,12 @@ const fs = require('fs').promises
 const mcDefaultFolderPath = require('minecraft-folder-path')
 const path = require('path')
 
-module.exports = async function (client, options) {
+module.exports = function (client, options) {
+  client.username = ''
+  auth(client, options)
+}
+
+async function auth (client, options) {
   if (!options.profilesFolder && options.profilesFolder !== false) { // not defined, but not explicitly false. fallback to default
     let mcFolderExists = true
     try {
