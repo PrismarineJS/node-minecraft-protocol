@@ -5,7 +5,7 @@ const mcDefaultFolderPath = require('minecraft-folder-path')
 const path = require('path')
 
 module.exports = function (client, options) {
-  client.username = ''
+  client.username = options.username
   auth(client, options)
 }
 
