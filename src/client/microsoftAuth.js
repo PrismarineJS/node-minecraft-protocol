@@ -1,8 +1,6 @@
 const XboxLiveAuth = require('@xboxreplay/xboxlive-auth')
 const fetch = require('node-fetch')
 
-const version = require('minecraft-protocol/package').version
-
 const XSTSRelyingParty = 'rp://api.minecraftservices.com/'
 const MinecraftServicesLogWithXbox = 'https://api.minecraftservices.com/authentication/login_with_xbox'
 const MinecraftServicesEntitlement = 'https://api.minecraftservices.com/entitlements/mcstore'
@@ -11,7 +9,7 @@ const MinecraftServicesProfile = 'https://api.minecraftservices.com/minecraft/pr
 const getFetchOptions = {
   headers: {
     'Content-Type': 'application/json',
-    'User-Agent': `node-minecraft-protocol/${version}`
+    'User-Agent': `node-minecraft-protocol`
   }
 }
 
