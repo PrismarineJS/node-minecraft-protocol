@@ -77,7 +77,8 @@ Returns a `Client` instance and perform login.
  * password : can be omitted (if the tokens and profilesFolder are also omitted then it tries to connect in offline mode)
  * host : default to localhost
  * clientToken : generated if a password is given
- * accessToken : generated if a password is given
+ * accessToken : generated if a password or microsoft account is given
+ * auth : the type of auth server to use, either 'microsoft' or 'mojang'. default to 'mojang'
  * authServer : auth server, default to https://authserver.mojang.com
  * sessionServer : session server, default to https://sessionserver.mojang.com
  * keepAlive : send keep alive packets : default to true
