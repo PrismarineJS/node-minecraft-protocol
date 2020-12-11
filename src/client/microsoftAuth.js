@@ -34,6 +34,8 @@ module.exports = async (client, options) => {
     body: JSON.stringify({ identityToken: `XBL3.0 x=${XAuthResponse.userHash};${XAuthResponse.XSTSToken}` })
   }).then(checkStatus)
 
+  options.haveCredentials = MineServicesResponse.access_token != null;
+
   getFetchOptions.headers.Authorization = `Bearer ${MineServicesResponse.access_token}`
   const MineEntitlements = await fetch(MinecraftServicesEntitlement, getFetchOptions).then(checkStatus)
   if (MineEntitlements.items.length === 0) throw Error('This user does not have any items on its accounts according to minecraft services.')
