@@ -65,6 +65,7 @@ var client = mc.createClient({
   port: 25565,         // optional
   username: "email@example.com",
   password: "12345678",
+  auth: 'mojang' // optional; by default uses mojang, if using a microsoft account, set to 'microsoft'
 });
 client.on('chat', function(packet) {
   // Listen for chat messages and echo them back.
