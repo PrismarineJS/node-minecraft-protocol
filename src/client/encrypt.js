@@ -18,7 +18,7 @@ module.exports = function (client, options) {
         client.end()
         return
       }
-      if (options.haveCredentials) {
+      if ((options.auth === 'microsoft' && !options.haveCredentials) || options.haveCredentials) {
         joinServerRequest(onJoinServerResponse)
       } else {
         if (packet.serverId !== '-') {
