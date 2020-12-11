@@ -16,13 +16,14 @@ const getFetchOptions = {
 };
 
 /**
- * Authenticates with XBOX LIVE.
+ * Authenticates with Xbox Live, then Authenticates with Minecraft, Checks Entitlements and Gets Profile.
  * @function
- * @param {object} client - The protocol client
+ * @param {object} client - The client passed to protocol
  * @param {object} options - Client Options
  */
 
 module.exports = async (client, options) => {
+    // Use external library to authenticate with 
     const XAuthResponse = await XboxLiveAuth.authenticate(options.username, options.password, { XSTSRelyingParty })
         .catch((err) => {
             if (err.details) throw new Error(`Unable to authenticate with Xbox Live: ${JSON.stringify(err.details)}`);
@@ -42,6 +43,9 @@ module.exports = async (client, options) => {
     const MinecraftProfile = await fetch(MinecraftServicesProfile, getFetchOptions).then(checkStatus);
     if (!MinecraftProfile.id) throw Error('This user does not own minecraft according to minecraft services.');
 
+    // This profile / session here could be simplified down to where it just passes the uuid of the player to encrypt.js
+    // That way you could remove some lines of code. It accesses client.session.selectedProfile.id so /shrug.
+    // - Kashalls
     const profile = {
         name: MinecraftProfile.name,
         id: MinecraftProfile.id
