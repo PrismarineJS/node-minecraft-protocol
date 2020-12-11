@@ -9,7 +9,7 @@ const MinecraftServicesProfile = 'https://api.minecraftservices.com/minecraft/pr
 const getFetchOptions = {
   headers: {
     'Content-Type': 'application/json',
-    'User-Agent': `node-minecraft-protocol`
+    'User-Agent': 'node-minecraft-protocol'
   }
 }
 
