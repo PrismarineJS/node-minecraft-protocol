@@ -1,5 +1,9 @@
 # History
 
+## 1.21.0
+
+* Integrate Authentication for Microsoft Accounts (thanks @Kashalls)
+
 ## 1.20.2
 
 * add back token auth now that mineflayer is fixed
