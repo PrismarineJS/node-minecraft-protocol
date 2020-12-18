@@ -97,7 +97,7 @@ srv.on('login', function (client) {
     username: client.username,
     keepAlive: false,
     version: version,
-	profilesFolder: false
+    profilesFolder: false
   })
   client.on('packet', function (data, meta) {
     if (targetClient.state === states.PLAY && meta.state === states.PLAY) {
