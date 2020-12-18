@@ -19,7 +19,7 @@ module.exports = async function (client, options) {
   const clientToken = options.clientToken || (options.session && options.session.clientToken) || (options.profilesFolder && (await getLauncherProfiles()).clientToken) || UUID.v4().toString().replace(/-/g, '')
   const skipValidation = false || options.skipValidation
   options.accessToken = null
-  options.haveCredentials = options.password != null || (clientToken != null && options.session != null) || (options.profilesFolder && await hasProfileCredentials())
+  options.haveCredentials = !!options.password || (clientToken != null && options.session != null) || (options.profilesFolder && await hasProfileCredentials())
 
   async function getLauncherProfiles () { // get launcher profiles
     try {
