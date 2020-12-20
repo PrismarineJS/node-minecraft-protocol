@@ -18,7 +18,7 @@ module.exports = function (client, options) {
   client.registerChannel('UNREGISTER', ['registerarr', []])
 
   if (options.protocolVersion >= 385) { // 1.13-pre3 (385) added Added Login Plugin Message (https://wiki.vg/Protocol_History#1.13-pre3)
-    client.once('login_plugin_request', onLoginPluginRequest)
+    client.on('login_plugin_request', onLoginPluginRequest)
   }
 
   function registerChannel (name, parser, custom) {
