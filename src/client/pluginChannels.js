@@ -17,6 +17,10 @@ module.exports = function (client, options) {
   client.registerChannel('REGISTER', ['registerarr', []])
   client.registerChannel('UNREGISTER', ['registerarr', []])
 
+  if (options.protocolVersion >= 385) { // 1.13-pre3 (385) added Added Login Plugin Message (https://wiki.vg/Protocol_History#1.13-pre3)
+    client.on('login_plugin_request', onLoginPluginRequest)
+  }
+
   function registerChannel (name, parser, custom) {
     if (custom) {
       client.writeChannel('REGISTER', name)
@@ -49,6 +53,12 @@ module.exports = function (client, options) {
       debug('read custom payload ' + channel + ' ' + packet.data)
       client.emit(channel, packet.data)
     }
+  }
+
+  function onLoginPluginRequest (packet) {
+    client.write('login_plugin_response', { // write that login plugin request is not understood, just like the Notchian client
+      messageId: packet.messageId
+    })
   }
 
   function writeChannel (channel, params) {
