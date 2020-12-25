@@ -2,7 +2,7 @@
 
 const ProtoDef = require('protodef').ProtoDef
 const Serializer = require('protodef').Serializer
-const Parser = require('protodef').FullPacketParser
+const Parser = require('protodef').LazyPacketParser
 const { ProtoDefCompiler } = require('protodef').Compiler
 
 const minecraft = require('../datatypes/minecraft')
@@ -38,7 +38,7 @@ function createSerializer ({ state = states.HANDSHAKING, isServer = false, versi
 }
 
 function createDeserializer ({ state = states.HANDSHAKING, isServer = false, version, customPackets, compiled = true, noErrorLogging = false } = {}) {
-  return new Parser(createProtocol(state, isServer ? 'toServer' : 'toClient', version, customPackets, compiled), 'packet', noErrorLogging)
+  return new Parser(createProtocol(state, isServer ? 'toServer' : 'toClient', version, customPackets, compiled), 'packet', 'packet_shallow', noErrorLogging)
 }
 
 module.exports = {
