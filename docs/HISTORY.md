@@ -1,5 +1,11 @@
 # History
 
+## 1.22.0
+
+* Don't stringify every packet if debug not enabled (@evan-goode)
+* Add handler for Login Plugin Message (@ph0t0shop)
+* Password=false now using offline mode (@dada513)
+
 ## 1.21.0
 
 * Integrate Authentication for Microsoft Accounts (thanks @Kashalls)
