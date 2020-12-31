@@ -49,6 +49,7 @@ declare module 'minecraft-protocol' {
 		stream?: Stream
 		connect?: (client: Client) => void
 		agent?: Agent
+		auth?: 'mojang' | 'microsoft'
 	}
 
 	export class Server extends EventEmitter {
