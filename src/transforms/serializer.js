@@ -12,10 +12,29 @@ const get = require('lodash.get')
 
 const protocols = {}
 
+const SHALLOW_PACKET_TYPE = 'packet_shallow'
+
 function createProtocol (state, direction, version, customPackets, compiled = true) {
   const key = state + ';' + direction + ';' + version + (compiled ? ';c' : '')
   if (protocols[key]) { return protocols[key] }
   const mcData = require('minecraft-data')(version)
+
+  if (direction === 'toClient') {
+    const nameField = mcData.protocol.play.toClient.types.packet[1].find((field) => field.name === 'name')
+    mcData.protocol.play.toClient.types[SHALLOW_PACKET_TYPE] = [
+      'container',
+      [
+        nameField,
+        {
+          name: 'params',
+          type: [
+            'container',
+            []
+          ]
+        }
+      ]
+    ]
+  }
 
   if (compiled) {
     const compiler = new ProtoDefCompiler()
@@ -38,7 +57,7 @@ function createSerializer ({ state = states.HANDSHAKING, isServer = false, versi
 }
 
 function createDeserializer ({ state = states.HANDSHAKING, isServer = false, version, customPackets, compiled = true, noErrorLogging = false } = {}) {
-  return new Parser(createProtocol(state, isServer ? 'toServer' : 'toClient', version, customPackets, compiled), 'packet', 'packet_shallow', noErrorLogging)
+  return new Parser(createProtocol(state, isServer ? 'toServer' : 'toClient', version, customPackets, compiled), 'packet', SHALLOW_PACKET_TYPE, noErrorLogging)
 }
 
 module.exports = {
