@@ -14,6 +14,7 @@ const tcpDns = require('./client/tcp_dns')
 const autoVersion = require('./client/autoVersion')
 const pluginChannels = require('./client/pluginChannels')
 const versionChecking = require('./client/versionChecking')
+const mcleaksAuth = require('./client/mcleaksAuth')
 
 module.exports = createClient
 
@@ -34,8 +35,17 @@ function createClient (options) {
   const client = new Client(false, version.minecraftVersion, options.customPackets, hideErrors)
 
   tcpDns(client, options)
-  if (options.auth === 'microsoft') microsoftAuth(client, options)
-  else auth(client, options)
+  switch(options.auth) {
+	  case 'microsoft':
+		  microsoftAuth(client, options)
+		  break
+	  case 'mcleaks':
+		  mcleaksAuth(client, options)
+		  break
+	  default:
+		  auth(client, options)
+
+  }
   if (options.version === false) autoVersion(client, options)
   setProtocol(client, options)
   keepalive(client, options)

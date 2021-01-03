@@ -3,6 +3,7 @@
 const crypto = require('crypto')
 const debug = require('debug')('minecraft-protocol')
 const yggdrasil = require('yggdrasil')
+const mcleaks = require('node-mcleaks')
 
 module.exports = function (client, options) {
   const yggdrasilServer = yggdrasil.server({ agent: options.agent, host: options.sessionServer || 'https://sessionserver.mojang.com' })
@@ -19,7 +20,7 @@ module.exports = function (client, options) {
         return
       }
       if (options.haveCredentials) {
-        joinServerRequest(onJoinServerResponse)
+        joinServerRequest(options, onJoinServerResponse)
       } else {
         if (packet.serverId !== '-') {
           debug('This server appears to be an online server and you are providing no password, the authentication will probably fail')
@@ -36,7 +37,8 @@ module.exports = function (client, options) {
         }
       }
 
-      function joinServerRequest (cb) {
+      function joinServerRequest (options, cb) {
+	if(options.auth = 'mcleaks') mcleaks.join({session: client.mcleaksSession, server: `${options.host}:${options.port}`, serverid: packet.serverId, sharedsecret: sharedSecret, serverKey: packet.publicKey}, cb)
         yggdrasilServer.join(options.accessToken, client.session.selectedProfile.id,
           packet.serverId, sharedSecret, packet.publicKey, cb)
       }

@@ -53,6 +53,7 @@
     "minecraft-data": "^2.70.0",
     "minecraft-folder-path": "^1.1.0",
     "node-fetch": "^2.6.1",
+    "node-mcleaks": "git+https://github.com/funniray/node-mcleaks.git",
     "node-rsa": "^0.4.2",
     "prismarine-nbt": "^1.3.0",
     "protodef": "^1.8.0",
