@@ -35,16 +35,15 @@ function createClient (options) {
   const client = new Client(false, version.minecraftVersion, options.customPackets, hideErrors)
 
   tcpDns(client, options)
-  switch(options.auth) {
-	  case 'microsoft':
-		  microsoftAuth(client, options)
-		  break
-	  case 'mcleaks':
-		  mcleaksAuth(client, options)
-		  break
-	  default:
-		  auth(client, options)
-
+  switch (options.auth) { 
+    case 'microsoft':
+      microsoftAuth(client, options)
+      break
+    case 'mcleaks':
+      mcleaksAuth(client, options)
+      break
+    default:
+      auth(client, options)
   }
   if (options.version === false) autoVersion(client, options)
   setProtocol(client, options)
