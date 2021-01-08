@@ -45,6 +45,7 @@
   "dependencies": {
     "@xboxreplay/xboxlive-auth": "^3.3.0",
     "aes-js": "^3.1.2",
+    "axios": "^0.21.1",
     "buffer-equal": "^1.0.0",
     "debug": "^4.1.0",
     "endian-toggle": "^0.0.0",
