@@ -21,8 +21,8 @@ const msalConfig = {
   auth: {
     // the minecraft client:
     // clientId: "000000004C12AE6F",
-    // clientId: '389b1b32-b5d5-43b2-bddc-84ce938d6737', // token from https://github.com/microsoft/Office365APIEditor
-    clientId: '60bad957-e36a-472d-a72a-612ad7f66b46', // @extremeheat
+    clientId: '389b1b32-b5d5-43b2-bddc-84ce938d6737', // token from https://github.com/microsoft/Office365APIEditor
+    // clientId: '60bad957-e36a-472d-a72a-612ad7f66b46', // @extremeheat
     // clientId: '1fec8e78-bce4-4aaf-ab1b-5451cc387264', // MS Teams
     authority: 'https://login.microsoftonline.com/consumers'
 

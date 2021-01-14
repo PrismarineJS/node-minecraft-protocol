@@ -133,7 +133,7 @@ class MsaTokenManager {
     return new Promise((resolve, reject) => {
       this.msalApp.acquireTokenByDeviceCode(deviceCodeRequest).then((response) => {
         debug('[msa] device_code resp', JSON.stringify(response))
-        if (!this.msaCache.Account) this.msaCache.Account = { '': response.account } 
+        if (!this.msaCache.Account) this.msaCache.Account = { '': response.account }
         resolve(response)
       }).catch((error) => {
         console.warn('[msa] Error getting device_code')
