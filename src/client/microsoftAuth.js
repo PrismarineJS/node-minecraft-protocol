@@ -58,7 +58,7 @@ async function postAuthenticate (client, options, mcAccessToken) {
     } else {
       const user = msa.getUsers()[0]
       // debug(user)
-      console.error(`Failed to obtain Minecraft profile data for '${user.username}', does the account own Minecraft Java?`)
+      console.error(`Failed to obtain Minecraft profile data for '${user?.username}', does the account own Minecraft Java?`)
       throw Error(res.statusText)
     }
   })
