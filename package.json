@@ -44,7 +44,7 @@
   },
   "dependencies": {
     "@azure/msal-node": "^1.0.0-beta.3",
-    "@xboxreplay/xboxlive-auth": "^3.3.0",
+    "@xboxreplay/xboxlive-auth": "^3.3.3",
     "aes-js": "^3.1.2",
     "buffer-equal": "^1.0.0",
     "debug": "^4.1.0",
