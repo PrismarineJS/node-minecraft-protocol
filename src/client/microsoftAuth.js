@@ -2,6 +2,7 @@ const XboxLiveAuth = require('@xboxreplay/xboxlive-auth')
 const msal = require('@azure/msal-node')
 const fetch = require('node-fetch')
 const authConstants = require('./authConstants')
+const crypto = require('crypto')
 const { MsaTokenManager, XboxTokenManager, MinecraftTokenManager } = require('./tokens')
 
 const getFetchOptions = {
@@ -41,11 +42,7 @@ const msalConfig = {
   }
 }
 
-const scopes = ['XboxLive.signin', 'offline_access']
-const msa = new MsaTokenManager({ msalConfig, scopes })
-const relayParty = 'rp://api.minecraftservices.com/'
-const xbl = new XboxTokenManager({ relayParty })
-const mca = new MinecraftTokenManager()
+let msa, xbl, mca
 
 function debug (...message) {
   console.debug(message[0])
@@ -140,7 +137,7 @@ async function getXboxToken () {
     const msaToken = await getMsaToken()
     const ut = await xbl.getUserToken(msaToken)
     const xsts = await xbl.getXSTSToken(ut)
-    return xsts.data
+    return xsts
   }
 }
 
@@ -149,13 +146,35 @@ async function getMinecraftToken () {
     return mca.getCachedAccessToken().token
   } else {
     const xsts = await getXboxToken()
+    debug('xsts data', xsts)
     return mca.getAccessToken(xsts)
   }
 }
 
+function sha1 (data) {
+  return crypto.createHash('sha1').update(data || '', 'binary').digest('hex')
+}
+
+async function initTokenCaches (username) {
+  const hash = sha1(username).substr(0, 6)
+
+  const cachePaths = {
+    msa: `./${hash}_msa-cache.json`,
+    xbl: `./${hash}_xbl-cache.json`,
+    mca: `./${hash}_mca-cache.json`
+  }
+
+  const scopes = ['XboxLive.signin', 'offline_access']
+  msa = new MsaTokenManager(msalConfig, scopes, cachePaths.msa)
+  xbl = new XboxTokenManager(authConstants.XSTSRelyingParty, cachePaths.xbl)
+  mca = new MinecraftTokenManager(cachePaths.mca)
+}
+
 async function authenticateDeviceToken (client, options) {
+  initTokenCaches(options.username)
+
   const token = await getMinecraftToken()
-  console.debug('Aquired Minecraft token', token)
+  console.debug('Acquired Minecraft token', token)
 
   getFetchOptions.headers.Authorization = `Bearer ${token}`
   postAuthenticate(client, options, token)

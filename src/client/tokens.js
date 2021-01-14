@@ -10,7 +10,7 @@ function debug (...message) {
 
 // Manages Microsoft account tokens
 class MsaTokenManager {
-  constructor ({ msalConfig, scopes, cacheLocation }) {
+  constructor (msalConfig, scopes, cacheLocation) {
     this.msaClientId = msalConfig.auth.clientId
     this.scopes = scopes
     this.cacheLocation = cacheLocation || path.join(__dirname, './msa-cache.json')
@@ -133,8 +133,8 @@ class MsaTokenManager {
         debug('[msa] device_code resp', JSON.stringify(response))
         resolve(response)
       }).catch((error) => {
-        console.warn('ERROR!', error)
-        console.log('ERROR!', JSON.stringify(error))
+        console.warn('[msa] Error getting device_code')
+        console.debug(JSON.stringify(error))
         reject(error)
       })
     })
@@ -143,7 +143,7 @@ class MsaTokenManager {
 
 // Manages Xbox Live tokens for xboxlive.com
 class XboxTokenManager {
-  constructor ({ relayParty, cacheLocation }) {
+  constructor (relayParty, cacheLocation) {
     this.relayParty = relayParty
     this.cacheLocation = cacheLocation || path.join(__dirname, './xbl-cache.json')
     try {
@@ -224,7 +224,7 @@ class XboxTokenManager {
 
 // Manages Minecraft tokens for sessionserver.mojang.com
 class MinecraftTokenManager {
-  constructor ({ cacheLocation } = {}) {
+  constructor (cacheLocation) {
     this.cacheLocation = cacheLocation || path.join(__dirname, './mca-cache.json')
     try {
       this.cache = require(this.cacheLocation)
