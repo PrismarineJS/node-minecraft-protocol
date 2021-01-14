@@ -54,52 +54,9 @@ let relayParty = 'rp://api.minecraftservices.com/'
 let xbl = new XboxTokenManager({ relayParty })
 let mca = new MinecraftTokenManager()
 
-// async function authenticateMsa() {
-//   if (await msa.verifyTokens()) { // We have valid tokens
-//     console.debug('[msa] re-using existing tokens')
-//     return msa.getAccessToken()
-//   }
-
-//   let ret = await msa.authDeviceToken((response) => {
-//     console.info('[msa] First time signing in. Please authenticate now:')
-//     console.info(response.message)
-//     // console.log('Data', data)
-//   })
-
-//   console.info(`[msa] Signed in as ${ret.account.username}`)
-
-//   console.log(ret)
-//   return ret.accessToken
-// }
-
 function debug(...message) {
   console.debug(message[0])
 }
-
-// async function authenticateXbl(msaAccessToken) {
-//   debug('[xbl] obtaining xbox token with ms token', msaAccessToken)
-
-//   if (await xbl.verifyTokens()) {
-//     debug('[xbl] re-using existing xbox tokens')
-//     return xbl.getCachedXstsToken().data
-//   }
-
-//   let ut = await xbl.getUserToken(msaAccessToken)
-//   let xt = await xbl.getXSTSToken(ut)
-
-//   console.log(xt)
-//   return xt
-// }
-
-// async function authenticateMinecraft(xsts) {
-//   if (await mca.verifyTokens()) {
-//     debug('[msa] re-using existing xbox tokens')
-//     return mca.getCachedAccessToken().token
-//   }
-//   let mctoken = await mca.getAccessToken(xsts)
-//   debug('Minecraft token: ', mctoken)
-//   return mctoken
-// }
 
 async function postAuthenticate(client, options, mcAccessToken) {
   options.haveCredentials = mcAccessToken != null
@@ -221,13 +178,6 @@ module.exports = {
   authenticatePassword,
   authenticateDeviceToken
 }
-
-// async function msaTest() {
-//   let msaToken = await authenticateMsa()
-//   let xblToken = await authenticateXbl(msaToken.token)
-//   let mcToken = await authenticateMinecraft(xblToken)
-//   // let tm = new TokenManager('389b1b32-b5d5-43b2-bddc-84ce938d6737')
-// }
 
 async function msaTest() {
   await authenticateDeviceToken({}, {})
