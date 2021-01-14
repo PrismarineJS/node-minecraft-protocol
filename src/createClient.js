@@ -34,11 +34,12 @@ function createClient (options) {
   const client = new Client(false, version.minecraftVersion, options.customPackets, hideErrors)
 
   tcpDns(client, options)
-  if (options.auth == 'microsoft') {
-    if (options.password)
+  if (options.auth === 'microsoft') {
+    if (options.password) { 
       microsoftAuth.authenticatePassword(client, options)
-    else 
+    } else { 
       microsoftAuth.authenticateDeviceToken(client, options)
+    }
   } else {
     auth(client, options)
   }
