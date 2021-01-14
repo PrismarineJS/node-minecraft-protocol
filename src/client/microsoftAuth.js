@@ -1,6 +1,7 @@
 const XboxLiveAuth = require('@xboxreplay/xboxlive-auth')
 const msal = require('@azure/msal-node')
 const fetch = require('node-fetch')
+const authConstants = require('./authConstants')
 const { MsaTokenManager, XboxTokenManager, MinecraftTokenManager } = require('./tokens')
 
 const getFetchOptions = {
@@ -9,11 +10,6 @@ const getFetchOptions = {
     'User-Agent': 'node-minecraft-protocol'
   }
 }
-
-const XSTSRelyingParty = 'rp://api.minecraftservices.com/'
-const MinecraftServicesLogWithXbox = 'https://api.minecraftservices.com/authentication/login_with_xbox'
-const MinecraftServicesEntitlement = 'https://api.minecraftservices.com/entitlements/mcstore'
-const MinecraftServicesProfile = 'https://api.minecraftservices.com/minecraft/profile'
 
 // Initialize msal
 
@@ -26,48 +22,45 @@ const msalConfig = {
     // clientId: '389b1b32-b5d5-43b2-bddc-84ce938d6737', // token from https://github.com/microsoft/Office365APIEditor
     clientId: '60bad957-e36a-472d-a72a-612ad7f66b46', // @extremeheat
     // clientId: '1fec8e78-bce4-4aaf-ab1b-5451cc387264', // MS Teams
-    authority: "https://login.microsoftonline.com/consumers"
+    authority: 'https://login.microsoftonline.com/consumers'
+
     // test out using live.com:
     // validateAuthority: false,
     // knownAuthorities: ["login.live.com"],
     // protocolMode: 'OIDC',
-
     // authority: 'https://login.live.com'
   },
-  // cache: {
-  //   cachePlugin // your implementation of cache plugin
-  // },
   system: {
     loggerOptions: {
-      loggerCallback(loglevel, message, containsPii) {
-        // console.log('[msal] ', this.logLevel, message);
+      loggerCallback (loglevel, message, containsPii) {
+        // console.debug('[msal] ', this.logLevel, message)
       },
       piiLoggingEnabled: false,
-      logLevel: msal.LogLevel.Verbose,
+      logLevel: msal.LogLevel.Verbose
     }
   }
 }
 
-let scopes = ['XboxLive.signin', 'offline_access']
-let msa = new MsaTokenManager({ msalConfig, scopes })
-let relayParty = 'rp://api.minecraftservices.com/'
-let xbl = new XboxTokenManager({ relayParty })
-let mca = new MinecraftTokenManager()
+const scopes = ['XboxLive.signin', 'offline_access']
+const msa = new MsaTokenManager({ msalConfig, scopes })
+const relayParty = 'rp://api.minecraftservices.com/'
+const xbl = new XboxTokenManager({ relayParty })
+const mca = new MinecraftTokenManager()
 
-function debug(...message) {
+function debug (...message) {
   console.debug(message[0])
 }
 
-async function postAuthenticate(client, options, mcAccessToken) {
+async function postAuthenticate (client, options, mcAccessToken) {
   options.haveCredentials = mcAccessToken != null
 
-  const MinecraftProfile = await fetch(MinecraftServicesProfile, getFetchOptions).then((res) => {
+  const MinecraftProfile = await fetch(authConstants.MinecraftServicesProfile, getFetchOptions).then((res) => {
     if (res.ok) { // res.status >= 200 && res.status < 300
       return res.json()
     } else {
-      let user = msa.getUsers()[0]
-      debug(user)
-      console.error(`Failed to obtain Minecraft profile data for '${ user.username }', does the account own Minecraft Java?`)
+      const user = msa.getUsers()[0]
+      // debug(user)
+      console.error(`Failed to obtain Minecraft profile data for '${user.username}', does the account own Minecraft Java?`)
       throw Error(res.statusText)
     }
   })
@@ -88,7 +81,7 @@ async function postAuthenticate(client, options, mcAccessToken) {
   }
   client.session = session
   client.username = MinecraftProfile.name
-  options.accessToken = MineServicesResponse.access_token
+  options.accessToken = authConstants.MineServicesResponse.access_token
   client.emit('session', session)
   options.connect(client)
 }
@@ -96,77 +89,79 @@ async function postAuthenticate(client, options, mcAccessToken) {
 /**
  * Authenticates with Mincrosoft through user credentials, then
  * with Xbox Live, Minecraft, checks entitlements and returns profile
- * 
+ *
  * @function
  * @param {object} client - The client passed to protocol
  * @param {object} options - Client Options
  */
-async function authenticatePassword(client, options) {
+async function authenticatePassword (client, options) {
   // Use external library to authenticate with
-  const XAuthResponse = await XboxLiveAuth.authenticate(options.username, options.password, { XSTSRelyingParty })
+
+  const XAuthResponse = await XboxLiveAuth.authenticate(options.username, options.password, { XSTSRelyingParty: authConstants.XSTSRelyingParty })
     .catch((err) => {
-      if (err.details) throw new Error(`Unable to authenticate with Xbox Live: ${JSON.stringify(err.details)}`)
-      else throw Error(err)
+      console.warn('Unable to authenticate with Microsoft', err)
+      throw err
     })
 
-  const MineServicesResponse = await fetch(MinecraftServicesLogWithXbox, {
+  const MineServicesResponse = await fetch(authConstants.MinecraftServicesLogWithXbox, {
     method: 'post',
     ...getFetchOptions,
     body: JSON.stringify({ identityToken: `XBL3.0 x=${XAuthResponse.userHash};${XAuthResponse.XSTSToken}` })
   }).then(checkStatus)
 
   getFetchOptions.headers.Authorization = `Bearer ${MineServicesResponse.access_token}`
-  const MineEntitlements = await fetch(MinecraftServicesEntitlement, getFetchOptions).then(checkStatus)
+  const MineEntitlements = await fetch(authConstants.MinecraftServicesEntitlement, getFetchOptions).then(checkStatus)
   if (MineEntitlements.items.length === 0) throw Error('This user does not have any items on its accounts according to minecraft services.')
 
   postAuthenticate(client, options, MineServicesResponse.access_token)
 }
 
-async function getMsaToken() {
+async function getMsaToken () {
   if (await msa.verifyTokens()) {
     return msa.getAccessToken().token
   } else {
-    let ret = await msa.authDeviceToken((response) => {
+    const ret = await msa.authDeviceToken((response) => {
       console.info('[msa] First time signing in. Please authenticate now:')
       console.info(response.message)
       // console.log('Data', data)
     })
-  
+
     console.info(`[msa] Signed in as ${ret.account.username}`)
-  
+
     debug(ret)
     return ret.accessToken
   }
 }
 
-async function getXboxToken() {
+async function getXboxToken () {
   if (await xbl.verifyTokens()) {
     return xbl.getCachedXstsToken().data
   } else {
-    let msaToken = await getMsaToken()
-    let ut = await xbl.getUserToken(msaToken)
-    let xsts = await xbl.getXSTSToken(ut)
+    const msaToken = await getMsaToken()
+    const ut = await xbl.getUserToken(msaToken)
+    const xsts = await xbl.getXSTSToken(ut)
     return xsts.data
   }
 }
 
-async function getMinecraftToken() {
+async function getMinecraftToken () {
   if (await mca.verifyTokens()) {
     return mca.getCachedAccessToken().token
   } else {
-    let xsts = await getXboxToken()
+    const xsts = await getXboxToken()
     return mca.getAccessToken(xsts)
   }
 }
 
-async function authenticateDeviceToken(client, options) {
-  let token = await getMinecraftToken()
+async function authenticateDeviceToken (client, options) {
+  const token = await getMinecraftToken()
   console.debug('Aquired Minecraft token', token)
 
+  getFetchOptions.headers.Authorization = `Bearer ${token}`
   postAuthenticate(client, options, token)
 }
 
-function checkStatus(res) {
+function checkStatus (res) {
   if (res.ok) { // res.status >= 200 && res.status < 300
     return res.json()
   } else {
@@ -179,7 +174,7 @@ module.exports = {
   authenticateDeviceToken
 }
 
-async function msaTest() {
+async function msaTest () {
   await authenticateDeviceToken({}, {})
 }
 
