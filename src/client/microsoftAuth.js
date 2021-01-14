@@ -79,7 +79,7 @@ async function postAuthenticate (client, options, mcAccessToken) {
   }
   client.session = session
   client.username = MinecraftProfile.name
-  options.accessToken = MineServicesResponse.access_token
+  options.accessToken = mcAccessToken
   client.emit('session', session)
   options.connect(client)
 }
