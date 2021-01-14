@@ -35,9 +35,9 @@ function createClient (options) {
 
   tcpDns(client, options)
   if (options.auth === 'microsoft') {
-    if (options.password) { 
+    if (options.password) {
       microsoftAuth.authenticatePassword(client, options)
-    } else { 
+    } else {
       microsoftAuth.authenticateDeviceToken(client, options)
     }
   } else {

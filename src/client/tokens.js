@@ -3,6 +3,7 @@ const fs = require('fs')
 const path = require('path')
 const XboxLiveAuth = require('@xboxreplay/xboxlive-auth')
 const fetch = require('node-fetch')
+const authConstants = require('./authConstants')
 
 function debug (...message) {
   console.debug(message[0])
@@ -264,14 +265,13 @@ class MinecraftTokenManager {
 
   async getAccessToken (xsts) {
     debug('[mc] authing to minecraft', xsts)
-    const MinecraftServicesLogWithXbox = 'https://api.minecraftservices.com/authentication/login_with_xbox'
     const getFetchOptions = {
       headers: {
         'Content-Type': 'application/json',
         'User-Agent': 'node-minecraft-protocol'
       }
     }
-    const MineServicesResponse = await fetch(MinecraftServicesLogWithXbox, {
+    const MineServicesResponse = await fetch(authConstants.MinecraftServicesLogWithXbox, {
       method: 'post',
       ...getFetchOptions,
       body: JSON.stringify({ identityToken: `XBL3.0 x=${xsts.userHash};${xsts.XSTSToken}` })
