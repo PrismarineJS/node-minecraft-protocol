@@ -34,8 +34,14 @@ function createClient (options) {
   const client = new Client(false, version.minecraftVersion, options.customPackets, hideErrors)
 
   tcpDns(client, options)
-  if (options.auth === 'microsoft') microsoftAuth(client, options)
-  else auth(client, options)
+  if (options.auth == 'microsoft') {
+    if (options.password)
+      microsoftAuth.authenticatePassword(client, options)
+    else 
+      microsoftAuth.authenticateDeviceToken(client, options)
+  } else {
+    auth(client, options)
+  }
   if (options.version === false) autoVersion(client, options)
   setProtocol(client, options)
   keepalive(client, options)
