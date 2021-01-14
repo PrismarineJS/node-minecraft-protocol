@@ -3,6 +3,7 @@ const msal = require('@azure/msal-node')
 const fetch = require('node-fetch')
 const authConstants = require('./authConstants')
 const crypto = require('crypto')
+const path = require('path')
 const { MsaTokenManager, XboxTokenManager, MinecraftTokenManager } = require('./tokens')
 
 const getFetchOptions = {
@@ -78,7 +79,7 @@ async function postAuthenticate (client, options, mcAccessToken) {
   }
   client.session = session
   client.username = MinecraftProfile.name
-  options.accessToken = authConstants.MineServicesResponse.access_token
+  options.accessToken = MineServicesResponse.access_token
   client.emit('session', session)
   options.connect(client)
 }
@@ -159,9 +160,9 @@ async function initTokenCaches (username) {
   const hash = sha1(username).substr(0, 6)
 
   const cachePaths = {
-    msa: `./${hash}_msa-cache.json`,
-    xbl: `./${hash}_xbl-cache.json`,
-    mca: `./${hash}_mca-cache.json`
+    msa: path.join(__dirname, `./${hash}_msa-cache.json`),
+    xbl: path.join(__dirname, `./${hash}_xbl-cache.json`),
+    mca: path.join(__dirname, `./${hash}_mca-cache.json`)
   }
 
   const scopes = ['XboxLive.signin', 'offline_access']

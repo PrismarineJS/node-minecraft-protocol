@@ -16,6 +16,13 @@ class MsaTokenManager {
     this.scopes = scopes
     this.cacheLocation = cacheLocation || path.join(__dirname, './msa-cache.json')
 
+    try {
+      this.msaCache = require(this.cacheLocation)
+    } catch (e) {
+      this.msaCache = {}
+      fs.writeFileSync(this.cacheLocation, JSON.stringify(this.msaCache))
+    }
+
     const beforeCacheAccess = async (cacheContext) => {
       cacheContext.tokenCache.deserialize(await fs.promises.readFile(this.cacheLocation, 'utf-8'))
     }
@@ -36,18 +43,12 @@ class MsaTokenManager {
     }
     this.msalApp = new msal.PublicClientApplication(msalConfig)
     this.msalConfig = msalConfig
-
-    try {
-      this.msaCache = require(this.cacheLocation)
-    } catch (e) {
-      this.msaCache = {}
-      fs.writeFileSync(this.cacheLocation, JSON.stringify(this.msaCache))
-    }
   }
 
   getUsers () {
     const accounts = this.msaCache.Account
     const users = []
+    if (!accounts) return users
     for (const account of Object.values(accounts)) {
       users.push(account)
     }
