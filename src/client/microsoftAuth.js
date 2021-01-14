@@ -1,9 +1,12 @@
-const XboxLiveAuth = require('@xboxreplay/xboxlive-auth')
 const msal = require('@azure/msal-node')
+const XboxLiveAuth = require('@xboxreplay/xboxlive-auth')
 const fetch = require('node-fetch')
-const authConstants = require('./authConstants')
 const crypto = require('crypto')
 const path = require('path')
+const fs = require('fs')
+const mcDefaultFolderPath = require('minecraft-folder-path')
+
+const authConstants = require('./authConstants')
 const { MsaTokenManager, XboxTokenManager, MinecraftTokenManager } = require('./tokens')
 
 const getFetchOptions = {
@@ -93,13 +96,18 @@ async function postAuthenticate (client, options, mcAccessToken) {
  * @param {object} options - Client Options
  */
 async function authenticatePassword (client, options) {
-  // Use external library to authenticate with
+  let XAuthResponse
 
-  const XAuthResponse = await XboxLiveAuth.authenticate(options.username, options.password, { XSTSRelyingParty: authConstants.XSTSRelyingParty })
-    .catch((err) => {
-      console.warn('Unable to authenticate with Microsoft', err)
-      throw err
-    })
+  try {
+    XAuthResponse = await XboxLiveAuth.authenticate(options.username, options.password, { XSTSRelyingParty: authConstants.XSTSRelyingParty })
+      .catch((err) => {
+        console.warn('Unable to authenticate with Microsoft', err)
+        throw err
+      })
+  } catch (e) {
+    console.info('Retrying auth with device code flow')
+    return await authenticateDeviceToken(client, options)
+  }
 
   const MineServicesResponse = await fetch(authConstants.MinecraftServicesLogWithXbox, {
     method: 'post',
@@ -126,7 +134,7 @@ async function getMsaToken () {
 
     console.info(`[msa] Signed in as ${ret.account.username}`)
 
-    debug(ret)
+    debug('[msa] got auth result', ret)
     return ret.accessToken
   }
 }
@@ -156,13 +164,23 @@ function sha1 (data) {
   return crypto.createHash('sha1').update(data || '', 'binary').digest('hex')
 }
 
-async function initTokenCaches (username) {
+async function initTokenCaches (username, cacheDir) {
   const hash = sha1(username).substr(0, 6)
 
+  let cachePath = cacheDir || mcDefaultFolderPath
+  try {
+    await fs.promises.access(cachePath)
+    fs.mkdirSync(cachePath + '/nmp-cache')
+    cachePath += '/nmp-cache'
+  } catch (e) {
+    console.log('Failed to open cache dir', e)
+    cachePath = __dirname
+  }
+
   const cachePaths = {
-    msa: path.join(__dirname, `./${hash}_msa-cache.json`),
-    xbl: path.join(__dirname, `./${hash}_xbl-cache.json`),
-    mca: path.join(__dirname, `./${hash}_mca-cache.json`)
+    msa: path.join(cachePath, `./${hash}_msa-cache.json`),
+    xbl: path.join(cachePath, `./${hash}_xbl-cache.json`),
+    mca: path.join(cachePath, `./${hash}_mca-cache.json`)
   }
 
   const scopes = ['XboxLive.signin', 'offline_access']
@@ -172,7 +190,7 @@ async function initTokenCaches (username) {
 }
 
 async function authenticateDeviceToken (client, options) {
-  initTokenCaches(options.username)
+  await initTokenCaches(options.username, options.cacheDir)
 
   const token = await getMinecraftToken()
   console.debug('Acquired Minecraft token', token)

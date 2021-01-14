@@ -1,7 +1,7 @@
 const msal = require('@azure/msal-node')
+const XboxLiveAuth = require('@xboxreplay/xboxlive-auth')
 const fs = require('fs')
 const path = require('path')
-const XboxLiveAuth = require('@xboxreplay/xboxlive-auth')
 const fetch = require('node-fetch')
 const authConstants = require('./authConstants')
 
@@ -63,10 +63,9 @@ class MsaTokenManager {
       debug('[msa] No valid access token found', tokens)
       return
     }
-    // console.log(account)
-    const until = (Date.now() - new Date(account.expires_on * 1000))
-    const valid = until < 1000
-    return { valid, until: until * -1, token: account.secret }
+    const until = new Date(account.expires_on * 1000) - Date.now()
+    const valid = until > 1000
+    return { valid, until: until, token: account.secret }
   }
 
   getRefreshToken () {
@@ -136,7 +135,7 @@ class MsaTokenManager {
         if (!this.msaCache.Account) this.msaCache.Account = { '': response.account }
         resolve(response)
       }).catch((error) => {
-        console.warn('[msa] Error getting device_code')
+        console.warn('[msa] Error getting device code')
         console.debug(JSON.stringify(error))
         reject(error)
       })
@@ -288,18 +287,6 @@ class MinecraftTokenManager {
     // TODO
   }
 }
-
-// if (typeof btoa === 'undefined') {
-//   global.btoa = function (str) {
-//     return new Buffer(str, 'binary').toString('base64')
-//   }
-// }
-
-// if (typeof atob === 'undefined') {
-//   global.atob = function (b64Encoded) {
-//     return new Buffer(b64Encoded, 'base64').toString('binary')
-//   }
-// }
 
 function checkStatus (res) {
   if (res.ok) { // res.status >= 200 && res.status < 300
