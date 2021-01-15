@@ -46,7 +46,7 @@ const msalConfig = {
   }
 }
 
-let msa, xbl, mca
+let msa, xbl, mca, codeCallback
 
 function debug (...message) {
   console.debug(message[0])
@@ -55,24 +55,24 @@ function debug (...message) {
 async function postAuthenticate (client, options, mcAccessToken) {
   options.haveCredentials = mcAccessToken != null
 
-  const MinecraftProfile = await fetch(authConstants.MinecraftServicesProfile, getFetchOptions).then((res) => {
-    if (res.ok) { // res.status >= 200 && res.status < 300
-      return res.json()
-    } else {
-      const user = msa.getUsers()[0]
-      // debug(user)
-      console.error(`Failed to obtain Minecraft profile data for '${user?.username}', does the account own Minecraft Java?`)
-      throw Error(res.statusText)
-    }
-  })
-  if (!MinecraftProfile.id) throw Error('This user does not own minecraft according to minecraft services.')
+  let minecraftProfile
+  const res = await fetch(authConstants.MinecraftServicesProfile, getFetchOptions)
+  if (res.ok) { // res.status >= 200 && res.status < 300
+    minecraftProfile = res.json()
+  } else {
+    const user = msa.getUsers()[0]
+    // debug(user)
+    throw Error(`Failed to obtain Minecraft profile data for '${user?.username}', does the account own Minecraft Java? Server returned: ${res.statusText}`)
+  }
+
+  if (!minecraftProfile.id) throw Error('This user does not own minecraft according to minecraft services.')
 
   // This profile / session here could be simplified down to where it just passes the uuid of the player to encrypt.js
   // That way you could remove some lines of code. It accesses client.session.selectedProfile.id so /shrug.
   // - Kashalls
   const profile = {
-    name: MinecraftProfile.name,
-    id: MinecraftProfile.id
+    name: minecraftProfile.name,
+    id: minecraftProfile.id
   }
 
   const session = {
@@ -81,7 +81,7 @@ async function postAuthenticate (client, options, mcAccessToken) {
     availableProfile: [profile]
   }
   client.session = session
-  client.username = MinecraftProfile.name
+  client.username = minecraftProfile.name
   options.accessToken = mcAccessToken
   client.emit('session', session)
   options.connect(client)
@@ -109,17 +109,22 @@ async function authenticatePassword (client, options) {
     return await authenticateDeviceToken(client, options)
   }
 
-  const MineServicesResponse = await fetch(authConstants.MinecraftServicesLogWithXbox, {
-    method: 'post',
-    ...getFetchOptions,
-    body: JSON.stringify({ identityToken: `XBL3.0 x=${XAuthResponse.userHash};${XAuthResponse.XSTSToken}` })
-  }).then(checkStatus)
+  try {
+    const MineServicesResponse = await fetch(authConstants.MinecraftServicesLogWithXbox, {
+      method: 'post',
+      ...getFetchOptions,
+      body: JSON.stringify({ identityToken: `XBL3.0 x=${XAuthResponse.userHash};${XAuthResponse.XSTSToken}` })
+    }).then(checkStatus)
 
-  getFetchOptions.headers.Authorization = `Bearer ${MineServicesResponse.access_token}`
-  const MineEntitlements = await fetch(authConstants.MinecraftServicesEntitlement, getFetchOptions).then(checkStatus)
-  if (MineEntitlements.items.length === 0) throw Error('This user does not have any items on its accounts according to minecraft services.')
+    getFetchOptions.headers.Authorization = `Bearer ${MineServicesResponse.access_token}`
+    const MineEntitlements = await fetch(authConstants.MinecraftServicesEntitlement, getFetchOptions).then(checkStatus)
+    if (MineEntitlements.items.length === 0) throw Error('This user does not have any items on its accounts according to minecraft services.')
 
-  postAuthenticate(client, options, MineServicesResponse.access_token)
+    await postAuthenticate(client, options, MineServicesResponse.access_token)
+  } catch (err) {
+    console.error(err)
+    client.emit('error', err)
+  }
 }
 
 async function getMsaToken () {
@@ -130,6 +135,7 @@ async function getMsaToken () {
       console.info('[msa] First time signing in. Please authenticate now:')
       console.info(response.message)
       // console.log('Data', data)
+      if (codeCallback) codeCallback(response)
     })
 
     console.info(`[msa] Signed in as ${ret.account.username}`)
@@ -190,13 +196,19 @@ async function initTokenCaches (username, cacheDir) {
 }
 
 async function authenticateDeviceToken (client, options) {
-  await initTokenCaches(options.username, options.cacheDir)
+  try {
+    await initTokenCaches(options.username, options.profilesFolder)
+    codeCallback = options.onMsaCode
 
-  const token = await getMinecraftToken()
-  console.debug('Acquired Minecraft token', token)
+    const token = await getMinecraftToken()
+    console.debug('Acquired Minecraft token', token)
 
-  getFetchOptions.headers.Authorization = `Bearer ${token}`
-  postAuthenticate(client, options, token)
+    getFetchOptions.headers.Authorization = `Bearer ${token}`
+    await postAuthenticate(client, options, token)
+  } catch (err) {
+    console.error(err)
+    client.emit('error', err)
+  }
 }
 
 function checkStatus (res) {
@@ -213,7 +225,7 @@ module.exports = {
 }
 
 async function msaTest () {
-  await authenticateDeviceToken({}, {})
+  await authenticateDeviceToken({ emit: () => {} }, {})
 }
 
 // debug with node microsoftAuth.js
