@@ -175,8 +175,8 @@ async function initTokenCaches (username, cacheDir) {
 
   let cachePath = cacheDir || mcDefaultFolderPath
   try {
-    await fs.promises.access(cachePath)
-    fs.mkdirSync(cachePath + '/nmp-cache')
+    if (!fs.existsSync(cachePath + '/nmp-cache'))
+      fs.mkdirSync(cachePath + '/nmp-cache')
     cachePath += '/nmp-cache'
   } catch (e) {
     console.log('Failed to open cache dir', e)
