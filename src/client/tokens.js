@@ -111,7 +111,7 @@ class MsaTokenManager {
       return true
     } else {
       try {
-        this.refreshTokens()
+        await this.refreshTokens()
         return true
       } catch (e) {
         return false
@@ -196,7 +196,8 @@ class XboxTokenManager {
       return true
     } else if (ut.valid && !xt.valid) {
       try {
-        this.getXSTSToken(ut.data)
+        await this.getXSTSToken(ut.data)
+        return true
       } catch (e) {
         return false
       }

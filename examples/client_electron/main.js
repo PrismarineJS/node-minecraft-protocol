@@ -28,7 +28,7 @@ function main () {
     client.on('error', (err) => {
       dialog.showMessageBoxSync({
         type: 'error',
-        message: err.message + '\n' + err.stack
+        message: err.stack
       })
     })
 

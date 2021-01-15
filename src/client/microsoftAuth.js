@@ -46,13 +46,81 @@ const msalConfig = {
   }
 }
 
-let msa, xbl, mca, codeCallback
-
 function debug (...message) {
   console.debug(message[0])
 }
 
-async function postAuthenticate (client, options, mcAccessToken) {
+class MsAuthFlow {
+  constructor (username, cacheDir, codeCallback) {
+    // init token caches
+    const hash = sha1(username).substr(0, 6)
+
+    let cachePath = cacheDir || mcDefaultFolderPath
+    try {
+      if (!fs.existsSync(cachePath + '/nmp-cache')) {
+        fs.mkdirSync(cachePath + '/nmp-cache')
+      }
+      cachePath += '/nmp-cache'
+    } catch (e) {
+      console.log('Failed to open cache dir', e)
+      cachePath = __dirname
+    }
+
+    const cachePaths = {
+      msa: path.join(cachePath, `./${hash}_msa-cache.json`),
+      xbl: path.join(cachePath, `./${hash}_xbl-cache.json`),
+      mca: path.join(cachePath, `./${hash}_mca-cache.json`)
+    }
+
+    const scopes = ['XboxLive.signin', 'offline_access']
+    this.msa = new MsaTokenManager(msalConfig, scopes, cachePaths.msa)
+    this.xbl = new XboxTokenManager(authConstants.XSTSRelyingParty, cachePaths.xbl)
+    this.mca = new MinecraftTokenManager(cachePaths.mca)
+
+    this.codeCallback = codeCallback
+  }
+
+  async getMsaToken () {
+    if (await this.msa.verifyTokens()) {
+      return this.msa.getAccessToken().token
+    } else {
+      const ret = await this.msa.authDeviceToken((response) => {
+        console.info('[msa] First time signing in. Please authenticate now:')
+        console.info(response.message)
+        // console.log('Data', data)
+        if (this.codeCallback) this.codeCallback(response)
+      })
+
+      console.info(`[msa] Signed in as ${ret.account.username}`)
+
+      debug('[msa] got auth result', ret)
+      return ret.accessToken
+    }
+  }
+
+  async getXboxToken () {
+    if (await this.xbl.verifyTokens()) {
+      return this.xbl.getCachedXstsToken().data
+    } else {
+      const msaToken = await this.getMsaToken()
+      const ut = await this.xbl.getUserToken(msaToken)
+      const xsts = await this.xbl.getXSTSToken(ut)
+      return xsts
+    }
+  }
+
+  async getMinecraftToken () {
+    if (await this.mca.verifyTokens()) {
+      return this.mca.getCachedAccessToken().token
+    } else {
+      const xsts = await this.getXboxToken()
+      debug('xsts data', xsts)
+      return this.mca.getAccessToken(xsts)
+    }
+  }
+}
+
+async function postAuthenticate (client, options, mcAccessToken, msa) {
   options.haveCredentials = mcAccessToken != null
 
   let minecraftProfile
@@ -60,7 +128,7 @@ async function postAuthenticate (client, options, mcAccessToken) {
   if (res.ok) { // res.status >= 200 && res.status < 300
     minecraftProfile = res.json()
   } else {
-    const user = msa.getUsers()[0]
+    const user = msa ? msa.getUsers()[0] : options.username
     // debug(user)
     throw Error(`Failed to obtain Minecraft profile data for '${user?.username}', does the account own Minecraft Java? Server returned: ${res.statusText}`)
   }
@@ -127,85 +195,23 @@ async function authenticatePassword (client, options) {
   }
 }
 
-async function getMsaToken () {
-  if (await msa.verifyTokens()) {
-    return msa.getAccessToken().token
-  } else {
-    const ret = await msa.authDeviceToken((response) => {
-      console.info('[msa] First time signing in. Please authenticate now:')
-      console.info(response.message)
-      // console.log('Data', data)
-      if (codeCallback) codeCallback(response)
-    })
-
-    console.info(`[msa] Signed in as ${ret.account.username}`)
-
-    debug('[msa] got auth result', ret)
-    return ret.accessToken
-  }
-}
-
-async function getXboxToken () {
-  if (await xbl.verifyTokens()) {
-    return xbl.getCachedXstsToken().data
-  } else {
-    const msaToken = await getMsaToken()
-    const ut = await xbl.getUserToken(msaToken)
-    const xsts = await xbl.getXSTSToken(ut)
-    return xsts
-  }
-}
-
-async function getMinecraftToken () {
-  if (await mca.verifyTokens()) {
-    return mca.getCachedAccessToken().token
-  } else {
-    const xsts = await getXboxToken()
-    debug('xsts data', xsts)
-    return mca.getAccessToken(xsts)
-  }
-}
-
-function sha1 (data) {
-  return crypto.createHash('sha1').update(data || '', 'binary').digest('hex')
-}
-
-async function initTokenCaches (username, cacheDir) {
-  const hash = sha1(username).substr(0, 6)
-
-  let cachePath = cacheDir || mcDefaultFolderPath
-  try {
-    if (!fs.existsSync(cachePath + '/nmp-cache')) {
-      fs.mkdirSync(cachePath + '/nmp-cache')
-    }
-    cachePath += '/nmp-cache'
-  } catch (e) {
-    console.log('Failed to open cache dir', e)
-    cachePath = __dirname
-  }
-
-  const cachePaths = {
-    msa: path.join(cachePath, `./${hash}_msa-cache.json`),
-    xbl: path.join(cachePath, `./${hash}_xbl-cache.json`),
-    mca: path.join(cachePath, `./${hash}_mca-cache.json`)
-  }
-
-  const scopes = ['XboxLive.signin', 'offline_access']
-  msa = new MsaTokenManager(msalConfig, scopes, cachePaths.msa)
-  xbl = new XboxTokenManager(authConstants.XSTSRelyingParty, cachePaths.xbl)
-  mca = new MinecraftTokenManager(cachePaths.mca)
-}
-
+/**
+ * Authenticates to Minecraft via device code based Microsoft auth,
+ * then connects to the specified server in Client Options
+ *
+ * @function
+ * @param {object} client - The client passed to protocol
+ * @param {object} options - Client Options
+ */
 async function authenticateDeviceToken (client, options) {
   try {
-    await initTokenCaches(options.username, options.profilesFolder)
-    codeCallback = options.onMsaCode
+    const flow = new MsAuthFlow(options.username, options.profilesFolder, options.onMsaCode)
 
-    const token = await getMinecraftToken()
+    const token = await flow.getMinecraftToken()
     console.debug('Acquired Minecraft token', token)
 
     getFetchOptions.headers.Authorization = `Bearer ${token}`
-    await postAuthenticate(client, options, token)
+    await postAuthenticate(client, options, token, flow.msa)
   } catch (err) {
     console.error(err)
     client.emit('error', err)
@@ -218,6 +224,10 @@ function checkStatus (res) {
   } else {
     throw Error(res.statusText)
   }
+}
+
+function sha1 (data) {
+  return crypto.createHash('sha1').update(data || '', 'binary').digest('hex')
 }
 
 module.exports = {
