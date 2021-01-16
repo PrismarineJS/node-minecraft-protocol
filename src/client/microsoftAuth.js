@@ -1,11 +1,11 @@
 const msal = require('@azure/msal-node')
 const XboxLiveAuth = require('@xboxreplay/xboxlive-auth')
+// const debug = require('debug')('minecraft-protocol')
 const fetch = require('node-fetch')
 const crypto = require('crypto')
 const path = require('path')
 const fs = require('fs')
 const mcDefaultFolderPath = require('minecraft-folder-path')
-
 const authConstants = require('./authConstants')
 const { MsaTokenManager, XboxTokenManager, MinecraftTokenManager } = require('./tokens')
 
@@ -50,9 +50,25 @@ function debug (...message) {
   console.debug(message[0])
 }
 
+async function retry (methodFn, beforeRety, times) {
+  while (times--) {
+    if (times !== 0) {
+      try { return await methodFn() } catch (e) { debug(e) }
+      await beforeRety()
+    } else {
+      return await methodFn()
+    }
+  }
+}
+
+// TODO: Move this to a new file
 class MsAuthFlow {
   constructor (username, cacheDir, codeCallback) {
-    // init token caches
+    this.initTokenCaches(username, cacheDir)
+    this.codeCallback = codeCallback
+  }
+
+  initTokenCaches (username, cacheDir) {
     const hash = sha1(username).substr(0, 6)
 
     let cachePath = cacheDir || mcDefaultFolderPath
@@ -76,15 +92,29 @@ class MsAuthFlow {
     this.msa = new MsaTokenManager(msalConfig, scopes, cachePaths.msa)
     this.xbl = new XboxTokenManager(authConstants.XSTSRelyingParty, cachePaths.xbl)
     this.mca = new MinecraftTokenManager(cachePaths.mca)
+  }
 
-    this.codeCallback = codeCallback
+  static resetTokenCaches (cacheDir) {
+    let cachePath = cacheDir || mcDefaultFolderPath
+    try {
+      if (fs.existsSync(cachePath + '/nmp-cache')) {
+        cachePath += '/nmp-cache'
+        fs.rmdirSync(cachePath, { recursive: true })
+        return true
+      }
+    } catch (e) {
+      console.log('Failed to clear cache dir', e)
+      return false
+    }
   }
 
   async getMsaToken () {
     if (await this.msa.verifyTokens()) {
+      debug('[msa] Using existing tokens')
       return this.msa.getAccessToken().token
     } else {
-      const ret = await this.msa.authDeviceToken((response) => {
+      debug('[msa] Not using existing, need to sign in')
+      const ret = await this.msa.authDeviceCode((response) => {
         console.info('[msa] First time signing in. Please authenticate now:')
         console.info(response.message)
         // console.log('Data', data)
@@ -100,22 +130,30 @@ class MsAuthFlow {
 
   async getXboxToken () {
     if (await this.xbl.verifyTokens()) {
+      debug('[xbl] Using existing tokens')
       return this.xbl.getCachedXstsToken().data
     } else {
-      const msaToken = await this.getMsaToken()
-      const ut = await this.xbl.getUserToken(msaToken)
-      const xsts = await this.xbl.getXSTSToken(ut)
-      return xsts
+      debug('[xbl] Need to obtain tokens')
+      return await retry(async () => {
+        const msaToken = await this.getMsaToken()
+        const ut = await this.xbl.getUserToken(msaToken)
+        const xsts = await this.xbl.getXSTSToken(ut)
+        return xsts
+      }, () => { this.msa.forceRefresh = true }, 1)
     }
   }
 
   async getMinecraftToken () {
     if (await this.mca.verifyTokens()) {
+      debug('[mc] Using existing tokens')
       return this.mca.getCachedAccessToken().token
     } else {
-      const xsts = await this.getXboxToken()
-      debug('xsts data', xsts)
-      return this.mca.getAccessToken(xsts)
+      debug('[mc] Need to obtain tokens')
+      return await retry(async () => {
+        const xsts = await this.getXboxToken()
+        debug('[xbl] xsts data', xsts)
+        return this.mca.getAccessToken(xsts)
+      }, () => { this.xbl.forceRefresh = true }, 1)
     }
   }
 }
@@ -174,7 +212,7 @@ async function authenticatePassword (client, options) {
       })
   } catch (e) {
     console.info('Retrying auth with device code flow')
-    return await authenticateDeviceToken(client, options)
+    return await authenticateDeviceCode(client, options)
   }
 
   try {
@@ -203,7 +241,7 @@ async function authenticatePassword (client, options) {
  * @param {object} client - The client passed to protocol
  * @param {object} options - Client Options
  */
-async function authenticateDeviceToken (client, options) {
+async function authenticateDeviceCode (client, options) {
   try {
     const flow = new MsAuthFlow(options.username, options.profilesFolder, options.onMsaCode)
 
@@ -232,11 +270,12 @@ function sha1 (data) {
 
 module.exports = {
   authenticatePassword,
-  authenticateDeviceToken
+  authenticateDeviceCode
 }
 
 async function msaTest () {
-  await authenticateDeviceToken({ emit: () => {} }, {})
+  // MsAuthFlow.resetTokenCaches()
+  await authenticateDeviceCode({ emit: () => { } }, {})
 }
 
 // debug with node microsoftAuth.js

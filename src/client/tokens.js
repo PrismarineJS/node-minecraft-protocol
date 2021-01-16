@@ -1,5 +1,6 @@
 const msal = require('@azure/msal-node')
 const XboxLiveAuth = require('@xboxreplay/xboxlive-auth')
+// const debug = require('debug')('minecraft-protocol')
 const fs = require('fs')
 const path = require('path')
 const fetch = require('node-fetch')
@@ -103,7 +104,7 @@ class MsaTokenManager {
   async verifyTokens () {
     const at = this.getAccessToken()
     const rt = this.getRefreshToken()
-    if (!at || !rt) {
+    if (!at || !rt || this.forceRefresh) {
       return false
     }
     debug('[msa] have at, rt', at, rt)
@@ -120,7 +121,7 @@ class MsaTokenManager {
   }
 
   // Authenticate with device_code flow
-  async authDeviceToken (dataCallback) {
+  async authDeviceCode (dataCallback) {
     const deviceCodeRequest = {
       deviceCodeCallback: (resp) => {
         debug('[msa] device_code response: ', resp)
@@ -145,8 +146,8 @@ class MsaTokenManager {
 
 // Manages Xbox Live tokens for xboxlive.com
 class XboxTokenManager {
-  constructor (relayParty, cacheLocation) {
-    this.relayParty = relayParty
+  constructor (relyingParty, cacheLocation) {
+    this.relyingParty = relyingParty
     this.cacheLocation = cacheLocation || path.join(__dirname, './xbl-cache.json')
     try {
       this.cache = require(this.cacheLocation)
@@ -188,7 +189,7 @@ class XboxTokenManager {
   async verifyTokens () {
     const ut = this.getCachedUserToken()
     const xt = this.getCachedXstsToken()
-    if (!ut || !xt) {
+    if (!ut || !xt || this.forceRefresh) {
       return false
     }
     debug('[xbl] have user, xsts', ut, xt)
@@ -217,7 +218,7 @@ class XboxTokenManager {
   async getXSTSToken (xblUserToken) {
     debug('[xbl] obtaining xsts token with xbox user token', xblUserToken.Token)
     const xsts = await XboxLiveAuth.exchangeUserTokenForXSTSIdentity(
-      xblUserToken.Token, { XSTSRelyingParty: this.relayParty, raw: false }
+      xblUserToken.Token, { XSTSRelyingParty: this.relyingParty, raw: false }
     )
     this.setCachedXstsToken(xsts)
     debug('[xbl] xsts', xsts)
@@ -255,7 +256,7 @@ class MinecraftTokenManager {
 
   async verifyTokens () {
     const at = this.getCachedAccessToken()
-    if (!at) {
+    if (!at || this.forceRefresh) {
       return false
     }
     debug('[mc] have user access token', at)

@@ -38,7 +38,7 @@ function createClient (options) {
     if (options.password) {
       microsoftAuth.authenticatePassword(client, options)
     } else {
-      microsoftAuth.authenticateDeviceToken(client, options)
+      microsoftAuth.authenticateDeviceCode(client, options)
     }
   } else {
     auth(client, options)
