@@ -1,6 +1,8 @@
 const net = require('net')
 const dns = require('dns')
 
+const debug = require('debug')('minecraft-protocol')
+
 module.exports = function (client, options) {
   // Default options
   options.port = options.port || 25565
@@ -11,35 +13,25 @@ module.exports = function (client, options) {
       // Use stream if provided
       if (options.stream) {
         client.setSocket(options.stream)
-        client.emit('connect')
-        return
+        return client.emit('connect')
       }
 
-      // If port was not defined (defauls to 25565), host is not an ip neither localhost
+      // If port was not defined (defaults to 25565), host is not an ip and is not localhost
       if (options.port === 25565 && net.isIP(options.host) === 0 && options.host !== 'localhost') {
         // Try to resolve SRV records for the comain
-        dns.resolveSrv('_minecraft._tcp.' + options.host, (err, addresses) => {
+        dns.resolveSrv(`_minecraft._tcp.${options.host}`, (err, addresses) => {
           // Error resolving domain
-          if (err) {
-            // Could not resolve SRV lookup, connect directly
-            client.setSocket(net.connect(options.port, options.host))
-            return
-          }
+          if (err) debug(`srv lookup failed: ${err}`)
 
-          // SRV Lookup resolved conrrectly
+          // SRV Lookup resolved correctly
           if (addresses && addresses.length > 0) {
+            debug(`srv lookup returned ${addresses}`)
             options.host = addresses[0].name
             options.port = addresses[0].port
-            client.setSocket(net.connect(addresses[0].port, addresses[0].name))
-          } else {
-            // Otherwise, just connect using the provided hostname and port
-            client.setSocket(net.connect(options.port, options.host))
           }
         })
-      } else {
-        // Otherwise, just connect using the provided hostname and port
-        client.setSocket(net.connect(options.port, options.host))
       }
+      return client.setSocket(net.connect(options.port, options.host))
     }
   }
 }
