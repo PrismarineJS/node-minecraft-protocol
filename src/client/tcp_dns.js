@@ -31,7 +31,7 @@ module.exports = function (client, options) {
           }
         })
       }
-      client.setSocket(net.connect(options.port, options.host))
+      return client.setSocket(net.connect(options.port, options.host))
     }
   }
 }
