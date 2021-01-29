@@ -1,14 +1,10 @@
 const msal = require('@azure/msal-node')
 const XboxLiveAuth = require('@xboxreplay/xboxlive-auth')
-// const debug = require('debug')('minecraft-protocol')
+const debug = require('debug')('minecraft-protocol')
 const fs = require('fs')
 const path = require('path')
 const fetch = require('node-fetch')
 const authConstants = require('./authConstants')
-
-function debug (...message) {
-  console.debug(message[0])
-}
 
 // Manages Microsoft account tokens
 class MsaTokenManager {
@@ -239,7 +235,7 @@ class MinecraftTokenManager {
 
   getCachedAccessToken () {
     const token = this.cache.mca
-    // console.log('MC token cache', this.cache)
+    debug('[mc] token cache', this.cache)
     if (!token) return
     const expires = token.obtainedOn + (token.expires_in * 1000)
     const remaining = expires - Date.now()
@@ -251,7 +247,6 @@ class MinecraftTokenManager {
     data.obtainedOn = Date.now()
     this.cache.mca = data
     fs.writeFileSync(this.cacheLocation, JSON.stringify(this.cache))
-    // console.log('cached', data, this.cache, this.cacheLocation)
   }
 
   async verifyTokens () {
@@ -283,10 +278,6 @@ class MinecraftTokenManager {
     debug('[mc] mc auth response', MineServicesResponse)
     this.setCachedAccessToken(MineServicesResponse)
     return MineServicesResponse.access_token
-  }
-
-  async verifyEntitlements () {
-    // TODO
   }
 }
 
