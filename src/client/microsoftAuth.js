@@ -164,14 +164,17 @@ async function postAuthenticate (client, options, mcAccessToken, msa) {
   let minecraftProfile
   const res = await fetch(authConstants.MinecraftServicesProfile, getFetchOptions)
   if (res.ok) { // res.status >= 200 && res.status < 300
-    minecraftProfile = res.json()
+    minecraftProfile = await res.json()
   } else {
     const user = msa ? msa.getUsers()[0] : options.username
     // debug(user)
     throw Error(`Failed to obtain Minecraft profile data for '${user?.username}', does the account own Minecraft Java? Server returned: ${res.statusText}`)
   }
 
-  if (!minecraftProfile.id) throw Error('This user does not own minecraft according to minecraft services.')
+  if (!minecraftProfile.id) {
+    console.debug('[mc] profile', minecraftProfile)
+    throw Error('This user does not own minecraft according to minecraft services.')
+  }
 
   // This profile / session here could be simplified down to where it just passes the uuid of the player to encrypt.js
   // That way you could remove some lines of code. It accesses client.session.selectedProfile.id so /shrug.
