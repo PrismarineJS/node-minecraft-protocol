@@ -74,11 +74,16 @@ Returns a `Client` instance and perform login.
 `options` is an object containing the properties :
  * username
  * port : default to 25565
- * password : can be omitted (if the tokens and profilesFolder are also omitted then it tries to connect in offline mode)
+ * auth : the type of account to use, either `microsoft` or `mojang`. default to 'mojang'
+ * password : can be omitted
+   * (microsoft account) leave this blank to use device code auth. If you provide
+   a password, we try to do username and password auth, but this does not always work.
+   * (mojang account) If provided, we auth with the username and password. If this
+   is blank, and `profilesFolder` is specified, we auth with the tokens there instead.
+   If neither `password` or `profilesFolder` are specified, we connect in offline mode.
  * host : default to localhost
  * clientToken : generated if a password is given
  * accessToken : generated if a password or microsoft account is given
- * auth : the type of auth server to use, either 'microsoft' or 'mojang'. default to 'mojang'
  * authServer : auth server, default to https://authserver.mojang.com
  * sessionServer : session server, default to https://sessionserver.mojang.com
  * keepAlive : send keep alive packets : default to true
@@ -93,7 +98,12 @@ Returns a `Client` instance and perform login.
  * connect : a function taking the client as parameter and that should client.setSocket(socket) 
  and client.emit('connect') when appropriate (see the proxy examples for an example of use)
  * agent : a http agent that can be used to set proxy settings for yggdrasil authentication (see proxy-agent on npm) 
- * profilesFolder : the path to the folder that contains your `launcher_profiles.json`. defaults to your minecraft folder if it exists, otherwise the local directory. set to `false` to disable managing profiles
+ * profilesFolder : optional
+   * (mojang account) the path to the folder that contains your `launcher_profiles.json`. defaults to your minecraft folder if it exists, otherwise the local directory. set to `false` to disable managing profiles 
+   * (microsoft account) the path to store authentication caches, defaults to .minecraft
+ * onMsaCode(data) : (optional) callback called when signing in with a microsoft account
+ with device code auth. `data` is an object documented [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-device-code#device-authorization-response)
+
 
 ## mc.Client(isServer,version,[customPackets])
 
