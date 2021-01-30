@@ -1,5 +1,12 @@
 # History
 
+## 1.23.0
+
+* add auth type to types (@u9g)
+* refactor tcp dns (@Kashalls)
+* fix a launcher profile.json problem (@Rob9315)
+* Msa device auth (@extremeheat)
+
 ## 1.22.0
 
 * Don't stringify every packet if debug not enabled (@evan-goode)
