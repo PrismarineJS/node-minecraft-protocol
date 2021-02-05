@@ -1,5 +1,7 @@
 const net = require('net')
-const dns = require('dns')
+const dns = require('dns').promises
+
+const debug = require('debug')('minecraft-protocol')
 
 module.exports = function (client, options) {
   // Default options
@@ -7,7 +9,7 @@ module.exports = function (client, options) {
   options.host = options.host || 'localhost'
 
   if (!options.connect) {
-    options.connect = (client) => {
+    options.connect = async (client) => {
       // Use stream if provided
       if (options.stream) {
         client.setSocket(options.stream)
@@ -15,29 +17,23 @@ module.exports = function (client, options) {
         return
       }
 
-      // If port was not defined (defauls to 25565), host is not an ip neither localhost
+      // If port was not defined (defaults to 25565), host is not an ip and is not localhost
       if (options.port === 25565 && net.isIP(options.host) === 0 && options.host !== 'localhost') {
         // Try to resolve SRV records for the comain
-        dns.resolveSrv('_minecraft._tcp.' + options.host, (err, addresses) => {
-          // Error resolving domain
-          if (err) {
-            // Could not resolve SRV lookup, connect directly
-            client.setSocket(net.connect(options.port, options.host))
-            return
-          }
+        try {
+          const resolved = await dns.resolveSrv(`_minecraft._tcp.${options.host}`)
+          const [{ name, port }] = resolved
 
-          // SRV Lookup resolved conrrectly
-          if (addresses && addresses.length > 0) {
-            options.host = addresses[0].name
-            options.port = addresses[0].port
-            client.setSocket(net.connect(addresses[0].port, addresses[0].name))
-          } else {
-            // Otherwise, just connect using the provided hostname and port
-            client.setSocket(net.connect(options.port, options.host))
-          }
-        })
+          debug(`[DNS] SRV Lookup: ${name}:${port}`)
+          options.host = name
+          options.port = port
+        } catch (error) {
+          if (error.code && error.code === 'ENOTFOUND') debug('[DNS] Host does not seem to use an SRV record...')
+          else debug(`[DNS] SRV Resolve Failed: ${error}`)
+        } finally {
+          client.setSocket(net.connect(options.port, options.host))
+        }
       } else {
-        // Otherwise, just connect using the provided hostname and port
         client.setSocket(net.connect(options.port, options.host))
       }
     }
