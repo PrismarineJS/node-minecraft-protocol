@@ -31,7 +31,7 @@ async function connect (client, options) {
       const [address] = addresses
       const { name, port } = address
       // SRV Lookup resolved conrrectly
-      if (addresses?.length > 0) {
+      if (addresses.length > 0) {
         options.host = name
         options.port = port
         client.setSocket(net.connect(port, name))
