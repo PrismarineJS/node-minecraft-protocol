@@ -37,18 +37,14 @@ async function connect (client, options) {
         client.setSocket(net.connect(port, name))
       } else {
         // Otherwise, just connect using the provided hostname and port
-        connectUsingOptions(client, options)
+        client.setSocket(net.connect(options.port, options.host))
       }
     } catch (err) { // Error resolving domain
       // Could not resolve SRV lookup, connect directly
-      connectUsingOptions(client, options)
+      client.setSocket(net.connect(options.port, options.host))
     }
   } else {
     // Otherwise, just connect using the provided hostname and port
-    connectUsingOptions(client, options)
+    client.setSocket(net.connect(options.port, options.host))
   }
-}
-
-function connectUsingOptions (client, { host, port }) {
-  client.setSocket(net.connect(port, host))
 }
