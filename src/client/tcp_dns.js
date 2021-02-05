@@ -9,7 +9,7 @@ module.exports = (client, options) => {
   options.port = options.port || 25565
   options.host = options.host || 'localhost'
   if (options.connect) return
-  options.connect = async (passedClient) => connect(passedClient, options)
+  options.connect = (passedClient) => connect(passedClient, options)
 }
 
 async function connect (client, options) {
