@@ -1,6 +1,6 @@
 const net = require('net')
-const { Resolver } = require('dns').promises;
-const resolver = new Resolver();
+const { Resolver } = require('dns').promises
+const resolver = new Resolver()
 const debug = require('debug')('minecraft-protocol')
 
 module.exports = (client, options) => {
