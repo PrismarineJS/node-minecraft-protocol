@@ -1,6 +1,7 @@
 const net = require('net')
 const dns = require('dns')
 const util = require('util')
+const debug = require('debug')('minecraft-protocol')
 const resolveSrv = util.promisify(dns.resolveSrv)
 
 module.exports = (client, options) => {
@@ -22,8 +23,8 @@ async function connect (client, options) {
   // If port was not defined (defauls to 25565), host is not an ip neither localhost
   if (
     options.port === 25565 &&
-        net.isIP(options.host) === 0 &&
-        options.host !== 'localhost'
+    net.isIP(options.host) === 0 &&
+    options.host !== 'localhost'
   ) {
     // Try to resolve SRV records for the comain
     try {
@@ -41,6 +42,7 @@ async function connect (client, options) {
       }
     } catch (err) { // Error resolving domain
       // Could not resolve SRV lookup, connect directly
+      debug(`srv lookup failed: ${err}`)
       client.setSocket(net.connect(options.port, options.host))
     }
   } else {
