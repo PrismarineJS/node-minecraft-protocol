@@ -1,8 +1,7 @@
 const net = require('net')
-const dns = require('dns')
-const util = require('util')
+const { Resolver } = require('dns').promises;
+const resolver = new Resolver();
 const debug = require('debug')('minecraft-protocol')
-const resolveSrv = util.promisify(dns.resolveSrv)
 
 module.exports = (client, options) => {
   // Default options
@@ -28,7 +27,7 @@ async function connect (client, options) {
   ) {
     // Try to resolve SRV records for the comain
     try {
-      const addresses = await resolveSrv(`_minecraft._tcp.${options.host}`)
+      const addresses = await resolver.resolveSrv(`_minecraft._tcp.${options.host}`)
       const [address] = addresses
       const { name, port } = address
       // SRV Lookup resolved conrrectly
