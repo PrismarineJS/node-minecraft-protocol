@@ -3,8 +3,6 @@ const dns = require('dns').promises
 
 const debug = require('debug')('minecraft-protocol')
 
-const debug = require('debug')('minecraft-protocol')
-
 module.exports = function (client, options) {
   // Default options
   options.port = options.port || 25565
@@ -26,6 +24,7 @@ module.exports = function (client, options) {
           const [{ name, port }] = resolved
 
           debug(`[DNS] SRV Lookup: ${name}:${port}`)
+
           options.host = name
           options.port = port
         } catch (error) {
@@ -37,7 +36,7 @@ module.exports = function (client, options) {
       } else {
         client.setSocket(net.connect(options.port, options.host))
       }
-      return client.setSocket(net.connect(options.port, options.host))
+      client.setSocket(net.connect(options.port, options.host))
     }
   }
 }
