@@ -1,7 +1,7 @@
 'use strict'
 
 const path = require('path')
-const { app, ipcMain } = require('electron')
+const { app, ipcMain, dialog } = require('electron')
 const mc = require('minecraft-protocol')
 
 const Window = require('./Window')
@@ -17,8 +17,21 @@ function main () {
   })
 
   ipcMain.on('connect', (e, data) => {
+    data.onMsaCode = (data) => {
+      dialog.showMessageBoxSync({
+        type: 'info',
+        message: 'Please authenticate now:\n' + data.message
+      })
+    }
     const client = mc.createClient(data)
     client.on('login', () => mainWindow.send('content', 'connected'))
+    client.on('error', (err) => {
+      dialog.showMessageBoxSync({
+        type: 'error',
+        message: err.stack
+      })
+    })
+
     let chat = ''
 
     client.on('chat', function (packet) {

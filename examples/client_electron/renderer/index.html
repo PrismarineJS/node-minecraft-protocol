@@ -8,10 +8,13 @@
 
   <body>
 
-    Host: <input type="text" id="host" value="localhost" /><br />
-    Port: <input type="text" id="port" value="25565"/><br />
-    Username: <input type="text" id="username" value="electron_client" /><br />
-    Password: <input type="text" id="password" value="" /><br />
+    <div>
+      <p>Host: <input type="text" id="host" value="localhost" /></p>
+      <p>Port: <input type="text" id="port" value="25565"/></p>
+      <p>Account Type: <select onchange="onAuthTypeChange()" id='type'><option>Microsoft</option><option>Mojang</option></select></p>
+      <p>Username: <input type="text" id="username" value="electron_client" /></p>
+      <p>Password: <input type="text" id="password" value="" /></p>
+    </div>
 
     <button id="connect" type="button">Connect</button><br />
     <div id="content">Not connected</div> <br />

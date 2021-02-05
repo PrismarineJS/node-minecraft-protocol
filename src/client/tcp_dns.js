@@ -3,6 +3,8 @@ const dns = require('dns').promises
 
 const debug = require('debug')('minecraft-protocol')
 
+const debug = require('debug')('minecraft-protocol')
+
 module.exports = function (client, options) {
   // Default options
   options.port = options.port || 25565
@@ -13,8 +15,7 @@ module.exports = function (client, options) {
       // Use stream if provided
       if (options.stream) {
         client.setSocket(options.stream)
-        client.emit('connect')
-        return
+        return client.emit('connect')
       }
 
       // If port was not defined (defaults to 25565), host is not an ip and is not localhost
@@ -36,6 +37,7 @@ module.exports = function (client, options) {
       } else {
         client.setSocket(net.connect(options.port, options.host))
       }
+      return client.setSocket(net.connect(options.port, options.host))
     }
   }
 }
