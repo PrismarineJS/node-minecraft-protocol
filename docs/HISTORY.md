@@ -1,5 +1,9 @@
 # History
 
+## 1.23.1
+
+* revert refactor tns dns for now to fix it
+
 ## 1.23.0
 
 * add auth type to types (@u9g)
