@@ -56,7 +56,7 @@
     "node-fetch": "^2.6.1",
     "node-rsa": "^0.4.2",
     "prismarine-nbt": "^1.4.0",
-    "protodef": "^1.8.0",
+    "protodef": "^1.9.0",
     "readable-stream": "^3.0.6",
     "uuid-1345": "^1.0.1",
     "yggdrasil": "^1.4.0"
