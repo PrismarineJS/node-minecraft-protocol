@@ -1,5 +1,9 @@
 # History
 
+## 1.23.2
+
+* Remove test code from microsoftAuth
+
 ## 1.23.1
 
 * revert refactor tns dns for now to fix it
