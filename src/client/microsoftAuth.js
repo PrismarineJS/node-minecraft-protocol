@@ -130,13 +130,3 @@ module.exports = {
   authenticatePassword,
   authenticateDeviceCode
 }
-
-async function msaTest () {
-  // MsAuthFlow.resetTokenCaches()
-  await authenticateDeviceCode({ emit: () => { } }, {})
-}
-
-// debug with node microsoftAuth.js
-if (!module.parent) {
-  msaTest()
-}
