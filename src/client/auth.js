@@ -52,7 +52,6 @@ module.exports = async function (client, options) {
         getLauncherProfiles().then((auths) => {
           if (!auths.accounts) auths.accounts = []
           try {
-            const lowerUsername = options.username.toLowerCase()
             let profile = getProfileId(auths)
             if (err) {
               if (profile) { // profile is invalid, remove
@@ -73,7 +72,7 @@ module.exports = async function (client, options) {
                   minecraftProfile: {
                     name: session.selectedProfile.name
                   },
-                  userProperites: oldProfileObj ? (userProperites.properties || []) : [],
+                  userProperites: oldProfileObj ? (oldProfileObj.userProperites || []) : [],
                   username: options.username
                 }
                 auths.accounts[profile] = newProfileObj
