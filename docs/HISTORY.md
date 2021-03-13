@@ -1,5 +1,9 @@
 # History
 
+## 1.23.3
+
+* add a reason to client timeout
+
 ## 1.23.2
 
 * Remove test code from microsoftAuth
