@@ -17,11 +17,12 @@ const msalConfig = {
   }
 }
 
-async function retry (methodFn, beforeRety, times) {
+async function retry (methodFn, beforeRetry, times) {
   while (times--) {
     if (times !== 0) {
       try { return await methodFn() } catch (e) { debug(e) }
-      await beforeRety()
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      await beforeRetry()
     } else {
       return await methodFn()
     }
@@ -104,7 +105,7 @@ class MsAuthFlow {
         const ut = await this.xbl.getUserToken(msaToken)
         const xsts = await this.xbl.getXSTSToken(ut)
         return xsts
-      }, () => { this.msa.forceRefresh = true }, 1)
+      }, () => { this.msa.forceRefresh = true }, 2)
     }
   }
 
@@ -118,7 +119,7 @@ class MsAuthFlow {
         const xsts = await this.getXboxToken()
         debug('[xbl] xsts data', xsts)
         return this.mca.getAccessToken(xsts)
-      }, () => { this.xbl.forceRefresh = true }, 1)
+      }, () => { this.xbl.forceRefresh = true }, 2)
     }
   }
 }

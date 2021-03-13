@@ -80,6 +80,7 @@ client.on('chat', function(packet) {
 ```
 
 If the server is in offline mode, you may leave out the `password` option.
+You can also leave out `password` when using a Microsoft account. If provided, password based auth will be attempted first which may fail. *Note:* if using a Microsoft account, your account age must be >= 18 years old.
 
 ### Hello World server example
 
