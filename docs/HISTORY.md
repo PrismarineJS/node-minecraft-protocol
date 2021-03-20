@@ -1,5 +1,10 @@
 # History
 
+## 1.24.0
+
+* Using launcher_accounts.json as new token source (@Moondarker)
+* Fix msa caching bug (@extremeheat)
+
 ## 1.23.3
 
 * add a reason to client timeout
