@@ -4,6 +4,8 @@ const fs = require('fs').promises
 const mcDefaultFolderPath = require('minecraft-folder-path')
 const path = require('path')
 
+const launcherDataFile = 'launcher_accounts.json'
+
 module.exports = async function (client, options) {
   if (!options.profilesFolder && options.profilesFolder !== false) { // not defined, but not explicitly false. fallback to default
     let mcFolderExists = true
@@ -16,29 +18,27 @@ module.exports = async function (client, options) {
   }
 
   const yggdrasilClient = yggdrasil({ agent: options.agent, host: options.authServer || 'https://authserver.mojang.com' })
-  const clientToken = options.clientToken || (options.session && options.session.clientToken) || (options.profilesFolder && (await getLauncherProfiles()).clientToken) || UUID.v4().toString().replace(/-/g, '')
+  const clientToken = options.clientToken || (options.session && options.session.clientToken) || (options.profilesFolder && (await getLauncherProfiles()).mojangClientToken) || UUID.v4().toString().replace(/-/g, '')
   const skipValidation = false || options.skipValidation
   options.accessToken = null
-  options.haveCredentials = !!options.password || (clientToken != null && options.session != null) || (options.profilesFolder && await hasProfileCredentials())
+  options.haveCredentials = !!options.password || (clientToken != null && options.session != null) || (options.profilesFolder && !!getProfileId(await getLauncherProfiles()))
 
   async function getLauncherProfiles () { // get launcher profiles
     try {
-      return JSON.parse(await fs.readFile(path.join(options.profilesFolder, 'launcher_profiles.json'), 'utf8'))
+      return JSON.parse(await fs.readFile(path.join(options.profilesFolder, launcherDataFile), 'utf8'))
     } catch (err) {
       await fs.mkdir(options.profilesFolder, { recursive: true })
-      await fs.writeFile(path.join(options.profilesFolder, 'launcher_profiles.json'), '{}')
-      return { authenticationDatabase: {} }
+      await fs.writeFile(path.join(options.profilesFolder, launcherDataFile), '{}')
+      return { accounts: {} }
     }
   }
 
-  async function hasProfileCredentials () {
+  function getProfileId (auths) {
     try {
-      const auths = await getLauncherProfiles()
-
       const lowerUsername = options.username.toLowerCase()
-      return !!Object.keys(auths.authenticationDatabase).find(key =>
-        auths.authenticationDatabase[key].username.toLowerCase() === lowerUsername ||
-          Object.values(auths.authenticationDatabase[key].profiles)[0].displayName.toLowerCase() === lowerUsername
+      return Object.keys(auths.accounts).find(key =>
+        auths.accounts[key].username.toLowerCase() === lowerUsername ||
+          auths.accounts[key].minecraftProfile.name.toLowerCase() === lowerUsername
       )
     } catch (err) {
       return false
@@ -50,43 +50,38 @@ module.exports = async function (client, options) {
     const cb = function (err, session) {
       if (options.profilesFolder) {
         getLauncherProfiles().then((auths) => {
-          if (!auths.authenticationDatabase) auths.authenticationDatabase = []
+          if (!auths.accounts) auths.accounts = []
           try {
-            const lowerUsername = options.username.toLowerCase()
-            let profile = Object.keys(auths.authenticationDatabase).find(key =>
-              auths.authenticationDatabase[key].username.toLowerCase() === lowerUsername ||
-                Object.values(auths.authenticationDatabase[key].profiles)[0].displayName.toLowerCase() === lowerUsername
-            )
+            let profile = getProfileId(auths)
             if (err) {
               if (profile) { // profile is invalid, remove
-                delete auths.authenticationDatabase[profile]
+                delete auths.accounts[profile]
               }
             } else { // successful login
               if (!profile) {
                 profile = UUID.v4().toString().replace(/-/g, '') // create new profile
               }
-              if (!auths.clientToken) {
-                auths.clientToken = clientToken
+              if (!auths.mojangClientToken) {
+                auths.mojangClientToken = clientToken
               }
 
-              if (clientToken === auths.clientToken) { // only do something when we can save a new clienttoken or they match
-                const oldProfileObj = auths.authenticationDatabase[profile]
+              if (clientToken === auths.mojangClientToken) { // only do something when we can save a new clienttoken or they match
+                const oldProfileObj = auths.accounts[profile]
                 const newProfileObj = {
                   accessToken: session.accessToken,
-                  profiles: {},
-                  properties: oldProfileObj ? (oldProfileObj.properties || []) : [],
+                  minecraftProfile: {
+                    name: session.selectedProfile.name
+                  },
+                  userProperites: oldProfileObj ? (oldProfileObj.userProperites || []) : [],
                   username: options.username
                 }
-                newProfileObj.profiles[session.selectedProfile.id] = {
-                  displayName: session.selectedProfile.name
-                }
-                auths.authenticationDatabase[profile] = newProfileObj
+                auths.accounts[profile] = newProfileObj
               }
             }
           } catch (ignoreErr) {
             // again, silently fail, just don't save anything
           }
-          fs.writeFile(path.join(options.profilesFolder, 'launcher_profiles.json'), JSON.stringify(auths, null, 2)).then(() => {}, (ignoreErr) => {
+          fs.writeFile(path.join(options.profilesFolder, launcherDataFile), JSON.stringify(auths, null, 2)).then(() => {}, (ignoreErr) => {
             // console.warn("Couldn't save tokens:\n", err) // not any error, we just don't save the file
           })
         }, (ignoreErr) => {
@@ -108,25 +103,20 @@ module.exports = async function (client, options) {
     if (!options.session && options.profilesFolder) {
       try {
         const auths = await getLauncherProfiles()
-
-        const lowerUsername = options.username.toLowerCase()
-        const profile = Object.keys(auths.authenticationDatabase).find(key =>
-          auths.authenticationDatabase[key].username.toLowerCase() === lowerUsername ||
-            Object.values(auths.authenticationDatabase[key].profiles)[0].displayName.toLowerCase() === lowerUsername
-        )
+        const profile = getProfileId(auths)
 
         if (profile) {
-          const newUsername = auths.authenticationDatabase[profile].username
-          const uuid = Object.keys(auths.authenticationDatabase[profile].profiles)[0]
-          const displayName = auths.authenticationDatabase[profile].profiles[uuid].displayName
+          const newUsername = auths.accounts[profile].username
+          const displayName = auths.accounts[profile].minecraftProfile.name
+          const uuid = auths.accounts[profile].minecraftProfile.id
           const newProfile = {
-            name: displayName,
-            id: uuid
+            id: uuid,
+            name: displayName
           }
 
           options.session = {
-            accessToken: auths.authenticationDatabase[profile].accessToken,
-            clientToken: auths.clientToken,
+            accessToken: auths.accounts[profile].accessToken,
+            clientToken: auths.mojangClientToken,
             selectedProfile: newProfile,
             availableProfiles: [newProfile]
           }
