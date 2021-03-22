@@ -70,6 +70,7 @@ module.exports = async function (client, options) {
                 const newProfileObj = {
                   accessToken: session.accessToken,
                   minecraftProfile: {
+                    id: session.selectedProfile.id,
                     name: session.selectedProfile.name
                   },
                   userProperites: oldProfileObj ? (oldProfileObj.userProperites || []) : [],
