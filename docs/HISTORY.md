@@ -1,5 +1,9 @@
 # History
 
+## 1.24.1
+
+* fix write to launcher_accounts.json (@majorblake)
+
 ## 1.24.0
 
 * Using launcher_accounts.json as new token source (@Moondarker)
