@@ -1,5 +1,9 @@
 # History
 
+## 1.24.2
+
+* Throw if data is not available for a given version (@U9G)
+
 ## 1.24.1
 
 * fix write to launcher_accounts.json (@majorblake)
