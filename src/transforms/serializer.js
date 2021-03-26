@@ -15,7 +15,11 @@ const protocols = {}
 function createProtocol (state, direction, version, customPackets, compiled = true) {
   const key = state + ';' + direction + ';' + version + (compiled ? ';c' : '')
   if (protocols[key]) { return protocols[key] }
+
   const mcData = require('minecraft-data')(version)
+  if (mcData === null) {
+    throw new Error(`No data available for version ${version}`)
+  }
 
   if (compiled) {
     const compiler = new ProtoDefCompiler()
