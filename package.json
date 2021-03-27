@@ -59,6 +59,6 @@
     "protodef": "^1.8.0",
     "readable-stream": "^3.0.6",
     "uuid-1345": "^1.0.1",
-    "yggdrasil": "^1.4.0"
+    "yggdrasil": "PrismarineJS/node-yggdrasil#better"
   }
 }
