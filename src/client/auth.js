@@ -5,23 +5,34 @@ const mcDefaultFolderPath = require('minecraft-folder-path')
 const path = require('path')
 
 const launcherDataFile = 'launcher_accounts.json'
+const makeUUID = () => UUID.v4().toString().replace(/-/g, '')
 
 module.exports = async function (client, options) {
+  // get profiles folder
   if (!options.profilesFolder && options.profilesFolder !== false) { // not defined, but not explicitly false. fallback to default
     let mcFolderExists = true
     try {
       await fs.access(mcDefaultFolderPath)
-    } catch (ignoreErr) {
+    } catch (ignoreErr) { // we can't access the minecraft folder
       mcFolderExists = false
     }
     options.profilesFolder = mcFolderExists ? mcDefaultFolderPath : '.' // local folder if mc folder doesn't exist
   }
 
   const yggdrasilClient = yggdrasil({ agent: options.agent, host: options.authServer || 'https://authserver.mojang.com' })
-  const clientToken = options.clientToken || (options.session && options.session.clientToken) || (options.profilesFolder && (await getLauncherProfiles()).mojangClientToken) || UUID.v4().toString().replace(/-/g, '')
+
+  const clientToken = options.clientToken || // use clientToken passed to client
+  (options.session && options.session.clientToken) || // use session passed to client
+  (options.profilesFolder && (await getLauncherProfiles()).mojangClientToken) || // try to get the client token from minecraft folder
+  makeUUID() // as a last case make our own client token
+
   const skipValidation = false || options.skipValidation
+
   options.accessToken = null
-  options.haveCredentials = !!options.password || (clientToken != null && options.session != null) || (options.profilesFolder && !!getProfileId(await getLauncherProfiles()))
+
+  options.haveCredentials = !!options.password ||
+  (clientToken && options.session) ||
+  (options.profilesFolder && !!getProfileId(await getLauncherProfiles()))
 
   async function getLauncherProfiles () { // get launcher profiles
     try {
@@ -47,49 +58,70 @@ module.exports = async function (client, options) {
 
   if (options.haveCredentials) {
     // make a request to get the case-correct username before connecting.
-    const cb = function (err, session) {
+    async function saveSession (session) {
       if (options.profilesFolder) {
-        getLauncherProfiles().then((auths) => {
+        try {
+          const auths = getLauncherProfiles()
           if (!auths.accounts) auths.accounts = []
           try {
             let profile = getProfileId(auths)
-            if (err) {
-              if (profile) { // profile is invalid, remove
-                delete auths.accounts[profile]
-              }
-            } else { // successful login
-              if (!profile) {
-                profile = UUID.v4().toString().replace(/-/g, '') // create new profile
-              }
-              if (!auths.mojangClientToken) {
-                auths.mojangClientToken = clientToken
-              }
+            if (!profile) {
+              profile = makeUUID() // create new profile
+            }
+            if (!auths.mojangClientToken) {
+              auths.mojangClientToken = clientToken
+            }
 
-              if (clientToken === auths.mojangClientToken) { // only do something when we can save a new clienttoken or they match
-                const oldProfileObj = auths.accounts[profile]
-                const newProfileObj = {
-                  accessToken: session.accessToken,
-                  minecraftProfile: {
-                    id: session.selectedProfile.id,
-                    name: session.selectedProfile.name
-                  },
-                  userProperites: oldProfileObj ? (oldProfileObj.userProperites || []) : [],
-                  username: options.username
-                }
-                auths.accounts[profile] = newProfileObj
+            if (clientToken === auths.mojangClientToken) { // only do something when we can save a new clienttoken or they match
+              const oldProfileObj = auths.accounts[profile]
+
+              auths.accounts[profile] = {
+                accessToken: session.accessToken,
+                minecraftProfile: {
+                  id: session.selectedProfile.id,
+                  name: session.selectedProfile.name
+                },
+                userProperites: oldProfileObj ? (oldProfileObj.userProperites || []) : [],
+                username: options.username
               }
             }
           } catch (ignoreErr) {
             // again, silently fail, just don't save anything
           }
-          fs.writeFile(path.join(options.profilesFolder, launcherDataFile), JSON.stringify(auths, null, 2)).then(() => {}, (ignoreErr) => {
-            // console.warn("Couldn't save tokens:\n", err) // not any error, we just don't save the file
-          })
-        }, (ignoreErr) => {
-          // console.warn("Skipped saving tokens because of error\n", err) // not any error, we just don't save the file
-        })
+
+          try { // save file
+            await fs.writeFile(path.join(options.profilesFolder, launcherDataFile), JSON.stringify(auths, null, 2))
+          } catch (err) {
+            // not any error, we just don't save the file
+          }
+        } catch (err) {
+          // not any error, we just don't save the file
+        }
+      }
+    }
+
+    async function handleError (session, err) {
+      let auths
+      try {
+        auths = getLauncherProfiles()
+        if (!auths.accounts) auths.accounts = []
+        try {
+          const profile = getProfileId(auths)
+          if (!profile) return
+
+          delete auths.accounts[profile] // profile is invalid, remove
+        } catch (error) {
+          // not any error, we just don't save the file
+        }
+      } catch (error) {
+        // not any error, we just don't save the file
       }
 
+      try { // save file
+        await fs.writeFile(path.join(options.profilesFolder, launcherDataFile), JSON.stringify(auths, null, 2))
+      } catch (err) {
+        // not any error, we just don't save the file
+      }
       if (err) {
         client.emit('error', err)
       } else {
@@ -105,23 +137,17 @@ module.exports = async function (client, options) {
       try {
         const auths = await getLauncherProfiles()
         const profile = getProfileId(auths)
-
+        const { username, minecraftProfile: { name, id }, accessToken } = auths.accounts[profile]
         if (profile) {
-          const newUsername = auths.accounts[profile].username
-          const displayName = auths.accounts[profile].minecraftProfile.name
-          const uuid = auths.accounts[profile].minecraftProfile.id
-          const newProfile = {
-            id: uuid,
-            name: displayName
-          }
+          const newProfile = { id, name }
 
           options.session = {
-            accessToken: auths.accounts[profile].accessToken,
+            accessToken,
             clientToken: auths.mojangClientToken,
             selectedProfile: newProfile,
             availableProfiles: [newProfile]
           }
-          options.username = newUsername
+          options.username = username
         }
       } catch (ignoreErr) {
         // skip the error :/
@@ -130,34 +156,48 @@ module.exports = async function (client, options) {
 
     if (options.session) {
       if (!skipValidation) {
-        yggdrasilClient.validate(options.session.accessToken, function (err) {
-          if (!err) { cb(null, options.session) } else {
-            yggdrasilClient.refresh(options.session.accessToken, options.session.clientToken, function (err, accessToken, data) {
-              if (!err) {
-                cb(null, data)
-              } else if (options.username && options.password) {
-                yggdrasilClient.auth({
+        try { // validate existing session
+          await yggdrasilClient.validate(options.session.accessToken)
+          await saveSession(options.session)
+        } catch (err) {
+          let data
+          try { // refresh token
+            data = await yggdrasilClient.refresh(options.session.accessToken, options.session.clientToken)[1]
+            await saveSession(data)
+          } catch (err) { // token is invalid
+            if (options.username && options.password) { // try logging in
+              try {
+                data = await yggdrasilClient.auth({
                   user: options.username,
                   pass: options.password,
                   token: clientToken,
                   requestUser: true
-                }, cb)
-              } else {
-                cb(err, data)
+                })
+                await saveSession(data)
+              } catch (err) {
+                await handleError(data, err)
               }
-            })
+            } else { // just return the token with an error
+              await handleError(data, err)
+            }
           }
-        })
+        }
       } else {
         // trust that the provided session is a working one
-        cb(null, options.session)
+        await saveSession(options.session)
       }
-    } else {
-      yggdrasilClient.auth({
-        user: options.username,
-        pass: options.password,
-        token: clientToken
-      }, cb)
+    } else { // no session, so just make our auth with a token
+      let data
+      try {
+        data = await yggdrasilClient.auth({
+          user: options.username,
+          pass: options.password,
+          token: clientToken
+        })
+        await saveSession(data)
+      } catch (err) {
+        await handleError(data, err)
+      }
     }
   } else {
     // assume the server is in offline mode and just go for it.
