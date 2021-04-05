@@ -93,28 +93,17 @@ var server = mc.createServer({
   port: 25565,           // optional
   version: '1.16.3'
 });
-const mcData = require('minecraft-data')(server.version)
 
 server.on('login', function(client) {
-  
-  let loginPacket = mcData.loginPacket
 
   client.write('login', {
     entityId: client.id,
-    isHardcore: false,
+    levelType: 'default',
     gameMode: 0,
-    previousGameMode: 255,
-    worldNames: loginPacket.worldNames,
-    dimensionCodec: loginPacket.dimensionCodec,
-    dimension: loginPacket.dimension,
-    worldName: 'minecraft:overworld',
-    hashedSeed: [0, 0],
+    dimension: 0,
+    difficulty: 2,
     maxPlayers: server.maxPlayers,
-    viewDistance: 10,
-    reducedDebugInfo: false,
-    enableRespawnScreen: true,
-    isDebug: false,
-    isFlat: false
+    reducedDebugInfo: false
   });
   client.write('position', {
     x: 0,
