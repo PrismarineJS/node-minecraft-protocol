@@ -6,8 +6,6 @@ const options = {
 }
 
 const server = mc.createServer(options)
-const mcData = require('minecraft-data')(server.version)
-const loginPacket = mcData.loginPacket
 
 server.on('login', function (client) {
   const addr = client.socket.remoteAddress
@@ -24,21 +22,13 @@ server.on('login', function (client) {
   // send init data so client will start rendering world
   client.write('login', {
     entityId: client.id,
-    isHardcore: false,
+    levelType: 'default',
     gameMode: 0,
-    previousGameMode: 255,
-    worldNames: loginPacket.worldNames,
-    dimensionCodec: loginPacket.dimensionCodec,
-    dimension: loginPacket.dimension,
-    worldName: 'minecraft:overworld',
-    hashedSeed: [0, 0],
+    dimension: 0,
+    difficulty: 2,
     maxPlayers: server.maxPlayers,
-    viewDistance: 10,
-    reducedDebugInfo: false,
-    enableRespawnScreen: true,
-    isDebug: false,
-    isFlat: false
-  })
+    reducedDebugInfo: false
+  });
 
   client.write('position', {
     x: 0,
