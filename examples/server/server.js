@@ -8,7 +8,6 @@ const options = {
 }
 
 const server = mc.createServer(options)
-const mcData = require('minecraft-data')(server.version)
 
 server.on('login', function (client) {
   broadcast(client.username + ' joined the game.')
