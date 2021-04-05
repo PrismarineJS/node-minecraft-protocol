@@ -9,7 +9,7 @@ const server = mc.createServer({
 })
 
 server.on('login', function (client) {
-   client.write('login', {
+  client.write('login', {
     entityId: client.id,
     levelType: 'default',
     gameMode: 0,
@@ -17,7 +17,7 @@ server.on('login', function (client) {
     difficulty: 2,
     maxPlayers: server.maxPlayers,
     reducedDebugInfo: false
-  });
+  })
   client.registerChannel('CUSTOM|ChannelOne', ['i32', []], true)
   client.registerChannel('CUSTOM|ChannelTwo', ['i32', []], true)
   client.write('position', {

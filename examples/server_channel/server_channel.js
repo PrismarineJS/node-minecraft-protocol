@@ -12,7 +12,7 @@ server.on('login', function (client) {
   client.registerChannel('MC|Brand', ['string', []])
   client.on('MC|Brand', console.log)
 
-   client.write('login', {
+  client.write('login', {
     entityId: client.id,
     levelType: 'default',
     gameMode: 0,
@@ -20,7 +20,7 @@ server.on('login', function (client) {
     difficulty: 2,
     maxPlayers: server.maxPlayers,
     reducedDebugInfo: false
-  });
+  })
   client.write('position', {
     x: 0,
     y: 1.62,

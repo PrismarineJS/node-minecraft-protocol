@@ -30,7 +30,7 @@ server.on('login', function (client) {
     difficulty: 2,
     maxPlayers: server.maxPlayers,
     reducedDebugInfo: false
-  });
+  })
   client.write('map_chunk', {
     x: 0,
     z: 0,
