@@ -9,6 +9,7 @@ const server = mc.createServer({
   version: '1.16'
 })
 const chunk = new Chunk()
+const mcData = require('minecraft-data')(server.version)
 
 for (let x = 0; x < 16; x++) {
   for (let z = 0; z < 16; z++) {
