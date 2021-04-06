@@ -1,3 +1,7 @@
+// Tests packet serialization/deserialization from with raw binary from minecraft-packets
+
+const testedVersions = []
+
 const { createSerializer, createDeserializer, states } = require('minecraft-protocol')
 const mcPackets = require('minecraft-packets')
 const assert = require('assert')
