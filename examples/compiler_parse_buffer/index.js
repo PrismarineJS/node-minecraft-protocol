@@ -1,4 +1,4 @@
-const { createSerializer, createDeserializer, states } = require('../../src/index.js')
+const { createSerializer, createDeserializer, states } = require('minecraft-protocol')
 const mcPackets = require('minecraft-packets')
 
 const serializer = createSerializer({ state: states.PLAY, version: '1.16.5' })
