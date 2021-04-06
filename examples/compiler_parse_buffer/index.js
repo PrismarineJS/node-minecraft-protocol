@@ -17,4 +17,4 @@ const parsed = convertBufferToObject(buffer).data
 const parsedBuffer = convertObjectToBuffer(parsed)
 console.log(buffer)
 console.log(parsedBuffer)
-console.log(Buffer.compare(buffer, parsedBuffer) === 0)
+console.log(buffer.equals(parsedBuffer))
