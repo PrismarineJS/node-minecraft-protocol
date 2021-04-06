@@ -1,6 +1,6 @@
 // Tests packet serialization/deserialization from with raw binary from minecraft-packets
-
-const testedVersions = []
+const { firstVersion, lastVersion } = require('./common/parallel')
+const testedVersions = ['1.16', '1.16.5']
 
 const { createSerializer, createDeserializer, states } = require('minecraft-protocol')
 const mcPackets = require('minecraft-packets')
@@ -26,7 +26,10 @@ function testBuffer (buffer, [packetName, packetIx]) {
   assert(areEq === true, `Error when testing ${+packetIx + 1} ${packetName} packet`)
 }
 
-Object.entries(mcPackets.pc).forEach(([ver, data]) => {
+testedVersions.forEach((ver, i) => {
+  if (!(i >= firstVersion && i <= lastVersion)) { return }
+
+  const data = mcPackets.pc[ver]
   serializer = makeClientSerializer(ver)
   deserializer = makeClientDeserializer(ver)
   // server -> client

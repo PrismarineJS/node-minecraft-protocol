@@ -11,6 +11,7 @@
   "scripts": {
     "prepare": "npm install require-self && require-self",
     "test": "mocha --recursive --reporter spec --exit --exclude non-par-test",
+    "test-non-par": "mocha --recursive --reporter spec --exit -g non-par-test",
     "lint": "standard",
     "fix": "standard --fix",
     "pretest": "npm run lint",
