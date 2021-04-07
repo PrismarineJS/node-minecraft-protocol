@@ -39,7 +39,6 @@ jobs:
     strategy:
       matrix:
         node-version: [14.x]
-        mcVersionIndex: [0, 1]
 
     steps:
     - uses: actions/checkout@v2
@@ -52,8 +51,6 @@ jobs:
       with:
         java-version: 1.8
         java-package: jre
-    - run: npm install
-    - env:
-        CIRCLE_NODE_INDEX: ${{ matrix.mcVersionIndex }}
-        CIRCLE_NODE_TOTAL: 10
-      run: npm test-non-par
+    - run: |
+      npm install
+      npm run test-non-par
