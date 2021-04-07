@@ -8,31 +8,30 @@ const assert = require('assert')
 
 const makeClientSerializer = version => createSerializer({ state: states.PLAY, version, isServer: true })
 const makeClientDeserializer = version => createDeserializer({ state: states.PLAY, version })
-let serializer = null
-let deserializer = null
-
-function convertBufferToObject (buffer) {
-  return deserializer.parsePacketBuffer(buffer)
-}
-
-function convertObjectToBuffer (object) {
-  return serializer.createPacketBuffer(object)
-}
-
-function testBuffer (buffer, [packetName, packetIx]) {
-  const parsed = convertBufferToObject(buffer).data
-  const parsedBuffer = convertObjectToBuffer(parsed)
-  const areEq = buffer.equals(parsedBuffer)
-  assert.strictEqual(areEq, true, `Error when testing ${+packetIx + 1} ${packetName} packet`)
-}
 
 testedVersions.forEach((ver, i) => {
+  let serializer, deserializer, data, counter
+
+  function convertBufferToObject (buffer) {
+    return deserializer.parsePacketBuffer(buffer)
+  }
+
+  function convertObjectToBuffer (object) {
+    return serializer.createPacketBuffer(object)
+  }
+
+  function testBuffer (buffer, [packetName, packetIx]) {
+    const parsed = convertBufferToObject(buffer).data
+    const parsedBuffer = convertObjectToBuffer(parsed)
+    const areEq = buffer.equals(parsedBuffer)
+    assert.strictEqual(areEq, true, `Error when testing ${+packetIx + 1} ${packetName} packet`)
+  }
   describe(`Test version ${ver}`, () => {
-    const data = mcPackets.pc[ver]
+    data = mcPackets.pc[ver]
     serializer = makeClientSerializer(ver)
     deserializer = makeClientDeserializer(ver)
+    counter = 0
     // server -> client
-    let counter = 0
     Object.entries(data['from-server']).forEach(([packetName, packetData]) => {
       it(`${packetName} packet`, () => {
         for (const i in packetData) {
