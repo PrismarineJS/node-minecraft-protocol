@@ -1,4 +1,4 @@
-# minecraft protocol
+# minecraft protocol 
 [![NPM version](https://img.shields.io/npm/v/minecraft-protocol.svg)](https://www.npmjs.com/package/minecraft-protocol)
 [![Build Status](https://github.com/PrismarineJS/node-minecraft-protocol/workflows/CI/badge.svg)](https://github.com/PrismarineJS/node-minecraft-protocol/actions?query=workflow%3A%22CI%22)
 [![Discord](https://img.shields.io/badge/chat-on%20discord-brightgreen.svg)](https://discord.gg/GsEFRM8)
