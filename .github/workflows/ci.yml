@@ -51,6 +51,4 @@ jobs:
       with:
         java-version: 1.8
         java-package: jre
-    - run: |
-      npm install
-      npm run test-non-par
+    - run: npm install && npm run test-non-par
