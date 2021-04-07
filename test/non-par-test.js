@@ -9,8 +9,8 @@ const assert = require('assert')
 const makeClientSerializer = version => createSerializer({ state: states.PLAY, version, isServer: true })
 const makeClientDeserializer = version => createDeserializer({ state: states.PLAY, version })
 
-testedVersions.forEach((ver, i) => {
-  let serializer, deserializer, data, counter
+Object.entries(mcPackets.pc).forEach(([ver, data]) => {
+  let serializer, deserializer
 
   function convertBufferToObject (buffer) {
     return deserializer.parsePacketBuffer(buffer)
@@ -27,19 +27,15 @@ testedVersions.forEach((ver, i) => {
     assert.strictEqual(areEq, true, `Error when testing ${+packetIx + 1} ${packetName} packet`)
   }
   describe(`Test version ${ver}`, () => {
-    data = mcPackets.pc[ver]
     serializer = makeClientSerializer(ver)
     deserializer = makeClientDeserializer(ver)
-    counter = 0
     // server -> client
     Object.entries(data['from-server']).forEach(([packetName, packetData]) => {
       it(`${packetName} packet`, () => {
         for (const i in packetData) {
           testBuffer(packetData[i].raw, [packetName, i])
-          counter++
         }
       })
     })
-    console.log(`Cycled ${counter} packets for ${ver} successfully`)
   })
 })
