@@ -32,7 +32,7 @@ jobs:
         CIRCLE_NODE_INDEX: ${{ matrix.mcVersionIndex }}
         CIRCLE_NODE_TOTAL: 10
       run: npm test
-  non-par-test:
+  packet-cycle-test:
 
     runs-on: ubuntu-latest
 
