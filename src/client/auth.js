@@ -60,6 +60,11 @@ module.exports = async function (client, options) {
             } else { // successful login
               if (!profile) {
                 profile = UUID.v4().toString().replace(/-/g, '') // create new profile
+                throw new Error('Account not found') // TODO: Find a way to calculate remoteId. Launcher ignores account entry and makes a new one if remoteId is incorrect
+              }
+              if (!auths.accounts[profile].remoteId) {
+                delete auths.accounts[profile]
+                throw new Error('Account has no remoteId') // TODO: Find a way to calculate remoteId. Launcher ignores account entry and makes a new one if remoteId is incorrect
               }
               if (!auths.mojangClientToken) {
                 auths.mojangClientToken = clientToken
@@ -73,8 +78,12 @@ module.exports = async function (client, options) {
                     id: session.selectedProfile.id,
                     name: session.selectedProfile.name
                   },
-                  userProperites: oldProfileObj ? (oldProfileObj.userProperites || []) : [],
-                  username: options.username
+                  userProperites: oldProfileObj?.userProperites ?? [],
+                  remoteId: oldProfileObj?.remoteId ?? '',
+                  username: options.username,
+                  localId: profile,
+                  type: (options.auth?.toLowerCase() === 'microsoft' ? 'Xbox' : 'Mojang'),
+                  persistent: true
                 }
                 auths.accounts[profile] = newProfileObj
               }
