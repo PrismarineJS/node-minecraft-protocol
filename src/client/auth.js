@@ -54,8 +54,8 @@ module.exports = async function (client, options) {
           try {
             let profile = getProfileId(auths)
             if (err) {
-              if (profile) { // profile is invalid, remove
-                delete auths.accounts[profile]
+              if (profile && auths.accounts[profile].type !== 'Xbox') { // MS accounts are deemed invalid in case someone tries to use one without specifying options.auth, but we shouldn't remove these
+                delete auths.accounts[profile] // profile is invalid, remove
               }
             } else { // successful login
               if (!profile) {
