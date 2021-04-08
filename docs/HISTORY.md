@@ -1,5 +1,9 @@
 # History
 
+## 1.25.0
+
+* add fullBuffer to packet event
+
 ## 1.24.2
 
 * Throw if data is not available for a given version (@U9G)
