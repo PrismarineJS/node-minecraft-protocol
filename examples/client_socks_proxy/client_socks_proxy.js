@@ -16,7 +16,7 @@ require('http').get({
   method: 'GET',
   host: 'ifconfig.me',
   path: '/',
-  agent: new ProxyAgent({ protocol: 'socks5:', host: proxyHost, port: proxyPort }),
+  agent: new ProxyAgent({ protocol: 'socks5:', host: proxyHost, port: proxyPort })
 }, (res) => {
   if (res.statusCode === 200) {
     process.stdout.write('Proxy ok ip: ')
@@ -66,7 +66,7 @@ client.on('disconnect', function (packet) {
 client.on('end', function () {
   console.log('Connection lost')
 })
-client.on('error', function(error) {
+client.on('error', function (error) {
   console.log('Client Error', error)
 })
 client.on('kick_disconnect', (reason) => {

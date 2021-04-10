@@ -37,12 +37,12 @@
     "@types/node": "^14.0.1",
     "espower-loader": "^1.0.0",
     "intelli-espower-loader": "^1.0.0",
+    "minecraft-packets": "^1.1.5",
     "minecraft-wrap": "^1.2.3",
     "mocha": "^8.0.1",
     "power-assert": "^1.0.0",
     "require-self": "^0.2.3",
-    "standard": "^16.0.1",
-    "minecraft-packets": "^1.1.5"
+    "standard": "^16.0.1"
   },
   "dependencies": {
     "@azure/msal-node": "^1.0.0-beta.3",
