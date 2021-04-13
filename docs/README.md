@@ -65,6 +65,7 @@ var client = mc.createClient({
   port: 25565,         // optional
   username: "email@example.com",
   password: "12345678",
+  auth: 'mojang' // optional; by default uses mojang, if using a microsoft account, set to 'microsoft'
 });
 client.on('chat', function(packet) {
   // Listen for chat messages and echo them back.
@@ -79,6 +80,7 @@ client.on('chat', function(packet) {
 ```
 
 If the server is in offline mode, you may leave out the `password` option.
+You can also leave out `password` when using a Microsoft account. If provided, password based auth will be attempted first which may fail. *Note:* if using a Microsoft account, your account age must be >= 18 years old.
 
 ### Hello World server example
 

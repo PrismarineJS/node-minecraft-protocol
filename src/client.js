@@ -83,9 +83,11 @@ class Client extends EventEmitter {
       parsed.data = parsed.data.params
       parsed.metadata.state = state
       debug('read packet ' + state + '.' + parsed.metadata.name)
-      const s = JSON.stringify(parsed.data, null, 2)
-      debug(s && s.length > 10000 ? parsed.data : s)
-      this.emit('packet', parsed.data, parsed.metadata, parsed.buffer)
+      if (debug.enabled) {
+        const s = JSON.stringify(parsed.data, null, 2)
+        debug(s && s.length > 10000 ? parsed.data : s)
+      }
+      this.emit('packet', parsed.data, parsed.metadata, parsed.buffer, parsed.fullBuffer)
       this.emit(parsed.metadata.name, parsed.data, parsed.metadata)
       this.emit('raw.' + parsed.metadata.name, parsed.buffer, parsed.metadata)
       this.emit('raw', parsed.buffer, parsed.metadata)
@@ -169,10 +171,14 @@ class Client extends EventEmitter {
 
   end (reason) {
     this._endReason = reason
-    if (this.cipher) this.cipher.unpipe()
-    if (this.framer) this.framer.unpipe()
+    /* ending the serializer will end the whole chain
+    serializer -> framer -> socket -> splitter -> deserializer */
+    if (this.serializer) {
+      this.serializer.end()
+    } else {
+      if (this.socket) this.socket.end()
+    }
     if (this.socket) {
-      this.socket.end()
       this.closeTimer = setTimeout(
         this.socket.destroy.bind(this.socket),
         closeTimeout
@@ -209,15 +215,16 @@ class Client extends EventEmitter {
   }
 
   write (name, params) {
-    if (this.ended) { return }
+    if (!this.serializer.writable) { return }
     debug('writing packet ' + this.state + '.' + name)
     debug(params)
     this.serializer.write({ name, params })
   }
 
   writeRaw (buffer) {
-    if (this.ended) { return }
-    if (this.compressor === null) { this.framer.write(buffer) } else { this.compressor.write(buffer) }
+    const stream = this.compressor === null ? this.framer : this.compressor
+    if (!stream.writable) { return }
+    stream.write(buffer)
   }
 
   // TCP/IP-specific (not generic Stream) method for backwards-compatibility

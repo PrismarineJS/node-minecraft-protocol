@@ -1,5 +1,65 @@
 # History
 
+## 1.25.0
+
+* add fullBuffer to packet event
+
+## 1.24.2
+
+* Throw if data is not available for a given version (@U9G)
+
+## 1.24.1
+
+* fix write to launcher_accounts.json (@majorblake)
+
+## 1.24.0
+
+* Using launcher_accounts.json as new token source (@Moondarker)
+* Fix msa caching bug (@extremeheat)
+
+## 1.23.3
+
+* add a reason to client timeout
+
+## 1.23.2
+
+* Remove test code from microsoftAuth
+
+## 1.23.1
+
+* revert refactor tns dns for now to fix it
+
+## 1.23.0
+
+* add auth type to types (@u9g)
+* refactor tcp dns (@Kashalls)
+* fix a launcher profile.json problem (@Rob9315)
+* Msa device auth (@extremeheat)
+
+## 1.22.0
+
+* Don't stringify every packet if debug not enabled (@evan-goode)
+* Add handler for Login Plugin Message (@ph0t0shop)
+* Password=false now using offline mode (@dada513)
+
+## 1.21.0
+
+* Integrate Authentication for Microsoft Accounts (thanks @Kashalls)
+
+## 1.20.2
+
+* add back token auth now that mineflayer is fixed
+
+## 1.20.1
+
+* Temporarily revert token auth to fix a bug
+
+## 1.20.0
+
+* Add token auth like the vanilla launcher (save the token) (thanks @ph0t0shop)
+* Only use fullReason for the disconnect packet (thanks @DeltaEvo)
+* End the serializer instead of unpiping streams (thanks @DeltaEvo)
+
 ## 1.19.0
 
 * make auto version more robust by giving up after 5s if no answer to ping is given but the version is returned

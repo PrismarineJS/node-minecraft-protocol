@@ -79,7 +79,7 @@ module.exports = function (client, server, options) {
     nextStep()
 
     function verifyUsername () {
-      yggdrasilServer.hasJoined(client.username, serverId, sharedSecret, client.publicKey, client.socket.remoteAddress, function (err, profile) {
+      yggdrasilServer.hasJoined(client.username, serverId, sharedSecret, client.publicKey, function (err, profile) {
         if (err) {
           client.end('Failed to verify username!')
           return
