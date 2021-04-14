@@ -10,6 +10,25 @@ if (process.argv.length < 6 || process.argv.length > 8) {
 const proxyHost = process.argv[4]
 const proxyPort = process.argv[5]
 
+// This part tests the proxy
+// You can comment out this part if you know what you are doing
+require('http').get({
+  method: 'GET',
+  host: 'ifconfig.me',
+  path: '/',
+  agent: new ProxyAgent({ protocol: 'socks5:', host: proxyHost, port: proxyPort })
+}, (res) => {
+  if (res.statusCode === 200) {
+    process.stdout.write('Proxy ok ip: ')
+    res.pipe(process.stdout)
+    res.on('close', () => {
+      process.stdout.write('\nProxy Connection closed\n')
+    })
+  } else {
+    throw Error('Proxy not working')
+  }
+})
+
 const client = mc.createClient({
   connect: client => {
     socks.createConnection({
@@ -46,6 +65,12 @@ client.on('disconnect', function (packet) {
 })
 client.on('end', function () {
   console.log('Connection lost')
+})
+client.on('error', function (error) {
+  console.log('Client Error', error)
+})
+client.on('kick_disconnect', (reason) => {
+  console.log('Kicked for reason', reason)
 })
 client.on('chat', function (packet) {
   const jsonMsg = JSON.parse(packet.message)
