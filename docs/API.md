@@ -226,7 +226,7 @@ correct data type. You can figure out the types [here](http://wiki.vg/Entities#E
 * port : default too 25565
 * version: default too most recent version
 
-Ping a minecraft server and return a promise or use a callback containing the information about it
+Ping a minecraft server and return a promise or use an optional callback containing the information about it
 
 returns: `promise( <pending> ).then(pingResult).catch(err)`
 callback `callback(err, pingResults)`
