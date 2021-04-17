@@ -219,16 +219,17 @@ Where the key is the numeric metadata key and the value is the value of the
 correct data type. You can figure out the types [here](http://wiki.vg/Entities#Entity_Metadata_Format)
 
 
-## mc.ping(options)
+## mc.ping(options, callback)
 
 `options` is an object containing the following:
 * host : default too locahost
 * port : default too 25565
 * version: default too most recent version
 
-Ping a minecraft server and return a promise containing the information about it
+Ping a minecraft server and return a promise or use a callback containing the information about it
 
-`promise( <pending> ).then(pingResult).catch(err)`
+returns: `promise( <pending> ).then(pingResult).catch(err)`
+callback `callback(err, pingResults)`
 
 `pingResults`:
 
