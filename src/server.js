@@ -4,6 +4,7 @@ const net = require('net')
 const EventEmitter = require('events').EventEmitter
 const Client = require('./client')
 const states = require('./states')
+const { createSerializer } = require('./transforms/serializer')
 
 class Server extends EventEmitter {
   constructor (version, customPackets, hideErrors = false) {
@@ -15,6 +16,7 @@ class Server extends EventEmitter {
     this.clients = {}
     this.customPackets = customPackets
     this.hideErrors = hideErrors
+    this.serializer = createSerializer({ state: 'play', isServer: true, version, customPackets })
   }
 
   listen (port, host) {
@@ -58,6 +60,12 @@ class Server extends EventEmitter {
       client.end('ServerShutdown')
     })
     this.socketServer.close()
+  }
+
+  writeToClients (clients, name, params) {
+    if (clients.length === 0) return
+    const buffer = this.serializer.createPacketBuffer({ name, params })
+    clients.forEach(client => client.writeRaw(buffer))
   }
 }
 
