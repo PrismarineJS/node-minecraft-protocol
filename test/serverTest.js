@@ -417,7 +417,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           version: version.minecraftVersion,
           port: PORT
         })
-        await Promise.all(once(player1, 'login'), once(player2, 'login'))
+        await Promise.all([once(player1, 'login'), once(player2, 'login')])
         player1.once('chat', (packet) => {
           assert.strictEqual(packet, { message: '{"text":"A message from the server."}', position: 1, sender: '0' })
           player1.end()
@@ -427,7 +427,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           player2.end()
         })
         server.writeToClients([player1, player2], 'chat', { message: '{"text":"A message from the server."}', position: 1, sender: '0' })
-        await Promise.all(once(player1, 'end'), once(player2, 'end'))
+        await Promise.all([once(player1, 'end'), once(player2, 'end')])
         server.close()
       })
     })
