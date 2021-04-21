@@ -2,6 +2,7 @@
 
 const mc = require('../')
 const assert = require('power-assert')
+const { once } = require('events')
 
 const { firstVersion, lastVersion } = require('./common/parallel')
 const w = {
@@ -369,6 +370,66 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         count -= 1
         if (count <= 0) done()
       }
+    })
+    it('encodes chat packet once and send it to two clients', function (done) {
+      const server = mc.createServer({
+        'online-mode': false,
+        version: version.minecraftVersion,
+        port: PORT
+      })
+      server.on('login', function (client) {
+        const loginPacket = {
+          entityId: client.id,
+          levelType: 'default',
+          gameMode: 1,
+          previousGameMode: 255,
+          worldNames: ['minecraft:overworld'],
+          dimensionCodec: (version.version >= 735 ? mcData.loginPacket.dimension : { name: '', type: 'compound', value: { dimension: { type: 'list', value: { type: 'compound', value: [w] } } } }),
+          dimension: (version.version >= 735 ? mcData.loginPacket.dimension : 0),
+          worldName: 'minecraft:overworld',
+          hashedSeed: [0, 0],
+          difficulty: 2,
+          maxPlayers: server.maxPlayers,
+          reducedDebugInfo: (version.version >= 735 ? false : 0),
+          enableRespawnScreen: true
+        }
+        if (version.version >= 735) { // 1.16x
+          loginPacket.isDebug = false
+          loginPacket.isFlat = false
+          loginPacket.isHardcore = false
+          loginPacket.viewDistance = 10
+          delete loginPacket.levelType
+          delete loginPacket.difficulty
+        }
+        client.write('login', loginPacket)
+      })
+      server.on('close', done)
+      server.on('listening', async function () {
+        const player1 = mc.createClient({
+          username: 'player1',
+          host: '127.0.0.1',
+          version: version.minecraftVersion,
+          port: PORT
+        })
+        const player2 = mc.createClient({
+          username: 'player2',
+          host: '127.0.0.1',
+          version: version.minecraftVersion,
+          port: PORT
+        })
+        await Promise.all(once(player1, 'login'), once(player2, 'login'))
+        player1.once('chat', (packet) => {
+          assert.strictEqual(packet, { message: '{"text":"A message from the server."}', position: 1, sender: '0' })
+          player1.end()
+        })
+        player2.once('chat', (packet) => {
+          assert.strictEqual(packet, { message: '{"text":"A message from the server."}', position: 1, sender: '0' })
+          player2.end()
+        })
+        server.writeToClients([player1, player2], 'chat', { message: '{"text":"A message from the server."}', position: 1, sender: '0' })
+        await Promise.all(once(player1, 'end'), once(player2, 'end'))
+        server.close()
+      })
     })
   })
 })
