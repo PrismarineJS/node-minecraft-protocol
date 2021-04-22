@@ -419,15 +419,15 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         })
         await Promise.all([once(player1, 'login'), once(player2, 'login')])
         player1.on('chat', (packet) => {
-          assert.deepStrictEqual(packet, { "message": "{\"text\":\"A message from the server.\"}", "position": 1, "sender": "00000000-0000-0000-0000-000000000000" })
+          assert.strictEqual(packet.message, '{"text":"A message from the server."}')
           player1.end()
         })
         player2.on('chat', (packet) => {
-          assert.deepStrictEqual(packet, { "message": "{\"text\":\"A message from the server.\"}", "position": 1, "sender": "00000000-0000-0000-0000-000000000000" })
+          assert.strictEqual(packet.message, '{"text":"A message from the server."}')
           player2.end()
         })
         
-        server.writeToClients(Object.values(server.clients), 'chat', { "message": "{\"text\":\"A message from the server.\"}", "position": 1, "sender": "00000000-0000-0000-0000-000000000000" })
+        server.writeToClients(Object.values(server.clients), 'chat', { message: JSON.stringify({ text: 'A message from the server.' }), position: 1, sender: '00000000-0000-0000-0000-000000000000' })
         await Promise.all([once(player1, 'end'), once(player2, 'end')])
         server.close()
       })
