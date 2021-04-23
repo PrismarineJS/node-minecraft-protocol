@@ -68,7 +68,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
   const version = mcData.version
 
   describe('mc-server ' + version.minecraftVersion, function () {
-    this.timeout(5000*2)
+    this.timeout(5000)
     it('starts listening and shuts down cleanly', function (done) {
       const server = mc.createServer({
         'online-mode': false,
