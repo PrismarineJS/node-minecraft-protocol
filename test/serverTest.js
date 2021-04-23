@@ -68,7 +68,7 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
   const version = mcData.version
 
   describe('mc-server ' + version.minecraftVersion, function () {
-    this.timeout(5000)
+    this.timeout(5000*2)
     it('starts listening and shuts down cleanly', function (done) {
       const server = mc.createServer({
         'online-mode': false,
@@ -417,17 +417,14 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           version: version.minecraftVersion,
           port: PORT
         })
-        await Promise.all([once(player1, 'login'), once(player2, 'login')])
-        player1.on('chat', (packet) => {
-          assert.strictEqual(packet.message, '{"text":"A message from the server."}')
-          player1.end()
-        })
-        player2.on('chat', (packet) => {
-          assert.strictEqual(packet.message, '{"text":"A message from the server."}')
-          player2.end()
-        })
-        
+        await Promise.all([once(player1, 'login'), once(player2, 'login')])        
         server.writeToClients(Object.values(server.clients), 'chat', { message: JSON.stringify({ text: 'A message from the server.' }), position: 1, sender: '00000000-0000-0000-0000-000000000000' })
+        
+        let results = await Promise.all([ once(player1, 'chat'), once(player2, 'chat') ])
+        results.forEach(res => assert.strictEqual(res[0].message, '{"text":"A message from the server."}'))
+        
+        player1.end()
+        player2.end()
         await Promise.all([once(player1, 'end'), once(player2, 'end')])
         server.close()
       })
