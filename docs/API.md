@@ -29,6 +29,10 @@ automatically logged in and validated against mojang's auth.
 
 Create a server instance for `version` of minecraft.
 
+### server.writeToClients(clients, name, params)
+
+Write a packet to all `clients` but encode it only once.
+
 ### server.onlineModeExceptions
 
 This is a plain old JavaScript object. Add a key with the username you want to
