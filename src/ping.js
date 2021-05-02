@@ -19,22 +19,21 @@ function ping (options, cb) {
   options.noPongTimeout = options.noPongTimeout || 5 * 1000
 
   const client = new Client(false, version.minecraftVersion)
-  return new Promise((resolve, reject)=>{
+  return new Promise((resolve, reject) => {
     client.on('error', function (err) {
       clearTimeout(closeTimer)
-      if(cb){
+      if (cb) {
         cb(err)
       }
       reject(err)
     })
-  
     client.once('server_info', function (packet) {
       const data = JSON.parse(packet.response)
       const start = Date.now()
       const maxTime = setTimeout(() => {
         clearTimeout(closeTimer)
         client.end()
-        if(cb){
+        if (cb) {
           cb(null, data)
         }
         resolve(data)
@@ -44,18 +43,16 @@ function ping (options, cb) {
         clearTimeout(maxTime)
         clearTimeout(closeTimer)
         client.end()
-        if(cb){
+        if (cb) {
           cb(null, data)
         }
         resolve(data)
       })
       client.write('ping', { time: [0, 0] })
     })
-  
     client.on('state', function (newState) {
       if (newState === states.STATUS) { client.write('ping_start', {}) }
     })
-  
     // TODO: refactor with src/client/setProtocol.js
     client.on('connect', function () {
       client.write('set_protocol', {
@@ -66,18 +63,16 @@ function ping (options, cb) {
       })
       client.state = states.STATUS
     })
-  
     // timeout against servers that never reply while keeping
     // the connection open and alive.
     closeTimer = setTimeout(function () {
       client.end()
-      if(cb){
+      if (cb) {
         cb(new Error('ETIMEDOUT'))
       }
       reject(new Error('ETIMEDOUT'))
     }, options.closeTimeout)
-  
     tcpDns(client, options)
     options.connect(client)
-  });
-}
+  })
+};
