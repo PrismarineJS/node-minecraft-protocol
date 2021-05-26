@@ -41,7 +41,7 @@ class MsAuthFlow {
     let cachePath = cacheDir || mcDefaultFolderPath
     try {
       if (!fs.existsSync(cachePath + '/nmp-cache')) {
-        fs.mkdirSync(cachePath + '/nmp-cache')
+        fs.mkdirSync(cachePath + '/nmp-cache', { recursive: true })
       }
       cachePath += '/nmp-cache'
     } catch (e) {
