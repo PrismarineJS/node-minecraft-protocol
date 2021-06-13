@@ -9,13 +9,9 @@ const MC_SERVER_PATH = path.join(__dirname, 'server')
 
 const Wrap = require('minecraft-wrap').Wrap
 
-const { firstVersion, lastVersion } = require('./common/parallel')
-
 const download = require('minecraft-wrap').download
 
-mc.supportedVersions.forEach(function (supportedVersion, i) {
-  if (!(i >= firstVersion && i <= lastVersion)) { return }
-
+for (const supportedVersion of mc.supportedVersions) {
   const PORT = Math.round(30000 + Math.random() * 20000)
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
@@ -257,4 +253,4 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
       })
     })
   })
-})
+}
