@@ -12,12 +12,7 @@ const testDataWrite = [
   // TODO: add more packets for better quality data
 ]
 
-const { firstVersion, lastVersion } = require('./common/parallel')
-console.log({ firstVersion, lastVersion })
-
-mc.supportedVersions.forEach(function (supportedVersion, i) {
-  if (!(i >= firstVersion && i <= lastVersion)) { return }
-
+for (const supportedVersion of mc.supportedVersions) {
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
   describe('benchmark ' + version.minecraftVersion, function () {
@@ -49,4 +44,4 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
       done()
     })
   })
-})
+}
