@@ -222,6 +222,10 @@ for (const supportedVersion of mc.supportedVersions) {
           delete loginPacket.levelType
           delete loginPacket.difficulty
         }
+        if (version.version >= 755) { // 1.17
+          loginPacket.enableRespawnScreen = true
+          loginPacket.previousGameMode = -1
+        }
         client.write('login', loginPacket)
         client.on('chat', function (packet) {
           const message = '<' + client.username + '>' + ' ' + packet.message
@@ -347,6 +351,10 @@ for (const supportedVersion of mc.supportedVersions) {
           delete loginPacket.levelType
           delete loginPacket.difficulty
         }
+        if (version.version >= 755) { // 1.17
+          loginPacket.enableRespawnScreen = true
+          loginPacket.previousGameMode = -1
+        }
         client.write('login', loginPacket)
       })
       server.on('close', function () {
@@ -397,6 +405,10 @@ for (const supportedVersion of mc.supportedVersions) {
           loginPacket.viewDistance = 10
           delete loginPacket.levelType
           delete loginPacket.difficulty
+        }
+        if (version.version >= 755) { // 1.17
+          loginPacket.enableRespawnScreen = true
+          loginPacket.previousGameMode = -1
         }
         client.write('login', loginPacket)
       })
