@@ -48,10 +48,8 @@ server.on('login', function (client) {
     heightmaps: {
       type: 'compound',
       name: '',
-      value: {
-        MOTION_BLOCKING: { type: 'longArray', value: new Array(36).fill([0, 0]) }
-      }
-    }, // send fake heightmap
+      value: {} // Client will accept fake heightmap
+    },
     bitMap: chunk.getMask(),
     chunkData: chunk.dump(),
     blockEntities: []
