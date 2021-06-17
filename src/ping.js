@@ -4,9 +4,21 @@ const Client = require('./client')
 const states = require('./states')
 const tcpDns = require('./client/tcp_dns')
 
-module.exports = ping
+module.exports = cbPing
 
-function ping (options, cb) {
+function cbPing (options, cb) {
+  const pingPromise = ping(options)
+  if (cb) {
+    pingPromise.then((d) => {
+      cb(null, d)
+    }).catch((err) => {
+      cb(err, null)
+    })
+  }
+  return pingPromise
+};
+
+function ping (options) {
   options.host = options.host || 'localhost'
   options.port = options.port || 25565
   const optVersion = options.version || require('./version').defaultVersion
@@ -22,9 +34,6 @@ function ping (options, cb) {
   return new Promise((resolve, reject) => {
     client.on('error', function (err) {
       clearTimeout(closeTimer)
-      if (cb) {
-        cb(err)
-      }
       reject(err)
     })
     client.once('server_info', function (packet) {
@@ -33,9 +42,6 @@ function ping (options, cb) {
       const maxTime = setTimeout(() => {
         clearTimeout(closeTimer)
         client.end()
-        if (cb) {
-          cb(null, data)
-        }
         resolve(data)
       }, options.noPongTimeout)
       client.once('ping', function (packet) {
@@ -43,9 +49,6 @@ function ping (options, cb) {
         clearTimeout(maxTime)
         clearTimeout(closeTimer)
         client.end()
-        if (cb) {
-          cb(null, data)
-        }
         resolve(data)
       })
       client.write('ping', { time: [0, 0] })
@@ -67,9 +70,6 @@ function ping (options, cb) {
     // the connection open and alive.
     closeTimer = setTimeout(function () {
       client.end()
-      if (cb) {
-        cb(new Error('ETIMEDOUT'))
-      }
       reject(new Error('ETIMEDOUT'))
     }, options.closeTimeout)
     tcpDns(client, options)
