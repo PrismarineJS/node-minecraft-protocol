@@ -1,3 +1,5 @@
+'use strict'
+
 const encrypt = require('./encrypt')
 const keepalive = require('./keepalive')
 const compress = require('./compress')
@@ -11,15 +13,15 @@ const pluginChannels = require('./pluginChannels')
 const versionChecking = require('./versionChecking')
 
 module.exports = {
-    encrypt,
-    keepalive,
-    compress,
-    auth,
-    microsoftAuth,
-    setProtocol,
-    play,
-    tcpDns,
-    autoVersion,
-    pluginChannels,
-    versionChecking
+    encrypt: encrypt,
+    keepalive: keepalive,
+    compress: compress,
+    auth: auth,
+    microsoftAuth: microsoftAuth,
+    setProtocol: setProtocol,
+    play: play,
+    tcpDns: tcpDns,
+    autoVersion: autoVersion,
+    pluginChannels: pluginChannels,
+    versionChecking: versionChecking
 }
