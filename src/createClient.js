@@ -23,7 +23,16 @@ function createClient (options) {
   if (!options.version) { options.version = false }
 
   // TODO: avoid setting default version if autoVersion is enabled
-  const optVersion = options.version || require('./version').defaultVersion
+  const optVersion = options.version || (() => {
+    const defaultVersion = require('./version').defaultVersion
+    const optVersionClient = new Client(false, defaultVersion)
+    const returnClient = autoVersion(optVersionClient, options)
+    optVersionClient.end()
+    const returnVal = returnClient.version
+    returnClient.end() // TODO: improve this in the future
+    return returnVal
+  }) ()
+
   const mcData = require('minecraft-data')(optVersion)
   if (!mcData) throw new Error(`unsupported protocol version: ${optVersion}`)
   const version = mcData.version
@@ -51,6 +60,6 @@ function createClient (options) {
   compress(client, options)
   pluginChannels(client, options)
   versionChecking(client, options)
-
+  
   return client
 }
