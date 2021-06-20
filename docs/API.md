@@ -277,4 +277,6 @@ Returns a minecraft protocol [serializer](https://github.com/roblabla/ProtoDef#s
 
 Returns a minecraft protocol [deserializer](https://github.com/roblabla/ProtoDef#parserprotomaintype) for these parameters.
 
+## mc.clientFunctions 
 
+The functions within /src/client for more advanced use of the Client class without directly importing them
