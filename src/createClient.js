@@ -22,9 +22,8 @@ function createClient (options) {
   assert.ok(options.username, 'username is required')
   if (!options.version) { options.version = false }
 
-  // TODO: avoid setting default version if autoVersion is enabled
+  const defaultVersion = require('./version').defaultVersion
   const optVersion = options.version || (() => {
-    const defaultVersion = require('./version').defaultVersion
     const optVersionClient = new Client(false, defaultVersion)
     const returnClient = autoVersion(optVersionClient, options)
     optVersionClient.end()
