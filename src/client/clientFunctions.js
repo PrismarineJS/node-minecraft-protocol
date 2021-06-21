@@ -13,15 +13,15 @@ const pluginChannels = require('./pluginChannels')
 const versionChecking = require('./versionChecking')
 
 module.exports = {
-    encrypt: encrypt,
-    keepalive: keepalive,
-    compress: compress,
-    auth: auth,
-    microsoftAuth: microsoftAuth,
-    setProtocol: setProtocol,
-    play: play,
-    tcpDns: tcpDns,
-    autoVersion: autoVersion,
-    pluginChannels: pluginChannels,
-    versionChecking: versionChecking
+  encrypt: encrypt,
+  keepalive: keepalive,
+  compress: compress,
+  auth: auth,
+  microsoftAuth: microsoftAuth,
+  setProtocol: setProtocol,
+  play: play,
+  tcpDns: tcpDns,
+  autoVersion: autoVersion,
+  pluginChannels: pluginChannels,
+  versionChecking: versionChecking
 }

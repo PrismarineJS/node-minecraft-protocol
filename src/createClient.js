@@ -28,9 +28,9 @@ function createClient (options) {
     const returnClient = autoVersion(optVersionClient, options)
     optVersionClient.end()
     const returnVal = returnClient.version
-    returnClient.end() // TODO: improve this in the future
+    returnClient.end() // I am unsure if this is best way too do this
     return returnVal
-  }) ()
+  })()
 
   const mcData = require('minecraft-data')(optVersion)
   if (!mcData) throw new Error(`unsupported protocol version: ${optVersion}`)
@@ -59,6 +59,5 @@ function createClient (options) {
   compress(client, options)
   pluginChannels(client, options)
   versionChecking(client, options)
-  
   return client
 }
