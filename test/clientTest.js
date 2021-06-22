@@ -55,12 +55,16 @@ for (const supportedVersion of mc.supportedVersions) {
     describe('offline', function () {
       before(async () => {
         console.log(new Date() + 'starting server ' + version.minecraftVersion)
-        const startServer = util.promisify(wrap.startServer)
-        await startServer({
-          'online-mode': 'false',
-          'server-port': PORT,
-          motd: 'test1234',
-          'max-players': 120
+        await new Promise((resolve, reject) => {
+          wrap.startServer({
+            'online-mode': 'false',
+            'server-port': PORT,
+            motd: 'test1234',
+            'max-players': 120
+          }, (err) => {
+            if (err) reject(err)
+            resolve()
+          })
         })
         console.log(new Date() + 'started server ' + version.minecraftVersion)
       })
