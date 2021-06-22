@@ -2,17 +2,28 @@
 
 const mc = require('../')
 const os = require('os')
+const net = require('net')
 const path = require('path')
 const assert = require('power-assert')
 const SURVIVE_TIME = 10000
+const util = require('util')
 const MC_SERVER_PATH = path.join(__dirname, 'server')
 
 const Wrap = require('minecraft-wrap').Wrap
 
-const download = require('minecraft-wrap').download
+const download = util.promisify(require('minecraft-wrap').download)
+
+const getPort = () => new Promise(resolve => {
+  const server = net.createServer()
+  server.listen(0, '127.0.0.1')
+  server.on('listening', () => {
+    const { port } = server.address()
+    server.close(() => resolve(port))
+  })
+})
 
 for (const supportedVersion of mc.supportedVersions) {
-  const PORT = Math.round(30000 + Math.random() * 20000)
+  let PORT = null
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
   const MC_SERVER_JAR_DIR = process.env.MC_SERVER_JAR_DIR || os.tmpdir()
@@ -28,7 +39,11 @@ for (const supportedVersion of mc.supportedVersions) {
   describe('client ' + version.minecraftVersion, function () {
     this.timeout(10 * 60 * 1000)
 
-    before(download.bind(null, version.minecraftVersion, MC_SERVER_JAR))
+    before(async function () {
+      this.timeout(30 * 1000)
+      await download(version.minecraftVersion, MC_SERVER_JAR)
+      PORT = await getPort()
+    })
 
     after(function (done) {
       wrap.deleteServerData(function (err) {
@@ -38,18 +53,16 @@ for (const supportedVersion of mc.supportedVersions) {
     })
 
     describe('offline', function () {
-      before(function (done) {
+      before(async () => {
         console.log(new Date() + 'starting server ' + version.minecraftVersion)
-        wrap.startServer({
+        const startServer = util.promisify(wrap.startServer)
+        await startServer({
           'online-mode': 'false',
           'server-port': PORT,
           motd: 'test1234',
           'max-players': 120
-        }, function (err) {
-          if (err) { console.log(err) }
-          console.log(new Date() + 'started server ' + version.minecraftVersion)
-          done(err)
         })
+        console.log(new Date() + 'started server ' + version.minecraftVersion)
       })
 
       after(function (done) {
