@@ -53,6 +53,7 @@ for (const supportedVersion of mc.supportedVersions) {
     })
 
     describe('offline', function () {
+      this.timeout(60 * 1000)
       before(async () => {
         console.log(new Date() + 'starting server ' + version.minecraftVersion)
         await new Promise((resolve, reject) => {
