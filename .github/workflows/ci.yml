@@ -43,4 +43,5 @@ jobs:
       uses: actions/setup-java@v1.4.3
       with:
         java-version: '16'
+        distribution: 'adopt'
     - run: npm install && npm run test-non-par
