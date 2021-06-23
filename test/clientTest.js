@@ -29,8 +29,8 @@ for (const supportedVersion of mc.supportedVersions) {
   const MC_SERVER_JAR_DIR = process.env.MC_SERVER_JAR_DIR || os.tmpdir()
   const MC_SERVER_JAR = MC_SERVER_JAR_DIR + '/minecraft_server.' + version.minecraftVersion + '.jar'
   const wrap = new Wrap(MC_SERVER_JAR, MC_SERVER_PATH + '_' + supportedVersion, {
-    minMem: 3 * 1024,
-    maxMem: 5 * 1024
+    minMem: 1 * 1024,
+    maxMem: 3 * 1024
   })
   wrap.on('line', function (line) {
     console.log(line)
@@ -192,12 +192,13 @@ for (const supportedVersion of mc.supportedVersions) {
       })
     })
 
-    describe('online', function () {
+    describe.skip('online', function () {
       before(function (done) {
         console.log(new Date() + 'starting server ' + version.minecraftVersion)
         wrap.startServer({
           'online-mode': 'true',
-          'server-port': PORT
+          'server-port': PORT,
+          'use-native-transport': 'false' // java 16 throws errors without this, https://www.spigotmc.org/threads/unable-to-access-address-of-buffer.311602
         }, function (err) {
           if (err) { console.log(err) }
           console.log(new Date() + 'started server ' + version.minecraftVersion)
@@ -214,7 +215,7 @@ for (const supportedVersion of mc.supportedVersions) {
         })
       })
 
-      it.skip('connects successfully - online mode', function (done) {
+      it('connects successfully - online mode', function (done) {
         const client = mc.createClient({
           username: process.env.MC_USERNAME,
           password: process.env.MC_PASSWORD,
