@@ -61,7 +61,8 @@ for (const supportedVersion of mc.supportedVersions) {
             'online-mode': 'false',
             'server-port': PORT,
             motd: 'test1234',
-            'max-players': 120
+            'max-players': 120,
+            'use-native-transport': 'false' // java 16 throws errors without this, https://www.spigotmc.org/threads/unable-to-access-address-of-buffer.311602
           }, (err) => {
             if (err) reject(err)
             resolve()
