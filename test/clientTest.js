@@ -192,7 +192,7 @@ for (const supportedVersion of mc.supportedVersions) {
         })
       })
     })
-
+    /*
     describe.skip('online', function () {
       before(function (done) {
         console.log(new Date() + 'starting server ' + version.minecraftVersion)
@@ -272,6 +272,7 @@ for (const supportedVersion of mc.supportedVersions) {
           done()
         })
       })
+    */
     })
   })
 }
