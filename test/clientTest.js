@@ -43,6 +43,7 @@ for (const supportedVersion of mc.supportedVersions) {
       this.timeout(30 * 1000)
       await download(version.minecraftVersion, MC_SERVER_JAR)
       PORT = await getPort()
+      console.log(`Port chosen: ${PORT}`)
     })
 
     after(function (done) {
