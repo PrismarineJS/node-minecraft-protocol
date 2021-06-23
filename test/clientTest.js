@@ -41,15 +41,23 @@ for (const supportedVersion of mc.supportedVersions) {
 
     before(async function () {
       this.timeout(30 * 1000)
+      await new Promise((resolve, reject) => {
+        wrap.deleteServerData(err => {
+          if (err) reject(err)
+          resolve()
+        })
+      })
       await download(version.minecraftVersion, MC_SERVER_JAR)
       PORT = await getPort()
       console.log(`Port chosen: ${PORT}`)
     })
 
-    after(function (done) {
-      wrap.deleteServerData(function (err) {
-        if (err) { console.log(err) }
-        done(err)
+    after(async () => {
+      await new Promise((resolve, reject) => {
+        wrap.deleteServerData(err => {
+          if (err) reject(err)
+          resolve()
+        })
       })
     })
 
