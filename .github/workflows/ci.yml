@@ -24,8 +24,8 @@ jobs:
     - name: Setup Java JDK
       uses: actions/setup-java@v1.4.3
       with:
-        java-version: 1.8
-        java-package: jre
+        java-version: '16'
+        distribution: 'adopt'
     - name: Install dependencies
       run: npm install
     - name: Run tests
@@ -42,6 +42,6 @@ jobs:
     - name: Setup Java JDK
       uses: actions/setup-java@v1.4.3
       with:
-        java-version: 1.8
-        java-package: jre
+        java-version: '16'
+        distribution: 'adopt'
     - run: npm install && npm run test-non-par

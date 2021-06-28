@@ -2,17 +2,28 @@
 
 const mc = require('../')
 const os = require('os')
+const net = require('net')
 const path = require('path')
 const assert = require('power-assert')
 const SURVIVE_TIME = 10000
+const util = require('util')
 const MC_SERVER_PATH = path.join(__dirname, 'server')
 
 const Wrap = require('minecraft-wrap').Wrap
 
-const download = require('minecraft-wrap').download
+const download = util.promisify(require('minecraft-wrap').download)
+
+const getPort = () => new Promise(resolve => {
+  const server = net.createServer()
+  server.listen(0, '127.0.0.1')
+  server.on('listening', () => {
+    const { port } = server.address()
+    server.close(() => resolve(port))
+  })
+})
 
 for (const supportedVersion of mc.supportedVersions) {
-  const PORT = Math.round(30000 + Math.random() * 20000)
+  let PORT = null
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
   const MC_SERVER_JAR_DIR = process.env.MC_SERVER_JAR_DIR || os.tmpdir()
@@ -28,28 +39,39 @@ for (const supportedVersion of mc.supportedVersions) {
   describe('client ' + version.minecraftVersion, function () {
     this.timeout(10 * 60 * 1000)
 
-    before(download.bind(null, version.minecraftVersion, MC_SERVER_JAR))
+    before(async function () {
+      this.timeout(30 * 1000)
+      await download(version.minecraftVersion, MC_SERVER_JAR)
+      PORT = await getPort()
+      console.log(`Port chosen: ${PORT}`)
+    })
 
-    after(function (done) {
-      wrap.deleteServerData(function (err) {
-        if (err) { console.log(err) }
-        done(err)
+    after(async () => {
+      await new Promise((resolve, reject) => {
+        wrap.deleteServerData(err => {
+          if (err) reject(err)
+          resolve()
+        })
       })
     })
 
     describe('offline', function () {
-      before(function (done) {
+      this.timeout(90 * 1000)
+      before(async () => {
         console.log(new Date() + 'starting server ' + version.minecraftVersion)
-        wrap.startServer({
-          'online-mode': 'false',
-          'server-port': PORT,
-          motd: 'test1234',
-          'max-players': 120
-        }, function (err) {
-          if (err) { console.log(err) }
-          console.log(new Date() + 'started server ' + version.minecraftVersion)
-          done(err)
+        await new Promise((resolve, reject) => {
+          wrap.startServer({
+            'online-mode': 'false',
+            'server-port': PORT,
+            motd: 'test1234',
+            'max-players': 120,
+            'use-native-transport': 'false' // java 16 throws errors without this, https://www.spigotmc.org/threads/unable-to-access-address-of-buffer.311602
+          }, (err) => {
+            if (err) reject(err)
+            resolve()
+          })
         })
+        console.log(new Date() + 'started server ' + version.minecraftVersion)
       })
 
       after(function (done) {
@@ -173,12 +195,13 @@ for (const supportedVersion of mc.supportedVersions) {
       })
     })
 
-    describe('online', function () {
+    describe.skip('online', function () {
       before(function (done) {
         console.log(new Date() + 'starting server ' + version.minecraftVersion)
         wrap.startServer({
           'online-mode': 'true',
-          'server-port': PORT
+          'server-port': PORT,
+          'use-native-transport': 'false' // java 16 throws errors without this, https://www.spigotmc.org/threads/unable-to-access-address-of-buffer.311602
         }, function (err) {
           if (err) { console.log(err) }
           console.log(new Date() + 'started server ' + version.minecraftVersion)
@@ -195,7 +218,7 @@ for (const supportedVersion of mc.supportedVersions) {
         })
       })
 
-      it.skip('connects successfully - online mode', function (done) {
+      it('connects successfully - online mode', function (done) {
         const client = mc.createClient({
           username: process.env.MC_USERNAME,
           password: process.env.MC_PASSWORD,
