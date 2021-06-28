@@ -29,8 +29,8 @@ for (const supportedVersion of mc.supportedVersions) {
   const MC_SERVER_JAR_DIR = process.env.MC_SERVER_JAR_DIR || os.tmpdir()
   const MC_SERVER_JAR = MC_SERVER_JAR_DIR + '/minecraft_server.' + version.minecraftVersion + '.jar'
   const wrap = new Wrap(MC_SERVER_JAR, MC_SERVER_PATH + '_' + supportedVersion, {
-    minMem: 1 * 1024,
-    maxMem: 3 * 1024
+    minMem: 1024,
+    maxMem: 1024
   })
   wrap.on('line', function (line) {
     console.log(line)
@@ -41,12 +41,6 @@ for (const supportedVersion of mc.supportedVersions) {
 
     before(async function () {
       this.timeout(30 * 1000)
-      await new Promise((resolve, reject) => {
-        wrap.deleteServerData(err => {
-          if (err) reject(err)
-          resolve()
-        })
-      })
       await download(version.minecraftVersion, MC_SERVER_JAR)
       PORT = await getPort()
       console.log(`Port chosen: ${PORT}`)
@@ -200,7 +194,7 @@ for (const supportedVersion of mc.supportedVersions) {
         })
       })
     })
-    /*
+
     describe.skip('online', function () {
       before(function (done) {
         console.log(new Date() + 'starting server ' + version.minecraftVersion)
@@ -281,6 +275,5 @@ for (const supportedVersion of mc.supportedVersions) {
         })
       })
     })
-    */
   })
 }
