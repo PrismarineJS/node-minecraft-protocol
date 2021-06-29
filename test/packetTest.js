@@ -8,6 +8,15 @@ const assert = require('power-assert')
 const getFieldInfo = require('protodef').utils.getFieldInfo
 const getField = require('protodef').utils.getField
 
+const getPort = () => new Promise(resolve => {
+  const server = net.createServer()
+  server.listen(0, '127.0.0.1')
+  server.on('listening', () => {
+    const { port } = server.address()
+    server.close(() => resolve(port))
+  })
+})
+
 function evalCount (count, fields) {
   if (fields[count.field] in count.map) { return count.map[fields[count.field]] }
   return count.default
@@ -188,10 +197,16 @@ function getValue (_type, packet) {
 }
 
 for (const supportedVersion of mc.supportedVersions) {
-  const PORT = Math.round(30000 + Math.random() * 20000)
+  let PORT
+
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
   const packets = mcData.protocol
+
+  before(async function () {
+    PORT = await getPort()
+    console.log(`Using port for tests: ${PORT}`)
+  })
 
   describe('packets ' + version.minecraftVersion, function () {
     let client, server, serverClient

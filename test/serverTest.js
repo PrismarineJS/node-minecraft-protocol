@@ -1,6 +1,7 @@
 /* eslint-env mocha */
 
 const mc = require('../')
+const net = require('net')
 const assert = require('power-assert')
 const { once } = require('events')
 
@@ -59,12 +60,27 @@ const w = {
   }
 }
 
+const getPort = () => new Promise(resolve => {
+  const server = net.createServer()
+  server.listen(0, '127.0.0.1')
+  server.on('listening', () => {
+    const { port } = server.address()
+    server.close(() => resolve(port))
+  })
+})
+
 for (const supportedVersion of mc.supportedVersions) {
-  const PORT = Math.round(30000 + Math.random() * 20000)
+  let PORT;
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
 
   describe('mc-server ' + version.minecraftVersion, function () {
+
+    this.beforeAll(async function() {
+      PORT = await getPort();
+      console.log(`Using port for tests: ${PORT}`)
+    })
+    
     this.timeout(5000)
     it('starts listening and shuts down cleanly', function (done) {
       const server = mc.createServer({
