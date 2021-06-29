@@ -8,14 +8,7 @@ const assert = require('power-assert')
 const getFieldInfo = require('protodef').utils.getFieldInfo
 const getField = require('protodef').utils.getField
 
-const getPort = () => new Promise(resolve => {
-  const server = net.createServer()
-  server.listen(0, '127.0.0.1')
-  server.on('listening', () => {
-    const { port } = server.address()
-    server.close(() => resolve(port))
-  })
-})
+const { getPort } = require('./common/util')
 
 function evalCount (count, fields) {
   if (fields[count.field] in count.map) { return count.map[fields[count.field]] }

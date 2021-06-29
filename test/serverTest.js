@@ -1,9 +1,10 @@
 /* eslint-env mocha */
 
 const mc = require('../')
-const net = require('net')
 const assert = require('power-assert')
 const { once } = require('events')
+
+const { getPort } = require('./common/util')
 
 const w = {
   piglin_safe: {
@@ -59,15 +60,6 @@ const w = {
     value: 0
   }
 }
-
-const getPort = () => new Promise(resolve => {
-  const server = net.createServer()
-  server.listen(0, '127.0.0.1')
-  server.on('listening', () => {
-    const { port } = server.address()
-    server.close(() => resolve(port))
-  })
-})
 
 for (const supportedVersion of mc.supportedVersions) {
   let PORT
