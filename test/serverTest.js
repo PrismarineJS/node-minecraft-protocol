@@ -4,6 +4,8 @@ const mc = require('../')
 const assert = require('power-assert')
 const { once } = require('events')
 
+const { getPort } = require('./common/util')
+
 const w = {
   piglin_safe: {
     type: 'byte',
@@ -60,11 +62,17 @@ const w = {
 }
 
 for (const supportedVersion of mc.supportedVersions) {
-  const PORT = Math.round(30000 + Math.random() * 20000)
+  let PORT
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
 
   describe('mc-server ' + version.minecraftVersion, function () {
+
+    this.beforeAll(async function() {
+      PORT = await getPort()
+      console.log(`Using port for tests: ${PORT}`)
+    })
+
     this.timeout(5000)
     it('starts listening and shuts down cleanly', function (done) {
       const server = mc.createServer({

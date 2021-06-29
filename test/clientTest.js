@@ -2,7 +2,6 @@
 
 const mc = require('../')
 const os = require('os')
-const net = require('net')
 const path = require('path')
 const assert = require('power-assert')
 const SURVIVE_TIME = 10000
@@ -13,14 +12,7 @@ const Wrap = require('minecraft-wrap').Wrap
 
 const download = util.promisify(require('minecraft-wrap').download)
 
-const getPort = () => new Promise(resolve => {
-  const server = net.createServer()
-  server.listen(0, '127.0.0.1')
-  server.on('listening', () => {
-    const { port } = server.address()
-    server.close(() => resolve(port))
-  })
-})
+const { getPort } = require('./common/util')
 
 for (const supportedVersion of mc.supportedVersions) {
   let PORT = null
