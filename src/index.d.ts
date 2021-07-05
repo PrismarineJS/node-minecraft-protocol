@@ -66,7 +66,6 @@ declare module 'minecraft-protocol' {
 		close(): void
 		on(event: 'connection', handler: (client: Client) => void): this
 		on(event: 'error', listener: (error: Error) => void): this
-		on(event: 'beforeLogin', listener: (client: Client) => void): this
 		on(event: 'login', handler: (client: Client) => void): this
 	}
 
@@ -83,6 +82,7 @@ declare module 'minecraft-protocol' {
 		port?: number
 		version?: string
 		beforePing?: (response: any, client: Client, callback?: (result: any) => any) => any
+		beforeLogin?: (client: Client) => void
 		errorHandler?: (client: Client, error: Error) => void
 		agent?: Agent
 	}
