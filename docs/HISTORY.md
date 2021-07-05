@@ -1,5 +1,9 @@
 # History
 
+## 1.26.0
+
+* add `beforeLogin` server option (@rob9315)
+
 ## 1.25.0
 
 * add fullBuffer to packet event
