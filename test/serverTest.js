@@ -191,6 +191,32 @@ for (const supportedVersion of mc.supportedVersions) {
       })
       server.on('close', done)
     })
+    it('clients can be changed by beforeLogin', function (done) {
+      const notchUUID = '069a79f4-44e9-4726-a5be-fca90e38aaf5'
+      const server = mc.createServer({
+        'online-mode': false,
+        version: version.minecraftVersion,
+        port: PORT,
+        beforeLogin: (client) => {
+          client.uuid = notchUUID
+        }
+      })
+      server.on('listening', function () {
+        const client = mc.createClient({
+          username: 'notNotch',
+          host: '127.0.0.1',
+          version: version.minecraftVersion,
+          port: PORT
+        })
+        client.on('packet', (data, {name})=>{
+          if (name === 'success') {
+            assert.strictEqual(data.uuid, notchUUID, 'UUID')
+            server.close()
+          }
+        })
+      })
+      server.on('close', done)
+    })
     it('clients can log in and chat', function (done) {
       const server = mc.createServer({
         'online-mode': false,

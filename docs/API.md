@@ -15,6 +15,8 @@ automatically logged in and validated against mojang's auth.
  * beforePing : allow customisation of the answer to ping the server does. 
  It takes a function with argument response and client, response is the default json response, and client is client who sent a ping.
  It can take as third argument a callback. If the callback is passed, the function should pass its result to the callback, if not it should return.
+ * beforeLogin : allow customisation of client before the `success` packet is sent.
+ It takes a function with argument client and should be synchronous for the server to wait for completion before continuing execution.
  * motd : default to "A Minecraft server"
  * maxPlayers : default to 20
  * keepAlive : send keep alive packets : default to true

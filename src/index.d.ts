@@ -82,6 +82,7 @@ declare module 'minecraft-protocol' {
 		port?: number
 		version?: string
 		beforePing?: (response: any, client: Client, callback?: (result: any) => any) => any
+		beforeLogin?: (client: Client) => void
 		errorHandler?: (client: Client, error: Error) => void
 		agent?: Agent
 	}
