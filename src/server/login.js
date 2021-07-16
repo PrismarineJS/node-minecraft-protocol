@@ -27,7 +27,7 @@ module.exports = function (client, server, options) {
   let loginKickTimer = setTimeout(kickForNotLoggingIn, kickTimeout)
 
   function onLogin (packet) {
-    if (options.adaptToProtocol && client.version < options.baseProtocol) {
+    if (options.adaptToProtocol && client.protocolVersion < options.baseProtocol) {
       client.end(`\u00A7cYou are using an outdated client!\n\u00A7cPlease use the Minecraft version ${options.baseVersion} or higher.`)
       return
     }
