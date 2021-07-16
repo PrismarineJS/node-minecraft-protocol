@@ -18,6 +18,7 @@ declare module 'minecraft-protocol' {
 		uuid: string
 		protocolVersion: number
 		connect(port: number, host: string): void
+		setSocket(socket: Socket): void
 		end(reason: string): void
 		registerChannel(name: string, typeDefinition: any, custom?: boolean): void
 		unregisterChannel(name: string): void
@@ -61,6 +62,7 @@ declare module 'minecraft-protocol' {
 		motd: string
 		onlineModeExceptions: object
 		playerCount: number
+		writeToClients(clients: Client[], name: string, params: any): void
 		close(): void
 		on(event: 'connection', handler: (client: Client) => void): this
 		on(event: 'error', listener: (error: Error) => void): this
@@ -80,6 +82,7 @@ declare module 'minecraft-protocol' {
 		port?: number
 		version?: string
 		beforePing?: (response: any, client: Client, callback?: (result: any) => any) => any
+		beforeLogin?: (client: Client) => void
 		errorHandler?: (client: Client, error: Error) => void
 		agent?: Agent
 	}

@@ -8,6 +8,8 @@ const assert = require('power-assert')
 const getFieldInfo = require('protodef').utils.getFieldInfo
 const getField = require('protodef').utils.getField
 
+const { getPort } = require('./common/util')
+
 function evalCount (count, fields) {
   if (fields[count.field] in count.map) { return count.map[fields[count.field]] }
   return count.default
@@ -187,29 +189,30 @@ function getValue (_type, packet) {
   }
 }
 
-const { firstVersion, lastVersion } = require('./common/parallel')
+for (const supportedVersion of mc.supportedVersions) {
+  let PORT
 
-mc.supportedVersions.forEach(function (supportedVersion, i) {
-  if (!(i >= firstVersion && i <= lastVersion)) { return }
-
-  const PORT = Math.round(30000 + Math.random() * 20000)
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
   const packets = mcData.protocol
 
   describe('packets ' + version.minecraftVersion, function () {
     let client, server, serverClient
-    before(function (done) {
+    before(async function () {
+      PORT = await getPort()
       server = new Server(version.minecraftVersion)
-      server.once('listening', function () {
-        server.once('connection', function (c) {
-          serverClient = c
-          done()
+      return new Promise((resolve) => {
+        console.log(`Using port for tests: ${PORT}`)
+        server.once('listening', function () {
+          server.once('connection', function (c) {
+            serverClient = c
+            resolve()
+          })
+          client = new Client(false, version.minecraftVersion)
+          client.setSocket(net.connect(PORT, 'localhost'))
         })
-        client = new Client(false, version.minecraftVersion)
-        client.setSocket(net.connect(PORT, 'localhost'))
+        server.listen(PORT, 'localhost')
       })
-      server.listen(PORT, 'localhost')
     })
     after(function (done) {
       client.on('end', function () {
@@ -284,4 +287,4 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
       })
     }
   })
-})
+}

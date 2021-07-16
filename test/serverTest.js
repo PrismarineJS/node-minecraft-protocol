@@ -2,8 +2,10 @@
 
 const mc = require('../')
 const assert = require('power-assert')
+const { once } = require('events')
 
-const { firstVersion, lastVersion } = require('./common/parallel')
+const { getPort } = require('./common/util')
+
 const w = {
   piglin_safe: {
     type: 'byte',
@@ -59,14 +61,18 @@ const w = {
   }
 }
 
-mc.supportedVersions.forEach(function (supportedVersion, i) {
-  if (!(i >= firstVersion && i <= lastVersion)) { return }
-
-  const PORT = Math.round(30000 + Math.random() * 20000)
+for (const supportedVersion of mc.supportedVersions) {
+  let PORT
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
 
   describe('mc-server ' + version.minecraftVersion, function () {
+
+    this.beforeAll(async function() {
+      PORT = await getPort()
+      console.log(`Using port for tests: ${PORT}`)
+    })
+
     this.timeout(5000)
     it('starts listening and shuts down cleanly', function (done) {
       const server = mc.createServer({
@@ -185,6 +191,32 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
       })
       server.on('close', done)
     })
+    it('clients can be changed by beforeLogin', function (done) {
+      const notchUUID = '069a79f4-44e9-4726-a5be-fca90e38aaf5'
+      const server = mc.createServer({
+        'online-mode': false,
+        version: version.minecraftVersion,
+        port: PORT,
+        beforeLogin: (client) => {
+          client.uuid = notchUUID
+        }
+      })
+      server.on('listening', function () {
+        const client = mc.createClient({
+          username: 'notNotch',
+          host: '127.0.0.1',
+          version: version.minecraftVersion,
+          port: PORT
+        })
+        client.on('packet', (data, {name})=>{
+          if (name === 'success') {
+            assert.strictEqual(data.uuid, notchUUID, 'UUID')
+            server.close()
+          }
+        })
+      })
+      server.on('close', done)
+    })
     it('clients can log in and chat', function (done) {
       const server = mc.createServer({
         'online-mode': false,
@@ -205,9 +237,9 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           entityId: client.id,
           levelType: 'default',
           gameMode: 1,
-          previousGameMode: 255,
+          previousGameMode: version.version >= 755 ? 0 : 255,
           worldNames: ['minecraft:overworld'],
-          dimensionCodec: (version.version >= 735 ? mcData.loginPacket.dimension : { name: '', type: 'compound', value: { dimension: { type: 'list', value: { type: 'compound', value: [w] } } } }),
+          dimensionCodec: version.version >= 755 ? mcData.loginPacket.dimensionCodec : (version.version >= 735 ? mcData.loginPacket.dimension : { name: '', type: 'compound', value: { dimension: { type: 'list', value: { type: 'compound', value: [w] } } } }),
           dimension: (version.version >= 735 ? mcData.loginPacket.dimension : 0),
           worldName: 'minecraft:overworld',
           hashedSeed: [0, 0],
@@ -330,9 +362,9 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
           entityId: client.id,
           levelType: 'default',
           gameMode: 1,
-          previousGameMode: 255,
+          previousGameMode: version.version >= 755 ? 0 : 255,
           worldNames: ['minecraft:overworld'],
-          dimensionCodec: (version.version >= 735 ? mcData.loginPacket.dimension : { name: '', type: 'compound', value: { dimension: { type: 'list', value: { type: 'compound', value: [w] } } } }),
+          dimensionCodec: version.version >= 755 ? mcData.loginPacket.dimensionCodec : (version.version >= 735 ? mcData.loginPacket.dimension : { name: '', type: 'compound', value: { dimension: { type: 'list', value: { type: 'compound', value: [w] } } } }),
           dimension: (version.version >= 735 ? mcData.loginPacket.dimension : 0),
           worldName: 'minecraft:overworld',
           hashedSeed: [0, 0],
@@ -370,5 +402,63 @@ mc.supportedVersions.forEach(function (supportedVersion, i) {
         if (count <= 0) done()
       }
     })
+    it('encodes chat packet once and send it to two clients', function (done) {
+      const server = mc.createServer({
+        'online-mode': false,
+        version: version.minecraftVersion,
+        port: PORT
+      })
+      server.on('login', function (client) {
+        const loginPacket = {
+          entityId: client.id,
+          levelType: 'default',
+          gameMode: 1,
+          previousGameMode: version.version >= 755 ? 0 : 255,
+          worldNames: ['minecraft:overworld'],
+          dimensionCodec: version.version >= 755 ? mcData.loginPacket.dimensionCodec : (version.version >= 735 ? mcData.loginPacket.dimension : { name: '', type: 'compound', value: { dimension: { type: 'list', value: { type: 'compound', value: [w] } } } }),
+          dimension: (version.version >= 735 ? mcData.loginPacket.dimension : 0),
+          worldName: 'minecraft:overworld',
+          hashedSeed: [0, 0],
+          difficulty: 2,
+          maxPlayers: server.maxPlayers,
+          reducedDebugInfo: (version.version >= 735 ? false : 0),
+          enableRespawnScreen: true
+        }
+        if (version.version >= 735) { // 1.16x
+          loginPacket.isDebug = false
+          loginPacket.isFlat = false
+          loginPacket.isHardcore = false
+          loginPacket.viewDistance = 10
+          delete loginPacket.levelType
+          delete loginPacket.difficulty
+        }
+        client.write('login', loginPacket)
+      })
+      server.on('close', done)
+      server.on('listening', async function () {
+        const player1 = mc.createClient({
+          username: 'player1',
+          host: '127.0.0.1',
+          version: version.minecraftVersion,
+          port: PORT
+        })
+        const player2 = mc.createClient({
+          username: 'player2',
+          host: '127.0.0.1',
+          version: version.minecraftVersion,
+          port: PORT
+        })
+        await Promise.all([once(player1, 'login'), once(player2, 'login')])        
+        server.writeToClients(Object.values(server.clients), 'chat', { message: JSON.stringify({ text: 'A message from the server.' }), position: 1, sender: '00000000-0000-0000-0000-000000000000' })
+        
+        let results = await Promise.all([ once(player1, 'chat'), once(player2, 'chat') ])
+        results.forEach(res => assert.strictEqual(res[0].message, '{"text":"A message from the server."}'))
+        
+        player1.end()
+        player2.end()
+        await Promise.all([once(player1, 'end'), once(player2, 'end')])
+        server.close()
+      })
+    })
   })
-})
+}
