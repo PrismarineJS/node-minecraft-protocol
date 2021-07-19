@@ -8,6 +8,7 @@ import { Agent } from 'http'
 declare module 'minecraft-protocol' {
 	export class Client extends EventEmitter {
 		constructor(isServer: boolean, version: string, customPackets?: any)
+		customPackets: any
 		isServer: boolean
 		latency: number
 		profile: any
@@ -17,6 +18,7 @@ declare module 'minecraft-protocol' {
 		username: string
 		uuid: string
 		protocolVersion: number
+		version: string
 		connect(port: number, host: string): void
 		setSocket(socket: Socket): void
 		end(reason: string): void
@@ -26,12 +28,14 @@ declare module 'minecraft-protocol' {
 		writeRaw(buffer: any): void
 		writeChannel(channel: any, params: any): void
 		on(event: 'error', listener: (error: Error) => void): this
-		on(event: 'packet', handler: (data: any, packetMeta: PacketMeta) => void): this
-		on(event: 'raw', handler: (data: any, packetMeta: PacketMeta) => void): this
+		on(event: 'packet', handler: (data: any, packetMeta: PacketMeta, buffer: Buffer, fullBuffer: Buffer) => void): this
+		on(event: 'raw', handler: (buffer: Buffer, packetMeta: PacketMeta) => void): this
 		on(event: 'session', handler: (session: any) => void): this
 		on(event: 'state', handler: (newState: States, oldState: States) => void): this
 		on(event: 'end', handler: (reason: string) => void): this
-		on(event: string, handler: (data: any, packetMeta: PacketMeta)=> unknown): this
+		on(event: 'connect', handler: () => unknown): this
+		on(event: string, handler: (data: any, packetMeta: PacketMeta) => unknown): this
+		on(event: `raw.${string}`, handler: (buffer: Buffer, packetMeta: PacketMeta) => unknown): this
 	}
 
 	export interface ClientOptions {
@@ -146,7 +150,7 @@ declare module 'minecraft-protocol' {
 	}
 
 	export const states: typeof States
-	export const supportedVersions: ['1.7', '1.8', '1.9', '1.10', '1.11.2', '1.12.2', '1.13.1']
+	export const supportedVersions: ['1.7', '1.8', '1.9', '1.10', '1.11.2', '1.12.2', '1.13.2', '1.14.4', '1.15.2', '1.16.5', '1.17.1']
 
 	export function createServer(options: ServerOptions): Server
 	export function createClient(options: ClientOptions): Client
