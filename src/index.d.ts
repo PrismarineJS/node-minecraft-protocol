@@ -71,6 +71,7 @@ declare module 'minecraft-protocol' {
 		on(event: 'connection', handler: (client: Client) => void): this
 		on(event: 'error', listener: (error: Error) => void): this
 		on(event: 'login', handler: (client: Client) => void): this
+		on(event: 'listening', listener: () => void): this
 	}
 
 	export interface ServerOptions {
