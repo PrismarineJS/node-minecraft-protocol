@@ -165,8 +165,7 @@ The latency of the client, in ms. Updated at each keep alive.
 
 ### `packet` event
 
-Called with every packet parsed. Takes three params, the JSON data we parsed,
-, the packet metadata (name, state) and the initial buffer
+Called with every packet parsed. Takes four paramaters, the JSON data we parsed, the packet metadata (name, state), the buffer (raw data) and the full buffer (includes surplus data and may include the data of following packets on versions below 1.8) 
 
 ### `raw` event
 
