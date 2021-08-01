@@ -1,3 +1,4 @@
+const mcData = require('minecraft-data')
 const states = require('../states')
 
 module.exports = function (client, server, { version }) {
@@ -7,12 +8,16 @@ module.exports = function (client, server, { version }) {
     client.serverHost = packet.serverHost
     client.serverPort = packet.serverPort
     client.protocolVersion = packet.protocolVersion
-
     if (version === false || version === undefined) {
-      if (require('minecraft-data')(client.protocolVersion)) {
-        client.version = client.protocolVersion
+      if (client.protocolVersion === 5) { // The first snapshot versions of 1.8 use the 1.7 protocol id, after 1.8 each snapshot has a different protocol id.
+        client.version = '1.7.10'
       } else {
-        client.end('Protocol version ' + client.protocolVersion + ' is not supported')
+        const postNettyVersions = mcData.postNettyVersionsByProtocolVersion.pc[client.protocolVersion]
+        if (postNettyVersions && postNettyVersions.length > 0) {
+          client.version = postNettyVersions[0].minecraftVersion
+        } else {
+          client.end('Protocol version ' + client.protocolVersion + ' is not supported')
+        }
       }
     } else if (client.protocolVersion !== server.mcversion.version && packet.nextState !== 1) {
       client.end('Wrong protocol version, expected: ' + server.mcversion.version + ' and you are using: ' + client.protocolVersion)
