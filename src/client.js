@@ -89,8 +89,8 @@ class Client extends EventEmitter {
       }
       this.emit('packet', parsed.data, parsed.metadata, parsed.buffer, parsed.fullBuffer)
       this.emit(parsed.metadata.name, parsed.data, parsed.metadata)
-      this.emit('raw.' + parsed.metadata.name, parsed.buffer, parsed.metadata)
-      this.emit('raw', parsed.buffer, parsed.metadata)
+      this.emit('raw.' + parsed.metadata.name, parsed.fullBuffer, parsed.metadata)
+      this.emit('raw', parsed.fullBuffer, parsed.metadata)
     })
   }
 
