@@ -9,7 +9,7 @@ module.exports = function (client, server, { version }) {
     client.serverPort = packet.serverPort
     client.protocolVersion = packet.protocolVersion
     if (version === false || version === undefined) {
-      if (client.protocolVersion === 5) { // The first snapshot versions of 1.8 use the 1.7 protocol id, after 1.8 each snapshot has a different protocol id.
+      if (client.protocolVersion === 5) { // The first snapshot versions of 1.8 uses the 1.7 protocol id, after 1.8 each snapshot has a different protocol id.
         client.version = '1.7.10'
       } else {
         const postNettyVersions = mcData.postNettyVersionsByProtocolVersion.pc[client.protocolVersion]
