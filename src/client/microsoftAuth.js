@@ -16,7 +16,7 @@ async function authenticate (client, options) {
     options.profilesFolder = require('minecraft-folder-path')
   }
 
-  const Authflow = new PrismarineAuth(options.username, options.profilesFolder , options, options.onMsaCode)
+  const Authflow = new PrismarineAuth(options.username, options.profilesFolder, options, options.onMsaCode)
   const accessToken = await Authflow.getMinecraftJavaToken()
 
   // We have a minecraft access token.
