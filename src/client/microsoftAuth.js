@@ -1,6 +1,5 @@
-const { Authflow: PrismarineAuth } = require('prismarine-auth')
+const { Authflow: PrismarineAuth, Endpoints } = require('prismarine-auth')
 const fetch = require('node-fetch')
-const authConstants = require('./authConstants')
 
 const debug = require('debug')('minecraft-protocol')
 
@@ -23,7 +22,7 @@ async function authenticate (client, options) {
   // Let's verify entitlements.
 
   getFetchOptions.headers.Authorization = `Bearer ${accessToken}`
-  const MineEntitlements = await fetch(authConstants.MinecraftServicesEntitlement, getFetchOptions).then(checkStatus)
+  const MineEntitlements = await fetch(Endpoints.MinecraftServicesEntitlement, getFetchOptions).then(checkStatus)
   if (MineEntitlements.items.length === 0) throw Error('This user does not possess any entitlements on this account according to minecraft services.')
 
   // We know that this account owns minecraft.
@@ -31,7 +30,7 @@ async function authenticate (client, options) {
 
   options.haveCredentials = accessToken != null
 
-  const MinecraftProfile = await fetch(authConstants.MinecraftServicesProfile, getFetchOptions)
+  const MinecraftProfile = await fetch(Endpoints.MinecraftServicesProfile, getFetchOptions)
     .then(async (res) => {
       if (res.ok) return await res.json()
       else throw new Error(`HTTP Error Response: ${res.status} ${res.statusText}`)
