@@ -51,8 +51,8 @@ node-minecraft-protocol is pluggable.
    create bots.
  * [flying-squid](https://github.com/PrismarineJS/flying-squid) create minecraft
    servers with a high level API, also a minecraft server by itself.
- * [pakkit](https://github.com/Heath123/pakkit) To monitor your packets
- * [minecraft-packet-debugger](https://github.com/wvffle/minecraft-packet-debugger) to easily debug your minecraft packets
+ * [pakkit](https://github.com/Heath123/pakkit) A GUI tool to monitor Minecraft packets in real time, allowing you to view their data and interactively edit and resend them
+ * [minecraft-packet-debugger](https://github.com/wvffle/minecraft-packet-debugger) A tool to capture Minecraft packets in a buffer then view them in a browser
 
 ## Usage
 
