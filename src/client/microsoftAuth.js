@@ -13,7 +13,7 @@ const getFetchOptions = {
 }
 
 async function authenticate (client, options) {
-  if (!options.profilesFolder && options.profilesFolder !== false) {
+  if (!options.profilesFolder) {
     options.profilesFolder = minecraftFolderPath
   }
 
