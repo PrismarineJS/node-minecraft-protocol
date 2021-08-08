@@ -1,6 +1,8 @@
 const { Authflow: PrismarineAuth, Endpoints } = require('prismarine-auth')
 const fetch = require('node-fetch')
 
+const minecraftFolderPath = require('minecraft-folder-path')
+
 const debug = require('debug')('minecraft-protocol')
 
 const getFetchOptions = {
@@ -12,7 +14,7 @@ const getFetchOptions = {
 
 async function authenticate (client, options) {
   if (!options.profilesFolder && options.profilesFolder !== false) {
-    options.profilesFolder = require('minecraft-folder-path')
+    options.profilesFolder = minecraftFolderPath
   }
 
   const Authflow = new PrismarineAuth(options.username, options.profilesFolder, options, options.onMsaCode)
@@ -22,15 +24,15 @@ async function authenticate (client, options) {
   // Let's verify entitlements.
 
   getFetchOptions.headers.Authorization = `Bearer ${accessToken}`
-  const MineEntitlements = await fetch(Endpoints.MinecraftServicesEntitlement, getFetchOptions).then(checkStatus)
-  if (MineEntitlements.items.length === 0) throw Error('This user does not possess any entitlements on this account according to minecraft services.')
+  const mineEntitlements = await fetch(Endpoints.MinecraftServicesEntitlement, getFetchOptions).then(checkStatus)
+  if (mineEntitlements.items.length === 0) throw Error('This user does not possess any entitlements on this account according to minecraft services.')
 
   // We know that this account owns minecraft.
   // Let's fetch the profile data.
 
   options.haveCredentials = accessToken != null
 
-  const MinecraftProfile = await fetch(Endpoints.MinecraftServicesProfile, getFetchOptions)
+  const mcProfile = await fetch(Endpoints.MinecraftServicesProfile, getFetchOptions)
     .then(async (res) => {
       if (res.ok) return await res.json()
       else throw new Error(`HTTP Error Response: ${res.status} ${res.statusText}`)
@@ -40,8 +42,8 @@ async function authenticate (client, options) {
       throw Error(`Failed to obtain profile date for "${user?.username}", does the account own minecraft?\nServer returned: ${res.statusText}`)
     })
 
-  if (!MinecraftProfile.id) {
-    debug('[mc] profile', MinecraftProfile)
+  if (!mcProfile.id) {
+    debug('[mc] profile', mcProfile)
     throw Error('This user does not own minecraft according to minecraft services.')
   }
 
@@ -49,8 +51,8 @@ async function authenticate (client, options) {
   // That way you could remove some lines of code. It accesses client.session.selectedProfile.id so /shrug.
   // - Kashalls
   const profile = {
-    name: MinecraftProfile.name,
-    id: MinecraftProfile.id
+    name: mcProfile.name,
+    id: mcProfile.id
   }
 
   const session = {
@@ -59,7 +61,7 @@ async function authenticate (client, options) {
     availableProfile: [profile]
   }
   client.session = session
-  client.username = MinecraftProfile.name
+  client.username = mcProfile.name
   options.accessToken = accessToken
   client.emit('session', session)
   options.connect(client)
