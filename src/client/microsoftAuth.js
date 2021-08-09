@@ -1,4 +1,4 @@
-const { Authflow: PrismarineAuth, Endpoints } = require('prismarine-auth')
+const { Authflow: PrismarineAuth } = require('prismarine-auth')
 const minecraftFolderPath = require('minecraft-folder-path')
 const debug = require('debug')('minecraft-protocol')
 
@@ -14,19 +14,18 @@ async function authenticate (client, options) {
   if (entitlements.items.length === 0) throw Error('This user does not possess any entitlements on this account according to minecraft services.')
   debug('[mc] entitlements', entitlements)
 
-  options.haveCredentials = token != null
-  const user = Authflow.username ?? options.username
-  if (profile.error) throw Error(`Failed to obtain profile data for ${user?.username}, does the account own minecraft?\n${profile}`)
-  debug(`[mc] profile`, profile)
+  options.haveCredentials = token !== null
+  if (profile.error) throw Error(`Failed to obtain profile data for ${options.username}, does the account own minecraft?\n${profile}`)
+  debug('[mc] profile', profile)
 
   const session = {
-    accessToken,
+    accessToken: token,
     selectedProfile: profile,
     availableProfile: [profile]
   }
   client.session = session
-  client.username = mcProfile.name
-  options.accessToken = accessToken
+  client.username = profile.name
+  options.accessToken = token
   client.emit('session', session)
   options.connect(client)
 }
