@@ -7,9 +7,8 @@ async function authenticate (client, options) {
     options.profilesFolder = minecraftFolderPath
   }
 
-  options = Object.assign(options, { fetchEntitlements: true, fetchProfile: true })
   const Authflow = new PrismarineAuth(options.username, options.profilesFolder, options, options.onMsaCode)
-  const { token, entitlements, profile } = await Authflow.getMinecraftJavaToken()
+  const { token, entitlements, profile } = await Authflow.getMinecraftJavaToken({ fetchEntitlements: true, fetchProfile: true })
 
   if (entitlements.items.length === 0) throw Error('This user does not possess any entitlements on this account according to minecraft services.')
   debug('[mc] entitlements', entitlements)
