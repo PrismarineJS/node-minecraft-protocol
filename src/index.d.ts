@@ -20,20 +20,20 @@ declare module 'minecraft-protocol' {
 		protocolVersion: number
 		version: string
 		write(name: string, params: any): void
+		writeRaw(buffer: any): void
 		end(reason: string): void
 		connect(port: number, host: string): void
 		setSocket(socket: Socket): void
 		registerChannel(name: string, typeDefinition: any, custom?: boolean): void
 		unregisterChannel(name: string): void
-		writeRaw(buffer: any): void
 		writeChannel(channel: any, params: any): void
-		on(event: 'error', listener: (error: Error) => void): this
 		on(event: 'packet', handler: (data: any, packetMeta: PacketMeta, buffer: Buffer, fullBuffer: Buffer) => void): this
 		on(event: 'raw', handler: (buffer: Buffer, packetMeta: PacketMeta) => void): this
+		on(event: 'connect', handler: () => unknown): this
+		on(event: 'end', handler: (reason: string) => void): this
 		on(event: 'session', handler: (session: any) => void): this
 		on(event: 'state', handler: (newState: States, oldState: States) => void): this
-		on(event: 'end', handler: (reason: string) => void): this
-		on(event: 'connect', handler: () => unknown): this
+		on(event: 'error', listener: (error: Error) => void): this
 		on(event: string, handler: (data: any, packetMeta: PacketMeta) => unknown): this
 		on(event: `raw.${string}`, handler: (buffer: Buffer, packetMeta: PacketMeta) => unknown): this
 	}
