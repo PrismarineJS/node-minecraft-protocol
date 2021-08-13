@@ -35,11 +35,7 @@ function createClient (options) {
 
   tcpDns(client, options)
   if (options.auth === 'microsoft') {
-    if (options.password) {
-      microsoftAuth.authenticatePassword(client, options)
-    } else {
-      microsoftAuth.authenticateDeviceCode(client, options)
-    }
+    microsoftAuth.authenticate(client, options)
   } else {
     auth(client, options)
   }
