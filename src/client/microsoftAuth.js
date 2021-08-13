@@ -4,7 +4,7 @@ const debug = require('debug')('minecraft-protocol')
 
 async function authenticate (client, options) {
   if (!options.profilesFolder) {
-    options.profilesFolder = minecraftFolderPath
+    options.profilesFolder = path.join(minecraftFolderPath, 'nmp-cache')
   }
 
   const Authflow = new PrismarineAuth(options.username, options.profilesFolder, options, options.onMsaCode)
