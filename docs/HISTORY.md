@@ -1,5 +1,9 @@
 # History
 
+## 1.26.1
+
+* temporarily revert prismarine-auth
+
 ## 1.26.0
 
 * move microsoft auth to prismarine-auth (@Kashalls)
