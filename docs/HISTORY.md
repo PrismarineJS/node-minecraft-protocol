@@ -1,5 +1,9 @@
 # History
 
+## 1.26.4
+
+* add once to typescript types for all events
+
 ## 1.26.3
 
 * fix typescript types
