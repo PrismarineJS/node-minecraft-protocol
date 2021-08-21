@@ -1,5 +1,9 @@
 # History
 
+## 1.26.2
+
+* fix typescript types
+
 ## 1.26.1
 
 * temporarily revert prismarine-auth
