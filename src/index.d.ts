@@ -82,7 +82,7 @@ declare module 'minecraft-protocol' {
 		on(event: 'error', listener: (error: Error) => void): this
 		on(event: 'login', handler: (client: ServerClient) => void): this
 		on(event: 'listening', listener: () => void): this
-		once(event: 'concenection', handler: (client: ServerClient) => void): this
+		once(event: 'connection', handler: (client: ServerClient) => void): this
 		once(event: 'error', listener: (error: Error) => void): this
 		once(event: 'login', handler: (client: ServerClient) => void): this
 		once(event: 'listening', listener: () => void): this
