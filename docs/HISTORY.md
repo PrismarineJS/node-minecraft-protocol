@@ -1,5 +1,9 @@
 # History
 
+## 1.26.3
+
+* fix typescript types
+
 ## 1.26.2
 
 * fix typescript types
