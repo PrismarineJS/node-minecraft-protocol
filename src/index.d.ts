@@ -22,7 +22,7 @@ declare module 'minecraft-protocol' {
 		compressionThreshold: string
 		connect(port: number, host: string): void
 		setSocket(socket: Socket): void
-		end(reason: string): void
+		end(reason?: string): void
 		registerChannel(name: string, typeDefinition: any, custom?: boolean): void
 		unregisterChannel(name: string): void
 		write(name: string, params: any): void
