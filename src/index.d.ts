@@ -19,6 +19,7 @@ declare module 'minecraft-protocol' {
 		uuid: string
 		protocolVersion: number
 		version: string
+		compressionThreshold: string
 		connect(port: number, host: string): void
 		setSocket(socket: Socket): void
 		end(reason: string): void
