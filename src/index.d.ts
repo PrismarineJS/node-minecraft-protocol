@@ -68,10 +68,14 @@ declare module 'minecraft-protocol' {
 		playerCount: number
 		writeToClients(clients: Client[], name: string, params: any): void
 		close(): void
-		on(event: 'connection', handler: (client: Client) => void): this
+		on(event: 'connection', handler: (client: ServerClient) => void): this
 		on(event: 'error', listener: (error: Error) => void): this
-		on(event: 'login', handler: (client: Client) => void): this
+		on(event: 'login', handler: (client: ServerClient) => void): this
 		on(event: 'listening', listener: () => void): this
+	}
+
+	export interface ServerClient extends Client {
+		id: number
 	}
 
 	export interface ServerOptions {
