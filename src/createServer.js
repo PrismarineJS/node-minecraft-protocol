@@ -39,7 +39,7 @@ function createServer (options = {}) {
   server.motd = motd
   server.maxPlayers = maxPlayers
   server.playerCount = 0
-  server.onlineModeExceptions = {}
+  server.onlineModeExceptions = Object.create(null)
   server.favicon = favicon
   server.serverKey = new NodeRSA({ b: 1024 })
 
