@@ -1,5 +1,9 @@
 # History
 
+## 1.26.5
+
+* update Online Mode Exceptions
+
 ## 1.26.4
 
 * add once to typescript types for all events
