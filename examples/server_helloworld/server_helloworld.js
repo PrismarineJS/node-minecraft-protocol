@@ -26,7 +26,7 @@ server.on('login', function (client) {
     entityId: client.id,
     isHardcore: false,
     gameMode: 0,
-    previousGameMode: 255,
+    previousGameMode: 1,
     worldNames: loginPacket.worldNames,
     dimensionCodec: loginPacket.dimensionCodec,
     dimension: loginPacket.dimension,
