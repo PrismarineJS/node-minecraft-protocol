@@ -1,5 +1,10 @@
 # History
 
+## 1.26.6
+
+* update examples for 1.17+
+* fix typings
+
 ## 1.26.5
 
 * update Online Mode Exceptions
