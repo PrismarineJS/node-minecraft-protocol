@@ -41,7 +41,21 @@ function createServer (options = {}) {
   server.playerCount = 0
   server.onlineModeExceptions = Object.create(null)
   server.favicon = favicon
-  server.serverKey = new NodeRSA({ b: 1024 })
+
+  // The RSA keypair can take some time to generate
+  // and is only needed for online-mode
+  // So we generate it lazily when needed
+  Object.defineProperty(server, 'serverKey', {
+    configurable: true,
+    get () {
+      this.serverKey = new NodeRSA({ b: 1024 })
+      return this.serverKey
+    },
+    set (value) {
+      delete this.serverKey
+      this.serverKey = value
+    }
+  })
 
   server.on('connection', function (client) {
     plugins.forEach(plugin => plugin(client, server, options))
