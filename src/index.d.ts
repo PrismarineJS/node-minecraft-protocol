@@ -10,17 +10,19 @@ type PromiseLike = Promise<void> | void
 declare module 'minecraft-protocol' {
 	export class Client extends EventEmitter {
 		constructor(isServer: boolean, version: string, customPackets?: any)
-		customPackets: any
-		isServer: boolean
-		latency: number
-		profile: any
-		session: any
-		socket: Socket
 		state: States
-		username: string
+		isServer: boolean
+		socket: Socket
 		uuid: string
+		username: string
+		session?: any
+		profile?: any
+		latency: number
+		customPackets: any
 		protocolVersion: number
 		version: string
+		write(name: string, params: any): void
+		writeRaw(buffer: any): void
 		compressionThreshold: string
 		ended: boolean
 		connect(port: number, host: string): void
@@ -28,9 +30,16 @@ declare module 'minecraft-protocol' {
 		end(reason?: string): void
 		registerChannel(name: string, typeDefinition: any, custom?: boolean): void
 		unregisterChannel(name: string): void
-		write(name: string, params: any): void
-		writeRaw(buffer: any): void
 		writeChannel(channel: any, params: any): void
+		on(event: 'packet', handler: (data: any, packetMeta: PacketMeta, buffer: Buffer, fullBuffer: Buffer) => void): this
+		on(event: 'raw', handler: (buffer: Buffer, packetMeta: PacketMeta) => void): this
+		on(event: 'connect', handler: () => unknown): this
+		on(event: 'end', handler: (reason: string) => void): this
+		on(event: 'session', handler: (session: any) => void): this
+		on(event: 'state', handler: (newState: States, oldState: States) => void): this
+		on(event: 'error', listener: (error: Error) => void): this
+		on(event: string, handler: (data: any, packetMeta: PacketMeta) => unknown): this
+		on(event: `raw.${string}`, handler: (buffer: Buffer, packetMeta: PacketMeta) => unknown): this
 		on(event: 'error', listener: (error: Error) => PromiseLike): this
 		on(event: 'packet', handler: (data: any, packetMeta: PacketMeta, buffer: Buffer, fullBuffer: Buffer) => PromiseLike): this
 		on(event: 'raw', handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
@@ -40,46 +49,43 @@ declare module 'minecraft-protocol' {
 		on(event: 'connect', handler: () => PromiseLike): this
 		on(event: string, handler: (data: any, packetMeta: PacketMeta) => PromiseLike): this
 		on(event: `raw.${string}`, handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
-		once(event: 'error', listener: (error: Error) => PromiseLike): this
-		once(event: 'packet', handler: (data: any, packetMeta: PacketMeta, buffer: Buffer, fullBuffer: Buffer) => PromiseLike): this
-		once(event: 'raw', handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
-		once(event: 'sessionce', handler: (sessionce: any) => PromiseLike): this
-		once(event: 'state', handler: (newState: States, oldState: States) => PromiseLike): this
-		once(event: 'end', handler: (reasonce: string) => PromiseLike): this
-		once(event: 'concenect', handler: () => PromiseLike): this
-		once(event: string, handler: (data: any, packetMeta: PacketMeta) => PromiseLike): this
-		once(event: `raw.${string}`, handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
 	}
 
 	export interface ClientOptions {
-		accessToken?: string
-		checkTimeoutInterval?: number
+		username: string
+		port?: number
+		auth?: 'mojang' | 'microsoft'
+		password?: string
+		host?: string
 		clientToken?: string
+		accessToken?: string
+		authServer?: string
+		sessionServer?: string
+		keepAlive?: boolean
+		closeTimeout?: number 
+		noPongTimeout?: number
+		checkTimeoutInterval?: number
+		version?: string
 		customPackets?: any
 		hideErrors?: boolean
-		host?: string
-		keepAlive?: boolean
-		password?: string
-		port?: number
-		username: string
-		version?: string
 		skipValidation?: boolean
 		stream?: Stream
 		connect?: (client: Client) => void
 		agent?: Agent
-		auth?: 'mojang' | 'microsoft'
+		profilesFolder?: string
+		onMsaCode?: (data: MicrosoftDeviceAuthorizationResponse) => void
 		id?: number
 	}
 
 	export class Server extends EventEmitter {
 		constructor(version: string, customPackets?: any)
+		writeToClients(clients: Client[], name: string, params: any): void
+		onlineModeExceptions: object
 		clients: ClientsMap
-		favicon: string
+		playerCount: number
 		maxPlayers: number
 		motd: string
-		onlineModeExceptions: object
-		playerCount: number
-		writeToClients(clients: Client[], name: string, params: any): void
+		favicon: string
 		close(): void
 		on(event: 'connection', handler: (client: ServerClient) => PromiseLike): this
 		on(event: 'error', listener: (error: Error) => PromiseLike): this
@@ -96,20 +102,20 @@ declare module 'minecraft-protocol' {
 	}
 
 	export interface ServerOptions {
-		'online-mode'?: boolean
-		checkTimeoutInterval?: number
-		customPackets?: any
-		hideErrors?: boolean
-		host?: string
-		keepAlive?: boolean
-		kickTimeout?: number
-		maxPlayers?: number
-		motd?: string
 		port?: number
-		version?: string
+		host?: string
+		kickTimeout?: number
+		checkTimeoutInterval?: number
+		'online-mode'?: boolean
 		beforePing?: (response: any, client: Client, callback?: (result: any) => any) => any
 		beforeLogin?: (client: Client) => void
+		motd?: string
+		maxPlayers?: number
+		keepAlive?: boolean
+		version?: string
+		customPackets?: any
 		errorHandler?: (client: Client, error: Error) => void
+		hideErrors?: boolean
 		agent?: Agent
 	}
 
@@ -118,6 +124,15 @@ declare module 'minecraft-protocol' {
 		isServer?: boolean
 		state?: States
 		version: string
+	}
+	
+	export interface MicrosoftDeviceAuthorizationResponse {
+		device_code: string
+		user_code: string
+		verification_uri: string
+		expires_in: number
+		interval: number
+		message: string
 	}
 
 	enum States {
