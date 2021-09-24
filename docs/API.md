@@ -150,7 +150,7 @@ Unregisters a plugin channel.
 
 ### client.writeChannel(channel, params)
 
-TODO: clarify what the heck this does exactly
+Write to [Plugin Channels](https://wiki.vg/Plugin_channels)
 
 ### client.state
 
