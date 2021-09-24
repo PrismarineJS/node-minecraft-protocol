@@ -5,6 +5,8 @@ import { Socket } from 'net'
 import * as Stream from 'stream'
 import { Agent } from 'http'
 
+type PromiseLike = Promise<void> | void
+
 declare module 'minecraft-protocol' {
 	export class Client extends EventEmitter {
 		constructor(isServer: boolean, version: string, customPackets?: any)
@@ -21,9 +23,11 @@ declare module 'minecraft-protocol' {
 		version: string
 		write(name: string, params: any): void
 		writeRaw(buffer: any): void
-		end(reason: string): void
+		compressionThreshold: string
+		ended: boolean
 		connect(port: number, host: string): void
 		setSocket(socket: Socket): void
+		end(reason?: string): void
 		registerChannel(name: string, typeDefinition: any, custom?: boolean): void
 		unregisterChannel(name: string): void
 		writeChannel(channel: any, params: any): void
@@ -36,6 +40,15 @@ declare module 'minecraft-protocol' {
 		on(event: 'error', listener: (error: Error) => void): this
 		on(event: string, handler: (data: any, packetMeta: PacketMeta) => unknown): this
 		on(event: `raw.${string}`, handler: (buffer: Buffer, packetMeta: PacketMeta) => unknown): this
+		on(event: 'error', listener: (error: Error) => PromiseLike): this
+		on(event: 'packet', handler: (data: any, packetMeta: PacketMeta, buffer: Buffer, fullBuffer: Buffer) => PromiseLike): this
+		on(event: 'raw', handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
+		on(event: 'session', handler: (session: any) => PromiseLike): this
+		on(event: 'state', handler: (newState: States, oldState: States) => PromiseLike): this
+		on(event: 'end', handler: (reason: string) => PromiseLike): this
+		on(event: 'connect', handler: () => PromiseLike): this
+		on(event: string, handler: (data: any, packetMeta: PacketMeta) => PromiseLike): this
+		on(event: `raw.${string}`, handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
 	}
 
 	export interface ClientOptions {
@@ -74,10 +87,18 @@ declare module 'minecraft-protocol' {
 		motd: string
 		favicon: string
 		close(): void
-		on(event: 'connection', handler: (client: Client) => void): this
-		on(event: 'error', listener: (error: Error) => void): this
-		on(event: 'login', handler: (client: Client) => void): this
-		on(event: 'listening', listener: () => void): this
+		on(event: 'connection', handler: (client: ServerClient) => PromiseLike): this
+		on(event: 'error', listener: (error: Error) => PromiseLike): this
+		on(event: 'login', handler: (client: ServerClient) => PromiseLike): this
+		on(event: 'listening', listener: () => PromiseLike): this
+		once(event: 'connection', handler: (client: ServerClient) => PromiseLike): this
+		once(event: 'error', listener: (error: Error) => PromiseLike): this
+		once(event: 'login', handler: (client: ServerClient) => PromiseLike): this
+		once(event: 'listening', listener: () => PromiseLike): this
+	}
+
+	export interface ServerClient extends Client {
+		id: number
 	}
 
 	export interface ServerOptions {
