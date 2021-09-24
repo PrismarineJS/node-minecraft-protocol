@@ -134,7 +134,7 @@ If `fullReason` is not defined, then the `reason` will be used.
 
 ### client.connect(port, host)
 
-TODO
+Used by the [Client Class](https://github.com/PrismarineJS/node-minecraft-protocol/blob/d9d01c8be4921bb38e7b59d9c18afd771615ba22/src/client.js) to connect to a server, done by createClient automatically
 
 ### client.setSocket(socket)
 
@@ -210,7 +210,7 @@ and the packet metadata (name, state)
 
 ### `connect` event
 
-TODO: Clarify what this is
+when the socket connects to the server, this is emitted
 
 ### `end` event
 
