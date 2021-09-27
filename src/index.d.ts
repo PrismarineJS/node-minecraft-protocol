@@ -157,6 +157,8 @@ declare module 'minecraft-protocol' {
 		port?: number
 		protocolVersion?: string
 		version?: string
+		closeTimeout?: number
+		noPongTimeout?: number
 	}
 
 	export interface OldPingResult {
