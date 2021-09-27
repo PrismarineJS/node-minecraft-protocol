@@ -196,5 +196,5 @@ declare module 'minecraft-protocol' {
 	export function createSerializer({ state, isServer, version, customPackets }: SerializerOptions): any
 	export function createDeserializer({ state, isServer, version, customPackets }: SerializerOptions): any
 
-	export function ping(options: PingOptions, callback: (error: Error, result: OldPingResult | NewPingResult) => void): void
+	export function ping(options: PingOptions, callback?: (error: Error, result: OldPingResult | NewPingResult) => void): Promise<OldPingResult | NewPingResult>
 }
