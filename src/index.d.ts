@@ -171,7 +171,9 @@ declare module 'minecraft-protocol' {
 	}
 
 	export interface NewPingResult {
-		description: string
+		description: {
+			text: string
+		} | string
 		players: {
 			max: number
 			online: number
