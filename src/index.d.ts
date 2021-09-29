@@ -166,7 +166,7 @@ declare module 'minecraft-protocol' {
 		motd: string
 		playerCount: number
 		prefix: string
-		protocol: string
+		protocol: number
 		version: string
 	}
 
@@ -184,7 +184,7 @@ declare module 'minecraft-protocol' {
 		}
 		version: {
 			name: string
-			protocol: string
+			protocol: number
 		}
 		favicon: string
 		latency: number
