@@ -133,7 +133,7 @@ module.exports = async function (client, options) {
           manageAuth()
         }
       } catch (ignoreErr) {
-        // again, silently fail, just don't save anything
+        // skip the error :/
       }
     } catch (ignoreErr) {
       // console.warn("Skipped saving tokens because of error\n", err) // not any error, we just don't save the file
