@@ -145,7 +145,7 @@ module.exports = async function (client, options) {
     }
     connect(null, session)
   }
-  
+
   if (!options.haveCredentials) {
     // assume the server is in offline mode and just go for it.
     connect(options.username)
