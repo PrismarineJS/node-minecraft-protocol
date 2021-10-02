@@ -172,12 +172,13 @@ declare module 'minecraft-protocol' {
 
 	export interface NewPingResult {
 		description: {
-			text: string
+			text?: string
+			extra?: any[]
 		} | string
 		players: {
 			max: number
 			online: number
-			sample: {
+			sample?: {
 				id: string
 				name: string
 			}[]
@@ -186,7 +187,7 @@ declare module 'minecraft-protocol' {
 			name: string
 			protocol: number
 		}
-		favicon: string
+		favicon?: string
 		latency: number
 	}
 
