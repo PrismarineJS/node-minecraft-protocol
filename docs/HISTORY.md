@@ -1,5 +1,34 @@
 # History
 
+## 1.26.5
+
+* update Online Mode Exceptions
+
+## 1.26.4
+
+* add once to typescript types for all events
+
+## 1.26.3
+
+* fix typescript types
+
+## 1.26.2
+
+* fix typescript types
+
+## 1.26.1
+
+* temporarily revert prismarine-auth
+
+## 1.26.0
+
+* move microsoft auth to prismarine-auth (@Kashalls)
+* Add beforeLogin function option on server (@rob9315)
+* Make cache path creation recursive (@DecentralisedTech)
+* Mc.ping return a promise and use callbacks (@AngeryFrog)
+* Add a way to encode a packet only once and send it to multiple clients (@GroobleDierne)
+* launcher_accounts.json account corruption fix (@Moondarker)
+
 ## 1.25.0
 
 * add fullBuffer to packet event

@@ -110,6 +110,7 @@ Returns a `Client` instance and perform login.
    * (microsoft account) the path to store authentication caches, defaults to .minecraft
  * onMsaCode(data) : (optional) callback called when signing in with a microsoft account
  with device code auth. `data` is an object documented [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-device-code#device-authorization-response)
+ * id : a numeric client id used for referring to multiple clients in a server
 
 
 ## mc.Client(isServer,version,[customPackets])
@@ -121,12 +122,36 @@ Takes a minecraft `version` as second argument.
 
 write a packet
 
+### client.writeRaw(buffer)
+
+write a raw buffer as a packet
+
 ### client.end(reason, fullReason)
 
 Ends the connection with `reason` or `fullReason`
 If `fullReason` is not defined, then the `reason` will be used.
 
 `fullReason` is a JSON object, which represents [chat](https://wiki.vg/Chat) message.
+
+### client.connect(port, host)
+
+Used by the [Client Class](https://github.com/PrismarineJS/node-minecraft-protocol/blob/d9d01c8be4921bb38e7b59d9c18afd771615ba22/src/client.js) to connect to a server, done by createClient automatically
+
+### client.setSocket(socket)
+
+Sets the client's connection socket.
+
+### client.registerChannel(name, typeDefinition, custom)
+
+Registers a plugin channel with the given `name` and protodef `typeDefinition`
+
+### client.unregisterChannel(name)
+
+Unregisters a plugin channel.
+
+### client.writeChannel(channel, params)
+
+Write to [Plugin Channels](https://wiki.vg/Plugin_channels)
 
 ### client.state
 
@@ -137,7 +162,6 @@ packet parsing. This is one of the protocol.states.
 
 True if this is a connection going from the server to the client,
 False if it is a connection from client to server.
-
 
 ### client.socket
 
@@ -164,6 +188,18 @@ The player's profile, as returned by the Yggdrasil system. (only server-side)
 
 The latency of the client, in ms. Updated at each keep alive.
 
+### client.customPackets
+
+An object index by version/state/direction/name, see client_custom_packet for an example
+
+### client.protocolVersion
+
+The client's protocol version
+
+### client.version
+
+The client's version
+
 ### `packet` event
 
 Called with every packet parsed. Takes four paramaters, the JSON data we parsed, the packet metadata (name, state), the buffer (raw data) and the full buffer (includes surplus data and may include the data of following packets on versions below 1.8) 
@@ -173,14 +209,26 @@ Called with every packet parsed. Takes four paramaters, the JSON data we parsed,
 Called with every packet, but as a buffer. Takes two params, the buffer
 and the packet metadata (name, state)
 
+### `connect` event
+
+when the socket connects to the server, this is emitted
+
+### `end` event
+
+Called when the client's connection is disconnected. Takes the reason as parameter
+
+### `session` event
+
+Called when user authentication is resolved. Takes session data as parameter.
+
 ### `state` event
 
 Called when the protocol changes state. Takes the new state and old state as
 parameters.
 
-### `session` event
+### `error` event
 
-Called when user authentication is resolved. Takes session data as parameter.
+Called when an error occurs within the client. Takes an Error as parameter.
 
 ### per-packet events
 

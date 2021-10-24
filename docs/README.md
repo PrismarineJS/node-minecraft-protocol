@@ -44,15 +44,17 @@ node-minecraft-protocol is pluggable.
 
 ## Projects Using node-minecraft-protocol
 
- * [mineflayer](https://github.com/PrismarineJS/mineflayer/) - create minecraft
+ * [mineflayer](https://github.com/PrismarineJS/mineflayer/) - Create minecraft
    bots with a stable, high level API.
- * [mcserve](https://github.com/andrewrk/mcserve) - runs and monitors your
+ * [mcserve](https://github.com/andrewrk/mcserve) - Runs and monitors your
    minecraft server, provides real-time web interface, allow your users to
    create bots.
- * [flying-squid](https://github.com/PrismarineJS/flying-squid) create minecraft
+ * [flying-squid](https://github.com/PrismarineJS/flying-squid) - Create minecraft
    servers with a high level API, also a minecraft server by itself.
- * [pakkit](https://github.com/Heath123/pakkit) A GUI tool to monitor Minecraft packets in real time, allowing you to view their data and interactively edit and resend them
- * [minecraft-packet-debugger](https://github.com/wvffle/minecraft-packet-debugger) A tool to capture Minecraft packets in a buffer then view them in a browser
+ * [pakkit](https://github.com/Heath123/pakkit) - A GUI tool to monitor Minecraft packets in real time, allowing you to view their data and interactively edit and resend them
+ * [minecraft-packet-debugger](https://github.com/wvffle/minecraft-packet-debugger) - A tool to capture Minecraft packets in a buffer then view them in a browser
+ * [aresrpg](https://github.com/aresrpg/aresrpg) - An open-source mmorpg minecraft server
+ * and [several thousands others](https://github.com/PrismarineJS/node-minecraft-protocol/network/dependents?package_id=UGFja2FnZS0xODEzMDk0OQ%3D%3D)
 
 ## Usage
 
