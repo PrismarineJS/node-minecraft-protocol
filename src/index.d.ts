@@ -72,10 +72,11 @@ declare module 'minecraft-protocol' {
 		stream?: Stream
 		connect?: (client: Client) => void
 		agent?: Agent
+		fakeHost?: string
 		profilesFolder?: string
 		onMsaCode?: (data: MicrosoftDeviceAuthorizationResponse) => void
 		id?: number
-		fakeHost?: string
+
 	}
 
 	export class Server extends EventEmitter {
