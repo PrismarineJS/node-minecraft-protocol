@@ -1,5 +1,19 @@
 # History
 
+## 1.26.6
+
+* Typings and Documentation updates [(#888)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/e305bbdf5c0fb790bbf27bfd7307a1d82bc9b48a)
+  * Update index.d.ts to more closely match API.md
+  * Update to fit more in line with my API.md
+  Reorder things for my additions and reorders in API.md
+  * Update API.md from index.d.ts
+  * Explain writeChannel
+  * Clarified on all TODOs
+* Lazily generate serverKey [(#907)](https://github.com/PrismarineJS/node-minecraft-protocol/pull/907)
+* Add ended to typings [(#904)](https://github.com/PrismarineJS/node-minecraft-protocol/pull/904)
+* Make examples work for 1.17.1 [(#902)](https://github.com/PrismarineJS/node-minecraft-protocol/pull/902)
+* Make all events have promiselike returns for async [(#903)](https://github.com/PrismarineJS/node-minecraft-protocol/pull/903)
+
 ## 1.26.5
 
 * update Online Mode Exceptions
