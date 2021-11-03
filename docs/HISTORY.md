@@ -1,5 +1,9 @@
 # History
 
+## 1.27.1
+
+* revert prismarine-auth usage for now (see https://github.com/panva/jose/issues/307)
+
 ## 1.27.0
 
 * use prismarine-auth
