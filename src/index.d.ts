@@ -159,6 +159,8 @@ declare module 'minecraft-protocol' {
 		port?: number
 		protocolVersion?: string
 		version?: string
+		closeTimeout?: number
+		noPongTimeout?: number
 	}
 
 	export interface OldPingResult {
@@ -166,25 +168,28 @@ declare module 'minecraft-protocol' {
 		motd: string
 		playerCount: number
 		prefix: string
-		protocol: string
+		protocol: number
 		version: string
 	}
 
 	export interface NewPingResult {
-		description: string
+		description: {
+			text?: string
+			extra?: any[]
+		} | string
 		players: {
 			max: number
 			online: number
-			sample: {
+			sample?: {
 				id: string
 				name: string
 			}[]
 		}
 		version: {
 			name: string
-			protocol: string
+			protocol: number
 		}
-		favicon: string
+		favicon?: string
 		latency: number
 	}
 
@@ -198,5 +203,5 @@ declare module 'minecraft-protocol' {
 	export function createSerializer({ state, isServer, version, customPackets }: SerializerOptions): any
 	export function createDeserializer({ state, isServer, version, customPackets }: SerializerOptions): any
 
-	export function ping(options: PingOptions, callback: (error: Error, result: OldPingResult | NewPingResult) => void): void
+	export function ping(options: PingOptions, callback?: (error: Error, result: OldPingResult | NewPingResult) => void): Promise<OldPingResult | NewPingResult>
 }
