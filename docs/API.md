@@ -276,9 +276,9 @@ correct data type. You can figure out the types [here](http://wiki.vg/Entities#E
 ## mc.ping(options, callback)
 
 `options` is an object containing the following:
-* host : default too locahost
-* port : default too 25565
-* version: default too most recent version
+* host : default to localhost
+* port : default to 25565
+* version: default to most recent version
 
 Ping a minecraft server and return a promise or use an optional callback containing the information about it
 
