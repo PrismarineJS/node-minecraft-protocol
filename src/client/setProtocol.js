@@ -15,6 +15,7 @@ module.exports = function (client, options) {
     function next () {
       let taggedHost = options.host
       if (client.tagHost) taggedHost += client.tagHost
+      if (client.fakeHost) taggedHost = options.fakeHost
 
       client.write('set_protocol', {
         protocolVersion: options.protocolVersion,

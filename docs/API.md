@@ -104,6 +104,7 @@ Returns a `Client` instance and perform login.
  * connect : a function taking the client as parameter and that should client.setSocket(socket) 
  and client.emit('connect') when appropriate (see the proxy examples for an example of use)
  * agent : a http agent that can be used to set proxy settings for yggdrasil authentication (see proxy-agent on npm) 
+ * fakeHost : (optional) hostname to send to the server in the set_protocol packet
  * profilesFolder : optional
    * (mojang account) the path to the folder that contains your `launcher_profiles.json`. defaults to your minecraft folder if it exists, otherwise the local directory. set to `false` to disable managing profiles 
    * (microsoft account) the path to store authentication caches, defaults to .minecraft
