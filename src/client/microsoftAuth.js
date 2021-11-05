@@ -7,7 +7,7 @@ async function authenticate (client, options) {
   if (!options.profilesFolder) {
     options.profilesFolder = path.join(minecraftFolderPath, 'nmp-cache')
   }
-  
+
   if (!options.authTitle) {
     options.authTitle = Titles.MinecraftJava
   }
