@@ -55,6 +55,7 @@ declare module 'minecraft-protocol' {
 		username: string
 		port?: number
 		auth?: 'mojang' | 'microsoft'
+		authTitle?: string
 		password?: string
 		host?: string
 		clientToken?: string
