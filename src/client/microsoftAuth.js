@@ -9,18 +9,24 @@ async function authenticate (client, options) {
   }
 
   if (options.authTitle === undefined) {
-    options.authTitle = Titles.MinecraftJava
+    options.authTitle = Titles.MinecraftNintendoSwitch
+    options.deviceType = 'Nintendo'
   }
 
   const Authflow = new PrismarineAuth(options.username, options.profilesFolder, options, options.onMsaCode)
-  const { token, entitlements, profile } = await Authflow.getMinecraftJavaToken({ fetchEntitlements: true, fetchProfile: true })
+  const { token, entitlements, profile } = await Authflow.getMinecraftJavaToken({ fetchEntitlements: true, fetchProfile: true }).catch(e => {
+    if (options.password) console.warn('Sign in failed, try removing the password field\n')
+    if (e.toString().includes('Not Found')) console.warn(`Please verify that the account ${options.username} owns Minecraft\n`)
+    throw e
+  })
 
-  if (entitlements.items.length === 0) throw Error('This user does not possess any entitlements on this account according to minecraft services.')
   debug('[mc] entitlements', entitlements)
+  debug('[mc] profile', profile)
+
+  if (!entitlements?.items) throw Error(`Signed in account ${options.username} doesn't appear to own Minecraft`)
+  if (profile?.error) throw Error(`Failed to obtain profile data for ${options.username}, does the account own minecraft?`)
 
   options.haveCredentials = token !== null
-  if (profile.error) throw Error(`Failed to obtain profile data for ${options.username}, does the account own minecraft?\n${profile}`)
-  debug('[mc] profile', profile)
 
   const session = {
     accessToken: token,
