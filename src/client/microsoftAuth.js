@@ -9,8 +9,8 @@ async function authenticate (client, options) {
   }
 
   if (options.authTitle === undefined) {
-    options.authTitle = Titles.MinecraftJava
-    options.deviceType = 'Win32'
+    options.authTitle = Titles.MinecraftNintendoSwitch
+    options.deviceType = 'Nintendo'
   }
 
   const Authflow = new PrismarineAuth(options.username, options.profilesFolder, options, options.onMsaCode)
