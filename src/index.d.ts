@@ -60,6 +60,7 @@ declare module 'minecraft-protocol' {
 		clientToken?: string
 		accessToken?: string
 		authServer?: string
+		authTitle?: string
 		sessionServer?: string
 		keepAlive?: boolean
 		closeTimeout?: number 
