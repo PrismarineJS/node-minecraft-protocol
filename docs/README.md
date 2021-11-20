@@ -56,6 +56,16 @@ node-minecraft-protocol is pluggable.
  * [aresrpg](https://github.com/aresrpg/aresrpg) - An open-source mmorpg minecraft server
  * and [several thousands others](https://github.com/PrismarineJS/node-minecraft-protocol/network/dependents?package_id=UGFja2FnZS0xODEzMDk0OQ%3D%3D)
 
+## Installation
+
+`npm install minecraft-protocol`
+
+## Documentation
+
+* [API doc](API.md)
+* [faq](FAQ.md)
+* [protocol doc](https://minecraft-data.prismarine.js.org/?d=protocol) and [wiki.vg/Protocol](https://wiki.vg/Protocol)
+
 ## Usage
 
 ### Echo client example
@@ -136,16 +146,6 @@ server.on('login', function(client) {
   client.write("chat", { message: JSON.stringify(msg), position: 0, sender: '0' });
 });
 ```
-
-## Installation
-
-`npm install minecraft-protocol`
-
-## Documentation
-
-See [doc](API.md)
-See [faq](FAQ.md)
-
 
 ## Testing
 
