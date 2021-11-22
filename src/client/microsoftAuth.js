@@ -23,8 +23,8 @@ async function authenticate (client, options) {
   debug('[mc] entitlements', entitlements)
   debug('[mc] profile', profile)
 
-  if (!entitlements?.items) throw Error(`Signed in account ${options.username} doesn't appear to own Minecraft`)
-  if (profile?.error) throw Error(`Failed to obtain profile data for ${options.username}, does the account own minecraft?`)
+  if (!entitlements.items?.length) throw Error(`Signed in account ${options.username} doesn't appear to own Minecraft`)
+  if (!profile || profile.error) throw Error(`Failed to obtain profile data for ${options.username}, does the account own minecraft?`)
 
   options.haveCredentials = token !== null
 
