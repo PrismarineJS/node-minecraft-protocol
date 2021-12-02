@@ -8,7 +8,7 @@
     "start": "electron ."
   },
   "dependencies": {
-    "electron": "^9.1.2",
+    "electron": "^11.5.0",
     "electron-reload": "^1.5.0"
   }
 }
