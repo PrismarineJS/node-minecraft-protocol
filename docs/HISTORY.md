@@ -1,6 +1,11 @@
 # History
 
+## 1.28.1
+
+* Fix microsoft auth error condition handling (@extremeheat)
+
 ## 1.28.0
+
 * Fixed TypeScript error TS2769 when authenticating with mojang (#922) (@liquiddevelopmentnet)
 * Update prismarine-auth usage (#923) (@extremeheat)
 * types(Client): fix events (#918) (@muchnameless and Robert Hartmann)  
