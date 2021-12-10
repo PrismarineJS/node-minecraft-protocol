@@ -34,18 +34,3 @@ jobs:
       run: npm install && npm run test-non-par
       env:
         MC_VERSION: ${{ matrix.mcVersion }}
-  packet-cycle-test:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js 14.x
-      uses: actions/setup-node@v1
-      with:
-        node-version: 14.x
-    - name: Setup Java JDK
-      uses: actions/setup-java@v1.4.3
-      with:
-        java-version: '16'
-        distribution: 'adopt'
-    
