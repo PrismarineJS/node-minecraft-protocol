@@ -4,6 +4,8 @@ const { createSerializer, createDeserializer, states } = require('minecraft-prot
 const mcPackets = require('minecraft-packets')
 const assert = require('assert')
 
+const serializers = {}
+const deserializers = {}
 const makeClientSerializer = version => createSerializer({ state: states.PLAY, version, isServer: true })
 const makeClientDeserializer = version => createDeserializer({ state: states.PLAY, version })
 
@@ -19,8 +21,6 @@ if (MC_VERSION !== undefined) {
   }
 }
 
-const serializers = {}
-const deserializers = {}
 function cycleBufferFactory (mcVersion) {
   serializers[mcVersion] = serializers[mcVersion] ? serializers[mcVersion] : makeClientSerializer(mcVersion)
   deserializers[mcVersion] = deserializers[mcVersion] ? serializers[mcVersion] : makeClientDeserializer(mcVersion)
