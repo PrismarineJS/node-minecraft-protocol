@@ -7,33 +7,43 @@ const assert = require('assert')
 const makeClientSerializer = version => createSerializer({ state: states.PLAY, version, isServer: true })
 const makeClientDeserializer = version => createDeserializer({ state: states.PLAY, version })
 
-Object.entries(mcPackets.pc).forEach(([ver, data]) => {
-  let serializer, deserializer
-
-  function convertBufferToObject (buffer) {
-    return deserializer.parsePacketBuffer(buffer)
+const { MC_VERSION } = process.env
+if (MC_VERSION !== undefined) {
+  if (!(MC_VERSION in mcPackets.pc)) {
+    throw new Error(`${String(MC_VERSION)} Version not in minecraft-packets`)
   }
-
-  function convertObjectToBuffer (object) {
-    return serializer.createPacketBuffer(object)
+  runTestForVersion(MC_VERSION)
+} else {
+  for (const mcVersion of Object.keys(mcPackets.pc)) {
+    runTestForVersion(mcVersion)
   }
+}
 
-  function testBuffer (buffer, [packetName, packetIx]) {
-    const parsed = convertBufferToObject(buffer).data
-    const parsedBuffer = convertObjectToBuffer(parsed)
-    const areEq = buffer.equals(parsedBuffer)
-    assert.strictEqual(areEq, true, `Error when testing ${+packetIx + 1} ${packetName} packet`)
-  }
-  describe(`Test version ${ver}`, () => {
-    serializer = makeClientSerializer(ver)
-    deserializer = makeClientDeserializer(ver)
+const serializers = {}
+const deserializers = {}
+function cycleBufferFactory (mcVersion) {
+  serializers[mcVersion] ??= makeClientSerializer(mcVersion)
+  deserializers[mcVersion] ??= makeClientDeserializer(mcVersion)
+  const Buffer2Parsed = b => deserializers[mcVersion].parsePacketBuffer(b).data
+  const Parsed2Buffer = obj => serializers[mcVersion].createPacketBuffer(obj)
+  return buffer => Parsed2Buffer(Buffer2Parsed(buffer))
+}
+
+function runTestForVersion (mcVersion) {
+  describe(`Test version ${mcVersion}`, () => {
+    const cycleBuffer = cycleBufferFactory(mcVersion)
+    function testBuffer (buffer, [packetName, packetIx]) {
+      const cycled = cycleBuffer(buffer)
+      assert.strictEqual(buffer.equals(cycled), true, `Error when testing ${+packetIx + 1} ${packetName} packet`)
+    }
     // server -> client
-    Object.entries(data['from-server']).forEach(([packetName, packetData]) => {
+    const data = mcPackets.pc[mcVersion].data['from-server']
+    for (const [packetName, packetData] of data) {
       it(`${packetName} packet`, () => {
         for (const i in packetData) {
           testBuffer(packetData[i].raw, [packetName, i])
         }
       })
-    })
+    }
   })
-})
+}
