@@ -10,11 +10,13 @@ const makeClientSerializer = version => createSerializer({ state: states.PLAY, v
 const makeClientDeserializer = version => createDeserializer({ state: states.PLAY, version })
 
 for (const mcVersion of supportedVersions) {
-  describe(`Packet cycle tests for ${mcVersion}`, () => {
-    if (!(mcVersion in mcPackets.pc)) {
-      throw new Error(`${mcVersion} Version not in minecraft-packets`)
+  const mcData = require('minecraft-data')(supportedVersion)
+  const version = mcData.version
+  describe(`Packet cycle tests for ${version}`, () => {
+    if (!(version in mcPackets.pc)) {
+      throw new Error(`${version} Version not in minecraft-packets`)
     }
-    runTestForVersion(mcVersion)
+    runTestForVersion(version)
   })
 }
 
