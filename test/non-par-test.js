@@ -22,11 +22,11 @@ if (MC_VERSION !== undefined) {
 const serializers = {}
 const deserializers = {}
 function cycleBufferFactory (mcVersion) {
-  serializers[mcVersion] ??= makeClientSerializer(mcVersion)
-  deserializers[mcVersion] ??= makeClientDeserializer(mcVersion)
-  const Buffer2Parsed = b => deserializers[mcVersion].parsePacketBuffer(b).data
-  const Parsed2Buffer = obj => serializers[mcVersion].createPacketBuffer(obj)
-  return buffer => Parsed2Buffer(Buffer2Parsed(buffer))
+  serializers[mcVersion] = serializers[mcVersion] ? serializers[mcVersion] : makeClientSerializer(mcVersion)
+  deserializers[mcVersion] = deserializers[mcVersion] ? serializers[mcVersion] : makeClientDeserializer(mcVersion)
+  const bufferToParsed = b => deserializers[mcVersion].parsePacketBuffer(b).data
+  const parsedToBuffer = obj => serializers[mcVersion].createPacketBuffer(obj)
+  return buffer => parsedToBuffer(bufferToParsed(buffer))
 }
 
 function runTestForVersion (mcVersion) {
