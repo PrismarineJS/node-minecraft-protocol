@@ -9,11 +9,24 @@ on:
       - master
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js 14.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14.x
+    - name: Install dependencies
+      run: npm install
+    - name: Run lint
+      run: npm run lint
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         mcVersion: ['1.7', '1.8', '1.9', '1.10', '1.11.2', '1.12.2', '1.13.2', '1.14.4', '1.15.2', '1.16.5', '1.17', '1.17.1']
+    fail-fast: false
 
     steps:
     - uses: actions/checkout@v2
@@ -29,4 +42,4 @@ jobs:
     - name: Install dependencies
       run: npm install
     - name: Run tests
-      run: npm test -- -g ${{ matrix.mcVersion }}  
+      run: npm mocha_test -- -g ${{ matrix.mcVersion }}  
