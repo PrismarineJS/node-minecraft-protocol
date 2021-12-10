@@ -9,11 +9,11 @@ const deserializers = {}
 const makeClientSerializer = version => createSerializer({ state: states.PLAY, version, isServer: true })
 const makeClientDeserializer = version => createDeserializer({ state: states.PLAY, version })
 
-for (const version of supportedVersions) {
-  if (!(MC_VERSION in mcPackets.pc)) {
-    throw new Error(`${MC_VERSION} Version not in minecraft-packets`)
+for (const mcVersion of supportedVersions) {
+  if (!(mcVersion in mcPackets.pc)) {
+    throw new Error(`${mcVersion} Version not in minecraft-packets`)
   }
-  runTestForVersion(MC_VERSION)
+  runTestForVersion(mcVersion)
 }
 
 function cycleBufferFactory (mcVersion) {
