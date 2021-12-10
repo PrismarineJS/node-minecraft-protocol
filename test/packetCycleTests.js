@@ -10,10 +10,12 @@ const makeClientSerializer = version => createSerializer({ state: states.PLAY, v
 const makeClientDeserializer = version => createDeserializer({ state: states.PLAY, version })
 
 for (const mcVersion of supportedVersions) {
-  if (!(mcVersion in mcPackets.pc)) {
-    throw new Error(`${mcVersion} Version not in minecraft-packets`)
-  }
-  runTestForVersion(mcVersion)
+  describe(`Packet cycle tests for ${mcVersion}`, () => {
+    if (!(mcVersion in mcPackets.pc)) {
+      throw new Error(`${mcVersion} Version not in minecraft-packets`)
+    }
+    runTestForVersion(mcVersion)
+  })
 }
 
 function cycleBufferFactory (mcVersion) {
@@ -25,20 +27,18 @@ function cycleBufferFactory (mcVersion) {
 }
 
 function runTestForVersion (mcVersion) {
-  describe(`Packet cycle tests for ${mcVersion}`, () => {
-    const cycleBuffer = cycleBufferFactory(mcVersion)
-    function testBuffer (buffer, [packetName, packetIx]) {
-      const cycled = cycleBuffer(buffer)
-      assert.strictEqual(buffer.equals(cycled), true, `Error when testing ${+packetIx + 1} ${packetName} packet`)
-    }
-    // server -> client
-    const data = mcPackets.pc[mcVersion]['from-server']
-    for (const [packetName, packetData] of Object.entries(data)) {
-      it(`${packetName} packet`, () => {
-        for (const i in packetData) {
-          testBuffer(packetData[i].raw, [packetName, i])
-        }
-      })
-    }
-  })
+  const cycleBuffer = cycleBufferFactory(mcVersion)
+  function testBuffer (buffer, [packetName, packetIx]) {
+    const cycled = cycleBuffer(buffer)
+    assert.strictEqual(buffer.equals(cycled), true, `Error when testing ${+packetIx + 1} ${packetName} packet`)
+  }
+  // server -> client
+  const data = mcPackets.pc[mcVersion]['from-server']
+  for (const [packetName, packetData] of Object.entries(data)) {
+    it(`${packetName} packet`, () => {
+      for (const i in packetData) {
+        testBuffer(packetData[i].raw, [packetName, i])
+      }
+    })
+  }
 }
