@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 // Tests packet serialization/deserialization from with raw binary from minecraft-packets
-const { createSerializer, createDeserializer, states } = require('minecraft-protocol')
+const { createSerializer, createDeserializer, states, supportedVersions } = require('minecraft-protocol')
 const mcPackets = require('minecraft-packets')
 const assert = require('assert')
 
@@ -9,16 +9,11 @@ const deserializers = {}
 const makeClientSerializer = version => createSerializer({ state: states.PLAY, version, isServer: true })
 const makeClientDeserializer = version => createDeserializer({ state: states.PLAY, version })
 
-const { MC_VERSION } = process.env
-if (MC_VERSION !== undefined) {
+for (const version of supportedVersions) {
   if (!(MC_VERSION in mcPackets.pc)) {
-    throw new Error(`${String(MC_VERSION)} Version not in minecraft-packets`)
+    throw new Error(`${MC_VERSION} Version not in minecraft-packets`)
   }
   runTestForVersion(MC_VERSION)
-} else {
-  for (const mcVersion of Object.keys(mcPackets.pc)) {
-    runTestForVersion(mcVersion)
-  }
 }
 
 function cycleBufferFactory (mcVersion) {
@@ -30,7 +25,7 @@ function cycleBufferFactory (mcVersion) {
 }
 
 function runTestForVersion (mcVersion) {
-  describe(`Test version ${mcVersion}`, () => {
+  describe(`Packet cycle tests for ${mcVersion}`, () => {
     const cycleBuffer = cycleBufferFactory(mcVersion)
     function testBuffer (buffer, [packetName, packetIx]) {
       const cycled = cycleBuffer(buffer)

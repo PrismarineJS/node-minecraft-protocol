@@ -30,7 +30,5 @@ jobs:
       run: npm install
     - name: Run tests
       run: npm test -- -g ${{ matrix.mcVersion }}
-    - name: Run packet cycle tests
-      run: npm install && npm run test-non-par
       env:
-        MC_VERSION: ${{ matrix.mcVersion }}
+        MC_VERSION: ${{ matrix.mcVersion }}      
