@@ -37,8 +37,8 @@ function runTestForVersion (mcVersion) {
       assert.strictEqual(buffer.equals(cycled), true, `Error when testing ${+packetIx + 1} ${packetName} packet`)
     }
     // server -> client
-    const data = mcPackets.pc[mcVersion].data['from-server']
-    for (const [packetName, packetData] of data) {
+    const data = mcPackets.pc[mcVersion]['from-server']
+    for (const [packetName, packetData] of Object.entries(data)) {
       it(`${packetName} packet`, () => {
         for (const i in packetData) {
           testBuffer(packetData[i].raw, [packetName, i])
