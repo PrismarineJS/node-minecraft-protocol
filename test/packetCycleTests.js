@@ -9,18 +9,16 @@ const deserializers = {}
 const makeClientSerializer = version => createSerializer({ state: states.PLAY, version, isServer: true })
 const makeClientDeserializer = version => createDeserializer({ state: states.PLAY, version })
 
-describe('Packet cycle tests', () => {
-  for (const supportedVersion of supportedVersions) {
-    const mcData = require('minecraft-data')(supportedVersion)
-    const version = mcData.version.minecraftVersion
-    it('Packet cycle tests for ${version}', () => {
-      if (!(version in mcPackets.pc)) {
-        throw new Error(`${version} Version not in minecraft-packets`)
-      }
-      runTestForVersion(version)
-    })
-  }
-})
+for (const supportedVersion of supportedVersions) {
+  const mcData = require('minecraft-data')(supportedVersion)
+  const version = mcData.version.minecraftVersion
+  describe(`Packet cycle tests for ${version}`, () => {
+    if (!(version in mcPackets.pc)) {
+      throw new Error(`${version} Version not in minecraft-packets`)
+    }
+    runTestForVersion(version)
+  })
+}
 
 function cycleBufferFactory (mcVersion) {
   serializers[mcVersion] = serializers[mcVersion] ? serializers[mcVersion] : makeClientSerializer(mcVersion)
