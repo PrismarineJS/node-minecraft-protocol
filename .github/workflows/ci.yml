@@ -29,6 +29,4 @@ jobs:
     - name: Install dependencies
       run: npm install
     - name: Run tests
-      run: npm test -- -g ${{ matrix.mcVersion }}
-      env:
-        MC_VERSION: ${{ matrix.mcVersion }}      
+      run: npm test -- -g ${{ matrix.mcVersion }}  
