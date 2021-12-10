@@ -9,7 +9,7 @@ const deserializers = {}
 const makeClientSerializer = version => createSerializer({ state: states.PLAY, version, isServer: true })
 const makeClientDeserializer = version => createDeserializer({ state: states.PLAY, version })
 
-for (const mcVersion of supportedVersions) {
+for (const supportedVersion of supportedVersions) {
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
   describe(`Packet cycle tests for ${version}`, () => {
