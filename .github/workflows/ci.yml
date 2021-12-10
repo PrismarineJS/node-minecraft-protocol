@@ -30,6 +30,10 @@ jobs:
       run: npm install
     - name: Run tests
       run: npm test -- -g ${{ matrix.mcVersion }}
+    - name: Run packet cycle tests
+      run: npm install && npm run test-non-par
+      env:
+        MC_VERSION: ${{ matrix.mcVersion }}
   packet-cycle-test:
     runs-on: ubuntu-latest
 
@@ -44,4 +48,4 @@ jobs:
       with:
         java-version: '16'
         distribution: 'adopt'
-    - run: npm install && npm run test-non-par
+    
