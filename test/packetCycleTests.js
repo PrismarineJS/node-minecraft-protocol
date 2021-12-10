@@ -13,9 +13,11 @@ for (const supportedVersion of supportedVersions) {
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version.minecraftVersion
   describe(`Packet cycle tests for ${version}`, () => {
-    if (!(version in mcPackets.pc)) {
-      throw new Error(`${version} Version not in minecraft-packets`)
-    }
+    before(() => {
+      if (!(version in mcPackets.pc)) {
+        throw new Error(`${version} Version not in minecraft-packets`)
+      }
+    })
     runTestForVersion(version)
   })
 }
