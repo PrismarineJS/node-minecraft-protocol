@@ -27,8 +27,8 @@ function cycleBufferFactory (mcVersion) {
 
 function runTestForVersion (mcVersion) {
   it(`${mcVersion} in mcpackets`, () => {
-    if (!(version in mcPackets.pc)) {
-      throw new Error(`${version} Version not in minecraft-packets`)
+    if (!(mcVersion in mcPackets.pc)) {
+      throw new Error(`${mcVersion} Version not in minecraft-packets`)
     }
   })
   const cycleBuffer = cycleBufferFactory(mcVersion)
