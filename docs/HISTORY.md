@@ -1,5 +1,9 @@
 # History
 
+## 1.29.0
+
+* 1.18.0 support
+
 ## 1.28.1
 
 * Fix microsoft auth error condition handling (@extremeheat)
