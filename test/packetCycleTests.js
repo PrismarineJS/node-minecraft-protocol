@@ -13,11 +13,6 @@ for (const supportedVersion of supportedVersions) {
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version.minecraftVersion
   describe(`Packet cycle tests for ${version}`, () => {
-    before(() => {
-      if (!(version in mcPackets.pc)) {
-        throw new Error(`${version} Version not in minecraft-packets`)
-      }
-    })
     runTestForVersion(version)
   })
 }
@@ -31,6 +26,11 @@ function cycleBufferFactory (mcVersion) {
 }
 
 function runTestForVersion (mcVersion) {
+  it(`${mcVersion} in mcpackets`, () => {
+    if (!(version in mcPackets.pc)) {
+      throw new Error(`${version} Version not in minecraft-packets`)
+    }
+  })
   const cycleBuffer = cycleBufferFactory(mcVersion)
   function testBuffer (buffer, [packetName, packetIx]) {
     const cycled = cycleBuffer(buffer)
