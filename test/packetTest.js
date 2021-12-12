@@ -175,7 +175,8 @@ const values = {
   },
   tags: [{ tagName: 'hi', entries: [1, 2, 3, 4, 5] }],
   ingredient: [slotValue],
-  particleData: null
+  particleData: null,
+  chunkBlockEntity: { x: 10, y: 11, z: 12, type: 25 }
 }
 
 function getValue (_type, packet) {
