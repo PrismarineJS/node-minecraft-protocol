@@ -24,7 +24,7 @@ jobs:
     - name: Setup Java JDK
       uses: actions/setup-java@v1.4.3
       with:
-        java-version: '16'
+        java-version: '17'
         distribution: 'adopt'
     - name: Install dependencies
       run: npm install
