@@ -88,7 +88,7 @@ Returns a `Client` instance and perform login.
    is blank, and `profilesFolder` is specified, we auth with the tokens there instead.
    If neither `password` or `profilesFolder` are specified, we connect in offline mode.
  * host : default to localhost
- * session : An object holding clientToken and accessToken. Generated when after logging in using username + password with mojang or after logging in using microsoft auth. `clientToken` and `accessToken` can be set inside of `session` when using createClient to login with a client and access Token instead of a username and password. 
+ * session : An object holding clientToken and accessToken. Generated after logging in using username + password with mojang auth or after logging in using microsoft auth. `clientToken` and `accessToken` can be set inside of `session` when using createClient to login with a client and access Token instead of a username and password. 
    * clientToken : generated if a password is given
    * accessToken : generated if a password or microsoft account is given
  * authServer : auth server, default to https://authserver.mojang.com
