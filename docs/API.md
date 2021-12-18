@@ -21,6 +21,7 @@ automatically logged in and validated against mojang's auth.
  * maxPlayers : default to 20
  * keepAlive : send keep alive packets : default to true
  * version : 1.8 or 1.9 : default to 1.8
+ * favicon (optional) : the favicon to set, base64 encoded
  * customPackets (optional) : an object index by version/state/direction/name, see client_custom_packet for an example
  * errorHandler : A way to override the default error handler for client errors. A function that takes a Client and an error.
  The default kicks the client.

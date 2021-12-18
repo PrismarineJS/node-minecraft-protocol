@@ -116,6 +116,7 @@ declare module 'minecraft-protocol' {
 		maxPlayers?: number
 		keepAlive?: boolean
 		version?: string
+		favicon?: string
 		customPackets?: any
 		errorHandler?: (client: Client, error: Error) => void
 		hideErrors?: boolean
