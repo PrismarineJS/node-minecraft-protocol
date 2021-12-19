@@ -1,5 +1,8 @@
 # History
 
+## 1.29.1
+* Remove entitlement check in microsoftAuth (#929)
+
 ## 1.29.0
 
 * 1.18.0 support
