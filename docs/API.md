@@ -88,10 +88,12 @@ Returns a `Client` instance and perform login.
    is blank, and `profilesFolder` is specified, we auth with the tokens there instead.
    If neither `password` or `profilesFolder` are specified, we connect in offline mode.
  * host : default to localhost
- * session : An object holding clientToken and accessToken. Generated after logging in using username + password with mojang auth or after logging in using microsoft auth. `clientToken`, `accessToken` and `selectedProfile: {name: '<username>'}` can be set inside of `session` when using createClient to login with a client and access Token instead of a password. 
+ * session : An object holding clientToken, accessToken and selectedProfile. Generated after logging in using username + password with mojang auth or after logging in using microsoft auth. `clientToken`, `accessToken` and `selectedProfile: {name: '<username>', id: '<selected profile uuid>'}` can be set inside of `session` when using createClient to login with a client and access Token instead of a password. `session` is also emitted by the `Client` instance with the event 'session' after successful authentication. 
    * clientToken : generated if a password is given or can be set when when using createClient
    * accessToken : generated if a password or microsoft account is given or can be set when using createBot
-   * selectedProfile : generated if a password or microsoft account is given. Can be set as a object with one property `name` that specifies the selected profile. The selected profile is the same name as the in game username.
+   * selectedProfile : generated if a password or microsoft account is given. Can be set as a object with property `name` and `id` that specifies the selected profile.
+     * name : The selected profiles in game name needed for logging in with access and client Tokens.
+     * id : The selected profiles uuid in short form (without `-`) needed for logging in with access and client Tokens.
  * authServer : auth server, default to https://authserver.mojang.com
  * sessionServer : session server, default to https://sessionserver.mojang.com
  * keepAlive : send keep alive packets : default to true
