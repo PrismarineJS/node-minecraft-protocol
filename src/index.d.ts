@@ -15,7 +15,7 @@ declare module 'minecraft-protocol' {
 		socket: Socket
 		uuid: string
 		username: string
-		session?: any
+		session?: SessionOption
 		profile?: any
 		latency: number
 		customPackets: any
@@ -34,7 +34,7 @@ declare module 'minecraft-protocol' {
 		on(event: 'error', listener: (error: Error) => PromiseLike): this
 		on(event: 'packet', handler: (data: any, packetMeta: PacketMeta, buffer: Buffer, fullBuffer: Buffer) => PromiseLike): this
 		on(event: 'raw', handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
-		on(event: 'session', handler: (session: any) => PromiseLike): this
+		on(event: 'session', handler: (session: SessionObject) => PromiseLike): this
 		on(event: 'state', handler: (newState: States, oldState: States) => PromiseLike): this
 		on(event: 'end', handler: (reason: string) => PromiseLike): this
 		on(event: 'connect', handler: () => PromiseLike): this
@@ -49,6 +49,32 @@ declare module 'minecraft-protocol' {
 		once(event: 'concenect', handler: () => PromiseLike): this
 		once(event: string, handler: (data: any, packetMeta: PacketMeta) => PromiseLike): this
 		once(event: `raw.${string}`, handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
+	}
+
+	export interface SessionOption {
+		accessToken: string,
+		/** My be needed for mojang auth. Is send by mojang on username + password auth */
+		clientToken?: string,
+		selectedProfile: SessionProfile
+	}
+
+	export interface SessionObject {
+		accessToken: string,
+		/** My be needed for mojang auth. Is send by mojang on username + password auth */
+		clientToken?: string,
+		selectedProfile: {
+			name: string
+			id: string
+		}
+		availableProfiles?: SessionProfile[]
+		availableProfile?: SessionProfile[]
+	}
+
+	interface SessionProfile {
+		/** Character in game name */
+		name: string
+		/** Character UUID in short form */
+		id: string
 	}
 
 	export interface ClientOptions {
@@ -77,7 +103,7 @@ declare module 'minecraft-protocol' {
 		profilesFolder?: string
 		onMsaCode?: (data: MicrosoftDeviceAuthorizationResponse) => void
 		id?: number
-
+		session?: SessionOption
 	}
 
 	export class Server extends EventEmitter {
