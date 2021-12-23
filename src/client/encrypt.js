@@ -15,7 +15,7 @@ module.exports = function (client, options) {
       if (err) {
         debug(err)
         client.emit('error', err)
-        client.end()
+        client.end('encryptionSecretError')
         return
       }
       if (options.haveCredentials) {
@@ -30,7 +30,7 @@ module.exports = function (client, options) {
       function onJoinServerResponse (err) {
         if (err) {
           client.emit('error', err)
-          client.end()
+          client.end('encryptionLoginError')
         } else {
           sendEncryptionKeyResponse()
         }
