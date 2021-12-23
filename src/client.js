@@ -142,7 +142,7 @@ class Client extends EventEmitter {
       this.socket.removeListener('close', endSocket)
       this.socket.removeListener('end', endSocket)
       this.socket.removeListener('timeout', endSocket)
-      this.emit('end', this._endReason || 'SocketClosed')
+      this.emit('end', this._endReason || 'socketClosed')
     }
 
     const onFatalError = (err) => {
