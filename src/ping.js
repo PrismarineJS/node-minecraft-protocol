@@ -34,6 +34,7 @@ function ping (options) {
   return new Promise((resolve, reject) => {
     client.on('error', function (err) {
       clearTimeout(closeTimer)
+      client.end()
       reject(err)
     })
     client.once('server_info', function (packet) {
