@@ -137,7 +137,7 @@ declare module 'minecraft-protocol' {
 		checkTimeoutInterval?: number
 		'online-mode'?: boolean
 		beforePing?: (response: any, client: Client, callback?: (result: any) => any) => any
-		beforeLogin?: (client: Client) => void
+		beforeLogin?: (client: Client, callback?: () => void) => void
 		motd?: string
 		maxPlayers?: number
 		keepAlive?: boolean
