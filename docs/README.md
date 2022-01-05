@@ -51,9 +51,10 @@ node-minecraft-protocol is pluggable.
    create bots.
  * [flying-squid](https://github.com/PrismarineJS/flying-squid) - Create minecraft
    servers with a high level API, also a minecraft server by itself.
- * [pakkit](https://github.com/Heath123/pakkit) - A GUI tool to monitor Minecraft packets in real time, allowing you to view their data and interactively edit and resend them
- * [minecraft-packet-debugger](https://github.com/wvffle/minecraft-packet-debugger) - A tool to capture Minecraft packets in a buffer then view them in a browser
- * [aresrpg](https://github.com/aresrpg/aresrpg) - An open-source mmorpg minecraft server
+ * [pakkit](https://github.com/Heath123/pakkit) - A GUI tool to monitor Minecraft packets in real time, allowing you to view their data and interactively edit and resend them.
+ * [minecraft-packet-debugger](https://github.com/wvffle/minecraft-packet-debugger) - A tool to capture Minecraft packets in a buffer then view them in a browser.
+ * [aresrpg](https://github.com/aresrpg/aresrpg) - An open-source mmorpg minecraft server.
+ * [SteveProxy](https://github.com/SteveProxy/proxy) - Proxy for Minecraft with the ability to change the gameplay using plugins.
  * and [several thousands others](https://github.com/PrismarineJS/node-minecraft-protocol/network/dependents?package_id=UGFja2FnZS0xODEzMDk0OQ%3D%3D)
 
 ## Installation
