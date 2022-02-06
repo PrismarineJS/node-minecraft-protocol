@@ -34,10 +34,12 @@ function createClient (options) {
   const client = new Client(false, version.minecraftVersion, options.customPackets, hideErrors)
 
   tcpDns(client, options)
-  if (options.auth === 'microsoft') {
-    microsoftAuth.authenticate(client, options)
-  } else {
-    auth(client, options)
+  if (options.auth !== 'offline') {
+    if (options.auth === 'microsoft' || options.auth === undefined) {
+      microsoftAuth.authenticate(client, options)
+    } else if (options.auth === 'mojang') {
+      auth(client, options)
+    }
   }
   if (options.version === false) autoVersion(client, options)
   setProtocol(client, options)
