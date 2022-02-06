@@ -81,7 +81,7 @@ Returns a `Client` instance and perform login.
 `options` is an object containing the properties :
  * username
  * port : default to 25565
- * auth : the type of account to use, either `microsoft` or `mojang`. default to 'microsoft'
+ * auth : the type of account to use, either `microsoft`, `mojang` or `offline`. default to 'microsoft'
  * password : can be omitted
    * (microsoft account) leave this blank to use device code auth. If you provide
    a password, we try to do username and password auth, but this does not always work.

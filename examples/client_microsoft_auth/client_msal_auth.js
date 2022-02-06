@@ -10,9 +10,8 @@ if (process.argv.length < 4 || process.argv.length > 6) {
 const client = mc.createClient({
   host: process.argv[2],
   port: parseInt(process.argv[3]),
-  username: process.argv[4], // your microsoft account email
+  username: process.argv[4] // your microsoft account email
   //   password: process.argv[5], // your microsoft account password
-  auth: 'microsoft' // This option must be present and set to 'microsoft' to use Microsoft Account Authentication. Failure to do so will result in yggdrasil throwing invalid account information.
 })
 
 client.on('connect', function () {

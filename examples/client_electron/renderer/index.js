@@ -18,7 +18,7 @@ document.getElementById('connect').addEventListener('click', () => {
     username: document.getElementById('username').value,
     password: document.getElementById('password').value === '' ? undefined : document.getElementById('password').value
   }
-  if (authType.value === 'Microsoft') {
+  if (authType.value === '' || authType.value === 'Microsoft') {
     data.auth = 'microsoft'
     delete data.password
   }
