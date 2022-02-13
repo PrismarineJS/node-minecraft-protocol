@@ -100,7 +100,7 @@ declare module 'minecraft-protocol' {
 		connect?: (client: Client) => void
 		agent?: Agent
 		fakeHost?: string
-		profilesFolder?: string
+		profilesFolder?: string | false
 		onMsaCode?: (data: MicrosoftDeviceAuthorizationResponse) => void
 		id?: number
 		session?: SessionOption
