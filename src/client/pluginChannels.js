@@ -8,14 +8,10 @@ module.exports = function (client, options) {
   const proto = new ProtoDef()
   proto.addTypes(mcdata.protocol.types)
   proto.addTypes(minecraft)
-  proto.addType('registerarr', [readDumbArr, writeDumbArr, sizeOfDumbArr])
 
   client.registerChannel = registerChannel
   client.unregisterChannel = unregisterChannel
   client.writeChannel = writeChannel
-
-  client.registerChannel('REGISTER', ['registerarr', []])
-  client.registerChannel('UNREGISTER', ['registerarr', []])
 
   if (options.protocolVersion >= 385) { // 1.13-pre3 (385) added Added Login Plugin Message (https://wiki.vg/Protocol_History#1.13-pre3)
     client.on('login_plugin_request', onLoginPluginRequest)
@@ -65,34 +61,7 @@ module.exports = function (client, options) {
     debug('write custom payload ' + channel + ' ' + params)
     client.write('custom_payload', {
       channel: channel,
-      data: proto.createPacketBuffer(channel, params)
+      data: (channel === 'REGISTER' || channel === 'UNREGISTER') ? Buffer.from(params) : proto.createPacketBuffer(channel, params)
     })
-  }
-
-  function readDumbArr (buf, offset) {
-    const ret = {
-      value: [],
-      size: 0
-    }
-    let results
-    while (offset < buf.length) {
-      if (buf.indexOf(0x0, offset) === -1) { results = this.read(buf, offset, 'restBuffer', {}) } else { results = this.read(buf, offset, 'cstring', {}) }
-      ret.size += results.size
-      ret.value.push(results.value.toString())
-      offset += results.size
-    }
-    return ret
-  }
-
-  function writeDumbArr (value, buf, offset) {
-    // TODO: Remove trailing \0
-    value.forEach(function (v) {
-      offset += this.write(v, buf, offset, 'cstring', {})
-    })
-    return offset
-  }
-
-  function sizeOfDumbArr (value) {
-    return value.reduce((acc, v) => acc + this.sizeOf(v, 'cstring', {}), 0)
   }
 }
