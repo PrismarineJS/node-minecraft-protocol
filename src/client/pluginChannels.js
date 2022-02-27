@@ -23,7 +23,7 @@ module.exports = function (client, options) {
 
   function registerChannel (name, parser, custom) {
     if (custom) {
-      client.writeChannel('REGISTER', name)
+      client.writeChannel('REGISTER', [name])
     }
     if (parser) proto.addType(name, parser)
     channels.push(name)
@@ -32,7 +32,7 @@ module.exports = function (client, options) {
 
   function unregisterChannel (channel, custom) {
     if (custom) {
-      client.writeChannel('UNREGISTER', channel)
+      client.writeChannel('UNREGISTER', [channel])
     }
     const index = channels.find(function (name) {
       return channel === name
@@ -87,7 +87,7 @@ module.exports = function (client, options) {
   function writeDumbArr (value, buf, offset) {
     // TODO: Remove trailing \0
     value.forEach(function (v) {
-      offset += this.write(v, buf, offset, 'cstring', {})
+      offset += buf.write(v, offset)
     })
     return offset
   }
