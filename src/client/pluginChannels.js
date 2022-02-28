@@ -89,7 +89,7 @@ module.exports = function (client, options) {
   function writeDumbArr (value, buf, offset) {
     // TODO: Remove trailing \0
     value.forEach(function (v) {
-      offset += buf.write(v + '\0', offset)
+      offset += proto.write(v, buf, offset, 'cstring')
     })
     return offset
   }
