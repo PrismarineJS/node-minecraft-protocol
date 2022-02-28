@@ -104,7 +104,7 @@ declare module 'minecraft-protocol' {
 		onMsaCode?: (data: MicrosoftDeviceAuthorizationResponse) => void
 		id?: number
 		session?: SessionOption
-		protocolValidation?: boolean
+		validateChannelProtocol?: boolean
 	}
 
 	export class Server extends EventEmitter {
@@ -148,7 +148,7 @@ declare module 'minecraft-protocol' {
 		errorHandler?: (client: Client, error: Error) => void
 		hideErrors?: boolean
 		agent?: Agent
-		protocolValidation: boolean
+		validateChannelProtocol: boolean
 	}
 
 	export interface SerializerOptions {

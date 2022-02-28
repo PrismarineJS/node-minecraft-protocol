@@ -5,7 +5,7 @@ const debug = require('debug')('minecraft-protocol')
 module.exports = function (client, options) {
   const mcdata = require('minecraft-data')(options.version || require('../version').defaultVersion)
   const channels = []
-  const proto = new ProtoDef(options.protocolValidation ?? true)
+  const proto = new ProtoDef(options.validateChannelProtocol ?? true)
   proto.addTypes(mcdata.protocol.types)
   proto.addTypes(minecraft)
   proto.addType('registerarr', [readDumbArr, writeDumbArr, sizeOfDumbArr])
