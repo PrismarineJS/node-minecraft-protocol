@@ -1,5 +1,9 @@
 # History
 
+## 1.31.0
+
+* 1.18.2
+
 ## 1.30.0
 
 * add reasons for client.end() & fix issues (@U5B)
