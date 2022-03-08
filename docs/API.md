@@ -26,7 +26,8 @@ automatically logged in and validated against mojang's auth.
  * errorHandler : A way to override the default error handler for client errors. A function that takes a Client and an error.
  The default kicks the client.
  * hideErrors : do not display errors, default to false
- * agent : a http agent that can be used to set proxy settings for yggdrasil authentication confirmation (see proxy-agent on npm) 
+ * agent : a http agent that can be used to set proxy settings for yggdrasil authentication confirmation (see proxy-agent on npm)
+ * validateChannelProtocol (optional) : whether or not to enable protocol validation for custom protocols using plugin channels for the connected clients. Defaults to true
 
 ## mc.Server(version,[customPackets])
 
@@ -116,6 +117,7 @@ Returns a `Client` instance and perform login.
  * onMsaCode(data) : (optional) callback called when signing in with a microsoft account
  with device code auth. `data` is an object documented [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-device-code#device-authorization-response)
  * id : a numeric client id used for referring to multiple clients in a server
+ * validateChannelProtocol (optional) : whether or not to enable protocol validation for custom protocols using plugin channels. Defaults to true
 
 
 ## mc.Client(isServer,version,[customPackets])
