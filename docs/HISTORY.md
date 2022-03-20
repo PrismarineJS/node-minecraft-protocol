@@ -1,5 +1,9 @@
 # History
 
+## 1.32.1
+
+* fix protocolValidation not being optional in .d.ts typings (@IceTank)
+
 ## 1.32.0
 
 * add protocolValidation field to server and client options (@RichardDorian)
