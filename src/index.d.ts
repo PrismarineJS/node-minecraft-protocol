@@ -4,6 +4,7 @@ import { EventEmitter } from 'events';
 import { Socket } from 'net'
 import * as Stream from 'stream'
 import { Agent } from 'http'
+import { Transform } from "readable-stream";
 
 type PromiseLike = Promise<void> | void
 
@@ -17,6 +18,8 @@ declare module 'minecraft-protocol' {
 		username: string
 		session?: SessionOption
 		profile?: any
+		deserializer: FullPacketParser
+		serializer: Serializer
 		latency: number
 		customPackets: any
 		protocolVersion: number
@@ -49,6 +52,24 @@ declare module 'minecraft-protocol' {
 		once(event: 'concenect', handler: () => PromiseLike): this
 		once(event: string, handler: (data: any, packetMeta: PacketMeta) => PromiseLike): this
 		once(event: `raw.${string}`, handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
+	}
+
+	class FullPacketParser extends Transform {
+		proto: any
+		mainType: any
+		noErrorLogging: boolean
+		constructor (proto: any, mainType: any, noErrorLogging?: boolean)
+
+		parsePacketBuffer(buffer: Buffer): any
+	}
+
+	class Serializer extends Transform {
+		proto: any
+		mainType: any
+		queue: Buffer
+		constructor(proto: any, mainType: any)
+
+		createPacketBuffer(packet: any): any
 	}
 
 	export interface SessionOption {
