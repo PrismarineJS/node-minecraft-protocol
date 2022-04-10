@@ -1,5 +1,9 @@
 # History
 
+## 1.32.2
+
+* fix: cross version ping
+
 ## 1.32.1
 
 * fix protocolValidation not being optional in .d.ts typings (@IceTank)
