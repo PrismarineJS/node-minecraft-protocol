@@ -1,15 +1,23 @@
 const endianToggle = require('endian-toggle')
 
-module.exports = function (client, server, { beforePing = null }) {
+module.exports = function (client, server, { beforePing = null, version }) {
   client.once('ping_start', onPing)
   client.once('legacy_server_list_ping', onLegacyPing)
 
   function onPing () {
+    // Use client version if dynamic cross version support is enabled.
+    const responseVersion = (version === false)
+      ? {
+          name: client.version,
+          protocol: client.protocolVersion
+        }
+      : {
+          name: server.mcversion.minecraftVersion,
+          protocol: server.mcversion.version
+        }
+
     const response = {
-      version: {
-        name: server.mcversion.minecraftVersion,
-        protocol: server.mcversion.version
-      },
+      version: responseVersion,
       players: {
         max: server.maxPlayers,
         online: server.playerCount,

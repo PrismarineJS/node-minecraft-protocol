@@ -142,7 +142,7 @@ declare module 'minecraft-protocol' {
 		motd?: string
 		maxPlayers?: number
 		keepAlive?: boolean
-		version?: string
+		version?: string | false
 		favicon?: string
 		customPackets?: any
 		errorHandler?: (client: Client, error: Error) => void
