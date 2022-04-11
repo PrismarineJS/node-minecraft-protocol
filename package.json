@@ -34,7 +34,6 @@
   "browser": "src/browser.js",
   "devDependencies": {
     "@types/node": "^17.0.4",
-    "@types/readable-stream": "^2.3.13",
     "espower-loader": "^1.0.0",
     "intelli-espower-loader": "^1.0.0",
     "minecraft-packets": "^1.1.5",
@@ -45,6 +44,7 @@
     "standard": "^16.0.1"
   },
   "dependencies": {
+    "@types/readable-stream": "^2.3.13",
     "aes-js": "^3.1.2",
     "buffer-equal": "^1.0.0",
     "debug": "^4.3.2",
