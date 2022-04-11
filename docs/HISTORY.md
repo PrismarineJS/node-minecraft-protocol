@@ -1,5 +1,9 @@
 # History
 
+## 1.33.0
+
+* Bump mcdata
+
 ## 1.32.2
 
 * fix: cross version ping
