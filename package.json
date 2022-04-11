@@ -50,7 +50,7 @@
     "endian-toggle": "^0.0.0",
     "lodash.get": "^4.1.2",
     "lodash.merge": "^4.3.0",
-    "minecraft-data": "^2.109.0",
+    "minecraft-data": "^3.0.0",
     "minecraft-folder-path": "^1.2.0",
     "node-fetch": "^2.6.1",
     "node-rsa": "^0.4.2",
