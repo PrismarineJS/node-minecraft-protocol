@@ -1,6 +1,6 @@
 const states = require('../states')
 
-module.exports = function (client, server, { version }) {
+module.exports = function (client, server, { version, fallbackVersion }) {
   client.once('set_protocol', onHandshake)
 
   function onHandshake (packet) {
@@ -12,7 +12,15 @@ module.exports = function (client, server, { version }) {
       if (require('minecraft-data')(client.protocolVersion)) {
         client.version = client.protocolVersion
       } else {
-        client.end('Protocol version ' + client.protocolVersion + ' is not supported')
+        let fallback
+        if (fallbackVersion !== undefined) {
+          fallback = require('minecraft-data')(fallbackVersion)
+        }
+        if (fallback) {
+          client.version = fallback.version.version
+        } else {
+          client.end('Protocol version ' + client.protocolVersion + ' is not supported')
+        }
       }
     } else if (client.protocolVersion !== server.mcversion.version && packet.nextState !== 1) {
       client.end('Wrong protocol version, expected: ' + server.mcversion.version + ' and you are using: ' + client.protocolVersion)
