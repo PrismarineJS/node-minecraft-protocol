@@ -19,7 +19,7 @@ class Client extends EventEmitter {
     this.customPackets = customPackets
     this.version = version
     this.isServer = !!isServer
-    this.splitter = framing.createSplitter()
+    this.splitter = framing.createSplitter(hideErrors)
     this.packetsToParse = {}
     this.compressor = null
     this.framer = framing.createFramer()
