@@ -15,5 +15,6 @@ module.exports = {
   createSerializer: serializer.createSerializer,
   createDeserializer: serializer.createDeserializer,
   ping: require('./ping'),
-  supportedVersions: require('./version').supportedVersions
+  supportedVersions: require('./version').supportedVersions,
+  defaultVersion: require('./version').defaultVersion
 }
