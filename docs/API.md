@@ -28,6 +28,7 @@ automatically logged in and validated against mojang's auth.
  * hideErrors : do not display errors, default to false
  * agent : a http agent that can be used to set proxy settings for yggdrasil authentication confirmation (see proxy-agent on npm)
  * validateChannelProtocol (optional) : whether or not to enable protocol validation for custom protocols using plugin channels for the connected clients. Defaults to true
+ * shouldVerifyClient (optional) : a callback function to decide if verification (online mode login) is required individually for each client, takes a Client as first argument and returns a boolean, can be async
 
 ## mc.Server(version,[customPackets])
 

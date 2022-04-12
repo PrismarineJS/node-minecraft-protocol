@@ -14,6 +14,7 @@ module.exports = function (client, server, options) {
   } = options
 
   let serverId
+  let needToVerify
 
   client.on('error', function (err) {
     clientErrorHandler(client, err)
@@ -26,10 +27,15 @@ module.exports = function (client, server, options) {
 
   let loginKickTimer = setTimeout(kickForNotLoggingIn, kickTimeout)
 
-  function onLogin (packet) {
+  async function onLogin (packet) {
     client.username = packet.username
-    const isException = !!server.onlineModeExceptions[client.username.toLowerCase()]
-    const needToVerify = (onlineMode && !isException) || (!onlineMode && isException)
+    if (typeof options.shouldVerifyClient === 'function') {
+      needToVerify = await options.shouldVerifyClient(client)
+    }
+    if (typeof needToVerify !== 'function') {
+      const isException = !!server.onlineModeExceptions[client.username.toLowerCase()]
+      needToVerify = (onlineMode && !isException) || (!onlineMode && isException)
+    }
     if (needToVerify) {
       serverId = crypto.randomBytes(4).toString('hex')
       client.verifyToken = crypto.randomBytes(4)
@@ -69,8 +75,6 @@ module.exports = function (client, server, options) {
     }
     client.setEncryption(sharedSecret)
 
-    const isException = !!server.onlineModeExceptions[client.username.toLowerCase()]
-    const needToVerify = (onlineMode && !isException) || (!onlineMode && isException)
     const nextStep = needToVerify ? verifyUsername : loginClient
     nextStep()
 

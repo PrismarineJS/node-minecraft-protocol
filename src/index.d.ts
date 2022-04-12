@@ -169,7 +169,8 @@ declare module 'minecraft-protocol' {
 		errorHandler?: (client: Client, error: Error) => void
 		hideErrors?: boolean
 		agent?: Agent
-		validateChannelProtocol?: boolean
+		validateChannelProtocol?: boolean,
+		shouldVerifyClient?: (client: Client) => boolean | Promise<boolean>
 	}
 
 	export interface SerializerOptions {
