@@ -21,7 +21,7 @@ automatically logged in and validated against mojang's auth.
  * maxPlayers : default to 20
  * keepAlive : send keep alive packets : default to true
  * version : the version of the server, defaults to the latest version. Set version to `false` to enable dynamic cross version support.
- * fallbackVersion : the version that should be used as a fallback, if the client version isn't supported, only works with dynamic cross version support.
+ * fallbackVersion (optional) : the version that should be used as a fallback, if the client version isn't supported, only works with dynamic cross version support.
  * favicon (optional) : the favicon to set, base64 encoded
  * customPackets (optional) : an object index by version/state/direction/name, see client_custom_packet for an example
  * errorHandler : A way to override the default error handler for client errors. A function that takes a Client and an error.
