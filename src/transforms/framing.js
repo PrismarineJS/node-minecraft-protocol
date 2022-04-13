@@ -3,8 +3,8 @@
 const [readVarInt, writeVarInt, sizeOfVarInt] = require('protodef').types.varint
 const Transform = require('readable-stream').Transform
 
-module.exports.createSplitter = function (hideErrors = false) {
-  return new Splitter(hideErrors)
+module.exports.createSplitter = function () {
+  return new Splitter()
 }
 
 module.exports.createFramer = function () {
@@ -25,9 +25,8 @@ class Framer extends Transform {
 const LEGACY_PING_PACKET_ID = 0xfe
 
 class Splitter extends Transform {
-  constructor (hideErrors = false) {
+  constructor () {
     super()
-    this.hideErrors = hideErrors
     this.buffer = Buffer.alloc(0)
     this.recognizeLegacyPing = false
   }
@@ -53,7 +52,7 @@ class Splitter extends Transform {
       ({ value, size } = readVarInt(this.buffer, offset))
     } catch (e) {
       if (!(e.partialReadError)) {
-        if (!this.hideErrors) throw e
+        this.emit('fatal-error', e)
       } else { stop = true }
     }
     if (!stop) {
@@ -66,7 +65,7 @@ class Splitter extends Transform {
           if (e.partialReadError) {
             break
           } else {
-            if (!this.hideErrors) throw e
+            this.emit('fatal-error', e)
           }
         }
       }
