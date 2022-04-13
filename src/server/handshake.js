@@ -8,7 +8,7 @@ module.exports = function (client, server, { version, fallbackVersion }) {
     client.serverPort = packet.serverPort
     client.protocolVersion = packet.protocolVersion
 
-    if (version === false || version === undefined) {
+    if (version === false) {
       if (require('minecraft-data')(client.protocolVersion)) {
         client.version = client.protocolVersion
       } else {

@@ -10,7 +10,7 @@ module.exports = function (client, server, { beforePing = null, version, fallbac
       protocol: server.mcversion.version
     }
 
-    if (version === false || version === undefined) {
+    if (version === false) {
       let minecraftData = require('minecraft-data')(client.protocolVersion)
       if (!minecraftData && fallbackVersion !== undefined) {
         minecraftData = require('minecraft-data')(fallbackVersion)
