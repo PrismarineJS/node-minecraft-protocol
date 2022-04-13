@@ -52,7 +52,7 @@ class Splitter extends Transform {
       ({ value, size } = readVarInt(this.buffer, offset))
     } catch (e) {
       if (!(e.partialReadError)) {
-        this.emit('fatal-error', e)
+        this.emit('error', e)
       } else { stop = true }
     }
     if (!stop) {
@@ -65,7 +65,7 @@ class Splitter extends Transform {
           if (e.partialReadError) {
             break
           } else {
-            this.emit('fatal-error', e)
+            this.emit('error', e)
           }
         }
       }
