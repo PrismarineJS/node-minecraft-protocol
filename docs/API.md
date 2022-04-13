@@ -325,6 +325,10 @@ The minecraft protocol states.
 
 The supported minecraft versions.
 
+## mc.defaultVersion
+
+The current default minecraft version.
+
 ## mc.createSerializer({ state = states.HANDSHAKING, isServer = false , version})
 
 Returns a minecraft protocol [serializer](https://github.com/roblabla/ProtoDef#serializerprotomaintype) for these parameters.
