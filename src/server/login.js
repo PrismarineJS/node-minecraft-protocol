@@ -32,7 +32,7 @@ module.exports = function (client, server, options) {
     if (typeof options.shouldVerifyClient === 'function') {
       needToVerify = await options.shouldVerifyClient(client)
     }
-    if (typeof needToVerify !== 'function') {
+    if (typeof needToVerify !== 'boolean') {
       const isException = !!server.onlineModeExceptions[client.username.toLowerCase()]
       needToVerify = (onlineMode && !isException) || (!onlineMode && isException)
     }
@@ -109,8 +109,7 @@ module.exports = function (client, server, options) {
   }
 
   function loginClient () {
-    const isException = !!server.onlineModeExceptions[client.username.toLowerCase()]
-    if (onlineMode === false || isException) {
+    if (!needToVerify) {
       client.uuid = nameToMcOfflineUUID(client.username)
     }
     options.beforeLogin?.(client)
