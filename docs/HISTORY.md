@@ -1,5 +1,10 @@
 # History
 
+## 1.34.0
+
+* Export defaultVersion (@matthi4s)
+* Fix missing readable-stream types (@IceTank)
+
 ## 1.33.0
 
 * Bump mcdata
