@@ -15,11 +15,7 @@ module.exports = function (client, server, { beforePing = null, version }) {
           name: server.mcversion.minecraftVersion,
           protocol: server.mcversion.version
         }
-    
-    if (!server.raw_motd) {
-      server.raw_motd = {text: server.motd}
-    }
-    
+
     const response = {
       version: responseVersion,
       players: {
@@ -27,7 +23,7 @@ module.exports = function (client, server, { beforePing = null, version }) {
         online: server.playerCount,
         sample: []
       },
-      description: server.raw_motd,
+      description: server.raw_motd || { text: server.motd },
       favicon: server.favicon
     }
 
