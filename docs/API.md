@@ -12,9 +12,11 @@ automatically logged in and validated against mojang's auth.
  * kickTimeout : default to `10*1000` (10s), kick client that doesn't answer to keepalive after that time
  * checkTimeoutInterval : default to `4*1000` (4s), send keepalive packet at that period
  * online-mode : default to true
- * beforePing : allow customisation of the answer to ping the server does. 
+ * beforeServerInfo : allow customisation of the answer to server info (MOTD, server icon, player list and so on) the server does. 
  It takes a function with argument response and client, response is the default json response, and client is client who sent a ping.
  It can take as third argument a callback. If the callback is passed, the function should pass its result to the callback, if not it should return.
+ * beforePing : allow customisation of the answer to ping. It takes a function with argument client and packet. This function will override the
+ default behavior when the server will receive a ping packet.
  * beforeLogin : allow customisation of client before the `success` packet is sent.
  It takes a function with argument client and should be synchronous for the server to wait for completion before continuing execution.
  * motd : default to "A Minecraft server"
