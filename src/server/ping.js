@@ -32,11 +32,10 @@ module.exports = function (client, server, { beforeServerInfo = null, beforePing
       client.write('server_info', { response: JSON.stringify(response) })
     }
 
-    function answerPing (client, packet) {
+    function answerPing (packet) {
       client.write('ping', { time: packet.time })
       client.end()
     }
-    if (beforePing) answerPing = beforePing;
 
     if (beforeServerInfo) {
       if (beforeServerInfo.length > 2) {
@@ -49,7 +48,8 @@ module.exports = function (client, server, { beforeServerInfo = null, beforePing
     }
 
     client.once('ping', function (packet) {
-      answerPing(client, packet);
+      if (beforePing) return beforePing(client, packet)
+      answerPing(packet)
     })
   }
 
