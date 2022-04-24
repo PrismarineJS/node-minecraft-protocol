@@ -1,6 +1,6 @@
 const endianToggle = require('endian-toggle')
 
-module.exports = function (client, server, { beforePing = null, version }) {
+module.exports = function (client, server, { beforeServerInfo = null, beforePing = null, version }) {
   client.once('ping_start', onPing)
   client.once('legacy_server_list_ping', onLegacyPing)
 
@@ -27,24 +27,29 @@ module.exports = function (client, server, { beforePing = null, version }) {
       favicon: server.favicon
     }
 
-    function answerToPing (err, response) {
+    function answerToServerInfo (err, response) {
       if (err) return
       client.write('server_info', { response: JSON.stringify(response) })
     }
 
-    if (beforePing) {
-      if (beforePing.length > 2) {
-        beforePing(response, client, answerToPing)
+    function answerPing (client, packet) {
+      client.write('ping', { time: packet.time })
+      client.end()
+    }
+    if (beforePing) answerPing = beforePing;
+
+    if (beforeServerInfo) {
+      if (beforeServerInfo.length > 2) {
+        beforeServerInfo(response, client, answerToServerInfo)
       } else {
-        answerToPing(null, beforePing(response, client) || response)
+        answerToServerInfo(null, beforeServerInfo(response, client) || response)
       }
     } else {
-      answerToPing(null, response)
+      answerToServerInfo(null, response)
     }
 
     client.once('ping', function (packet) {
-      client.write('ping', { time: packet.time })
-      client.end()
+      answerPing(client, packet);
     })
   }
 
