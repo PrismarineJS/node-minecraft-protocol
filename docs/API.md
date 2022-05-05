@@ -18,7 +18,7 @@ automatically logged in and validated against mojang's auth.
  * beforeLogin : allow customisation of client before the `success` packet is sent.
  It takes a function with argument client and should be synchronous for the server to wait for completion before continuing execution.
  * motd : default to "A Minecraft server"
- * chatMessageMotd : A MessageBuilder instance from [prismarine-chat](https://github.com/PrismarineJS/prismarine-chat) to use instead of motd. Not used with legacy pings.
+ * chatMessageMotd : A json object off the chat message to use instead of `motd`. See MessageBuilder in [prismarine-chat](https://github.com/PrismarineJS/prismarine-chat). Not used with legacy pings.
  * maxPlayers : default to 20
  * keepAlive : send keep alive packets : default to true
  * version : the version of the server, defaults to the latest version. Set version to `false` to enable dynamic cross version support.
