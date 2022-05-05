@@ -16,6 +16,7 @@ module.exports = function (client, server, { beforePing = null, version }) {
           protocol: server.mcversion.version
         }
 
+    const description = server.chatMessageMotd ?? { text: server.motd }
     const response = {
       version: responseVersion,
       players: {
@@ -23,7 +24,7 @@ module.exports = function (client, server, { beforePing = null, version }) {
         online: server.playerCount,
         sample: []
       },
-      description: { text: server.motd },
+      description,
       favicon: server.favicon
     }
 
