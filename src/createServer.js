@@ -23,7 +23,7 @@ function createServer (options = {}) {
     version,
     favicon,
     customPackets,
-    chatMessageMotd = undefined // This is when you want to send formated motd's from ChatMessage instances
+    chatMessageMotd // This is when you want to send formated motd's from ChatMessage instances
   } = options
 
   const maxPlayers = options['max-players'] !== undefined ? maxPlayersOld : maxPlayersNew
