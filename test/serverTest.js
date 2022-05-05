@@ -157,10 +157,11 @@ for (const supportedVersion of mc.supportedVersions) {
       }
     })
     it('responds to ping requests', function (done) {
-      const { MessageBuilder } = require('prismarine-chat')(version.minecraftVersion)
-      const chatMotd = new MessageBuilder()
-      chatMotd.setBold(true).setText('Example chat mesasge')
-      chatMotd.addExtra(new MessageBuilder().setText('Red text').setColor('red'))
+      const chatMotd = { // Generated with prismarine-chat MessageBuilder on version 1.16 may change in the future
+        extra: [{ color: 'red', text: 'Red text' }],
+        bold: true,
+        text: 'Example chat mesasge'
+      }
 
       const server = mc.createServer({
         'online-mode': false,
