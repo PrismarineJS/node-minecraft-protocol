@@ -5,7 +5,7 @@ import { Socket } from 'net'
 import * as Stream from 'stream'
 import { Agent } from 'http'
 import { Transform } from "readable-stream";
-import type { ChatMessage } from 'prismarine-chat'
+import type { MessageBuilder } from 'prismarine-chat'
 
 type PromiseLike = Promise<void> | void
 
@@ -137,7 +137,7 @@ declare module 'minecraft-protocol' {
 		playerCount: number
 		maxPlayers: number
 		motd: string
-		chatMessageMotd?: ChatMessage
+		chatMessageMotd?: MessageBuilder
 		favicon: string
 		close(): void
 		on(event: 'connection', handler: (client: ServerClient) => PromiseLike): this
@@ -163,7 +163,7 @@ declare module 'minecraft-protocol' {
 		beforePing?: (response: any, client: Client, callback?: (error: any, result: any) => any) => any
 		beforeLogin?: (client: Client) => void
 		motd?: string
-		chatMessageMotd?: ChatMessage
+		chatMessageMotd?: MessageBuilder
 		maxPlayers?: number
 		keepAlive?: boolean
 		version?: string | false
