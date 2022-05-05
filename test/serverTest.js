@@ -191,7 +191,6 @@ for (const supportedVersion of mc.supportedVersions) {
               sample: []
             },
             description: { 
-              with: [],
               extra: [ { color: 'red', text: 'Red text' } ],
               bold: true,
               text: 'Example chat mesasge'
