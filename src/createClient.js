@@ -38,7 +38,6 @@ function createClient (options) {
     case 'mojang':
       auth(client, options)
       break
-    case undefined:
     case 'microsoft':
       microsoftAuth.authenticate(client, options)
       break
