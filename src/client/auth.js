@@ -82,7 +82,7 @@ module.exports = async function (client, options) {
                   remoteId: oldProfileObj?.remoteId ?? '',
                   username: options.username,
                   localId: profile,
-                  type: (options.auth?.toLowerCase() === 'mojang' ? 'Mojang' : 'Xbox'),
+                  type: (options.auth?.toLowerCase() === 'microsoft' ? 'Xbox' : 'Mojang'),
                   persistent: true
                 }
                 auths.accounts[profile] = newProfileObj
