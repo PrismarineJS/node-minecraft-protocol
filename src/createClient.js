@@ -6,7 +6,7 @@ const assert = require('assert')
 const encrypt = require('./client/encrypt')
 const keepalive = require('./client/keepalive')
 const compress = require('./client/compress')
-const auth = require('./client/auth')
+const auth = require('./client/mojangAuth')
 const microsoftAuth = require('./client/microsoftAuth')
 const setProtocol = require('./client/setProtocol')
 const play = require('./client/play')
@@ -34,10 +34,19 @@ function createClient (options) {
   const client = new Client(false, version.minecraftVersion, options.customPackets, hideErrors)
 
   tcpDns(client, options)
-  if (options.auth === 'microsoft') {
-    microsoftAuth.authenticate(client, options)
-  } else {
-    auth(client, options)
+  switch (options.auth) {
+    case 'mojang':
+      auth(client, options)
+      break
+    case undefined:
+    case 'microsoft':
+      microsoftAuth.authenticate(client, options)
+      break
+    case 'offline':
+    default:
+      client.username = options.username
+      options.connect(client)
+      break
   }
   if (options.version === false) autoVersion(client, options)
   setProtocol(client, options)

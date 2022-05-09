@@ -3,7 +3,7 @@
 const mc = require('minecraft-protocol')
 
 if (process.argv.length < 4 || process.argv.length > 6) {
-  console.log('Usage : node echo.js <host> <port> <email>')
+  console.log('Usage : node client_msal_auth.js <host> <port> <email>')
   process.exit(1)
 }
 

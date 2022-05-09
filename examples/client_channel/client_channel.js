@@ -10,7 +10,8 @@ const client = mc.createClient({
   host: process.argv[2],
   port: parseInt(process.argv[3]),
   username: process.argv[4] ? process.argv[4] : 'test',
-  password: process.argv[5]
+  password: process.argv[5],
+  auth: 'microsoft'
 })
 
 client.registerChannel('MC|Brand', ['string', []])

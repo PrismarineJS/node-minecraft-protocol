@@ -1,7 +1,7 @@
 const mc = require('minecraft-protocol')
 
 if (process.argv.length < 4 || process.argv.length > 6) {
-  console.log('Usage : node echo.js <host> <port> [<name>] [<password>]')
+  console.log('Usage : node client_custom_packets.js <host> <port> [<name>] [<password>]')
   process.exit(1)
 }
 
@@ -62,7 +62,8 @@ const client = mc.createClient({
   port: parseInt(process.argv[3]),
   username: process.argv[4] ? process.argv[4] : 'echo',
   password: process.argv[5],
-  customPackets: customPackets
+  customPackets: customPackets,
+  auth: 'microsoft'
 })
 
 client.on('connect', function () {

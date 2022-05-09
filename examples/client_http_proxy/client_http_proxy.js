@@ -27,7 +27,8 @@ const client = mc.createClient({
   },
   agent: new ProxyAgent({ protocol: 'http', host: proxyHost, port: proxyPort }),
   username: process.argv[6] ? process.argv[6] : 'echo',
-  password: process.argv[7]
+  password: process.argv[7],
+  auth: 'microsoft'
 })
 
 client.on('connect', function () {

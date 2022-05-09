@@ -44,7 +44,8 @@ const client = mc.createClient({
   host: host,
   port: port,
   username: user,
-  password: passwd
+  password: passwd,
+  auth: 'microsoft'
 })
 
 client.on('kick_disconnect', function (packet) {

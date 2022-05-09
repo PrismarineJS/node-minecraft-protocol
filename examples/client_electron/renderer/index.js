@@ -22,6 +22,10 @@ document.getElementById('connect').addEventListener('click', () => {
     data.auth = 'microsoft'
     delete data.password
   }
+  if (authType.value === 'offline' || authType.value === '') {
+    data.auth === 'offline'
+    delete data.password
+  }
   ipcRenderer.send('connect', data)
 })
 
