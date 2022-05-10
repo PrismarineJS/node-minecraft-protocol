@@ -23,7 +23,7 @@ document.getElementById('connect').addEventListener('click', () => {
     delete data.password
   }
   if (authType.value === 'offline' || authType.value === '') {
-    data.auth === 'offline'
+    data.auth = 'offline'
     delete data.password
   }
   ipcRenderer.send('connect', data)
