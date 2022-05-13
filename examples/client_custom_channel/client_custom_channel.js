@@ -10,8 +10,7 @@ const client = mc.createClient({
   port: parseInt(process.argv[3]),
   username: process.argv[4] ? process.argv[4] : 'test',
   password: process.argv[5],
-  version: '1.10',
-  auth: 'microsoft'
+  version: '1.10'
 })
 
 client.on('login', onlogin)

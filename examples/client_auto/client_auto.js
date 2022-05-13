@@ -12,8 +12,7 @@ const client = mc.createClient({
   host: process.argv[2],
   port: parseInt(process.argv[3]),
   username: process.argv[4] ? process.argv[4] : 'echo',
-  password: process.argv[5],
-  auth: 'microsoft'
+  password: process.argv[5]
 })
 
 client.on('connect', function () {

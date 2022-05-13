@@ -8,8 +8,7 @@ if (process.argv.length < 4 || process.argv.length > 6) {
 const client = mc.createClient({
   host: process.argv[2],
   port: parseInt(process.argv[3]),
-  username: process.argv[4] ? process.argv[4] : 'echo',
-  auth: 'microsoft'
+  username: process.argv[4] ? process.argv[4] : 'echo'
 })
 client.on('error', function (err) {
   console.error(err)
