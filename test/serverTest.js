@@ -157,6 +157,52 @@ for (const supportedVersion of mc.supportedVersions) {
       }
     })
     it('responds to ping requests', function (done) {
+      const chatMotd = { // Generated with prismarine-chat MessageBuilder on version 1.16 may change in the future
+        extra: [{ color: 'red', text: 'Red text' }],
+        bold: true,
+        text: 'Example chat mesasge'
+      }
+
+      const server = mc.createServer({
+        'online-mode': false,
+        motd: 'test1234',
+        motdMsg: chatMotd,
+        'max-players': 120,
+        version: version.minecraftVersion,
+        port: PORT
+      })
+      server.on('listening', function () {
+        mc.ping({
+          host: '127.0.0.1',
+          version: version.minecraftVersion,
+          port: PORT
+        }, function (err, results) {
+          if (err) return done(err)
+          assert.ok(results.latency >= 0)
+          assert.ok(results.latency <= 1000)
+          delete results.latency
+          assert.deepEqual(results, {
+            version: {
+              name: version.minecraftVersion,
+              protocol: version.version
+            },
+            players: {
+              max: 120,
+              online: 0,
+              sample: []
+            },
+            description: { 
+              extra: [ { color: 'red', text: 'Red text' } ],
+              bold: true,
+              text: 'Example chat mesasge'
+            }
+          })
+          server.close()
+        })
+      })
+      server.on('close', done)
+    })
+    it('responds with chatMessage motd\'s', function (done) {
       const server = mc.createServer({
         'online-mode': false,
         motd: 'test1234',
