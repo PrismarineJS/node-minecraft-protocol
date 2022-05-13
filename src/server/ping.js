@@ -23,7 +23,7 @@ module.exports = function (client, server, { beforePing = null, version }) {
         online: server.playerCount,
         sample: []
       },
-      description: server.chatMessageMotd ?? { text: server.motd },
+      description: server.motdMsg ?? { text: server.motd },
       favicon: server.favicon
     }
 

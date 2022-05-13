@@ -166,7 +166,7 @@ for (const supportedVersion of mc.supportedVersions) {
       const server = mc.createServer({
         'online-mode': false,
         motd: 'test1234',
-        chatMessageMotd: chatMotd,
+        motdMsg: chatMotd,
         'max-players': 120,
         version: version.minecraftVersion,
         port: PORT
