@@ -1,20 +1,32 @@
 const endianToggle = require('endian-toggle')
 
-module.exports = function (client, server, { beforePing = null, version }) {
+module.exports = function (client, server, { beforePing = null, version, fallbackVersion }) {
   client.once('ping_start', onPing)
   client.once('legacy_server_list_ping', onLegacyPing)
 
   function onPing () {
-    // Use client version if dynamic cross version support is enabled.
-    const responseVersion = (version === false)
-      ? {
+    let responseVersion = {
+      name: server.mcversion.minecraftVersion,
+      protocol: server.mcversion.version
+    }
+
+    if (version === false) {
+      let minecraftData = require('minecraft-data')(client.protocolVersion)
+      if (!minecraftData && fallbackVersion !== undefined) {
+        minecraftData = require('minecraft-data')(fallbackVersion)
+      }
+      if (minecraftData) {
+        responseVersion = {
+          name: minecraftData.version.minecraftVersion,
+          protocol: minecraftData.version.version
+        }
+      } else {
+        responseVersion = {
           name: client.version,
           protocol: client.protocolVersion
         }
-      : {
-          name: server.mcversion.minecraftVersion,
-          protocol: server.mcversion.version
-        }
+      }
+    }
 
     const response = {
       version: responseVersion,

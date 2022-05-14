@@ -166,6 +166,7 @@ declare module 'minecraft-protocol' {
 		maxPlayers?: number
 		keepAlive?: boolean
 		version?: string | false
+		fallbackVersion?: string
 		favicon?: string
 		customPackets?: any
 		errorHandler?: (client: Client, error: Error) => void
