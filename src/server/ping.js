@@ -41,7 +41,11 @@ module.exports = function (client, server, { beforePing = null, version, fallbac
 
     function answerToPing (err, response) {
       if (err) return
-      client.write('server_info', { response: JSON.stringify(response) })
+      if (response === false) {
+        client.socket.destroy()
+      } else {
+        client.write('server_info', { response: JSON.stringify(response) })
+      }
     }
 
     if (beforePing) {
