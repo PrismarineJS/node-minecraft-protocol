@@ -1,7 +1,7 @@
 const mc = require('minecraft-protocol')
 
 if (process.argv.length < 4 || process.argv.length > 6) {
-  console.log('Usage : node client_echo.js <host> <port> [<name>]')
+  console.log('Usage : node echo.js <host> <port> [<name>]')
   process.exit(1)
 }
 

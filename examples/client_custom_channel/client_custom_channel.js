@@ -1,7 +1,7 @@
 const mc = require('minecraft-protocol')
 
 if (process.argv.length < 4 || process.argv.length > 6) {
-  console.log('Usage : node client_custom_channel.js <host> <port> [<name>] [<password>]')
+  console.log('Usage : node client_channel.js <host> <port> [<name>] [<password>]')
   process.exit(1)
 }
 
