@@ -15,14 +15,15 @@ automatically logged in and validated against mojang's auth.
  * beforeServerInfo : allow customisation of the answer to server info (MOTD, server icon, player list and so on) the server does. 
  It takes a function with argument response and client, response is the default json response, and client is client who sent a ping.
  It can take as third argument a callback. If the callback is passed, the function should pass its result to the callback, if not it should return.
- * beforePing : allow customisation of the answer to ping. It takes a function with argument client and packet. This function will override the
- default behavior when the server will receive a ping packet.
+ If the result is `false` instead of a response object then the connection is terminated and no ping is returned to the client.
  * beforeLogin : allow customisation of client before the `success` packet is sent.
  It takes a function with argument client and should be synchronous for the server to wait for completion before continuing execution.
  * motd : default to "A Minecraft server"
+ * motdMsg : A json object of the chat message to use instead of `motd`. Can be build using [prismarine-chat](https://github.com/PrismarineJS/prismarine-chat) and calling .toJSON(). Not used with legacy pings.
  * maxPlayers : default to 20
  * keepAlive : send keep alive packets : default to true
  * version : the version of the server, defaults to the latest version. Set version to `false` to enable dynamic cross version support.
+ * fallbackVersion (optional) : the version that should be used as a fallback, if the client version isn't supported, only works with dynamic cross version support.
  * favicon (optional) : the favicon to set, base64 encoded
  * customPackets (optional) : an object index by version/state/direction/name, see client_custom_packet for an example
  * errorHandler : A way to override the default error handler for client errors. A function that takes a Client and an error.

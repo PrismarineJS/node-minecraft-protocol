@@ -136,6 +136,7 @@ declare module 'minecraft-protocol' {
 		playerCount: number
 		maxPlayers: number
 		motd: string
+		motdMsg?: Object
 		favicon: string
 		close(): void
 		on(event: 'connection', handler: (client: ServerClient) => PromiseLike): this
@@ -162,9 +163,11 @@ declare module 'minecraft-protocol' {
 		beforePing?: (client: Client, packet: any) => any
 		beforeLogin?: (client: Client) => void
 		motd?: string
+		motdMsg?: Object
 		maxPlayers?: number
 		keepAlive?: boolean
 		version?: string | false
+		fallbackVersion?: string
 		favicon?: string
 		customPackets?: any
 		errorHandler?: (client: Client, error: Error) => void
