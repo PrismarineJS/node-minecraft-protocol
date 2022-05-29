@@ -14,7 +14,7 @@ module.exports = function (client, server, {
     // check if the last keepAlive was too long ago (kickTimeout)
     const elapsed = new Date() - lastKeepAlive
     if (elapsed > kickTimeout) {
-      client.end('KeepAliveTimeout')
+      client.end('Timed out')
       return
     }
     sendKeepAliveTime = new Date()
