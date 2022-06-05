@@ -77,6 +77,14 @@ Called when a client connects, but before any login has happened. Takes a
 
 Called when a client is logged in against server. Takes a `Client` parameter.
 
+### `listening` event
+
+Called when the server is listening for connections. This means that the server is ready to accept incoming connections.
+
+### `close` event
+
+Called when the server is no longer listening to incoming connections.
+
 
 ## mc.createClient(options)
 
