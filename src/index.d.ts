@@ -173,6 +173,8 @@ declare module 'minecraft-protocol' {
 		hideErrors?: boolean
 		agent?: Agent
 		validateChannelProtocol?: boolean
+		socketType: 'tcp' | 'ipc' | undefined
+		socketPath: string | undefined
 	}
 
 	export interface SerializerOptions {
