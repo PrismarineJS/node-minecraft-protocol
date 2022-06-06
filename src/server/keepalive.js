@@ -1,5 +1,6 @@
 module.exports = function (client, server, {
   kickTimeout = 30 * 1000,
+  timeoutReason = 'Timed out',
   checkTimeoutInterval = 4 * 1000,
   keepAlive: enableKeepAlive = true
 }) {
@@ -8,13 +9,13 @@ module.exports = function (client, server, {
   let keepAliveTimer = null
   let sendKeepAliveTime
 
-  function keepAliveLoop () {
+  function keepAliveLoop() {
     if (!keepAlive) { return }
 
     // check if the last keepAlive was too long ago (kickTimeout)
     const elapsed = new Date() - lastKeepAlive
     if (elapsed > kickTimeout) {
-      client.end('Timed out')
+      client.end(timeoutReason)
       return
     }
     sendKeepAliveTime = new Date()
@@ -23,12 +24,12 @@ module.exports = function (client, server, {
     })
   }
 
-  function onKeepAlive () {
+  function onKeepAlive() {
     if (sendKeepAliveTime) client.latency = (new Date()) - sendKeepAliveTime
     lastKeepAlive = new Date()
   }
 
-  function startKeepAlive () {
+  function startKeepAlive() {
     keepAlive = true
     lastKeepAlive = new Date()
     keepAliveTimer = setInterval(keepAliveLoop, checkTimeoutInterval)
