@@ -58,7 +58,7 @@ declare module 'minecraft-protocol' {
 		proto: any
 		mainType: any
 		noErrorLogging: boolean
-		constructor(proto: any, mainType: any, noErrorLogging?: boolean)
+		constructor (proto: any, mainType: any, noErrorLogging?: boolean)
 
 		parsePacketBuffer(buffer: Buffer): any
 	}
@@ -110,7 +110,7 @@ declare module 'minecraft-protocol' {
 		authTitle?: string
 		sessionServer?: string
 		keepAlive?: boolean
-		closeTimeout?: number
+		closeTimeout?: number 
 		noPongTimeout?: number
 		checkTimeoutInterval?: number
 		version?: string
@@ -182,7 +182,7 @@ declare module 'minecraft-protocol' {
 		state?: States
 		version: string
 	}
-
+	
 	export interface MicrosoftDeviceAuthorizationResponse {
 		device_code: string
 		user_code: string

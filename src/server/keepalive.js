@@ -9,7 +9,7 @@ module.exports = function (client, server, {
   let keepAliveTimer = null
   let sendKeepAliveTime
 
-  function keepAliveLoop() {
+  function keepAliveLoop () {
     if (!keepAlive) { return }
 
     // check if the last keepAlive was too long ago (kickTimeout)
@@ -24,12 +24,12 @@ module.exports = function (client, server, {
     })
   }
 
-  function onKeepAlive() {
+  function onKeepAlive () {
     if (sendKeepAliveTime) client.latency = (new Date()) - sendKeepAliveTime
     lastKeepAlive = new Date()
   }
 
-  function startKeepAlive() {
+  function startKeepAlive () {
     keepAlive = true
     lastKeepAlive = new Date()
     keepAliveTimer = setInterval(keepAliveLoop, checkTimeoutInterval)
