@@ -31,6 +31,7 @@ automatically logged in and validated against mojang's auth.
  * hideErrors : do not display errors, default to false
  * agent : a http agent that can be used to set proxy settings for yggdrasil authentication confirmation (see proxy-agent on npm)
  * validateChannelProtocol (optional) : whether or not to enable protocol validation for custom protocols using plugin channels for the connected clients. Defaults to true
+ * socketType (optional) : either `tcp` or `ipc`. Switches from a tcp connection to a ipc socket connection (or named pipes on windows). With the `ipc` option `host` becomes the path off the ipc connection on the local filesystem. Example: `\\.\pipe\minecraft-ipc` (Windows) `/tmp/minecraft-ipc.sock` (unix based systems). See the ipcConnection example for an example.
 
 ## mc.Server(version,[customPackets])
 
