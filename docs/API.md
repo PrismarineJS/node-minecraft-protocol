@@ -6,33 +6,32 @@ Returns a `Server` instance and starts listening. All clients will be
 automatically logged in and validated against mojang's auth.
 
 `options` is an object containing the properties :
-
-* port : default to 25565
-* host : default to undefined which means listen to all available ipv4 and ipv6 adresses
-  (see https://nodejs.org/api/net.html#net_server_listen_port_host_backlog_callback for details)
-* kickTimeout : default to `10*1000` (10s), kick client that doesn't answer to keepalive after that time
-* timeoutReason : default to `Timed out`, the end reason that is sent to the client when the client doesn't answer to keepalive packets
-* checkTimeoutInterval : default to `4*1000` (4s), send keepalive packet at that period
-* online-mode : default to true
-* beforePing : allow customisation of the answer to ping the server does.
-  It takes a function with argument response and client, response is the default json response, and client is client who sent a ping.
-  It can take as third argument a callback. If the callback is passed, the function should pass its result to the callback, if not it should return.
-  If the result is `false` instead of a response object then the connection is terminated and no ping is returned to the client.
-* beforeLogin : allow customisation of client before the `success` packet is sent.
-  It takes a function with argument client and should be synchronous for the server to wait for completion before continuing execution.
-* motd : default to "A Minecraft server"
-* motdMsg : A json object of the chat message to use instead of `motd`. Can be build using [prismarine-chat](https://github.com/PrismarineJS/prismarine-chat) and calling .toJSON(). Not used with legacy pings.
-* maxPlayers : default to 20
-* keepAlive : send keep alive packets : default to true
-* version : the version of the server, defaults to the latest version. Set version to `false` to enable dynamic cross version support.
-* fallbackVersion (optional) : the version that should be used as a fallback, if the client version isn't supported, only works with dynamic cross version support.
-* favicon (optional) : the favicon to set, base64 encoded
-* customPackets (optional) : an object index by version/state/direction/name, see client_custom_packet for an example
-* errorHandler : A way to override the default error handler for client errors. A function that takes a Client and an error.
-  The default kicks the client.
-* hideErrors : do not display errors, default to false
-* agent : a http agent that can be used to set proxy settings for yggdrasil authentication confirmation (see proxy-agent on npm)
-* validateChannelProtocol (optional) : whether or not to enable protocol validation for custom protocols using plugin channels for the connected clients. Defaults to true
+ * port : default to 25565
+ * host : default to undefined which means listen to all available ipv4 and ipv6 adresses
+ (see https://nodejs.org/api/net.html#net_server_listen_port_host_backlog_callback for details)
+ * kickTimeout : default to `10*1000` (10s), kick client that doesn't answer to keepalive after that time
+ * timeoutReason : default to `Timed out`, the end reason that is sent to the client when the client doesn't answer to keepalive packets
+ * checkTimeoutInterval : default to `4*1000` (4s), send keepalive packet at that period
+ * online-mode : default to true
+ * beforePing : allow customisation of the answer to ping the server does. 
+ It takes a function with argument response and client, response is the default json response, and client is client who sent a ping.
+ It can take as third argument a callback. If the callback is passed, the function should pass its result to the callback, if not it should return.
+ If the result is `false` instead of a response object then the connection is terminated and no ping is returned to the client.
+ * beforeLogin : allow customisation of client before the `success` packet is sent.
+ It takes a function with argument client and should be synchronous for the server to wait for completion before continuing execution.
+ * motd : default to "A Minecraft server"
+ * motdMsg : A json object of the chat message to use instead of `motd`. Can be build using [prismarine-chat](https://github.com/PrismarineJS/prismarine-chat) and calling .toJSON(). Not used with legacy pings.
+ * maxPlayers : default to 20
+ * keepAlive : send keep alive packets : default to true
+ * version : the version of the server, defaults to the latest version. Set version to `false` to enable dynamic cross version support.
+ * fallbackVersion (optional) : the version that should be used as a fallback, if the client version isn't supported, only works with dynamic cross version support.
+ * favicon (optional) : the favicon to set, base64 encoded
+ * customPackets (optional) : an object index by version/state/direction/name, see client_custom_packet for an example
+ * errorHandler : A way to override the default error handler for client errors. A function that takes a Client and an error.
+ The default kicks the client.
+ * hideErrors : do not display errors, default to false
+ * agent : a http agent that can be used to set proxy settings for yggdrasil authentication confirmation (see proxy-agent on npm)
+ * validateChannelProtocol (optional) : whether or not to enable protocol validation for custom protocols using plugin channels for the connected clients. Defaults to true
 
 ## mc.Server(version,[customPackets])
 
@@ -79,50 +78,51 @@ Called when a client connects, but before any login has happened. Takes a
 
 Called when a client is logged in against server. Takes a `Client` parameter.
 
+
 ## mc.createClient(options)
 
 Returns a `Client` instance and perform login.
 
 `options` is an object containing the properties :
+ * username
+ * port : default to 25565
+ * auth : the type of account to use, either `microsoft` or `mojang`. default to 'mojang'
+ * password : can be omitted
+   * (microsoft account) leave this blank to use device code auth. If you provide
+   a password, we try to do username and password auth, but this does not always work.
+   * (mojang account) If provided, we auth with the username and password. If this
+   is blank, and `profilesFolder` is specified, we auth with the tokens there instead.
+   If neither `password` or `profilesFolder` are specified, we connect in offline mode.
+ * host : default to localhost
+ * session : An object holding clientToken, accessToken and selectedProfile. Generated after logging in using username + password with mojang auth or after logging in using microsoft auth. `clientToken`, `accessToken` and `selectedProfile: {name: '<username>', id: '<selected profile uuid>'}` can be set inside of `session` when using createClient to login with a client and access Token instead of a password. `session` is also emitted by the `Client` instance with the event 'session' after successful authentication. 
+   * clientToken : generated if a password is given or can be set when when using createClient
+   * accessToken : generated if a password or microsoft account is given or can be set when using createBot
+   * selectedProfile : generated if a password or microsoft account is given. Can be set as a object with property `name` and `id` that specifies the selected profile.
+     * name : The selected profiles in game name needed for logging in with access and client Tokens.
+     * id : The selected profiles uuid in short form (without `-`) needed for logging in with access and client Tokens.
+ * authServer : auth server, default to https://authserver.mojang.com
+ * sessionServer : session server, default to https://sessionserver.mojang.com
+ * keepAlive : send keep alive packets : default to true
+ * closeTimeout : end the connection after this delay in milliseconds if server doesn't answer to ping, default to `120*1000`
+ * noPongTimeout : after the server opened the connection, wait for a default of `5*1000` after pinging and answers without the latency
+ * checkTimeoutInterval : default to `30*1000` (30s), check if keepalive received at that period, disconnect otherwise.
+ * version : 1.8 or 1.9 or false (to auto-negotiate): default to 1.8
+ * customPackets (optional) : an object index by version/state/direction/name, see client_custom_packet for an example
+ * hideErrors : do not display errors, default to false
+ * skipValidation : do not try to validate given session, defaults to false
+ * stream : a stream to use as connection
+ * connect : a function taking the client as parameter and that should client.setSocket(socket) 
+ and client.emit('connect') when appropriate (see the proxy examples for an example of use)
+ * agent : a http agent that can be used to set proxy settings for yggdrasil authentication (see proxy-agent on npm) 
+ * fakeHost : (optional) hostname to send to the server in the set_protocol packet
+ * profilesFolder : optional
+   * (mojang account) the path to the folder that contains your `launcher_profiles.json`. defaults to your minecraft folder if it exists, otherwise the local directory. set to `false` to disable managing profiles 
+   * (microsoft account) the path to store authentication caches, defaults to .minecraft
+ * onMsaCode(data) : (optional) callback called when signing in with a microsoft account
+ with device code auth. `data` is an object documented [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-device-code#device-authorization-response)
+ * id : a numeric client id used for referring to multiple clients in a server
+ * validateChannelProtocol (optional) : whether or not to enable protocol validation for custom protocols using plugin channels. Defaults to true
 
-* username
-* port : default to 25565
-* auth : the type of account to use, either `microsoft` or `mojang`. default to 'mojang'
-* password : can be omitted
-  * (microsoft account) leave this blank to use device code auth. If you provide
-    a password, we try to do username and password auth, but this does not always work.
-  * (mojang account) If provided, we auth with the username and password. If this
-    is blank, and `profilesFolder` is specified, we auth with the tokens there instead.
-    If neither `password` or `profilesFolder` are specified, we connect in offline mode.
-* host : default to localhost
-* session : An object holding clientToken, accessToken and selectedProfile. Generated after logging in using username + password with mojang auth or after logging in using microsoft auth. `clientToken`, `accessToken` and `selectedProfile: {name: '<username>', id: '<selected profile uuid>'}` can be set inside of `session` when using createClient to login with a client and access Token instead of a password. `session` is also emitted by the `Client` instance with the event 'session' after successful authentication.
-  * clientToken : generated if a password is given or can be set when when using createClient
-  * accessToken : generated if a password or microsoft account is given or can be set when using createBot
-  * selectedProfile : generated if a password or microsoft account is given. Can be set as a object with property `name` and `id` that specifies the selected profile.
-    * name : The selected profiles in game name needed for logging in with access and client Tokens.
-    * id : The selected profiles uuid in short form (without `-`) needed for logging in with access and client Tokens.
-* authServer : auth server, default to https://authserver.mojang.com
-* sessionServer : session server, default to https://sessionserver.mojang.com
-* keepAlive : send keep alive packets : default to true
-* closeTimeout : end the connection after this delay in milliseconds if server doesn't answer to ping, default to `120*1000`
-* noPongTimeout : after the server opened the connection, wait for a default of `5*1000` after pinging and answers without the latency
-* checkTimeoutInterval : default to `30*1000` (30s), check if keepalive received at that period, disconnect otherwise.
-* version : 1.8 or 1.9 or false (to auto-negotiate): default to 1.8
-* customPackets (optional) : an object index by version/state/direction/name, see client_custom_packet for an example
-* hideErrors : do not display errors, default to false
-* skipValidation : do not try to validate given session, defaults to false
-* stream : a stream to use as connection
-* connect : a function taking the client as parameter and that should client.setSocket(socket)
-  and client.emit('connect') when appropriate (see the proxy examples for an example of use)
-* agent : a http agent that can be used to set proxy settings for yggdrasil authentication (see proxy-agent on npm)
-* fakeHost : (optional) hostname to send to the server in the set_protocol packet
-* profilesFolder : optional
-  * (mojang account) the path to the folder that contains your `launcher_profiles.json`. defaults to your minecraft folder if it exists, otherwise the local directory. set to `false` to disable managing profiles
-  * (microsoft account) the path to store authentication caches, defaults to .minecraft
-* onMsaCode(data) : (optional) callback called when signing in with a microsoft account
-  with device code auth. `data` is an object documented [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-device-code#device-authorization-response)
-* id : a numeric client id used for referring to multiple clients in a server
-* validateChannelProtocol (optional) : whether or not to enable protocol validation for custom protocols using plugin channels. Defaults to true
 
 ## mc.Client(isServer,version,[customPackets])
 
@@ -213,7 +213,7 @@ The client's version
 
 ### `packet` event
 
-Called with every packet parsed. Takes four paramaters, the JSON data we parsed, the packet metadata (name, state), the buffer (raw data) and the full buffer (includes surplus data and may include the data of following packets on versions below 1.8)
+Called with every packet parsed. Takes four paramaters, the JSON data we parsed, the packet metadata (name, state), the buffer (raw data) and the full buffer (includes surplus data and may include the data of following packets on versions below 1.8) 
 
 ### `raw` event
 
@@ -245,9 +245,11 @@ Called when an error occurs within the client. Takes an Error as parameter.
 
 Check out the [minecraft-data docs](https://prismarinejs.github.io/minecraft-data/?v=1.8&d=protocol) to know the event names and data field names.
 
+
 ### client.writeChannel(channel, params)
 
 write a packet to a plugin channel
+
 
 ### client.registerChannel(name, typeDefinition, [custom])
 
@@ -258,6 +260,7 @@ Start emitting channel events of the given name on the client object.
 ### client.unregisterChannel(name, [custom])
 
 Unregister a channel `name` and send the unregister packet if `custom` is true.
+
 
 ## Not Immediately Obvious Data Type Formats
 
@@ -280,10 +283,10 @@ Value looks like this:
 Where the key is the numeric metadata key and the value is the value of the
 correct data type. You can figure out the types [here](http://wiki.vg/Entities#Entity_Metadata_Format)
 
+
 ## mc.ping(options, callback)
 
 `options` is an object containing the following:
-
 * host : default to localhost
 * port : default to 25565
 * version: default to most recent version
@@ -296,28 +299,27 @@ callback `callback(err, pingResults)`
 `pingResults`:
 
 ## Old version
-
-* `prefix`
-* `protocol`
-* `version`
-* `motd`
-* `playerCount`
-* `maxPlayers`
+ * `prefix`
+ * `protocol`
+ * `version`
+ * `motd`
+ * `playerCount`
+ * `maxPlayers`
 
 ## New version
-
-* `description`
-* `players`
-  * `max`
-  * `online`
-  * `sample`
-    * `id`
+ * `description`
+ * `players`
+    * `max`
+    * `online`
+    * `sample`
+       * `id`
+       * `name`
+ * `version`
     * `name`
-* `version`
-  * `name`
-  * `protocol`
-* `favicon`
-* `latency`
+    * `protocol`
+ * `favicon`
+ * `latency`
+
 
 ## mc.states
 
@@ -331,10 +333,13 @@ The supported minecraft versions.
 
 The current default minecraft version.
 
-## mc.createSerializer()
+## mc.createSerializer({ state = states.HANDSHAKING, isServer = false , version})
 
 Returns a minecraft protocol [serializer](https://github.com/roblabla/ProtoDef#serializerprotomaintype) for these parameters.
 
-## mc.createDeserializer(, version })
+
+## mc.createDeserializer({ state = states.HANDSHAKING, isServer = false, packetsToParse = {"packet": true}, version })
 
 Returns a minecraft protocol [deserializer](https://github.com/roblabla/ProtoDef#parserprotomaintype) for these parameters.
+
+
