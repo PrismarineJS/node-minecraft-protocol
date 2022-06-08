@@ -21,6 +21,7 @@ function createClient (options) {
   assert.ok(options, 'options is required')
   assert.ok(options.username, 'username is required')
   if (!options.version && !options.realms) { options.version = false }
+  if (options.realms && options.auth !== 'microsoft') throw new Error('Currently Realms can only be joined with auth: "microsoft"')
 
   // TODO: avoid setting default version if autoVersion is enabled
   const optVersion = options.version || require('./version').defaultVersion
