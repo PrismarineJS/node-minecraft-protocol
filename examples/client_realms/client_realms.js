@@ -14,7 +14,7 @@ const client = mc.createClient({
     pickRealm: (realms) => realms.find(e => e.name === 'Realm Name') // Connect the client to a Realm using a function that returns a Realm
   },
   username: username,
-  auth: 'microsoft' // This option must be present and set to 'microsoft' to use Microsoft Account Authentication. Failure to do so will result in yggdrasil throwing invalid account information.
+  auth: 'microsoft' // This option must be present and set to 'microsoft' to  join a Realm.
 })
 
 client.on('connect', function () {
