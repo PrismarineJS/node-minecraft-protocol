@@ -28,6 +28,7 @@ module.exports = function (client, server, options) {
 
   function onLogin (packet) {
     client.username = packet.username
+    client.playerKey = packet.publicKey;
     const isException = !!server.onlineModeExceptions[client.username.toLowerCase()]
     const needToVerify = (onlineMode && !isException) || (!onlineMode && isException)
     if (needToVerify) {
@@ -57,10 +58,14 @@ module.exports = function (client, server, options) {
   function onEncryptionKeyResponse (packet) {
     let sharedSecret
     try {
-      const verifyToken = crypto.privateDecrypt({ key: server.serverKey.exportKey(), padding: crypto.constants.RSA_PKCS1_PADDING }, packet.verifyToken)
-      if (!bufferEqual(client.verifyToken, verifyToken)) {
-        client.end('DidNotEncryptVerifyTokenProperly')
-        return
+      if (client.protocolVersion >= 759 && !packet.nonceSide) { // 1.19 added signed client keys
+        // TODO: verify signature
+      } else {
+        const verifyToken = crypto.privateDecrypt({ key: server.serverKey.exportKey(), padding: crypto.constants.RSA_PKCS1_PADDING }, packet.verifyToken)
+        if (!bufferEqual(client.verifyToken, verifyToken)) {
+          client.end('DidNotEncryptVerifyTokenProperly')
+          return
+        }
       }
       sharedSecret = crypto.privateDecrypt({ key: server.serverKey.exportKey(), padding: crypto.constants.RSA_PKCS1_PADDING }, packet.sharedSecret)
     } catch (e) {
@@ -114,7 +119,12 @@ module.exports = function (client, server, options) {
       client.write('compress', { threshold: 256 }) // Default threshold is 256
       client.compressionThreshold = 256
     }
-    client.write('success', { uuid: client.uuid, username: client.username })
+    
+    let status = { uuid: client.uuid, username: client.username };
+    if (client.protocolVersion >= 759) { // 1.19 added game profile properties
+      status.properties = 0;
+    }
+    client.write('success', status)
     client.state = states.PLAY
 
     clearTimeout(loginKickTimer)
