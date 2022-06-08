@@ -6,6 +6,7 @@ import * as Stream from 'stream'
 import { Agent } from 'http'
 import { Transform } from "readable-stream";
 import { KeyObject } from 'crypto';
+import { Realm } from "prismarine-realms"
 
 type PromiseLike = Promise<void> | void
 
@@ -129,6 +130,7 @@ declare module 'minecraft-protocol' {
 		id?: number
 		session?: SessionOption
 		validateChannelProtocol?: boolean,
+		realms?: RealmsOptions
 		// 1.19+
 		disableChatSigning: boolean
 	}
@@ -253,6 +255,11 @@ declare module 'minecraft-protocol' {
 		}
 		favicon?: string
 		latency: number
+	}
+
+	export interface RealmsOptions {
+		realmId?: string
+		pickRealm?: (realms: Realm[]) => Realm
 	}
 
 	export const states: typeof States

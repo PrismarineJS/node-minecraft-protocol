@@ -95,6 +95,20 @@ client.on('chat', function(packet) {
 If the server is in offline mode, you may leave out the `password` option and switch auth to `offline`.
 You can also leave out `password` when using a Microsoft account. If provided, password based auth will be attempted first which may fail. *Note:* if using a Microsoft account, your account age must be >= 18 years old.
 
+### Client example joining a Realm
+
+Example to connect to a Realm that the authenticating account is owner of or has been invited to:
+
+```js
+var mc = require('minecraft-protocol');
+var client = mc.createClient({
+  realms: {
+    pickRealm: (realms) => realms[0] // Function which recieves an array of joined/owned Realms and must return a single Realm. Can be async
+  },
+  auth: 'microsoft'
+})
+```
+
 ### Hello World server example
 
 ```js
