@@ -7,14 +7,8 @@ module.exports = function (client, server, { version, fallbackVersion }) {
     client.serverHost = packet.serverHost
     client.serverPort = packet.serverPort
     client.protocolVersion = packet.protocolVersion
-    
-    if (client.protocolVersion >= 759) {
-      client.version = "1.19";
-    }
-    
-    /*
+
     if (version === false) {
-      console.log("Got here")
       if (require('minecraft-data')(client.protocolVersion)) {
         client.version = client.protocolVersion
       } else {
@@ -31,7 +25,6 @@ module.exports = function (client, server, { version, fallbackVersion }) {
     } else if (client.protocolVersion !== server.mcversion.version && packet.nextState !== 1) {
       client.end('Wrong protocol version, expected: ' + server.mcversion.version + ' and you are using: ' + client.protocolVersion)
     }
-    */
 
     if (packet.nextState === 1) {
       client.state = states.STATUS
