@@ -38,6 +38,7 @@ function ping (options) {
       reject(err)
     })
     client.once('server_info', function (packet) {
+      packet.response = packet.response.replaceAll('\n', '\\n')
       const data = JSON.parse(packet.response)
       const start = Date.now()
       const maxTime = setTimeout(() => {
