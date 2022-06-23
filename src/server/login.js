@@ -10,7 +10,6 @@ module.exports = function (client, server, options) {
   const {
     'online-mode': onlineMode = true,
     kickTimeout = 30 * 1000,
-    timeoutReason,
     errorHandler: clientErrorHandler = (client, err) => client.end(err)
   } = options
 
@@ -27,7 +26,7 @@ module.exports = function (client, server, options) {
 
   let loginKickTimer = setTimeout(kickForNotLoggingIn, kickTimeout)
 
-  function onLogin (packet) {
+  function onLogin(packet) {
     client.username = packet.username
     const isException = !!server.onlineModeExceptions[client.username.toLowerCase()]
     const needToVerify = (onlineMode && !isException) || (!onlineMode && isException)
@@ -51,11 +50,11 @@ module.exports = function (client, server, options) {
     }
   }
 
-  function kickForNotLoggingIn () {
+  function kickForNotLoggingIn() {
     client.end('LoginTimeout')
   }
 
-  function onEncryptionKeyResponse (packet) {
+  function onEncryptionKeyResponse(packet) {
     let sharedSecret
     try {
       const verifyToken = crypto.privateDecrypt({ key: server.serverKey.exportKey(), padding: crypto.constants.RSA_PKCS1_PADDING }, packet.verifyToken)
@@ -75,7 +74,7 @@ module.exports = function (client, server, options) {
     const nextStep = needToVerify ? verifyUsername : loginClient
     nextStep()
 
-    function verifyUsername () {
+    function verifyUsername() {
       yggdrasilServer.hasJoined(client.username, serverId, sharedSecret, client.publicKey, function (err, profile) {
         if (err) {
           client.end('Failed to verify username!')
@@ -92,7 +91,7 @@ module.exports = function (client, server, options) {
   }
 
   // https://github.com/openjdk-mirror/jdk7u-jdk/blob/f4d80957e89a19a29bb9f9807d2a28351ed7f7df/src/share/classes/java/util/UUID.java#L163
-  function javaUUID (s) {
+  function javaUUID(s) {
     const hash = crypto.createHash('md5')
     hash.update(s, 'utf8')
     const buffer = hash.digest()
@@ -101,11 +100,11 @@ module.exports = function (client, server, options) {
     return buffer
   }
 
-  function nameToMcOfflineUUID (name) {
+  function nameToMcOfflineUUID(name) {
     return (new UUID(javaUUID('OfflinePlayer:' + name))).toString()
   }
 
-  function loginClient () {
+  function loginClient() {
     const isException = !!server.onlineModeExceptions[client.username.toLowerCase()]
     if (onlineMode === false || isException) {
       client.uuid = nameToMcOfflineUUID(client.username)
