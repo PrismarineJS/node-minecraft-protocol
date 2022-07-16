@@ -1,5 +1,13 @@
 # History
 
+## 1.35.0
+
+* Add option to not answer to pings (@matthi4s)
+* Add fallback version for dynamic version (@matthi4s) 
+* Add motdMsg to createServer (@IceTank & @U9G)
+* Bump mocha to 10.x
+* Bump standard to 17.x
+
 ## 1.34.0
 
 * Export defaultVersion (@matthi4s)
