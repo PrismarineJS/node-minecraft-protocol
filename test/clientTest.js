@@ -150,7 +150,7 @@ for (const supportedVersion of mc.supportedVersions) {
         client.on('player_chat', function (packet) {
           chatCount += 1
           console.log('player_chat', packet)
-          // assert.strictEqual(packet.type, )
+
           const sender = JSON.parse(packet.senderName)
           const chatContent = JSON.parse(packet.signedChatContent)
 
@@ -192,12 +192,6 @@ for (const supportedVersion of mc.supportedVersions) {
 
           resolve()
         })
-        // client.on('system_chat', function (packet) {
-        //   chatCount++
-        //   console.log('system_chat', packet)
-        //   // const content = JSON.parse(packet.content)
-        //   maybeFinish()
-        // })
 
         function resolve () {
           assert.ok(chatCount <= 2)
