@@ -55,18 +55,50 @@ module.exports = function (client, server, options) {
   }
 
   function onEncryptionKeyResponse (packet) {
+    const mcData = require('minecraft-data')(client.version)
+
+    let packetVerifyToken
+    let signature
+
+    if (mcData.supportFeature('signatureEncryption')) {
+      // 1.19+
+      if (packet.hasVerifyToken) {
+        packetVerifyToken = packet.crypto.verifyToken
+      } else {
+        signature = packet.crypto
+      }
+    } else {
+      // pre 1.19
+      packetVerifyToken = packet.verifyToken
+    }
+
     let sharedSecret
-    try {
-      const verifyToken = crypto.privateDecrypt({ key: server.serverKey.exportKey(), padding: crypto.constants.RSA_PKCS1_PADDING }, packet.verifyToken)
-      if (!bufferEqual(client.verifyToken, verifyToken)) {
+
+    if (packetVerifyToken) {
+      try {
+        const verifyToken = crypto.privateDecrypt({
+          key: server.serverKey.exportKey(),
+          padding: crypto.constants.RSA_PKCS1_PADDING
+        }, packetVerifyToken)
+        if (!bufferEqual(client.verifyToken, verifyToken)) {
+          client.end('DidNotEncryptVerifyTokenProperly')
+          return
+        }
+        sharedSecret = crypto.privateDecrypt({
+          key: server.serverKey.exportKey(),
+          padding: crypto.constants.RSA_PKCS1_PADDING
+        }, packet.sharedSecret)
+      } catch (e) {
         client.end('DidNotEncryptVerifyTokenProperly')
         return
       }
-      sharedSecret = crypto.privateDecrypt({ key: server.serverKey.exportKey(), padding: crypto.constants.RSA_PKCS1_PADDING }, packet.sharedSecret)
-    } catch (e) {
-      client.end('DidNotEncryptVerifyTokenProperly')
+    } else {
+      // todo: signature encryption
+      client.end('signature encryption not implemented')
+      console.error(signature)
       return
     }
+
     client.setEncryption(sharedSecret)
 
     const isException = !!server.onlineModeExceptions[client.username.toLowerCase()]
@@ -114,7 +146,12 @@ module.exports = function (client, server, options) {
       client.write('compress', { threshold: 256 }) // Default threshold is 256
       client.compressionThreshold = 256
     }
-    client.write('success', { uuid: client.uuid, username: client.username })
+    client.write('success', {
+      uuid: client.uuid,
+      username: client.username,
+      properties: []
+    })
+    // TODO: find out what properties are on 'success' packet
     client.state = states.PLAY
 
     clearTimeout(loginKickTimer)
