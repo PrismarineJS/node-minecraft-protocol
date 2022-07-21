@@ -149,7 +149,6 @@ for (const supportedVersion of mc.supportedVersions) {
 
         client.on('player_chat', function (packet) {
           chatCount += 1
-          console.log('player_chat', packet)
 
           const sender = JSON.parse(packet.senderName)
           const chatContent = JSON.parse(packet.signedChatContent)

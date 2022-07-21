@@ -61,11 +61,10 @@ function chat (client, message) {
 
 function clientXChat (x, client, fn) {
   const mcData = require('minecraft-data')(client.version)
-  if (!mcData.supportFeature('signedChat')) {
+  if (mcData.supportFeature('signedChat')) {
     // 1.19+
 
     x.bind(client)('player_chat', (packet) => {
-      console.log('player_chat triggered')
       const message = packet.unsignedChatContent || packet.signedChatContent
       fn(message)
     })
@@ -85,7 +84,6 @@ function serverXChat (x, server, fn) {
     // 1.19+
 
     x.bind(server)('chat_message', (packet) => {
-      console.log('chat_message triggered:', packet)
       const message = packet.message
       fn(message)
     })
@@ -116,7 +114,7 @@ async function OnceChatPromise (client) {
   } else {
     // pre 1.19
 
-    const packet = await once(client, 'chat')
+    const [packet] = await once(client, 'chat')
     return packet.message
   }
 }
