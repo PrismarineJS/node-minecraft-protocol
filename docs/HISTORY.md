@@ -1,5 +1,9 @@
 # History
 
+## 1.35.1
+
+* add custom minecraft type varlong which aliases to varint @rob9315
+
 ## 1.35.0
 
 * Add option to not answer to pings (@matthi4s)
