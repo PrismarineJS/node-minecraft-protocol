@@ -18,6 +18,10 @@ function cbPing (options, cb) {
   return pingPromise
 };
 
+function parseLenientJson(json) {
+	return JSON.parse(json.replace(/\n/g, '\\n'))
+};
+
 function ping (options) {
   options.host = options.host || 'localhost'
   options.port = options.port || 25565
@@ -38,8 +42,7 @@ function ping (options) {
       reject(err)
     })
     client.once('server_info', function (packet) {
-      packet.response = packet.response.replace(/\n/g, '\\n')
-      const data = JSON.parse(packet.response)
+      const data = parseLenientJson(packet.response)
       const start = Date.now()
       const maxTime = setTimeout(() => {
         clearTimeout(closeTimer)
