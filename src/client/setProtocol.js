@@ -27,6 +27,7 @@ module.exports = function (client, options) {
       client.write('login_start', {
         username: client.username
       })
+      // TODO: add signature option
     }
   }
 }

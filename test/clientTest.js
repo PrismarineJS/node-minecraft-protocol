@@ -12,7 +12,7 @@ const Wrap = require('minecraft-wrap').Wrap
 
 const download = util.promisify(require('minecraft-wrap').download)
 
-const { getPort } = require('./common/util')
+const { getPort, chat } = require('./common/util')
 
 for (const supportedVersion of mc.supportedVersions) {
   let PORT = null
@@ -104,6 +104,9 @@ for (const supportedVersion of mc.supportedVersions) {
         })
         client.on('error', err => done(err))
         const lineListener = function (line) {
+          // 1.19+ also prints Server like a player
+          if (line.match(/\[Server thread\/INFO\]: <Server> .*/)) return
+
           const match = line.match(/\[Server thread\/INFO\]: <(.+?)> (.+)/)
           if (!match) return
           assert.strictEqual(match[1], 'Player')
@@ -114,13 +117,13 @@ for (const supportedVersion of mc.supportedVersions) {
         let chatCount = 0
         client.on('login', function (packet) {
           assert.strictEqual(packet.gameMode, 0)
-          client.write('chat', {
-            message: 'hello everyone; I have logged in.'
-          })
+          chat(client, 'hello everyone; I have logged in.')
         })
+
+        // pre 1.19 named 'chat'
+
         client.on('chat', function (packet) {
           chatCount += 1
-          assert.ok(chatCount <= 2)
           const message = JSON.parse(packet.message)
           if (chatCount === 1) {
             assert.strictEqual(message.translate, 'chat.type.text')
@@ -138,11 +141,65 @@ for (const supportedVersion of mc.supportedVersions) {
                   ? message.with[1].extra[0].text
                   : message.with[1].extra[0])
               : message.with[1].text, 'hello')
+          }
+          resolve()
+        })
+
+        // 1.19+ named 'player_chat'
+
+        client.on('player_chat', function (packet) {
+          chatCount += 1
+
+          const sender = JSON.parse(packet.senderName)
+          const chatContent = JSON.parse(packet.signedChatContent)
+
+          switch (chatCount) {
+            case 1:
+              assert.deepStrictEqual(sender, {
+                insertion: 'Player',
+                clickEvent: {
+                  action: 'suggest_command',
+                  value: '/tell Player '
+                },
+                hoverEvent: {
+                  action: 'show_entity',
+                  contents: {
+                    type: 'minecraft:player',
+                    id: 'a01e3843-e521-3998-958a-f459800e4d11',
+                    name: {
+                      text: 'Player'
+                    }
+                  }
+                },
+                text: 'Player'
+              })
+              assert.deepStrictEqual(chatContent, {
+                text: 'hello everyone; I have logged in.'
+              })
+              assert.strictEqual(packet.type, 0)
+              break
+
+            case 2:
+              assert.deepStrictEqual(sender, {
+                text: 'Server'
+              })
+              assert.deepStrictEqual(chatContent, {
+                text: 'hello'
+              })
+              assert.strictEqual(packet.type, 3)
+          }
+
+          resolve()
+        })
+
+        function resolve () {
+          assert.ok(chatCount <= 2)
+          if (chatCount === 2) {
             wrap.removeListener('line', lineListener)
             client.end()
             done()
           }
-        })
+        }
       })
 
       it('does not crash for ' + SURVIVE_TIME + 'ms', function (done) {
@@ -153,9 +210,7 @@ for (const supportedVersion of mc.supportedVersions) {
         })
         client.on('error', err => done(err))
         client.on('login', function () {
-          client.write('chat', {
-            message: 'hello everyone; I have logged in.'
-          })
+          chat(client, 'hello everyone; I have logged in.')
           setTimeout(function () {
             client.end()
             done()
@@ -231,9 +286,7 @@ for (const supportedVersion of mc.supportedVersions) {
           assert.strictEqual(packet.difficulty, 1)
           assert.strictEqual(packet.dimension, 0)
           assert.strictEqual(packet.gameMode, 0)
-          client.write('chat', {
-            message: 'hello everyone; I have logged in.'
-          })
+          chat(client, 'hello everyone; I have logged in.')
         })
         let chatCount = 0
         client.on('chat', function (packet) {

@@ -40,6 +40,7 @@ const values = {
   i16: -123,
   u16: 123,
   varint: 1,
+  varlong: -20,
   i8: -10,
   u8: 8,
   string: 'hi hi this is my client string',
@@ -176,7 +177,30 @@ const values = {
   tags: [{ tagName: 'hi', entries: [1, 2, 3, 4, 5] }],
   ingredient: [slotValue],
   particleData: null,
-  chunkBlockEntity: { x: 10, y: 11, z: 12, type: 25 }
+  chunkBlockEntity: { x: 10, y: 11, z: 12, type: 25 },
+  command_node: {
+    flags: {
+      has_custom_suggestions: 1,
+      has_redirect_node: 1,
+      has_command: 1,
+      command_node_type: 2
+    },
+    children: [23, 29],
+    redirectNode: 83,
+    extraNodeData: {
+      name: 'command_node name',
+      parser: 'brigadier:double',
+      properties: {
+        flags: {
+          max_present: 1,
+          min_present: 1
+        },
+        min: -5.0,
+        max: 256.0
+      },
+      suggestionType: 'minecraft:summonable_entities'
+    }
+  }
 }
 
 function getValue (_type, packet) {

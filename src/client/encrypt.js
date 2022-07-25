@@ -42,13 +42,29 @@ module.exports = function (client, options) {
       }
 
       function sendEncryptionKeyResponse () {
+        const mcData = require('minecraft-data')(client.version)
+
         const pubKey = mcPubKeyToPem(packet.publicKey)
         const encryptedSharedSecretBuffer = crypto.publicEncrypt({ key: pubKey, padding: crypto.constants.RSA_PKCS1_PADDING }, sharedSecret)
         const encryptedVerifyTokenBuffer = crypto.publicEncrypt({ key: pubKey, padding: crypto.constants.RSA_PKCS1_PADDING }, packet.verifyToken)
-        client.write('encryption_begin', {
-          sharedSecret: encryptedSharedSecretBuffer,
-          verifyToken: encryptedVerifyTokenBuffer
-        })
+
+        if (mcData.supportFeature('signatureEncryption')) {
+          // todo: add signature encryption
+          // starting 1.19.1 we will not be able to join
+          // the default server configuration without it
+          client.write('encryption_begin', {
+            sharedSecret: encryptedSharedSecretBuffer,
+            hasVerifyToken: true,
+            crypto: {
+              verifyToken: encryptedVerifyTokenBuffer
+            }
+          })
+        } else {
+          client.write('encryption_begin', {
+            sharedSecret: encryptedSharedSecretBuffer,
+            verifyToken: encryptedVerifyTokenBuffer
+          })
+        }
         client.setEncryption(sharedSecret)
       }
     }

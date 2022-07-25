@@ -4,7 +4,7 @@ const mc = require('../')
 const assert = require('power-assert')
 const { once } = require('events')
 
-const { getPort } = require('./common/util')
+const { getPort, serverchat, makeBroadcast, chat, OnceChat, OnceChatPromise, serverXChat } = require('./common/util')
 
 const w = {
   piglin_safe: {
@@ -65,6 +65,49 @@ for (const supportedVersion of mc.supportedVersions) {
   let PORT
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
+
+  const loginPacket = (client, server) => {
+    return {
+      // 1.7
+      entityId: client.id,
+      gameMode: 1,
+      dimension: (version.version >= 735 ? mcData.loginPacket.dimension : 0),
+      difficulty: 2,
+      maxPlayers: server.maxPlayers,
+      levelType: 'default',
+      // 1.8
+      reducedDebugInfo: (version.version >= 735 ? false : 0),
+      // 1.14
+      // removes `difficulty`
+      viewDistance: 10,
+      // 1.15
+      hashedSeed: [0, 0],
+      enableRespawnScreen: true,
+      // 1.16
+      // removed levelType
+      previousGameMode: version.version >= 755 ? 0 : 255,
+      worldNames: ['minecraft:overworld'],
+      dimensionCodec: version.version >= 755 ? mcData.loginPacket.dimensionCodec : (version.version >= 735 ? mcData.loginPacket.dimension : { name: '', type: 'compound', value: { dimension: { type: 'list', value: { type: 'compound', value: [w] } } } }),
+      worldName: 'minecraft:overworld',
+      isDebug: false,
+      isFlat: false,
+      // 1.16.2
+      isHardcore: false,
+      // 1.18
+      simulationDistance: 10,
+      // 1.19
+      // removed `dimension`
+      // removed `dimensionCodec`
+      registryCodec: {
+        "type": "compound",
+        "name": "",
+        "value": {}
+      },
+      worldType: "minecraft:overworld",
+      death: undefined
+      // more to be added
+    }
+  }
 
   describe('mc-server ' + version.minecraftVersion, function () {
 
@@ -191,7 +234,7 @@ for (const supportedVersion of mc.supportedVersions) {
               online: 0,
               sample: []
             },
-            description: { 
+            description: {
               extra: [ { color: 'red', text: 'Red text' } ],
               bold: true,
               text: 'Example chat mesasge'
@@ -279,32 +322,9 @@ for (const supportedVersion of mc.supportedVersions) {
           broadcast(client.username + ' left the game.', client)
           if (client.username === 'player2') server.close()
         })
-        const loginPacket = {
-          entityId: client.id,
-          levelType: 'default',
-          gameMode: 1,
-          previousGameMode: version.version >= 755 ? 0 : 255,
-          worldNames: ['minecraft:overworld'],
-          dimensionCodec: version.version >= 755 ? mcData.loginPacket.dimensionCodec : (version.version >= 735 ? mcData.loginPacket.dimension : { name: '', type: 'compound', value: { dimension: { type: 'list', value: { type: 'compound', value: [w] } } } }),
-          dimension: (version.version >= 735 ? mcData.loginPacket.dimension : 0),
-          worldName: 'minecraft:overworld',
-          hashedSeed: [0, 0],
-          difficulty: 2,
-          maxPlayers: server.maxPlayers,
-          reducedDebugInfo: (version.version >= 735 ? false : 0),
-          enableRespawnScreen: true
-        }
-        if (version.version >= 735) { // 1.16x
-          loginPacket.isDebug = false
-          loginPacket.isFlat = false
-          loginPacket.isHardcore = false
-          loginPacket.viewDistance = 10
-          delete loginPacket.levelType
-          delete loginPacket.difficulty
-        }
-        client.write('login', loginPacket)
-        client.on('chat', function (packet) {
-          const message = '<' + client.username + '>' + ' ' + packet.message
+        client.write('login', loginPacket(client, server))
+        serverXChat(client.on, client, function (message) {
+          message = '<' + client.username + '>' + ' ' + message
           broadcast(message)
         })
       })
@@ -318,27 +338,31 @@ for (const supportedVersion of mc.supportedVersions) {
         })
         player1.on('login', function (packet) {
           assert.strictEqual(packet.gameMode, 1)
-          player1.once('chat', function (packet) {
-            assert.strictEqual(packet.message, '{"text":"player2 joined the game."}')
-            player1.once('chat', function (packet) {
-              assert.strictEqual(packet.message, '{"text":"<player2> hi"}')
-              player2.once('chat', fn)
-              function fn (packet) {
-                if (/<player2>/.test(packet.message)) {
-                  player2.once('chat', fn)
+
+          OnceChat(player1, (message) => {
+            assert.strictEqual(message, '{"text":"player2 joined the game."}')
+
+            OnceChat(player1, (message => {
+              assert.strictEqual(message, '{"text":"<player2> hi"}')
+
+              function fn(message) {
+                if (/<player2>/.test(message)) {
+                  OnceChat(player2, fn)
                   return
                 }
-                assert.strictEqual(packet.message, '{"text":"<player1> hello"}')
-                player1.once('chat', function (packet) {
-                  assert.strictEqual(packet.message, '{"text":"player2 left the game."}')
+                assert.strictEqual(message, '{"text":"<player1> hello"}')
+                OnceChat(player1, (message) => {
+                  assert.strictEqual(message, '{"text":"player2 left the game."}')
                   player1.end()
                 })
                 player2.end()
               }
 
-              player1.write('chat', { message: 'hello' })
-            })
-            player2.write('chat', { message: 'hi' })
+              OnceChat(player2, fn)
+
+              chat(player1, 'hello')
+            }))
+            chat(player2, 'hi')
           })
           const player2 = mc.createClient({
             username: 'player2',
@@ -349,13 +373,13 @@ for (const supportedVersion of mc.supportedVersions) {
         })
       })
 
-      function broadcast (message, exclude) {
+      function broadcast(message, exclude) {
         let client
         for (const clientId in server.clients) {
           if (server.clients[clientId] === undefined) continue
 
           client = server.clients[clientId]
-          if (client !== exclude) client.write('chat', { message: JSON.stringify({ text: message }), position: 0, sender: '0' })
+          if (client !== exclude) serverchat(client, message)
         }
       }
     })
@@ -404,30 +428,7 @@ for (const supportedVersion of mc.supportedVersions) {
           assert.strictEqual(reason, 'ServerShutdown')
           resolve()
         })
-        const loginPacket = {
-          entityId: client.id,
-          levelType: 'default',
-          gameMode: 1,
-          previousGameMode: version.version >= 755 ? 0 : 255,
-          worldNames: ['minecraft:overworld'],
-          dimensionCodec: version.version >= 755 ? mcData.loginPacket.dimensionCodec : (version.version >= 735 ? mcData.loginPacket.dimension : { name: '', type: 'compound', value: { dimension: { type: 'list', value: { type: 'compound', value: [w] } } } }),
-          dimension: (version.version >= 735 ? mcData.loginPacket.dimension : 0),
-          worldName: 'minecraft:overworld',
-          hashedSeed: [0, 0],
-          difficulty: 2,
-          maxPlayers: server.maxPlayers,
-          reducedDebugInfo: (version.version >= 735 ? false : 0),
-          enableRespawnScreen: true
-        }
-        if (version.version >= 735) { // 1.16x
-          loginPacket.isDebug = false
-          loginPacket.isFlat = false
-          loginPacket.isHardcore = false
-          loginPacket.viewDistance = 10
-          delete loginPacket.levelType
-          delete loginPacket.difficulty
-        }
-        client.write('login', loginPacket)
+        client.write('login', loginPacket(client, server))
       })
       server.on('close', function () {
         resolve()
@@ -455,30 +456,7 @@ for (const supportedVersion of mc.supportedVersions) {
         port: PORT
       })
       server.on('login', function (client) {
-        const loginPacket = {
-          entityId: client.id,
-          levelType: 'default',
-          gameMode: 1,
-          previousGameMode: version.version >= 755 ? 0 : 255,
-          worldNames: ['minecraft:overworld'],
-          dimensionCodec: version.version >= 755 ? mcData.loginPacket.dimensionCodec : (version.version >= 735 ? mcData.loginPacket.dimension : { name: '', type: 'compound', value: { dimension: { type: 'list', value: { type: 'compound', value: [w] } } } }),
-          dimension: (version.version >= 735 ? mcData.loginPacket.dimension : 0),
-          worldName: 'minecraft:overworld',
-          hashedSeed: [0, 0],
-          difficulty: 2,
-          maxPlayers: server.maxPlayers,
-          reducedDebugInfo: (version.version >= 735 ? false : 0),
-          enableRespawnScreen: true
-        }
-        if (version.version >= 735) { // 1.16x
-          loginPacket.isDebug = false
-          loginPacket.isFlat = false
-          loginPacket.isHardcore = false
-          loginPacket.viewDistance = 10
-          delete loginPacket.levelType
-          delete loginPacket.difficulty
-        }
-        client.write('login', loginPacket)
+        client.write('login', loginPacket(client, server))
       })
       server.on('close', done)
       server.on('listening', async function () {
@@ -494,11 +472,17 @@ for (const supportedVersion of mc.supportedVersions) {
           version: version.minecraftVersion,
           port: PORT
         })
-        await Promise.all([once(player1, 'login'), once(player2, 'login')])        
-        server.writeToClients(Object.values(server.clients), 'chat', { message: JSON.stringify({ text: 'A message from the server.' }), position: 1, sender: '00000000-0000-0000-0000-000000000000' })
+        await Promise.all([once(player1, 'login'), once(player2, 'login')])
         
-        let results = await Promise.all([ once(player1, 'chat'), once(player2, 'chat') ])
-        results.forEach(res => assert.strictEqual(res[0].message, '{"text":"A message from the server."}'))
+        const [event, data] = makeBroadcast(server.version, 'A message from the server.')
+
+        server.writeToClients(Object.values(server.clients), event, data)
+
+        let results = await Promise.all([OnceChatPromise(player1), OnceChatPromise(player2)])
+
+        for (const msg of results) {
+          assert.strictEqual(msg, '{"text":"A message from the server."}')
+        }
         
         player1.end()
         player2.end()
