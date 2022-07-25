@@ -120,7 +120,7 @@ for (const supportedVersion of mc.supportedVersions) {
           chat(client, 'hello everyone; I have logged in.')
         })
 
-        // pre 1.19
+        // pre 1.19 named 'chat'
 
         client.on('chat', function (packet) {
           chatCount += 1
@@ -145,7 +145,7 @@ for (const supportedVersion of mc.supportedVersions) {
           resolve()
         })
 
-        // 1.19+
+        // 1.19+ named 'player_chat'
 
         client.on('player_chat', function (packet) {
           chatCount += 1

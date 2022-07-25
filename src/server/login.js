@@ -61,14 +61,12 @@ module.exports = function (client, server, options) {
     let signature
 
     if (mcData.supportFeature('signatureEncryption')) {
-      // 1.19+
       if (packet.hasVerifyToken) {
         packetVerifyToken = packet.crypto.verifyToken
       } else {
         signature = packet.crypto
       }
     } else {
-      // pre 1.19
       packetVerifyToken = packet.verifyToken
     }
 

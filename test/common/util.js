@@ -17,7 +17,6 @@ function serverchat (client, message) {
 function makeBroadcast (version, message) {
   const mcData = require('minecraft-data')(version)
   if (mcData.supportFeature('signedChat')) {
-    // 1.19+
     return ['player_chat', {
       signedChatContent: JSON.stringify({ text: message }),
       unsignedChatContent: undefined,
@@ -29,7 +28,6 @@ function makeBroadcast (version, message) {
       signature: []
     }]
   } else {
-    // pre 1.19
     return ['chat', {
       message: JSON.stringify({ text: message }),
       position: 0,
@@ -41,8 +39,6 @@ function makeBroadcast (version, message) {
 function chat (client, message) {
   const mcData = require('minecraft-data')(client.version)
   if (mcData.supportFeature('signedChat')) {
-    // 1.19+
-
     client.write('chat_message', {
       message,
       timestamp: Date.now() * 1000,
@@ -51,8 +47,6 @@ function chat (client, message) {
       signedPreview: true
     })
   } else {
-    // pre 1.19
-
     client.write('chat', {
       message
     })
@@ -62,15 +56,11 @@ function chat (client, message) {
 function clientXChat (x, client, fn) {
   const mcData = require('minecraft-data')(client.version)
   if (mcData.supportFeature('signedChat')) {
-    // 1.19+
-
     x.bind(client)('player_chat', (packet) => {
       const message = packet.unsignedChatContent || packet.signedChatContent
       fn(message)
     })
   } else {
-    // pre 1.19
-
     x.bind(client)('chat', (packet) => {
       const message = packet.message
       fn(message)
@@ -81,15 +71,11 @@ function clientXChat (x, client, fn) {
 function serverXChat (x, server, fn) {
   const mcData = require('minecraft-data')(server.version)
   if (mcData.supportFeature('signedChat')) {
-    // 1.19+
-
     x.bind(server)('chat_message', (packet) => {
       const message = packet.message
       fn(message)
     })
   } else {
-    // pre 1.19
-
     x.bind(server)('chat', (packet) => {
       const message = packet.message
       fn(message)
@@ -107,13 +93,9 @@ async function OnceChatPromise (client) {
   const mcData = require('minecraft-data')(client.version)
   const { once } = require('events')
   if (mcData.supportFeature('signedChat')) {
-    // 1.19+
-
     const [packet] = await once(client, 'player_chat')
     return packet.unsignedChatContent || packet.signedChatContent
   } else {
-    // pre 1.19
-
     const [packet] = await once(client, 'chat')
     return packet.message
   }

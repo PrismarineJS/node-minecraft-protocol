@@ -49,7 +49,6 @@ module.exports = function (client, options) {
         const encryptedVerifyTokenBuffer = crypto.publicEncrypt({ key: pubKey, padding: crypto.constants.RSA_PKCS1_PADDING }, packet.verifyToken)
 
         if (mcData.supportFeature('signatureEncryption')) {
-          // 1.19+
           // todo: add signature encryption
           // starting 1.19.1 we will not be able to join
           // the default server configuration without it
@@ -61,7 +60,6 @@ module.exports = function (client, options) {
             }
           })
         } else {
-          // pre 1.19
           client.write('encryption_begin', {
             sharedSecret: encryptedSharedSecretBuffer,
             verifyToken: encryptedVerifyTokenBuffer
