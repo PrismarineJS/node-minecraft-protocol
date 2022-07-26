@@ -25,7 +25,8 @@ module.exports = function (client, options) {
       })
       client.state = states.LOGIN
       client.write('login_start', {
-        username: client.username
+        username: client.username,
+        signature: Buffer.from(client.crypto?.publicKeySignature, 'base64')
       })
       // TODO: add signature option
     }

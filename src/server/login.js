@@ -4,6 +4,7 @@ const crypto = require('crypto')
 const pluginChannels = require('../client/pluginChannels')
 const states = require('../states')
 const yggdrasil = require('yggdrasil')
+const { verifyPubKey, getKeyStringFromBytes } = require('../crypto')
 
 module.exports = function (client, server, options) {
   const yggdrasilServer = yggdrasil.server({ agent: options.agent })
@@ -31,6 +32,16 @@ module.exports = function (client, server, options) {
     const isException = !!server.onlineModeExceptions[client.username.toLowerCase()]
     const needToVerify = (onlineMode && !isException) || (!onlineMode && isException)
     if (needToVerify) {
+      if (packet.crypto) {
+        const { publicKey, expiresAt, signature } = packet.crypto
+        const verifiablePubKey = getKeyStringFromBytes(publicKey, 'public', true)
+        const verified = verifyPubKey(verifiablePubKey, expiresAt, signature, server.options.crypto)
+        if (!verified) {
+          client.end('invalid public key signature')
+          return
+        }
+        client.crypto = packet.crypto
+      }
       serverId = crypto.randomBytes(4).toString('hex')
       client.verifyToken = crypto.randomBytes(4)
       const publicKeyStrArr = server.serverKey.exportKey('pkcs8-public-pem').split('\n')
@@ -70,30 +81,35 @@ module.exports = function (client, server, options) {
       packetVerifyToken = packet.verifyToken
     }
 
+    // ensure the same auth method is used across the packets
+    if (!packetVerifyToken ^ client.crypto) {
+      client.end('SwitchedAuthMethod')
+      return
+    }
+
     let sharedSecret
 
-    if (packetVerifyToken) {
-      try {
-        const verifyToken = crypto.privateDecrypt({
-          key: server.serverKey.exportKey(),
-          padding: crypto.constants.RSA_PKCS1_PADDING
-        }, packetVerifyToken)
-        if (!bufferEqual(client.verifyToken, verifyToken)) {
-          client.end('DidNotEncryptVerifyTokenProperly')
-          return
-        }
-        sharedSecret = crypto.privateDecrypt({
-          key: server.serverKey.exportKey(),
-          padding: crypto.constants.RSA_PKCS1_PADDING
-        }, packet.sharedSecret)
-      } catch (e) {
-        client.end('DidNotEncryptVerifyTokenProperly')
-        return
+    try {
+      const key = server.serverKey.exportKey()
+      const padding = crypto.constants.RSA_PKCS1_PADDING
+      let verifyToken
+      if (packetVerifyToken) { // old method
+        verifyToken = crypto.privateDecrypt({ key, padding }, packetVerifyToken)
+      } else { // new method
+        const parsablePublicKey = getKeyStringFromBytes(client.crypto.publicKey);
+        verifyToken = crypto.publicDecrypt({
+          key: crypto.createPublicKey(parsablePublicKey),
+          padding
+        }, signature.encryptedVerifyToken)
       }
-    } else {
-      // todo: signature encryption
-      client.end('signature encryption not implemented')
-      console.error(signature)
+
+      // early exit to catch block
+      if (!bufferEqual(client.verifyToken, verifyToken)) throw
+      
+      sharedSecret = crypto.privateDecrypt({ key, padding }, packet.sharedSecret)
+
+    } catch (e) {
+      client.end('DidNotEncryptVerifyTokenProperly')
       return
     }
 

@@ -106,6 +106,7 @@ declare module 'minecraft-protocol' {
 		host?: string
 		clientToken?: string
 		accessToken?: string
+		crypto?: Certificates
 		authServer?: string
 		authTitle?: string
 		sessionServer?: string
@@ -245,6 +246,16 @@ declare module 'minecraft-protocol' {
 		}
 		favicon?: string
 		latency: number
+	}
+
+	export interface Certificates {
+		keyPair: {
+			privateKey: string
+			publicKey: string
+		}
+		publicKeySignature: string
+		publicKeySignatureV2?: string
+		expiresAt: string
 	}
 
 	export const states: typeof States

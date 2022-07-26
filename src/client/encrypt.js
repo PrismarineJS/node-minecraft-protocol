@@ -3,6 +3,7 @@
 const crypto = require('crypto')
 const debug = require('debug')('minecraft-protocol')
 const yggdrasil = require('yggdrasil')
+const { salt_i64, getKeyStringFromBytes } = require('../crypto')
 
 module.exports = function (client, options) {
   const yggdrasilServer = yggdrasil.server({ agent: options.agent, host: options.sessionServer || 'https://sessionserver.mojang.com' })
@@ -44,41 +45,34 @@ module.exports = function (client, options) {
       function sendEncryptionKeyResponse () {
         const mcData = require('minecraft-data')(client.version)
 
-        const pubKey = mcPubKeyToPem(packet.publicKey)
+        const pubKey = getKeyStringFromBytes(packet.publicKey)
         const encryptedSharedSecretBuffer = crypto.publicEncrypt({ key: pubKey, padding: crypto.constants.RSA_PKCS1_PADDING }, sharedSecret)
-        const encryptedVerifyTokenBuffer = crypto.publicEncrypt({ key: pubKey, padding: crypto.constants.RSA_PKCS1_PADDING }, packet.verifyToken)
+        const makeEncryptedVerifyTokenBuffer = () => crypto.publicEncrypt({ key: pubKey, padding: crypto.constants.RSA_PKCS1_PADDING }, packet.verifyToken)
 
         if (mcData.supportFeature('signatureEncryption')) {
-          // todo: add signature encryption
-          // starting 1.19.1 we will not be able to join
-          // the default server configuration without it
+          let crypto
+          if (client.crypto) {
+            salt = salt_i64()
+            const signer = crypto.createSigner('SHA-1')
+            signer.update(packet.verifyToken)
+            signer.update(salt)
+            crypto = { salt, signature: signer.sign(client.crypto.keyPair.publicKey) }
+          } else {
+            crypto = { verifyToken: makeEncryptedVerifyTokenBuffer() }
+          }
           client.write('encryption_begin', {
             sharedSecret: encryptedSharedSecretBuffer,
-            hasVerifyToken: true,
-            crypto: {
-              verifyToken: encryptedVerifyTokenBuffer
-            }
+            hasVerifyToken: !client.crypto,
+            crypto
           })
         } else {
           client.write('encryption_begin', {
             sharedSecret: encryptedSharedSecretBuffer,
-            verifyToken: encryptedVerifyTokenBuffer
+            verifyToken: makeEncryptedVerifyTokenBuffer()
           })
         }
         client.setEncryption(sharedSecret)
       }
     }
   }
-}
-
-function mcPubKeyToPem (mcPubKeyBuffer) {
-  let pem = '-----BEGIN PUBLIC KEY-----\n'
-  let base64PubKey = mcPubKeyBuffer.toString('base64')
-  const maxLineLength = 65
-  while (base64PubKey.length > 0) {
-    pem += base64PubKey.substring(0, maxLineLength) + '\n'
-    base64PubKey = base64PubKey.substring(maxLineLength)
-  }
-  pem += '-----END PUBLIC KEY-----\n'
-  return pem
 }

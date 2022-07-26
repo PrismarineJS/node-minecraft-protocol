@@ -21,7 +21,11 @@ module.exports = async function (client, options) {
   const clientToken = options.clientToken || (options.session && options.session.clientToken) || (options.profilesFolder && (await getLauncherProfiles()).mojangClientToken) || UUID.v4().toString().replace(/-/g, '')
   const skipValidation = false || options.skipValidation
   options.accessToken = null
-  options.haveCredentials = !!options.password || (clientToken != null && options.session != null) || (options.profilesFolder && !!getProfileId(await getLauncherProfiles()))
+  options.haveCredentials = !!options.password || (clientToken != null && options.session != null) || (options.profilesFolder && !!getProfileId(await getLauncherProfiles())) || !!options.crypto
+
+  if (options.crypto) {
+    client.crypto = options.crypto
+  }
 
   async function getLauncherProfiles () { // get launcher profiles
     try {
