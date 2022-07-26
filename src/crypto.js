@@ -1,4 +1,5 @@
 const crypto = require('node:crypto')
+const UUID = require('uuid-1345')
 
 // authlib-3.4.40
 const YGGDRASIL_SESSION_PUBKEY_20220726 = crypto.createPublicKey(`\
@@ -28,9 +29,9 @@ FbN2oDHyPaO5j1tTaBNyVt8CAwEAAQ==
  * } | undefined } options extra options like using a different authorities' pubkey
  * @returns {boolean}
  */
- function verifyPubKey(pubKey, expiresAt, signature, options = {}) {
+function verifyPubKey (pubKey, expiresAt, signature, options = {}) {
   const version = options.version ?? 0
-  
+
   switch (version) {
     case 0:
       return crypto.verify(
@@ -59,16 +60,16 @@ FbN2oDHyPaO5j1tTaBNyVt8CAwEAAQ==
  *  signature: Buffer
  * } the signature, used salt and timestamp
  */
-function sign(message, options) {
+function sign (message, options) {
   const privateKey = options.privateKey
 
   if (!privateKey) return
 
-  const salt = options.salt ?? 0;
+  const salt = options.salt ?? 0
   const uuid = UUID.parse(options.uuid)
   const timestamp = options.timestamp ?? Date.now()
 
-  const algorithm = options.algorithm ?? "RSA-SHA256"
+  const algorithm = options.algorithm ?? 'RSA-SHA256'
   const sign = crypto.createSign(algorithm)
 
   updateSignature(sign, salt, uuid, timestamp, message)
@@ -90,18 +91,18 @@ function sign(message, options) {
  * } } options various objects needed to verify the signature
  * @returns { boolean } if the signature is valid
  */
-function verify(message, signature, options) {
+function verify (message, signature, options) {
   const publicKey = options.publicKey
 
   if (!publicKey) return false
 
-  const salt = options.salt ?? 0;
+  const salt = options.salt ?? 0
   const uuid = UUID.parse(options.uuid)
   const timestamp = options.timestamp
 
   if (!timestamp) return false
 
-  const algorithm = options.algorithm ?? "RSA-SHA256"
+  const algorithm = options.algorithm ?? 'RSA-SHA256'
   const verify = crypto.createVerify(algorithm)
 
   updateSignature(verify, salt, uuid, timestamp, message)
@@ -117,18 +118,16 @@ function verify(message, signature, options) {
  * @param { number | bigint } timestamp time in millis
  * @param { string | Buffer } message the message to be signed
  */
-function updateSignature(signer, salt, uuid, timestamp, message) {
+function updateSignature (signer, salt, uuid, timestamp, message) {
 
   const buffer = Buffer.alloc(32)
-  {
-    // salt
-    buffer.writeBigUInt64BE(BigInt(salt), 0)
-    // uuid
-    buffer.writeBigUInt64BE(uuid.readBigUInt64BE(0), 8)
-    buffer.writeBigUInt64BE(uuid.readBigUInt64BE(8), 16)
-    // timestamp
-    buffer.writeBigUInt64BE(BigInt(timestamp), 24)
-  }
+  // salt
+  buffer.writeBigUInt64BE(BigInt(salt), 0)
+  // uuid
+  buffer.writeBigUInt64BE(uuid.readBigUInt64BE(0), 8)
+  buffer.writeBigUInt64BE(uuid.readBigUInt64BE(8), 16)
+  // timestamp
+  buffer.writeBigUInt64BE(BigInt(timestamp), 24)
   signer.update(buffer)
 
   // message
@@ -142,43 +141,34 @@ function updateSignature(signer, salt, uuid, timestamp, message) {
  * @param { boolean | undefined } whack whether or not to search for headers and footers containing 'RSA'
  * @returns { Buffer }
  */
- function getBytesFromKeyString(key, kind, whack) {
-  const KIND = (whack ? 'RSA ' : '') + (kind == 'public' ? 'PUBLIC' : 'PRIVATE')
-  const START = `-----BEGIN ${KIND} KEY-----`;
-  let start = key.indexOf(START);
-  start = start == -1 ? 0 : start + START.length;
-  const END = `-----END ${KIND} KEY-----`;
-  const end = key.indexOf(END);
-  return Buffer.from(key.substring(start, end != -1 ? end : undefined), 'base64')
+function getBytesFromKeyString (key, kind = 'public', whack = false) {
+  const KIND = (whack ? 'RSA ' : '') + (kind === 'public' ? 'PUBLIC' : 'PRIVATE')
+  const START = `-----BEGIN ${KIND} KEY-----`
+  let start = key.indexOf(START)
+  start = start === -1 ? 0 : start + START.length
+  const END = `-----END ${KIND} KEY-----`
+  const end = key.indexOf(END)
+  return Buffer.from(key.substring(start, end !== -1 ? end : undefined), 'base64')
 }
 
 /**
-* turns bytes back into parsable or verifiable strings
-* output will be exactly 76 chars per base64 line so that the signature stays
-* verifiable
-* @param { Buffer } bytes input data
-* @param {'public' | 'private'} kind if to put PUBLIC or PRIVATE in header and footer
-* @param { boolean } whack whether or not to put 'RSA' into the header and footer
-* @returns { string }
-*/
-function getKeyStringFromBytes(bytes, kind = 'public', whack = false) {
-  const KIND = (whack ? 'RSA ' : '') + (kind == 'public' ? 'PUBLIC' : 'PRIVATE')
-  return `-----BEGIN ${KIND} KEY-----\n${bytes.toString('base64').replace(/.{76}/g, '$&\n')}\n-----END ${KIND} KEY-----\n`
-}
-
-/**
- * @returns { bigint } random u64 bigint
+ * turns bytes back into parsable or verifiable strings
+ * output will be exactly 76 chars per base64 line so that the signature stays
+ * verifiable
+ * @param { Buffer } bytes input data
+ * @param {'public' | 'private'} kind if to put PUBLIC or PRIVATE in header and footer
+ * @param { boolean } whack whether or not to put 'RSA' into the header and footer
+ * @returns { string }
  */
- function salt_u64() {
-  const buffer = Buffer.alloc(8)
-  crypto.randomFillSync(buffer)
-  return buffer.readBigUInt64BE()
+function getKeyStringFromBytes (bytes, kind = 'public', whack = false) {
+  const KIND = (whack ? 'RSA ' : '') + (kind === 'public' ? 'PUBLIC' : 'PRIVATE')
+  return `-----BEGIN ${KIND} KEY-----\n${bytes.toString('base64').replace(/.{76}/g, '$&\n')}\n-----END ${KIND} KEY-----\n`
 }
 
 /**
  * @returns { bigint } random i64 bigint
  */
- function salt_i64() {
+function salt () {
   const buffer = Buffer.alloc(8)
   crypto.randomFillSync(buffer)
   return buffer.readBigInt64BE()

@@ -104,7 +104,9 @@ module.exports = function (client, server, options) {
       }
 
       // early exit to catch block
-      if (!bufferEqual(client.verifyToken, verifyToken)) throw
+      if (!bufferEqual(client.verifyToken, verifyToken)) {
+        throw
+      }
       
       sharedSecret = crypto.privateDecrypt({ key, padding }, packet.sharedSecret)
 

@@ -52,7 +52,7 @@ module.exports = function (client, options) {
         if (mcData.supportFeature('signatureEncryption')) {
           let crypto
           if (client.crypto) {
-            salt = salt_i64()
+            let salt = salt_i64()
             const signer = crypto.createSigner('SHA-1')
             signer.update(packet.verifyToken)
             signer.update(salt)
