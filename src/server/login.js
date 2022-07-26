@@ -96,7 +96,7 @@ module.exports = function (client, server, options) {
       if (packetVerifyToken) { // old method
         verifyToken = crypto.privateDecrypt({ key, padding }, packetVerifyToken)
       } else { // new method
-        const parsablePublicKey = getKeyStringFromBytes(client.crypto.publicKey);
+        const parsablePublicKey = getKeyStringFromBytes(client.crypto.publicKey)
         verifyToken = crypto.publicDecrypt({
           key: crypto.createPublicKey(parsablePublicKey),
           padding
@@ -107,9 +107,7 @@ module.exports = function (client, server, options) {
         client.end('DidNotEncryptVerifyTokenProperly')
         return
       }
-      
       sharedSecret = crypto.privateDecrypt({ key, padding }, packet.sharedSecret)
-
     } catch (e) {
       client.end('DidNotEncryptVerifyTokenProperly')
       return
