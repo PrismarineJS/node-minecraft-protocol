@@ -119,7 +119,6 @@ function verify (message, signature, options) {
  * @param { string | Buffer } message the message to be signed
  */
 function updateSignature (signer, salt, uuid, timestamp, message) {
-
   const buffer = Buffer.alloc(32)
   // salt
   buffer.writeBigUInt64BE(BigInt(salt), 0)
@@ -180,6 +179,5 @@ module.exports = {
   verifyPubKey,
   getBytesFromKeyString,
   getKeyStringFromBytes,
-  salt_i64,
-  salt_u64
+  salt
 }

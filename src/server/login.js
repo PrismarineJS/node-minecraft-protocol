@@ -103,9 +103,9 @@ module.exports = function (client, server, options) {
         }, signature.encryptedVerifyToken)
       }
 
-      // early exit to catch block
       if (!bufferEqual(client.verifyToken, verifyToken)) {
-        throw
+        client.end('DidNotEncryptVerifyTokenProperly')
+        return
       }
       
       sharedSecret = crypto.privateDecrypt({ key, padding }, packet.sharedSecret)

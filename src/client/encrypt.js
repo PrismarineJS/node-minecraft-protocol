@@ -3,7 +3,7 @@
 const crypto = require('crypto')
 const debug = require('debug')('minecraft-protocol')
 const yggdrasil = require('yggdrasil')
-const { salt_i64, getKeyStringFromBytes } = require('../crypto')
+const { salt, getKeyStringFromBytes } = require('../crypto')
 
 module.exports = function (client, options) {
   const yggdrasilServer = yggdrasil.server({ agent: options.agent, host: options.sessionServer || 'https://sessionserver.mojang.com' })
@@ -52,11 +52,11 @@ module.exports = function (client, options) {
         if (mcData.supportFeature('signatureEncryption')) {
           let crypto
           if (client.crypto) {
-            let salt = salt_i64()
+            const l = salt()
             const signer = crypto.createSigner('SHA-1')
             signer.update(packet.verifyToken)
-            signer.update(salt)
-            crypto = { salt, signature: signer.sign(client.crypto.keyPair.publicKey) }
+            signer.update(l)
+            crypto = { salt: l, signature: signer.sign(client.crypto.keyPair.publicKey) }
           } else {
             crypto = { verifyToken: makeEncryptedVerifyTokenBuffer() }
           }
