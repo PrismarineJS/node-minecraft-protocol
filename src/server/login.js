@@ -35,7 +35,7 @@ module.exports = function (client, server, options) {
       if (packet.crypto) {
         const { publicKey, expiresAt, signature } = packet.crypto
         const verifiablePubKey = getKeyStringFromBytes(publicKey, 'public', true)
-        const verified = verifyPubKey(verifiablePubKey, expiresAt, signature, server.options.crypto)
+        const verified = verifyPubKey(verifiablePubKey, expiresAt, signature, server.options?.crypto ?? {})
         if (!verified) {
           client.end('invalid public key signature')
           return
