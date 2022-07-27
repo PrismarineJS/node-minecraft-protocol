@@ -82,7 +82,7 @@ module.exports = function (client, server, options) {
     }
 
     // ensure the same auth method is used across the packets
-    if (!packetVerifyToken ^ client.crypto) {
+    if (packetVerifyToken ^ !!client.crypto) {
       client.end('SwitchedAuthMethod')
       return
     }
