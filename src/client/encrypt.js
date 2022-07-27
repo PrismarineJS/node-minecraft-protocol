@@ -53,7 +53,7 @@ module.exports = function (client, options) {
           let crypto
           if (client.crypto) {
             const l = salt()
-            const signer = crypto.createSigner('SHA-1')
+            const signer = crypto.createSigner('RSA-SHA256')
             signer.update(packet.verifyToken)
             signer.update(l)
             const clientPrivateKey = client.crypto.keyPair.privateKey.replace('RSA ', '')

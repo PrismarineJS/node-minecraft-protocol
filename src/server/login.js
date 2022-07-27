@@ -69,13 +69,13 @@ module.exports = function (client, server, options) {
     const mcData = require('minecraft-data')(client.version)
 
     let packetVerifyToken
-    let signature
+    let signobj
 
     if (mcData.supportFeature('signatureEncryption')) {
       if (packet.hasVerifyToken) {
         packetVerifyToken = packet.crypto.verifyToken
       } else {
-        signature = packet.crypto
+        signobj = packet.crypto
       }
     } else {
       packetVerifyToken = packet.verifyToken
@@ -87,31 +87,35 @@ module.exports = function (client, server, options) {
       return
     }
 
-    let sharedSecret
-
     try {
       const key = server.serverKey.exportKey()
       const padding = crypto.constants.RSA_PKCS1_PADDING
-      let verifyToken
-      if (packetVerifyToken) { // old method
-        verifyToken = crypto.privateDecrypt({ key, padding }, packetVerifyToken)
-      } else { // new method
+      if (player.crypto) {
+        const nonce = client.verifyToken
+        const salt = signobj.salt
+        const signature = signobj.signature
+        const verify = crypto.createVerify('RSA-SHA256')
+        verify.update(nonce)
+        const saltBuf = Buffer.alloc(8)
+        saltBuf.writeBigInt64BE(salt, 0)
+        verify.update(saltBuf)
         const parsablePublicKey = getKeyStringFromBytes(client.crypto.publicKey)
-        verifyToken = crypto.publicDecrypt({
-          key: crypto.createPublicKey(parsablePublicKey),
-          padding
-        }, signature.encryptedVerifyToken)
+        if (!verify.verify(parsablePublicKey)) {
+          client.end('Certificate Signature invalid')
+          return
+        }
+      } else {
+        const verifyToken = crypto.privateDecrypt({ key, padding }, packetVerifyToken)
+        if (!bufferEqual(client.verifyToken, verifyToken)) {
+          client.end('DidNotEncryptVerifyTokenProperly')
+          return
+        }
       }
-
-      if (!bufferEqual(client.verifyToken, verifyToken)) {
-        client.end('DidNotEncryptVerifyTokenProperly')
-        return
-      }
-      sharedSecret = crypto.privateDecrypt({ key, padding }, packet.sharedSecret)
     } catch (e) {
       client.end('DidNotEncryptVerifyTokenProperly')
       return
     }
+    const sharedSecret = crypto.privateDecrypt({ key, padding }, packet.sharedSecret)
 
     client.setEncryption(sharedSecret)
 
