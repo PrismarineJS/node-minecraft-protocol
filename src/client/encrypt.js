@@ -56,7 +56,8 @@ module.exports = function (client, options) {
             const signer = crypto.createSigner('SHA-1')
             signer.update(packet.verifyToken)
             signer.update(l)
-            crypto = { salt: l, signature: signer.sign(client.crypto.keyPair.publicKey) }
+            const clientPrivateKey = client.crypto.keyPair.privateKey.replace('RSA ', '')
+            crypto = { salt: l, signature: signer.sign(privKey) }
           } else {
             crypto = { verifyToken: makeEncryptedVerifyTokenBuffer() }
           }
