@@ -3,6 +3,7 @@
 const crypto = require('crypto')
 const debug = require('debug')('minecraft-protocol')
 const yggdrasil = require('yggdrasil')
+const { concat } = require('../transforms/binaryStream')
 
 module.exports = function (client, options) {
   const yggdrasilServer = yggdrasil.server({ agent: options.agent, host: options.sessionServer || 'https://sessionserver.mojang.com' })
@@ -49,15 +50,19 @@ module.exports = function (client, options) {
         const encryptedVerifyTokenBuffer = crypto.publicEncrypt({ key: pubKey, padding: crypto.constants.RSA_PKCS1_PADDING }, packet.verifyToken)
 
         if (mcData.supportFeature('signatureEncryption')) {
-          // todo: add signature encryption
-          // starting 1.19.1 we will not be able to join
-          // the default server configuration without it
+          const salt = BigInt(Date.now())
           client.write('encryption_begin', {
             sharedSecret: encryptedSharedSecretBuffer,
-            hasVerifyToken: true,
-            crypto: {
-              verifyToken: encryptedVerifyTokenBuffer
-            }
+            hasVerifyToken: client.profileKeys == null,
+            crypto: client.profileKeys
+              ? {
+                  salt,
+                  messageSignature: crypto.sign('sha256WithRSAEncryption',
+                    concat('buffer', packet.verifyToken, 'i64', salt), client.profileKeys.private)
+                }
+              : {
+                  verifyToken: encryptedVerifyTokenBuffer
+                }
           })
         } else {
           client.write('encryption_begin', {
