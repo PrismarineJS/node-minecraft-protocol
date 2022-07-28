@@ -25,3 +25,5 @@ client.on('end', () => {})
 Supporting alternative authentcation methods has been a long standing issue with Prismarine for awhile. We do add support for using your own custom authentication method by providing a function to the `options.auth` property. In order to keep the legitimacy of the project, and to prevent bad attention from Mojang, we will not be supporting any custom authentication methods in the official repositories.
 
 It is up to the end user to support and maintain the authentication protocol if this is used as support in many of the official channels will be limited.
+
+If you still wish to proceed, please make sure to throughly read and attempt to understand all implementations of the authentcation you wish to implement. Using an non-official authentication server can make you vulnerable to all different kinds of attacks which are not limited to insecure and/or malicious code! We will not be held responsible for anything you mess up.
