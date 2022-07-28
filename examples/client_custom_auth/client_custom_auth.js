@@ -1,7 +1,6 @@
 'use strict'
 
 const mc = require('minecraft-protocol')
-const fetch = require('node-fetch')
 
 const [, , host, port, username, password] = process.argv
 if (!username || !password) {
@@ -17,18 +16,10 @@ const client = mc.createClient({
   sessionServer: '', // URL to your session server proxy that changes the expected result of mojang's seession server to mcleaks expected.
   // For more information: https://github.com/PrismarineJS/node-yggdrasil/blob/master/src/Server.js#L19
   auth: async (client, options) => {
-    // Using mcleaks.net as an example.
-    const token = options.password
-    const redeemToken = await fetch('https://auth.mcleaks.net/v1/redeem', {
-      method: 'post',
-      body: JSON.stringify({ token }),
-      headers: { 'Content-Type': 'application/json' }
-    })
-    const data = await redeemToken.json()
-    if (!data.success) return console.log('Something bad happened when trying to redeem this token.')
+    // handle custom authentication your way.
 
-    client.username = data.result.mcname
-    options.accessToken = data.result.session
+    // client.username = options.username
+    // options.accessToken =
     return options.connect(client)
   }
 })
