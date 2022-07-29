@@ -101,7 +101,7 @@ declare module 'minecraft-protocol' {
 	export interface ClientOptions {
 		username: string
 		port?: number
-		auth?: 'mojang' | 'microsoft'
+		auth?: 'mojang' | 'microsoft' | 'offline'
 		password?: string
 		host?: string
 		clientToken?: string
