@@ -36,6 +36,7 @@ function createClient (options) {
   tcpDns(client, options)
   switch (options.auth) {
     case 'mojang':
+      console.warn('[deprecated] mojang auth servers no longer accept mojang accounts to login. convert your account.\nhttps://help.minecraft.net/hc/en-us/articles/4403181904525-How-to-Migrate-Your-Mojang-Account-to-a-Microsoft-Account')
       auth(client, options)
       break
     case 'microsoft':
