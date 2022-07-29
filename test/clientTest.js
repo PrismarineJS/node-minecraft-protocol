@@ -100,7 +100,8 @@ for (const supportedVersion of mc.supportedVersions) {
         const client = mc.createClient({
           username: 'Player',
           version: version.minecraftVersion,
-          port: PORT
+          port: PORT,
+          auth: 'offline'
         })
         client.on('error', err => done(err))
         const lineListener = function (line) {
@@ -206,7 +207,8 @@ for (const supportedVersion of mc.supportedVersions) {
         const client = mc.createClient({
           username: 'Player',
           version: version.minecraftVersion,
-          port: PORT
+          port: PORT,
+          auth: 'offline'
         })
         client.on('error', err => done(err))
         client.on('login', function () {
@@ -222,7 +224,8 @@ for (const supportedVersion of mc.supportedVersions) {
         const client = mc.createClient({
           username: 'Player',
           version: version.minecraftVersion === '1.8.8' ? '1.11.2' : '1.8.8',
-          port: PORT
+          port: PORT,
+          auth: 'offline'
         })
         client.once('error', function (err) {
           if (err.message.startsWith('This server is version')) {
@@ -270,7 +273,8 @@ for (const supportedVersion of mc.supportedVersions) {
           username: process.env.MC_USERNAME,
           password: process.env.MC_PASSWORD,
           version: version.minecraftVersion,
-          port: PORT
+          port: PORT,
+          auth: 'offline'
         })
         client.on('error', err => done(err))
         const lineListener = function (line) {
@@ -305,7 +309,8 @@ for (const supportedVersion of mc.supportedVersions) {
         const client = mc.createClient({
           username: 'Player',
           version: version.minecraftVersion,
-          port: PORT
+          port: PORT,
+          auth: 'offline'
         })
         client.on('error', err => done(err))
         let gotKicked = false
