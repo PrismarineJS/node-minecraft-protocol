@@ -35,21 +35,21 @@ function createClient (options) {
 
   tcpDns(client, options)
   if (options.auth instanceof Function) {
-      options.auth(client, options)
+    options.auth(client, options)
   } else {
-  switch (options.auth) {
-    case 'mojang':
-      console.warn('[deprecated] mojang auth servers no longer accept mojang accounts to login. convert your account.\nhttps://help.minecraft.net/hc/en-us/articles/4403181904525-How-to-Migrate-Your-Mojang-Account-to-a-Microsoft-Account')
-      auth(client, options)
-      break
-    case 'microsoft':
-      microsoftAuth.authenticate(client, options)
-      break
-    case 'offline':
-    default:
-      client.username = options.username
-      options.connect(client)
-      break
+    switch (options.auth) {
+      case 'mojang':
+        console.warn('[deprecated] mojang auth servers no longer accept mojang accounts to login. convert your account.\nhttps://help.minecraft.net/hc/en-us/articles/4403181904525-How-to-Migrate-Your-Mojang-Account-to-a-Microsoft-Account')
+        auth(client, options)
+        break
+      case 'microsoft':
+        microsoftAuth.authenticate(client, options)
+        break
+      case 'offline':
+      default:
+        client.username = options.username
+        options.connect(client)
+        break
     }
   }
   if (options.version === false) autoVersion(client, options)
