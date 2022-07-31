@@ -10,6 +10,7 @@ module.exports = function (client, options) {
     client.uuid = packet.uuid
     client.username = packet.username
     client.signMessage = (message, timestamp, salt = 0) => {
+      if (!client.profileKeys) throw Error("Can't sign message without profile keys, please set valid auth mode")
       const signable = concat('i64', salt, 'UUID', client.uuid, 'i64',
         timestamp / 1000n, 'pstring', JSON.stringify({ text: message }))
       return crypto.sign('RSA-SHA256', signable, client.profileKeys.private)

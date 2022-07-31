@@ -125,7 +125,9 @@ declare module 'minecraft-protocol' {
 		onMsaCode?: (data: MicrosoftDeviceAuthorizationResponse) => void
 		id?: number
 		session?: SessionOption
-		validateChannelProtocol?: boolean
+		validateChannelProtocol?: boolean,
+		// 1.19+
+		disableChatSigning: boolean
 	}
 
 	export class Server extends EventEmitter {
@@ -173,6 +175,9 @@ declare module 'minecraft-protocol' {
 		hideErrors?: boolean
 		agent?: Agent
 		validateChannelProtocol?: boolean
+		// 1.19+
+		// Require connecting clients to have chat signing support enabled
+		enforceSecureProfile: boolean
 	}
 
 	export interface SerializerOptions {
