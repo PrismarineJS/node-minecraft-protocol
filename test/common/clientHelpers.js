@@ -1,5 +1,3 @@
-const { once } = require('events')
-
 module.exports = client => {
   const mcData = require('minecraft-data')(client.version)
   const hasSignedChat = mcData.supportFeature('signedChat')
@@ -20,7 +18,7 @@ module.exports = client => {
 
   client.nextMessage = (containing) => {
     return new Promise((resolve) => {
-      function onChat(packet) {
+      function onChat (packet) {
         const m = packet.message || packet.unsignedChatContent || packet.signedChatContent
         if (containing) {
           if (m.includes(containing)) return finish(m)
@@ -30,7 +28,7 @@ module.exports = client => {
       }
       client.on(hasSignedChat ? 'player_chat' : 'chat', onChat)
 
-      function finish(m) {
+      function finish (m) {
         client.off(hasSignedChat ? 'player_chat' : 'chat', onChat)
         resolve(m)
       }
