@@ -45,8 +45,9 @@ module.exports = function (client, server, options) {
     if (packet.signature) {
       if (packet.signature.timestamp < BigInt(Date.now())) {
         raise('multiplayer.disconnect.invalid_public_key_signature')
-        return
+        return // expired tokens, client needs to restart game
       }
+
       try {
         const publicKey = crypto.createPublicKey({ key: packet.signature.publicKey, format: 'der', type: 'spki' })
         const publicPEM = mcPubKeyToPem(packet.signature.publicKey)
