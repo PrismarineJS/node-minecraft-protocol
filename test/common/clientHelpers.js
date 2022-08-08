@@ -18,16 +18,23 @@ module.exports = client => {
     }
   }
 
-  client.nextMessage = async (containing) => {
-    while (true) {
-      const [packet] = await once(client, hasSignedChat ? 'player_chat' : 'chat')
-      const m = packet.message || packet.unsignedChatContent || packet.signedChatContent
-      if (containing) {
-        if (m.includes(containing)) return m
-        else continue
+  client.nextMessage = (containing) => {
+    return new Promise((resolve) => {
+      function onChat(packet) {
+        const m = packet.message || packet.unsignedChatContent || packet.signedChatContent
+        if (containing) {
+          if (m.includes(containing)) return finish(m)
+          else return
+        }
+        return finish(m)
       }
-      return m
-    }
+      client.on(hasSignedChat ? 'player_chat' : 'chat', onChat)
+
+      function finish(m) {
+        client.off(hasSignedChat ? 'player_chat' : 'chat', onChat)
+        resolve(m)
+      }
+    })
   }
 
   return client
