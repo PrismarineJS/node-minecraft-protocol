@@ -40,6 +40,10 @@ Create a server instance for `version` of minecraft.
 
 Write a packet to all `clients` but encode it only once.
 
+### client.verifyMessage(packet) : boolean
+
+Verifies if player's chat message packet was signed with their Mojang provided key
+
 ### server.onlineModeExceptions
 
 This is a plain old JavaScript object. Add a key with the username you want to

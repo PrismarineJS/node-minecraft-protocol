@@ -26,6 +26,9 @@ module.exports = function (client, server, options) {
   })
   client.once('login_start', onLogin)
 
+  function kickForNotLoggingIn () {
+    client.end('LoginTimeout')
+  }
   let loginKickTimer = setTimeout(kickForNotLoggingIn, kickTimeout)
 
   function onLogin (packet) {
@@ -82,10 +85,6 @@ module.exports = function (client, server, options) {
     } else {
       loginClient()
     }
-  }
-
-  function kickForNotLoggingIn () {
-    client.end('LoginTimeout')
   }
 
   function onEncryptionKeyResponse (packet) {
@@ -196,6 +195,15 @@ module.exports = function (client, server, options) {
       server.playerCount -= 1
     })
     pluginChannels(client, options)
+
+    if (client.profileKeys) {
+      client.verifyMessage = (packet) => {
+        const signable = concat('i64', packet.salt, 'UUID', client.uuid, 'i64',
+          packet.timestamp, 'pstring', packet.message)
+
+        return crypto.verify('sha256WithRSAEncryption', signable, client.profileKeys.public, packet.crypto.signature)
+      }
+    }
     server.emit('login', client)
   }
 }
