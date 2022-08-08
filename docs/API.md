@@ -268,6 +268,13 @@ Start emitting channel events of the given name on the client object.
 
 Unregister a channel `name` and send the unregister packet if `custom` is true.
 
+### client.signMessage(message: string, timestamp: BigInt, salt?: number) : Buffer
+
+Generate a signature for a chat message to be sent to server
+
+### client.verifyMessage(publicKey: Buffer | KeyObject, packet) : boolean
+
+Verifies a player chat packet sent by another player against their public key
 
 ## Not Immediately Obvious Data Type Formats
 
