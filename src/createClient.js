@@ -43,7 +43,7 @@ function createClient (options) {
         auth(client, options)
         break
       case 'microsoft':
-        microsoftAuth.authenticate(client, options)
+        microsoftAuth.authenticate(client, options).catch((err) => client.emit('error', err))
         break
       case 'offline':
       default:
