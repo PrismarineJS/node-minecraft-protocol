@@ -7,7 +7,8 @@ const states = mc.states
 
 const testDataWrite = [
   { name: 'keep_alive', params: { keepAliveId: 957759560 } },
-  { name: 'chat', params: { message: '<Bob> Hello World!' } },
+  // TODO: 1.19+ `chat` -> `player_chat` feature toggle
+  // { name: 'chat', params: { message: '<Bob> Hello World!' } },
   { name: 'position_look', params: { x: 6.5, y: 65.62, stance: 67.24, z: 7.5, yaw: 0, pitch: 0, onGround: true } }
   // TODO: add more packets for better quality data
 ]

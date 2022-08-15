@@ -25,7 +25,14 @@ module.exports = function (client, options) {
       })
       client.state = states.LOGIN
       client.write('login_start', {
-        username: client.username
+        username: client.username,
+        signature: client.profileKeys
+          ? {
+              timestamp: BigInt(client.profileKeys.expiresOn.getTime()), // should probably be called "expireTime"
+              publicKey: client.profileKeys.publicDER,
+              signature: client.profileKeys.signature
+            }
+          : null
       })
     }
   }

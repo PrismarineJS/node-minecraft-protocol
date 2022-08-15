@@ -40,7 +40,7 @@ const values = {
   i16: -123,
   u16: 123,
   varint: 1,
-  varlong: -10,
+  varlong: -20,
   i8: -10,
   u8: 8,
   string: 'hi hi this is my client string',

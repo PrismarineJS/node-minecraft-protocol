@@ -4,15 +4,15 @@ const mc = require('../')
 const os = require('os')
 const path = require('path')
 const assert = require('power-assert')
-const SURVIVE_TIME = 10000
 const util = require('util')
+const applyClientHelpers = require('./common/clientHelpers')
+const download = util.promisify(require('minecraft-wrap').download)
+const { getPort } = require('./common/util')
+
+const SURVIVE_TIME = 10000
 const MC_SERVER_PATH = path.join(__dirname, 'server')
 
 const Wrap = require('minecraft-wrap').Wrap
-
-const download = util.promisify(require('minecraft-wrap').download)
-
-const { getPort } = require('./common/util')
 
 for (const supportedVersion of mc.supportedVersions) {
   let PORT = null
@@ -97,12 +97,12 @@ for (const supportedVersion of mc.supportedVersions) {
       })
 
       it('connects successfully - offline mode', function (done) {
-        const client = mc.createClient({
+        const client = applyClientHelpers(mc.createClient({
           username: 'Player',
           version: version.minecraftVersion,
           port: PORT,
           auth: 'offline'
-        })
+        }))
         client.on('error', err => done(err))
         const lineListener = function (line) {
           const match = line.match(/\[Server thread\/INFO\]: <(.+?)> (.+)/)
@@ -110,15 +110,16 @@ for (const supportedVersion of mc.supportedVersions) {
           assert.strictEqual(match[1], 'Player')
           assert.strictEqual(match[2], 'hello everyone; I have logged in.')
           wrap.writeServer('say hello\n')
+          wrap.off('line', lineListener)
         }
         wrap.on('line', lineListener)
         let chatCount = 0
         client.on('login', function (packet) {
           assert.strictEqual(packet.gameMode, 0)
-          client.write('chat', {
-            message: 'hello everyone; I have logged in.'
-          })
+          client.chat('hello everyone; I have logged in.')
         })
+
+        // 1.18 and below
         client.on('chat', function (packet) {
           chatCount += 1
           assert.ok(chatCount <= 2)
@@ -144,20 +145,34 @@ for (const supportedVersion of mc.supportedVersions) {
             done()
           }
         })
+
+        // 1.19 and above
+        let gotClientMessage, gotServerMessage
+        client.on('player_chat', (packet) => {
+          const message = JSON.parse(packet.unsignedChatContent || packet.signedChatContent)
+          // const sender = JSON.parse(packet.senderName)
+
+          if (message.text === 'hello everyone; I have logged in.') gotClientMessage = true
+          if (message.text === 'hello') gotServerMessage = true
+
+          if (gotClientMessage && gotServerMessage) {
+            wrap.removeListener('line', lineListener)
+            client.end()
+            done()
+          }
+        })
       })
 
       it('does not crash for ' + SURVIVE_TIME + 'ms', function (done) {
-        const client = mc.createClient({
+        const client = applyClientHelpers(mc.createClient({
           username: 'Player',
           version: version.minecraftVersion,
           port: PORT,
           auth: 'offline'
-        })
+        }))
         client.on('error', err => done(err))
         client.on('login', function () {
-          client.write('chat', {
-            message: 'hello everyone; I have logged in.'
-          })
+          client.chat('hello everyone; I have logged in.')
           setTimeout(function () {
             client.end()
             done()
@@ -166,6 +181,7 @@ for (const supportedVersion of mc.supportedVersions) {
       })
 
       it('produce a decent error when connecting with the wrong version', function (done) {
+        if (process.platform === 'win32') return done()
         const client = mc.createClient({
           username: 'Player',
           version: version.minecraftVersion === '1.8.8' ? '1.11.2' : '1.8.8',
@@ -214,13 +230,12 @@ for (const supportedVersion of mc.supportedVersions) {
       })
 
       it('connects successfully - online mode', function (done) {
-        const client = mc.createClient({
+        const client = applyClientHelpers(mc.createClient({
           username: process.env.MC_USERNAME,
           password: process.env.MC_PASSWORD,
           version: version.minecraftVersion,
-          port: PORT,
-          auth: 'offline'
-        })
+          port: PORT
+        }))
         client.on('error', err => done(err))
         const lineListener = function (line) {
           const match = line.match(/\[Server thread\/INFO\]: <(.+?)> (.+)/)
@@ -235,9 +250,7 @@ for (const supportedVersion of mc.supportedVersions) {
           assert.strictEqual(packet.difficulty, 1)
           assert.strictEqual(packet.dimension, 0)
           assert.strictEqual(packet.gameMode, 0)
-          client.write('chat', {
-            message: 'hello everyone; I have logged in.'
-          })
+          client.chat('hello everyone; I have logged in.')
         })
         let chatCount = 0
         client.on('chat', function (packet) {
