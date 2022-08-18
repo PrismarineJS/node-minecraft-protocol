@@ -180,7 +180,7 @@ declare module 'minecraft-protocol' {
 		validateChannelProtocol?: boolean
 		// 1.19+
 		// Require connecting clients to have chat signing support enabled
-		enforceSecureProfile: boolean
+		enforceSecureProfile?: boolean
 	}
 
 	export interface SerializerOptions {
