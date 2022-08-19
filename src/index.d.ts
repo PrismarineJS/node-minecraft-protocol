@@ -130,7 +130,7 @@ declare module 'minecraft-protocol' {
 		session?: SessionOption
 		validateChannelProtocol?: boolean,
 		// 1.19+
-		disableChatSigning: boolean
+		disableChatSigning?: boolean
 	}
 
 	export class Server extends EventEmitter {
