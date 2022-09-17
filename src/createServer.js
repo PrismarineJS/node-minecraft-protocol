@@ -31,7 +31,7 @@ function createServer (options = {}) {
   const optVersion = version === undefined || version === false ? require('./version').defaultVersion : version
 
   const mcData = require('minecraft-data')(optVersion)
-  if (!mcData) throw new Error(`unsupported protocol version: ${optVersion}`)
+  if (!mcData) throw new Error(`Unsupported protocol version: ${optVersion}`)
   const mcversion = mcData.version
   const hideErrors = options.hideErrors || false
 
