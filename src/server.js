@@ -57,7 +57,7 @@ class Server extends EventEmitter {
   close () {
     Object.keys(this.clients).forEach(clientId => {
       const client = this.clients[clientId]
-      client.end('ServerShutdown')
+      client.end('Server closed')
     })
     this.socketServer.close()
   }
