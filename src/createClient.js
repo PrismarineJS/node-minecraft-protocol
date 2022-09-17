@@ -18,14 +18,14 @@ const versionChecking = require('./client/versionChecking')
 module.exports = createClient
 
 function createClient (options) {
-  assert.ok(options, 'options is required')
-  assert.ok(options.username, 'username is required')
+  assert.ok(options, 'Options is required')
+  assert.ok(options.username, 'Username is required')
   if (!options.version) { options.version = false }
 
-  // TODO: avoid setting default version if autoVersion is enabled
+  // TODO: Avoid setting default version if autoVersion is enabled
   const optVersion = options.version || require('./version').defaultVersion
   const mcData = require('minecraft-data')(optVersion)
-  if (!mcData) throw new Error(`unsupported protocol version: ${optVersion}`)
+  if (!mcData) throw new Error(`Unsupported protocol version: ${optVersion}`)
   const version = mcData.version
   options.majorVersion = version.majorVersion
   options.protocolVersion = version.version
@@ -39,13 +39,12 @@ function createClient (options) {
   } else {
     switch (options.auth) {
       case 'mojang':
-        console.warn('[deprecated] mojang auth servers no longer accept mojang accounts to login. convert your account.\nhttps://help.minecraft.net/hc/en-us/articles/4403181904525-How-to-Migrate-Your-Mojang-Account-to-a-Microsoft-Account')
+        console.warn('[deprecated] Mojang auth servers no longer accept Mojang accounts to login. Convert your account.\nhttps://help.minecraft.net/hc/en-us/articles/4403181904525-How-to-Migrate-Your-Mojang-Account-to-a-Microsoft-Account')
         auth(client, options)
         break
       case 'microsoft':
         microsoftAuth.authenticate(client, options).catch((err) => client.emit('error', err))
         break
-      case 'offline':
       default:
         client.username = options.username
         options.connect(client)
