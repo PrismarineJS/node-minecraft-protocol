@@ -132,7 +132,7 @@ for (const supportedVersion of mc.supportedVersions) {
       let count = 2
       server.on('connection', function (client) {
         client.on('end', function (reason) {
-          assert.strictEqual(reason, 'Timed out')
+          assert.strictEqual(reason, 'KeepAliveTimeout')
           server.close()
         })
       })

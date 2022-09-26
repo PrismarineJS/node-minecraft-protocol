@@ -1,6 +1,6 @@
 module.exports = function (client, server, {
   kickTimeout = 30 * 1000,
-  timeoutReason = 'Timed out',
+  timeoutReason = 'keepAliveTimeout',
   checkTimeoutInterval = 4 * 1000,
   keepAlive: enableKeepAlive = true
 }) {
