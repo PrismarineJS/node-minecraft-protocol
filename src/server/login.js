@@ -41,7 +41,7 @@ module.exports = function (client, server, options) {
       client.publicKey = Buffer.from(publicKeyStr, 'base64')
       client.once('encryption_begin', onEncryptionKeyResponse)
       client.write('encryption_begin', {
-        serverId: serverId,
+        serverId,
         publicKey: client.publicKey,
         verifyToken: client.verifyToken
       })

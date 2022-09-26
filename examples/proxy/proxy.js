@@ -73,7 +73,7 @@ const srv = mc.createServer({
   'online-mode': false,
   port: 25566,
   keepAlive: false,
-  version: version
+  version
 })
 srv.on('login', function (client) {
   const addr = client.socket.remoteAddress
@@ -92,11 +92,11 @@ srv.on('login', function (client) {
     if (!endedTargetClient) { targetClient.end('Error') }
   })
   const targetClient = mc.createClient({
-    host: host,
-    port: port,
+    host,
+    port,
     username: client.username,
     keepAlive: false,
-    version: version
+    version
   })
   client.on('packet', function (data, meta) {
     if (targetClient.state === states.PLAY && meta.state === states.PLAY) {
