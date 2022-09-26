@@ -41,8 +41,8 @@ console.log('connecting to ' + host + ':' + port)
 console.log('user: ' + user)
 
 const client = mc.createClient({
-  host,
-  port,
+  host: host,
+  port: port,
   username: user,
   password: passwd
 })
