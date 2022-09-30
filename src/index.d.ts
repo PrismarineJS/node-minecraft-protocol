@@ -52,7 +52,7 @@ declare module 'minecraft-protocol' {
 		once(event: 'sessionce', handler: (sessionce: any) => PromiseLike): this
 		once(event: 'state', handler: (newState: States, oldState: States) => PromiseLike): this
 		once(event: 'end', handler: (reasonce: string) => PromiseLike): this
-		once(event: 'concenect', handler: () => PromiseLike): this
+		once(event: 'connect', handler: () => PromiseLike): this
 		once(event: string, handler: (data: any, packetMeta: PacketMeta) => PromiseLike): this
 		once(event: `raw.${string}`, handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
 	}
