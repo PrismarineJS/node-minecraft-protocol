@@ -385,7 +385,7 @@ for (const supportedVersion of mc.supportedVersions) {
       let count = 2
       server.on('login', function (client) {
         client.on('end', function (reason) {
-          assert.strictEqual(reason, 'ServerShutdown')
+          assert.strictEqual(reason, 'Server closed')
           resolve()
         })
         client.write('login', loginPacket(client, server))
