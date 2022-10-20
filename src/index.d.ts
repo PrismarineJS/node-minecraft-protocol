@@ -7,7 +7,6 @@ import { Agent } from 'http'
 import { Transform } from "readable-stream";
 import { KeyObject } from 'crypto';
 import { Realm } from "prismarine-realms"
-import { KeyObject } from 'crypto';
 
 type PromiseLike = Promise<void> | void
 
