@@ -23,12 +23,3 @@ client.on('connect', function () {
 client.on('disconnect', function (packet) {
   console.log('disconnected: ' + packet.reason)
 })
-client.on('chat', function (packet) {
-  const jsonMsg = JSON.parse(packet.message)
-  if (jsonMsg.translate === 'chat.type.announcement' || jsonMsg.translate === 'chat.type.text') {
-    const username = jsonMsg.with[0].text
-    const msg = jsonMsg.with[1]
-    if (username === client.username) return
-    client.write('chat', { message: msg })
-  }
-})
