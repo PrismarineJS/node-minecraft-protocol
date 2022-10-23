@@ -11,6 +11,7 @@ async function authenticate (client, options) {
   if (options.authTitle === undefined) {
     options.authTitle = Titles.MinecraftNintendoSwitch
     options.deviceType = 'Nintendo'
+    options.flow = 'live'
   }
 
   const Authflow = new PrismarineAuth(options.username, options.profilesFolder, options, options.onMsaCode)
