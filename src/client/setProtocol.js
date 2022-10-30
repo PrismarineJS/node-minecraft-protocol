@@ -32,7 +32,8 @@ module.exports = function (client, options) {
               publicKey: client.profileKeys.publicDER,
               signature: client.profileKeys.signature
             }
-          : null
+          : null,
+        playerUUID: client.uuid ?? null
       })
     }
   }
