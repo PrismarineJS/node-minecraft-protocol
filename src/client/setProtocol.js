@@ -31,7 +31,7 @@ module.exports = function (client, options) {
           ? {
               timestamp: BigInt(client.profileKeys.expiresOn.getTime()), // should probably be called "expireTime"
               publicKey: client.profileKeys.publicDER,
-              signature: mcData.supportFeature("signatureV2") ? client.profileKeys.signatureV2 : client.profileKeys.signature; 
+              signature: mcData.supportFeature("signatureV2") ? client.profileKeys.signatureV2 : client.profileKeys.signature
             }
           : null,
         playerUUID: client.uuid ?? null
