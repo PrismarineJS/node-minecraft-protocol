@@ -24,13 +24,14 @@ module.exports = function (client, options) {
         nextState: 2
       })
       client.state = states.LOGIN
+      const mcData = require('minecraft-data')(client.version)
       client.write('login_start', {
         username: client.username,
         signature: client.profileKeys
           ? {
               timestamp: BigInt(client.profileKeys.expiresOn.getTime()), // should probably be called "expireTime"
               publicKey: client.profileKeys.publicDER,
-              signature: client.profileKeys.signature
+              signature: mcData.supportFeature("signatureV2") ? client.profileKeys.signatureV2 : client.profileKeys.signature; 
             }
           : null,
         playerUUID: client.uuid ?? null
