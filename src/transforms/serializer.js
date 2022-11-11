@@ -46,6 +46,6 @@ function createDeserializer ({ state = states.HANDSHAKING, isServer = false, ver
 }
 
 module.exports = {
-  createSerializer: createSerializer,
-  createDeserializer: createDeserializer
+  createSerializer,
+  createDeserializer
 }

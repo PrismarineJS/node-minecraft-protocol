@@ -7,10 +7,10 @@ const createClient = require('./createClient')
 const createServer = require('./createServer')
 
 module.exports = {
-  createClient: createClient,
-  createServer: createServer,
-  Client: Client,
-  Server: Server,
+  createClient,
+  createServer,
+  Client,
+  Server,
   states: require('./states'),
   createSerializer: serializer.createSerializer,
   createDeserializer: serializer.createDeserializer,

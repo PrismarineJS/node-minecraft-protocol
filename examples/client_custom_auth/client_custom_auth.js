@@ -11,8 +11,8 @@ if (!username || !password) {
 const client = mc.createClient({
   host,
   port: parseInt(port),
-  username: username,
-  password: password,
+  username,
+  password,
   sessionServer: '', // URL to your session server proxy that changes the expected result of mojang's seession server to mcleaks expected.
   // For more information: https://github.com/PrismarineJS/node-yggdrasil/blob/master/src/Server.js#L19
   auth: async (client, options) => {
