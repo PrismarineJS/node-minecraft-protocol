@@ -5,8 +5,8 @@ const Server = require('./server')
 const serializer = require('./transforms/serializer')
 
 module.exports = {
-  Client: Client,
-  Server: Server,
+  Client,
+  Server,
   states: require('./states'),
   createSerializer: serializer.createSerializer,
   createDeserializer: serializer.createDeserializer,

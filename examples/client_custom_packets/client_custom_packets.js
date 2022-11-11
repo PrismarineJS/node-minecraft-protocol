@@ -62,7 +62,7 @@ const client = mc.createClient({
   port: parseInt(process.argv[3]),
   username: process.argv[4] ? process.argv[4] : 'echo',
   password: process.argv[5],
-  customPackets: customPackets
+  customPackets
 })
 
 client.on('connect', function () {
