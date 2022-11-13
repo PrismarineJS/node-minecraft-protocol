@@ -13,7 +13,7 @@ Parse and serialize minecraft packets, plus authentication and encryption.
 
  * Supports Minecraft PC version 1.7.10, 1.8.8, 1.9 (15w40b, 1.9, 1.9.1-pre2, 1.9.2, 1.9.4),
   1.10 (16w20a, 1.10-pre1, 1.10, 1.10.1, 1.10.2), 1.11 (16w35a, 1.11, 1.11.2), 1.12 (17w15a, 17w18b, 1.12-pre4, 1.12, 1.12.1, 1.12.2), and 1.13 (17w50a, 1.13, 1.13.1, 1.13.2-pre1, 1.13.2-pre2, 1.13.2), 1.14 (1.14, 1.14.1, 1.14.3, 1.14.4)
-  , 1.15 (1.15, 1.15.1, 1.15.2) and 1.16 (20w13b, 20w14a, 1.16-rc1, 1.16, 1.16.1, 1.16.2, 1.16.3, 1.16.4), 1.17 (21w07a, 1.17, 1.17.1), 1.18 (1.18, 1.18.1 and 1.18.2)
+  , 1.15 (1.15, 1.15.1, 1.15.2) and 1.16 (20w13b, 20w14a, 1.16-rc1, 1.16, 1.16.1, 1.16.2, 1.16.3, 1.16.4), 1.17 (21w07a, 1.17, 1.17.1), 1.18 (1.18, 1.18.1 and 1.18.2), 1.19
  * Parses all packets and emits events with packet fields as JavaScript
    objects.
  * Send a packet by supplying fields as a JavaScript object.
@@ -78,7 +78,7 @@ var client = mc.createClient({
   port: 25565,         // optional
   username: "email@example.com",
   password: "12345678",
-  auth: 'mojang' // optional; by default uses mojang, if using a microsoft account, set to 'microsoft'
+  auth: 'microsoft' // optional; by default uses offline mode, if using a microsoft account, set to 'microsoft'
 });
 client.on('chat', function(packet) {
   // Listen for chat messages and echo them back.
@@ -92,7 +92,7 @@ client.on('chat', function(packet) {
 });
 ```
 
-If the server is in offline mode, you may leave out the `password` option.
+If the server is in offline mode, you may leave out the `password` option and switch auth to `offline`.
 You can also leave out `password` when using a Microsoft account. If provided, password based auth will be attempted first which may fail. *Note:* if using a Microsoft account, your account age must be >= 18 years old.
 
 ### Hello World server example

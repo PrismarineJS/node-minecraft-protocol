@@ -3,8 +3,10 @@
 const nbt = require('prismarine-nbt')
 const UUID = require('uuid-1345')
 const zlib = require('zlib')
+const [readVarInt, writeVarInt, sizeOfVarInt] = require('protodef').types.varint
 
 module.exports = {
+  varlong: [readVarLong, writeVarLong, sizeOfVarLong],
   UUID: [readUUID, writeUUID, 16],
   nbt: [readNbt, writeNbt, sizeOfNbt],
   optionalNbt: [readOptionalNbt, writeOptionalNbt, sizeOfOptionalNbt],
@@ -14,6 +16,18 @@ module.exports = {
   topBitSetTerminatedArray: [readTopBitSetTerminatedArray, writeTopBitSetTerminatedArray, sizeOfTopBitSetTerminatedArray]
 }
 const PartialReadError = require('protodef').utils.PartialReadError
+
+function readVarLong (buffer, offset) {
+  return readVarInt(buffer, offset)
+}
+
+function writeVarLong (value, buffer, offset) {
+  return writeVarInt(value, buffer, offset)
+}
+
+function sizeOfVarLong (value) {
+  return sizeOfVarInt(value)
+}
 
 function readUUID (buffer, offset) {
   if (offset + 16 > buffer.length) { throw new PartialReadError() }

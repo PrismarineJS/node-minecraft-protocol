@@ -3,6 +3,7 @@
 const crypto = require('crypto')
 const debug = require('debug')('minecraft-protocol')
 const yggdrasil = require('yggdrasil')
+const { concat } = require('../transforms/binaryStream')
 
 module.exports = function (client, options) {
   const yggdrasilServer = yggdrasil.server({ agent: options.agent, host: options.sessionServer || 'https://sessionserver.mojang.com' })
@@ -42,13 +43,33 @@ module.exports = function (client, options) {
       }
 
       function sendEncryptionKeyResponse () {
+        const mcData = require('minecraft-data')(client.version)
+
         const pubKey = mcPubKeyToPem(packet.publicKey)
         const encryptedSharedSecretBuffer = crypto.publicEncrypt({ key: pubKey, padding: crypto.constants.RSA_PKCS1_PADDING }, sharedSecret)
         const encryptedVerifyTokenBuffer = crypto.publicEncrypt({ key: pubKey, padding: crypto.constants.RSA_PKCS1_PADDING }, packet.verifyToken)
-        client.write('encryption_begin', {
-          sharedSecret: encryptedSharedSecretBuffer,
-          verifyToken: encryptedVerifyTokenBuffer
-        })
+
+        if (mcData.supportFeature('signatureEncryption')) {
+          const salt = BigInt(Date.now())
+          client.write('encryption_begin', {
+            sharedSecret: encryptedSharedSecretBuffer,
+            hasVerifyToken: client.profileKeys == null,
+            crypto: client.profileKeys
+              ? {
+                  salt,
+                  messageSignature: crypto.sign('sha256WithRSAEncryption',
+                    concat('buffer', packet.verifyToken, 'i64', salt), client.profileKeys.private)
+                }
+              : {
+                  verifyToken: encryptedVerifyTokenBuffer
+                }
+          })
+        } else {
+          client.write('encryption_begin', {
+            sharedSecret: encryptedSharedSecretBuffer,
+            verifyToken: encryptedVerifyTokenBuffer
+          })
+        }
         client.setEncryption(sharedSecret)
       }
     }

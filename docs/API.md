@@ -32,6 +32,7 @@ automatically logged in and validated against mojang's auth.
  * hideErrors : do not display errors, default to false
  * agent : a http agent that can be used to set proxy settings for yggdrasil authentication confirmation (see proxy-agent on npm)
  * validateChannelProtocol (optional) : whether or not to enable protocol validation for custom protocols using plugin channels for the connected clients. Defaults to true
+ * enforceSecureProfile (optional) : Kick clients that do not have chat signing keys from Mojang (1.19+)
 
 ## mc.Server(version,[customPackets])
 
@@ -40,6 +41,10 @@ Create a server instance for `version` of minecraft.
 ### server.writeToClients(clients, name, params)
 
 Write a packet to all `clients` but encode it only once.
+
+### client.verifyMessage(packet) : boolean
+
+Verifies if player's chat message packet was signed with their Mojang provided key
 
 ### server.onlineModeExceptions
 
@@ -94,7 +99,7 @@ Returns a `Client` instance and perform login.
 `options` is an object containing the properties :
  * username
  * port : default to 25565
- * auth : the type of account to use, either `microsoft` or `mojang`. default to 'mojang'
+ * auth : the type of account to use, either `microsoft`, `mojang`, `offline` or `function (client, options) => void`. defaults to 'offline'.
  * password : can be omitted
    * (microsoft account) leave this blank to use device code auth. If you provide
    a password, we try to do username and password auth, but this does not always work.
@@ -130,7 +135,7 @@ Returns a `Client` instance and perform login.
  with device code auth. `data` is an object documented [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-device-code#device-authorization-response)
  * id : a numeric client id used for referring to multiple clients in a server
  * validateChannelProtocol (optional) : whether or not to enable protocol validation for custom protocols using plugin channels. Defaults to true
-
+ * disableChatSigning (optional) : Don't try obtaining chat signing keys from Mojang (1.19+)
 
 ## mc.Client(isServer,version,[customPackets])
 
@@ -269,6 +274,13 @@ Start emitting channel events of the given name on the client object.
 
 Unregister a channel `name` and send the unregister packet if `custom` is true.
 
+### client.signMessage(message: string, timestamp: BigInt, salt?: number) : Buffer
+
+Generate a signature for a chat message to be sent to server
+
+### client.verifyMessage(publicKey: Buffer | KeyObject, packet) : boolean
+
+Verifies a player chat packet sent by another player against their public key
 
 ## Not Immediately Obvious Data Type Formats
 

@@ -1,66 +1,28 @@
-const readline = require('readline')
 const mc = require('minecraft-protocol')
-const states = mc.states
-
+const readline = require('readline')
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
   terminal: false
 })
 
-function printHelp () {
-  console.log('usage: node client_chat.js <hostname> <port> <user> [<password>]')
-}
-
-if (process.argv.length < 5) {
-  console.log('Too few arguments!')
-  printHelp()
+const [,, host, port, username] = process.argv
+if (!host || !port) {
+  console.error('Usage: node client_chat.js <host> <port> <username>')
+  console.error('Usage (offline mode): node client_chat.js <host> <port> offline')
   process.exit(1)
 }
-
-process.argv.forEach(function (val) {
-  if (val === '-h') {
-    printHelp()
-    process.exit(0)
-  }
-})
-
-let host = process.argv[2]
-let port = parseInt(process.argv[3])
-const user = process.argv[4]
-const passwd = process.argv[5]
-
-let ChatMessage
-
-if (host.indexOf(':') !== -1) {
-  port = host.substring(host.indexOf(':') + 1)
-  host = host.substring(0, host.indexOf(':'))
-}
-
-console.log('connecting to ' + host + ':' + port)
-console.log('user: ' + user)
 
 const client = mc.createClient({
-  host: host,
-  port: port,
-  username: user,
-  password: passwd
+  host,
+  port,
+  username,
+  auth: username === 'offline' ? 'offline' : 'microsoft'
 })
 
-client.on('kick_disconnect', function (packet) {
-  console.info('Kicked for ' + packet.reason)
-  process.exit(1)
-})
-
-const chats = []
-
-client.on('connect', function () {
-  ChatMessage = require('prismarine-chat')(client.version)
-  console.info('Successfully connected to ' + host + ':' + port)
-})
-
+// Boilerplate
 client.on('disconnect', function (packet) {
-  console.log('disconnected: ' + packet.reason)
+  console.log('Disconnected from server : ' + packet.reason)
 })
 
 client.on('end', function () {
@@ -69,19 +31,66 @@ client.on('end', function () {
 })
 
 client.on('error', function (err) {
-  console.log('Error occured')
+  console.log('Error occurred')
   console.log(err)
   process.exit(1)
 })
 
+client.on('connect', () => {
+  const mcData = require('minecraft-data')(client.version)
+  const ChatMessage = require('prismarine-chat')(client.version)
+  const players = {} // 1.19+
+
+  console.log('Connected to server')
+
+  client.chat = (message) => {
+    if (mcData.supportFeature('signedChat')) {
+      const timestamp = BigInt(Date.now())
+      client.write('chat_message', {
+        message,
+        timestamp,
+        salt: 0,
+        signature: client.signMessage(message, timestamp)
+      })
+    } else {
+      client.write('chat', { message })
+    }
+  }
+
+  function onChat (packet) {
+    const message = packet.message || packet.unsignedChatContent || packet.signedChatContent
+    const j = JSON.parse(message)
+    const chat = new ChatMessage(j)
+
+    if (packet.signature) {
+      const verified = client.verifyMessage(players[packet.senderUuid].publicKey, packet)
+      console.info(verified ? 'Verified: ' : 'UNVERIFIED: ', chat.toAnsi())
+    } else {
+      console.info(chat.toAnsi())
+    }
+  }
+
+  client.on('chat', onChat)
+  client.on('player_chat', onChat)
+  client.on('player_info', (packet) => {
+    if (packet.action === 0) { // add player
+      for (const player of packet.data) {
+        players[player.UUID] = player.crypto
+      }
+    }
+  })
+})
+
+// Send the queued messages
+const queuedChatMessages = []
 client.on('state', function (newState) {
-  if (newState === states.PLAY) {
-    chats.forEach(function (chat) {
-      client.write('chat', { message: chat })
-    })
+  if (newState === mc.states.PLAY) {
+    queuedChatMessages.forEach(message => client.chat(message))
+    queuedChatMessages.length = 0
   }
 })
 
+// Listen for messages written to the console, send them to game chat
 rl.on('line', function (line) {
   if (line === '') {
     return
@@ -93,14 +102,9 @@ rl.on('line', function (line) {
     console.info('Forcibly ended client')
     process.exit(0)
   }
-  if (!client.write('chat', { message: line })) {
-    chats.push(line)
+  if (!client.chat) {
+    queuedChatMessages.push(line)
+  } else {
+    client.chat(line)
   }
-})
-
-client.on('chat', function (packet) {
-  if (!ChatMessage) return // Return if ChatMessage is not loaded yet.
-  const j = JSON.parse(packet.message)
-  const chat = new ChatMessage(j)
-  console.info(chat.toAnsi())
 })

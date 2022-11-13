@@ -1,5 +1,18 @@
 # History
 
+* Fix new types not being optional. (@IceTank) [#1033](https://github.com/PrismarineJS/node-minecraft-protocol/pull/1033)
+
+## 1.36.0
+
+* Use offline mode as default authentication, fallback to offline mode if invalid option. (@Kashalls)
+* Provide interface for using not at all supported alternative accounts. (@Kashalls)
+* 1.19 support (@extremeheat)
+* Fix unhandled promise rejection on ms auth (@IceTank)
+
+## 1.35.1
+
+* add custom minecraft type varlong which aliases to varint @rob9315
+
 ## 1.35.0
 
 * Add option to not answer to pings (@matthi4s)
