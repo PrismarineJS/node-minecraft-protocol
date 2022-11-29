@@ -2,6 +2,8 @@
 
 ## 1.36.2
 * Throw error on minecraft-data protocol version mismatch (#1044)
+* Make "fakeHost" option working
+* Update microsoftAuth to set default flow option
 
 ## 1.36.1
 
