@@ -66,7 +66,7 @@ module.exports = function (client, options) {
   function writeChannel (channel, params) {
     debug('write custom payload ' + channel + ' ' + params)
     client.write('custom_payload', {
-      channel: channel,
+      channel,
       data: proto.createPacketBuffer(channel, params)
     })
   }

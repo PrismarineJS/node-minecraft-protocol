@@ -10,15 +10,20 @@ const states = require('../states')
 const merge = require('lodash.merge')
 const get = require('lodash.get')
 
+const minecraftData = require('minecraft-data')
 const protocols = {}
 
 function createProtocol (state, direction, version, customPackets, compiled = true) {
   const key = state + ';' + direction + ';' + version + (compiled ? ';c' : '')
   if (protocols[key]) { return protocols[key] }
 
-  const mcData = require('minecraft-data')(version)
+  const mcData = minecraftData(version)
+  const versionInfo = minecraftData.versionsByMinecraftVersion.pc[version]
   if (mcData === null) {
     throw new Error(`No data available for version ${version}`)
+  } else if (versionInfo && versionInfo.version !== mcData.version.version) {
+    // The protocol version returned by node-minecraft-data constructor does not match the data in minecraft-data's protocolVersions.json
+    throw new Error(`Do not have protocol data for protocol version ${versionInfo.version} (attempted to use ${mcData.version.version} data)`)
   }
 
   if (compiled) {
@@ -46,6 +51,6 @@ function createDeserializer ({ state = states.HANDSHAKING, isServer = false, ver
 }
 
 module.exports = {
-  createSerializer: createSerializer,
-  createDeserializer: createDeserializer
+  createSerializer,
+  createDeserializer
 }

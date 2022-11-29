@@ -39,11 +39,11 @@ class Client extends EventEmitter {
   }
 
   setSerializer (state) {
-    this.serializer = createSerializer({ isServer: this.isServer, version: this.version, state: state, customPackets: this.customPackets })
+    this.serializer = createSerializer({ isServer: this.isServer, version: this.version, state, customPackets: this.customPackets })
     this.deserializer = createDeserializer({
       isServer: this.isServer,
       version: this.version,
-      state: state,
+      state,
       packetsToParse:
       this.packetsToParse,
       customPackets: this.customPackets,

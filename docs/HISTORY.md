@@ -1,5 +1,7 @@
 # History
 
+* Fix new types not being optional. (@IceTank) [#1033](https://github.com/PrismarineJS/node-minecraft-protocol/pull/1033)
+
 ## 1.36.0
 
 * Use offline mode as default authentication, fallback to offline mode if invalid option. (@Kashalls)

@@ -12,7 +12,7 @@ const client = mc.createClient({
   host,
   port: parseInt(port),
   username: userOrEmail, // your microsoft account email
-  password: password, // your microsoft account password
+  password, // your microsoft account password
   auth: 'microsoft' // This option must be present and set to 'microsoft' to use Microsoft Account Authentication. Failure to do so will result in yggdrasil throwing invalid account information.
 })
 

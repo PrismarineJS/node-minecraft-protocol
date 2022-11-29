@@ -49,6 +49,6 @@ class Decipher extends Transform {
 }
 
 module.exports = {
-  createCipher: createCipher,
-  createDecipher: createDecipher
+  createCipher,
+  createDecipher
 }
