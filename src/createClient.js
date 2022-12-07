@@ -14,6 +14,7 @@ const tcpDns = require('./client/tcp_dns')
 const autoVersion = require('./client/autoVersion')
 const pluginChannels = require('./client/pluginChannels')
 const versionChecking = require('./client/versionChecking')
+const chat = require('./client/chat')
 
 module.exports = createClient
 
@@ -60,6 +61,7 @@ function createClient (options) {
   compress(client, options)
   pluginChannels(client, options)
   versionChecking(client, options)
+  chat(client, options)
 
   return client
 }

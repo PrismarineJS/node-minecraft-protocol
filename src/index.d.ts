@@ -26,6 +26,8 @@ declare module 'minecraft-protocol' {
 		protocolVersion: number
 		version: string
 		write(name: string, params: any): void
+		/** @param message the json version of the message to send*/
+		chat(message: string): void
 		writeRaw(buffer: any): void
 		compressionThreshold: string
 		ended: boolean
@@ -44,6 +46,10 @@ declare module 'minecraft-protocol' {
 		on(event: 'state', handler: (newState: States, oldState: States) => PromiseLike): this
 		on(event: 'end', handler: (reason: string) => PromiseLike): this
 		on(event: 'connect', handler: () => PromiseLike): this
+		/**
+		 * @param handler verified & isServerChat is null when on a < 1.19 server
+		 */
+		on(event: 'chat_received', handler: (chat: { verified: boolean | null, message: string, isServerChat: boolean | null }) => PromiseLike)
 		on(event: string, handler: (data: any, packetMeta: PacketMeta) => PromiseLike): this
 		on(event: `raw.${string}`, handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
 		once(event: 'error', listener: (error: Error) => PromiseLike): this

@@ -37,47 +37,17 @@ client.on('error', function (err) {
 })
 
 client.on('connect', () => {
-  const mcData = require('minecraft-data')(client.version)
   const ChatMessage = require('prismarine-chat')(client.version)
-  const players = {} // 1.19+
 
   console.log('Connected to server')
 
-  client.chat = (message) => {
-    if (mcData.supportFeature('signedChat')) {
-      const timestamp = BigInt(Date.now())
-      client.write('chat_message', {
-        message,
-        timestamp,
-        salt: 0,
-        signature: client.signMessage(message, timestamp)
-      })
-    } else {
-      client.write('chat', { message })
-    }
-  }
-
-  function onChat (packet) {
-    const message = packet.message || packet.unsignedChatContent || packet.signedChatContent
-    const j = JSON.parse(message)
-    const chat = new ChatMessage(j)
-
-    if (packet.signature) {
-      const verified = client.verifyMessage(players[packet.senderUuid].publicKey, packet)
-      console.info(verified ? 'Verified: ' : 'UNVERIFIED: ', chat.toAnsi())
-    } else {
-      console.info(chat.toAnsi())
-    }
-  }
-
-  client.on('chat', onChat)
-  client.on('player_chat', onChat)
-  client.on('player_info', (packet) => {
-    if (packet.action === 0) { // add player
-      for (const player of packet.data) {
-        players[player.UUID] = player.crypto
-      }
-    }
+  client.on('chat_received', ({ verified, message, isServerChat }) => {
+    const chat = ChatMessage.fromNotch(message)
+    let prefix = ''
+    if (verified === true) prefix = 'Player > Verified: '
+    else if (verified === false) prefix = 'Player > Unverified: '
+    else if (isServerChat) prefix = 'Server: '
+    console.info(prefix + chat.toAnsi())
   })
 })
 
