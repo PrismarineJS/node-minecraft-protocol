@@ -41,12 +41,12 @@ client.on('connect', () => {
 
   console.log('Connected to server')
 
-  client.on('chat_received', ({ verified, message, isServerChat }) => {
+  client.on('chat_received', ({ verified, message, isMessageFromServer }) => {
     const chat = ChatMessage.fromNotch(message)
     let prefix = ''
     if (verified === true) prefix = 'Player > Verified: '
     else if (verified === false) prefix = 'Player > Unverified: '
-    else if (isServerChat) prefix = 'Server: '
+    else if (isMessageFromServer) prefix = 'Server: '
     console.info(prefix + chat.toAnsi())
   })
 })

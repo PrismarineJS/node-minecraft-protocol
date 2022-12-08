@@ -4,12 +4,15 @@ module.exports = (client, options) => {
   const mcData = require('minecraft-data')(client.version)
   const players = {} // 1.19+
 
-  function onChat (packet, isServerChat = false) {
+  function onChat (packet, isMessageFromServer = false) {
     let message = packet.message ?? packet.unsignedChatContent ?? packet.signedChatContent
-    if (isServerChat) message = packet.content
+    if (isMessageFromServer) message = packet.content
 
-    const verified = packet.signature ? client.verifyMessage(players[packet.senderUuid].publicKey, packet) : null
-    client.emit('chat_received', { verified, message, isServerChat })
+    let verified = isMessageFromServer ? null : false // default to false if this is a system chat
+    if (!isMessageFromServer && client.profileKeys != null && packet.signature) {
+      verified = client.verifyMessage(players[packet.senderUuid].publicKey, packet)
+    }
+    client.emit('chat_received', { verified, message, isMessageFromServer })
   }
 
   client.on('chat', packet => onChat(packet))

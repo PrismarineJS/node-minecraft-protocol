@@ -49,7 +49,7 @@ declare module 'minecraft-protocol' {
 		/**
 		 * @param handler verified & isServerChat is null when on a < 1.19 server
 		 */
-		on(event: 'chat_received', handler: (chat: { verified: boolean | null, message: string, isServerChat: boolean | null }) => PromiseLike)
+		on(event: 'chat_received', handler: (chat: { verified: boolean | null, message: string, isMessageFromServer: boolean | null }) => PromiseLike)
 		on(event: string, handler: (data: any, packetMeta: PacketMeta) => PromiseLike): this
 		on(event: `raw.${string}`, handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
 		once(event: 'error', listener: (error: Error) => PromiseLike): this
