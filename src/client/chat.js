@@ -18,13 +18,16 @@ module.exports = (client, options) => {
   client.on('chat', packet => onChat(packet))
   client.on('player_chat', packet => onChat(packet))
   client.on('system_chat', packet => onChat(packet, true))
-  client.on('player_info', (packet) => {
-    if (packet.action === 0) { // add player
+  client.on('player_info', packet => {
+    if (packet.action === 0) {
+      // add player
       for (const player of packet.data) {
         players[player.UUID] = player.crypto
       }
     }
   })
+
+  const EMPTY_BUFFER = Buffer.from([])
 
   client.on('state', function (newState) {
     if (newState === states.PLAY) {
@@ -35,7 +38,7 @@ module.exports = (client, options) => {
             message,
             timestamp,
             salt: 0,
-            signature: client.signMessage(message, timestamp)
+            signature: client.profileKeys != null ? EMPTY_BUFFER : client.signMessage(message, timestamp)
           })
         } else {
           client.write('chat', { message })
