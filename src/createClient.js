@@ -15,6 +15,7 @@ const autoVersion = require('./client/autoVersion')
 const pluginChannels = require('./client/pluginChannels')
 const versionChecking = require('./client/versionChecking')
 const chat = require('./client/chat')
+const chat_activity = require('./client/chat_activity_bring_to_mineflayer')
 
 module.exports = createClient
 
@@ -62,6 +63,7 @@ function createClient (options) {
   pluginChannels(client, options)
   versionChecking(client, options)
   chat(client, options)
+  chat_activity(client, options)
 
   return client
 }

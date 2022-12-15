@@ -30,9 +30,10 @@ module.exports = function (client, options) {
           ? {
               timestamp: BigInt(client.profileKeys.expiresOn.getTime()), // should probably be called "expireTime"
               publicKey: client.profileKeys.publicDER,
-              signature: client.profileKeys.signature
+              signature: client.profileKeys.signatureV2 ?? client.profileKeys.signature
             }
-          : null
+          : null,
+        uuid: client.uuid
       })
     }
   }

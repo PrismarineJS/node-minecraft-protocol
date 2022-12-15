@@ -17,7 +17,8 @@ const client = mc.createClient({
   host,
   port,
   username,
-  auth: username === 'offline' ? 'offline' : 'microsoft'
+  auth: username === 'offline' ? 'offline' : 'microsoft',
+  version: '1.19.2'
 })
 
 // Boilerplate
