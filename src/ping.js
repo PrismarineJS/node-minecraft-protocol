@@ -18,8 +18,8 @@ function cbPing (options, cb) {
   return pingPromise
 };
 
-function parseLenientJson(json) {
-	return JSON.parse(json.replace(/\n/g, '\\n'))
+function parseLenientJson (json) {
+  return JSON.parse(json.replace(/\n/g, '\\n'))
 };
 
 function ping (options) {
