@@ -20,7 +20,7 @@ if (!process.argv[2].includes(':')) { // Spliting ip and port if available.
   port = parseInt(port)
 }
 
-protocol.ping({ host: host, port: port }, (err, pingResults) => { // Pinging server and getting result
+protocol.ping({ host, port }, (err, pingResults) => { // Pinging server and getting result
   if (err) throw err
   console.log(`${removeColorsFromString(JSON.stringify(pingResults.description.text))}`) // Printing motd to console
   // Printing some infos to console

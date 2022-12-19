@@ -2,18 +2,26 @@
 
 const mc = require('minecraft-protocol')
 
-const [,, host, port, userOrEmail, password] = process.argv
-if (!userOrEmail) {
-  console.log('Usage : node client_microsoft_auth.js <host> <port> <username/email> [<password>]')
+const [, , host, port, username, password] = process.argv
+if (!username || !password) {
+  console.log('Usage : node client_custom_auth.js <host> <port> <username/email> [<password>]')
   process.exit(1)
 }
 
 const client = mc.createClient({
   host,
   port: parseInt(port),
-  username: userOrEmail, // your microsoft account email
-  password, // your microsoft account password
-  auth: 'microsoft' // This option must be present and set to 'microsoft' to use Microsoft Account Authentication. Failure to do so will result in yggdrasil throwing invalid account information.
+  username,
+  password,
+  sessionServer: '', // URL to your session server proxy that changes the expected result of mojang's seession server to mcleaks expected.
+  // For more information: https://github.com/PrismarineJS/node-yggdrasil/blob/master/src/Server.js#L19
+  auth: async (client, options) => {
+    // handle custom authentication your way.
+
+    // client.username = options.username
+    // options.accessToken =
+    return options.connect(client)
+  }
 })
 
 client.on('connect', function () {

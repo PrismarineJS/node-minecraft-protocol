@@ -73,7 +73,7 @@ function broadcast (message, exclude, username) {
     client = server.clients[clientId]
     if (client !== exclude) {
       const msg = {
-        translate: translate,
+        translate,
         with: [
           username,
           message

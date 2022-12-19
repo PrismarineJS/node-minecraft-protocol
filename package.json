@@ -1,6 +1,6 @@
 {
   "name": "minecraft-protocol",
-  "version": "1.35.0",
+  "version": "1.36.2",
   "description": "Parse and serialize minecraft packets, plus authentication and encryption.",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -33,7 +33,7 @@
   },
   "browser": "src/browser.js",
   "devDependencies": {
-    "@types/node": "^17.0.4",
+    "@types/node": "^18.0.6",
     "espower-loader": "^1.0.0",
     "intelli-espower-loader": "^1.0.0",
     "minecraft-packets": "^1.1.5",
@@ -51,14 +51,14 @@
     "endian-toggle": "^0.0.0",
     "lodash.get": "^4.1.2",
     "lodash.merge": "^4.3.0",
-    "minecraft-data": "^3.0.0",
+    "minecraft-data": "^3.8.0",
     "minecraft-folder-path": "^1.2.0",
     "node-fetch": "^2.6.1",
     "node-rsa": "^0.4.2",
-    "prismarine-auth": "^1.1.0",
+    "prismarine-auth": "^2.0.0",
     "prismarine-nbt": "^2.0.0",
     "protodef": "^1.8.0",
-    "readable-stream": "^3.0.6",
+    "readable-stream": "^4.1.0",
     "uuid-1345": "^1.0.1",
     "yggdrasil": "^1.4.0"
   }
