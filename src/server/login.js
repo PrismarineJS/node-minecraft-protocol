@@ -199,6 +199,7 @@ module.exports = function (client, server, options) {
     pluginChannels(client, options)
 
     if (client.profileKeys) {
+      // TODO: this does not apply to 1.19.1 anymore
       client.verifyMessage = (packet) => {
         const signable = concat('i64', packet.salt, 'UUID', client.uuid, 'i64',
           packet.timestamp, 'pstring', packet.message)

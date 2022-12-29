@@ -49,19 +49,20 @@ module.exports = function (client, options) {
     client._lastChatSignature = null
     client._lastRejectedMessage = null
 
-    client.on('player_info', (packet) => {
-      if (options.disableChatSigning) return
-      if (packet.action === 0) { // add player
-        for (const player of packet.data) {
-          client._players[player.UUID] = player.crypto
-          client._players[player.UUID].hasChainIntegrity = true
+    if (mcData.supportFeature('chainedChatWithHashing') && !options.disableChatSigning) {
+      client.on('player_info', (packet) => {
+        if (packet.action === 0) { // add player
+          for (const player of packet.data) {
+            client._players[player.UUID] = packet.crypto
+            client._players[player.UUID].hasChainIntegrity = true
+          }
+        } else if (packet.action === 4) { // remove player
+          for (const player of packet.data) {
+            delete client._players[player.UUID]
+          }
         }
-      } else if (packet.action === 4) { // remove player
-        for (const player of packet.data) {
-          delete client._players[player.UUID]
-        }
-      }
-    })
+      })
+    }
 
     function updateAndValidateChat (uuid, previousHeaderSignature, currentHeaderSignature, payload) {
       // Get the player information
@@ -111,8 +112,12 @@ module.exports = function (client, options) {
     })
 
     client.on('player_chat', (packet) => {
-      if (options.disableChatSigning) {
+      if (options.disableChatSigning || !mcData.supportFeature('signedChat')) {
         client.emit('playerChat', { ...packet, verified: false })
+        return
+      } else if (!mcData.supportFeature('chainedChatWithHashing')) {
+        const pubKey = client._players[packet.senderUuid]?.publicKey
+        client.emit('playerChat', { ...packet, verified: pubKey ? client.verifyMessage(pubKey, packet) : false })
         return
       }
 
