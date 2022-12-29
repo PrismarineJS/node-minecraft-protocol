@@ -6,6 +6,7 @@ module.exports = function (client, options) {
   client.on('connect', onConnect)
 
   function onConnect () {
+    const mcData = require('minecraft-data')(client.version)
     if (client.wait_connect) {
       client.on('connect_allowed', next)
     } else {
@@ -30,9 +31,12 @@ module.exports = function (client, options) {
           ? {
               timestamp: BigInt(client.profileKeys.expiresOn.getTime()), // should probably be called "expireTime"
               publicKey: client.profileKeys.publicDER,
-              signature: client.profileKeys.signature
+              signature: mcData.supportFeature('profileKeySignatureV2')
+                ? client.profileKeys.signatureV2
+                : client.profileKeys.signature
             }
-          : null
+          : null,
+        profileId: client.session.selectedProfile.id
       })
     }
   }

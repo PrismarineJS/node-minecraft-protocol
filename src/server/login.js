@@ -53,14 +53,16 @@ module.exports = function (client, server, options) {
 
       try {
         const publicKey = crypto.createPublicKey({ key: packet.signature.publicKey, format: 'der', type: 'spki' })
-        const publicPEM = mcPubKeyToPem(packet.signature.publicKey)
-        const signable = packet.signature.timestamp + publicPEM // (expires at + publicKey)
+        const signable = mcData.supportFeature('chainedChatWithHashing')
+          ? Buffer.from(packet.signature.timestamp + mcPubKeyToPem(packet.signature.publicKey), 'utf8') // (expires at + publicKey)
+          : concat('uuid', packet.profileId, 'i64', packet.signature.timestamp, 'buffer', packet.signature.publicKey)
 
-        if (!crypto.verify('RSA-SHA1', Buffer.from(signable, 'utf8'), mojangPubKey, packet.signature.signature)) {
+        // This makes sure 'signable' when signed with the mojang private key equals signature in this packet
+        if (!crypto.verify('RSA-SHA1', signable, mojangPubKey, packet.signature.signature)) {
           raise('multiplayer.disconnect.invalid_public_key_signature')
           return
         }
-        client.profileKeys = { public: publicKey, publicPEM }
+        client.profileKeys = { public: publicKey }
       } catch (err) {
         raise('multiplayer.disconnect.invalid_public_key')
         return

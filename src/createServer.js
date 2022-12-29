@@ -6,7 +6,8 @@ const plugins = [
   require('./server/handshake'),
   require('./server/keepalive'),
   require('./server/login'),
-  require('./server/ping')
+  require('./server/ping'),
+  require('./server/chat')
 ]
 
 module.exports = createServer
