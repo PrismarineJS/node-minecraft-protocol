@@ -57,7 +57,9 @@ module.exports = function (client, options) {
           client._players[player.UUID].hasChainIntegrity = true
         }
       } else if (packet.action === 4) { // remove player
-        delete client._players[player.UUID]
+        for (const player of packet.data) {
+          delete client._players[player.UUID]
+        }
       }
     })
 
