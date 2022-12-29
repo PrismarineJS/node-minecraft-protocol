@@ -131,7 +131,7 @@ module.exports = function (client, options) {
       // if the client sets secure chat to be required and the message from the server isn't signed,
       // or the client has blocked the sender.
       // client1.19.1/client/net/minecraft/client/multiplayer/ClientPacketListener.java#L768
-      client._lastSeenMessagesTracker.push({ sender: packet.senderUuid, signature: packet.headerSignature })
+      client._lastSeenMessages.push({ sender: packet.senderUuid, signature: packet.headerSignature })
       client._lastChatHistory.push({
         previousSignature: packet.messageSignature,
         signature: packet.headerSignature,
@@ -145,7 +145,7 @@ module.exports = function (client, options) {
         lastSeen: packet.previousMessages
       })
 
-      if (client._lastSeenMessagesTracker.pending++ > 64) {
+      if (client._lastSeenMessages.pending++ > 64) {
         client.write('message_acknowledgement', {
           previousMessages: client._lastSeenMessages.map((e) => ({
             messageSender: e.sender,
@@ -153,14 +153,15 @@ module.exports = function (client, options) {
           })),
           lastRejectedMessage: client._lastRejectedMessage
         })
-        client._lastSeenMessagesTracker.pending = 0
+        client._lastSeenMessages.pending = 0
       }
     })
 
     let lastPreviewRequestId = 0
     const pendingChatRequests = {}
-    client.chat = async (message, options) => {
-      options.timestamp = options.timestamp || Date.now()
+
+    function signedChat (message, options = {}) {
+      options.timestamp = options.timestamp || BigInt(Date.now())
       options.salt = options.salt || 0
 
       if (options.skipPreview || !client.serverFeatures.chatPreview) {
@@ -168,7 +169,7 @@ module.exports = function (client, options) {
           message,
           timestamp: options.timestamp,
           salt: options.salt,
-          signature: client.profileKeys ? client.signMessage(message, options.timestamp, options.salt) : [],
+          signature: client.profileKeys ? client.signMessage(message, options.timestamp, options.salt) : Buffer.alloc(0),
           signedPreview: options.didPreview,
           lastAcceptedMessages: client._lastSeenMessages.map((e) => ({
             messageSender: e.sender,
@@ -176,7 +177,7 @@ module.exports = function (client, options) {
           })),
           lastRejectedMessage: client._lastRejectedMessage
         })
-        client._lastSeenMessagesTracker.pending = 0
+        client._lastSeenMessages.pending = 0
       } else {
         client.write('chat_preview', {
           query: lastPreviewRequestId,
@@ -187,14 +188,19 @@ module.exports = function (client, options) {
       }
     }
 
-    function onPreviewResponse (packet) {
+    function unsignedChat (message) {
+      client.write('chat', { message })
+    }
+
+    client.chat = mcData.supportFeature('signedChat') ? signedChat : unsignedChat
+
+    client.on('chat_preview', (packet) => {
       const pending = pendingChatRequests[packet.query]
       if (pending) {
         client.chat(packet.message, { ...packet.options, skipPreview: true, didPreview: true })
         delete pendingChatRequests[packet.query]
       }
-    }
-    client.on('chat_preview', onPreviewResponse)
+    })
 
     client.signMessage = (message, timestamp, salt = 0) => {
       if (!client.profileKeys) throw Error("Can't sign message without profile keys, please set valid auth mode")
@@ -210,7 +216,7 @@ module.exports = function (client, options) {
       return (client._lastChatSignature = crypto.sign('RSA-SHA256', signable, client.profileKeys.private))
     }
 
-    // Verification handled internally in 1.19.1+ as previous messages must be stored to verify messages from future players
+    // Verification handled internally in 1.19.1+ as previous messages must be stored to verify future messages
     if (!mcData.supportFeature('chainedChatWithHashing')) {
       client.verifyMessage = (pubKey, packet) => {
         if (pubKey instanceof Buffer) pubKey = crypto.createPublicKey({ key: pubKey, format: 'der', type: 'spki' })
