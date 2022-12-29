@@ -3,13 +3,15 @@ const crypto = require('crypto')
 const concat = require('../transforms/binaryStream').concat
 
 module.exports = function (client, options) {
-  client.once('success', onLogin)
+  client.serverFeatures = {}
   client.on('server_data', (packet) => {
     client.serverFeatures = {
       chatPreview: packet.previewsChat,
       enforcesSecureChat: packet.enforcesSecureChat
     }
   })
+
+  client.once('success', onLogin)
 
   function onLogin (packet) {
     const mcData = require('minecraft-data')(client.version)
@@ -149,8 +151,8 @@ module.exports = function (client, options) {
     let lastPreviewRequestId = 0
     const pendingChatRequests = {}
     client.chat = async (message, options) => {
-      options.timestamp ||= Date.now()
-      options.salt ??= 0
+      options.timestamp = options.timestamp || Date.now()
+      options.salt = options.salt || 0
 
       if (options.skipPreview || !client.serverFeatures.chatPreview) {
         client.write('chat_message', {

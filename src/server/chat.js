@@ -92,7 +92,7 @@ module.exports = function (client, server, options) {
       }
       delete pendingACK[pendingUsers[i]]
     }
-    ;(pendingACK[sender] ??= {})[chatPacket.signature] = chatPacket.timestamp
+    ;(pendingACK[sender] = pendingACK[sender] || {})[chatPacket.signature] = chatPacket.timestamp
     pendingACKCount++
     if (pendingACKCount > 4096) {
       raise('multiplayer.disconnect.too_many_pending_chats')
