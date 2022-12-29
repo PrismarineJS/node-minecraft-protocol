@@ -33,8 +33,8 @@ module.exports = function (client, options) {
         }
         while (this.length >= this.capacity) this.pop()
       }
-    }
-    // This stores all inbound messages for report lookup
+    }()
+    // This stores last 1024 inbound messages for report lookup
     client._lastChatHistory = new class extends Array {
       capacity = 1024
       push (e) {
@@ -43,7 +43,7 @@ module.exports = function (client, options) {
           this.shift()
         }
       }
-    }
+    }()
     client._lastChatSignature = null
     client._lastRejectedMessage = null
 

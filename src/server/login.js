@@ -54,8 +54,8 @@ module.exports = function (client, server, options) {
       try {
         const publicKey = crypto.createPublicKey({ key: packet.signature.publicKey, format: 'der', type: 'spki' })
         const signable = mcData.supportFeature('chainedChatWithHashing')
-          ? Buffer.from(packet.signature.timestamp + mcPubKeyToPem(packet.signature.publicKey), 'utf8') // (expires at + publicKey)
-          : concat('uuid', packet.profileId, 'i64', packet.signature.timestamp, 'buffer', packet.signature.publicKey)
+          ? concat('uuid', packet.profileId, 'i64', packet.signature.timestamp, 'buffer', packet.signature.publicKey)
+          : Buffer.from(packet.signature.timestamp + mcPubKeyToPem(packet.signature.publicKey), 'utf8') // (expires at + publicKey)
 
         // This makes sure 'signable' when signed with the mojang private key equals signature in this packet
         if (!crypto.verify('RSA-SHA1', signable, mojangPubKey, packet.signature.signature)) {
