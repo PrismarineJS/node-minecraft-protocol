@@ -101,7 +101,7 @@ module.exports = function (client, options) {
       if (options.disableChatSigning) return
 
       // Confusingly, "messageSignature" is the previous header signature, and headerSignature is current one
-      // and the "bodyDigest" is the current message signature
+      // and the "bodyDigest" is the current message hash
       updateAndValidateChat(packet.senderUuid, packet.messageSignature, packet.headerSignature, packet.bodyDigest)
 
       client._lastChatHistory.push({
@@ -220,7 +220,7 @@ module.exports = function (client, options) {
       }
     }
 
-    // Report a chat message. Reason must be one of
+    // Report a chat message.
     client.reportPlayer = (uuid, reason, reportedSignatures, comments) => {
       const evidence = []
 

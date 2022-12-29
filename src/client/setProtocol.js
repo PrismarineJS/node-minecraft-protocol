@@ -6,7 +6,6 @@ module.exports = function (client, options) {
   client.on('connect', onConnect)
 
   function onConnect () {
-    const mcData = require('minecraft-data')(client.version)
     if (client.wait_connect) {
       client.on('connect_allowed', next)
     } else {
@@ -14,6 +13,7 @@ module.exports = function (client, options) {
     }
 
     function next () {
+      const mcData = require('minecraft-data')(client.version)
       let taggedHost = options.host
       if (client.tagHost) taggedHost += client.tagHost
       if (options.fakeHost) taggedHost = options.fakeHost
