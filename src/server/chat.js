@@ -2,24 +2,68 @@ module.exports = function (client, server, options) {
   class VerificationError extends Error {}
   const raise = (translatableError) => client.end(translatableError, JSON.stringify({ translate: translatableError }))
 
-  const pendingACK = {} // userUUID => { signature, ts }
-  let pendingACKCount = 0
+  const pending = new class extends Array {
+    map = {}
+    lastSeen = []
 
-  let lastTimestamp
-  function validateLastMessages (lastSeen, lastRejected) {
-    if (lastRejected) {
-      const rejectedTs = pendingACK[lastRejected.sender][lastRejected.signature]
-      if (!rejectedTs) {
-        throw new VerificationError(`Client rejected a message we never sent from '${lastRejected.sender}'`)
-      } else {
-        delete pendingACK[lastRejected.sender][lastRejected.signature]
-        pendingACKCount--
+    get (sender, signature) {
+      return this.map[sender]?.[signature]
+    }
+
+    add (sender, signature, ts) {
+      this.map[sender] = this.map[sender] || {}
+      this.map[sender][signature] = ts
+      this.push([sender, signature])
+    }
+
+    acknowledge (sender, username) {
+      delete this.map[sender][username]
+      this.splice(this.findIndex(([a, b]) => a === sender && b === username), 1)
+    }
+
+    acknowledgePrior (sender, signature) {
+      for (let i = 0; i < this.length; i++) {
+        const [a, b] = this[i]
+        delete this.map[a]
+        if (a === sender && b === signature) {
+          this.splice(0, i)
+          break
+        }
       }
     }
 
+    // Once we've acknowledged that the client has saw the messages we sent,
+    // we delete it from our map & pending list. However, the client may keep it in
+    // their 5-length lastSeen list anyway. Once we verify/ack the client's lastSeen array,
+    // we need to store it in memory to allow those entries to be approved again without
+    // erroring about a message we never sent in the next serverbound message packet we get.
+
+    setPreviouslyAcknowledged (lastSeen, lastRejected) {
+      this.lastSeen = lastSeen.map(e => Object.values(e)).push(Object.values(lastRejected))
+    }
+
+    previouslyAcknowledged (sender, signature) {
+      return this.lastSeen.some(([a, b]) => a === sender && b === signature)
+    }
+  }()
+
+  function validateLastMessages (lastSeen, lastRejected) {
+    if (lastRejected) {
+      const rejectedTs = pending.get(lastRejected.sender, lastRejected.signature)
+      if (!rejectedTs) {
+        throw new VerificationError(`Client rejected a message we never sent from '${lastRejected.sender}'`)
+      } else {
+        pending.acknowledge(lastRejected.sender, lastRejected.signature)
+      }
+    }
+
+    let lastTimestamp
     const seenSenders = new Set()
+
     for (const { messageSender, messageSignature } of lastSeen) {
-      const ts = pendingACK[messageSender][messageSignature]
+      if (pending.previouslyAcknowledged(messageSender, messageSignature)) continue
+
+      const ts = pending.get(messageSender)(messageSignature)
       if (!ts) {
         throw new VerificationError(`Client saw a message that we never sent from '${messageSender}'`)
       } else if (lastTimestamp && (ts < lastTimestamp)) {
@@ -30,16 +74,11 @@ module.exports = function (client, server, options) {
       } else {
         lastTimestamp = ts
         seenSenders.add(messageSender)
-        for (const signature in pendingACK[messageSender]) {
-          if (signature !== messageSender) {
-            delete pendingACK[messageSender][messageSignature]
-            pendingACKCount--
-          } else {
-            break
-          }
-        }
+        pending.acknowledgePrior(messageSender, messageSignature)
       }
     }
+
+    pending.setPreviouslyAcknowledged(lastSeen, lastRejected)
   }
 
   function validateMessage (packet) {
@@ -58,10 +97,9 @@ module.exports = function (client, server, options) {
   }
 
   // Listen to chat messages and verify the `lastSeen` and `lastRejected` messages chain
+  let lastTimestamp
   client.on('chat_message', (packet) => {
-    if (!options.enforceSecureProfile) {
-      return // nothing signable
-    }
+    if (!options.enforceSecureProfile) return // nothing signable
 
     if (lastTimestamp && packet.timestamp < lastTimestamp) {
       return raise('multiplayer.disconnect.out_of_order_chat')
@@ -71,7 +109,6 @@ module.exports = function (client, server, options) {
     if (client.settings.disabledChat) {
       return raise('chat.disabled.options')
     }
-
     validateMessage(packet)
   })
 
@@ -81,20 +118,10 @@ module.exports = function (client, server, options) {
 
   // Send a signed message from one player to another player on the server
   client.logSentMessageFromPeer = (chatPacket) => {
-    if (!options.enforceSecureProfile) {
-      return // nothing signable
-    }
-    const sender = chatPacket.senderUuid
-    const pendingUsers = Object.keys(pendingACK)
-    for (let i = 0; i < (pendingUsers.length - 10); i++) {
-      for (const signature in pendingACK[pendingUsers[i]]) { // eslint-disable-line
-        pendingACKCount--
-      }
-      delete pendingACK[pendingUsers[i]]
-    }
-    ;(pendingACK[sender] = pendingACK[sender] || {})[chatPacket.signature] = chatPacket.timestamp
-    pendingACKCount++
-    if (pendingACKCount > 4096) {
+    if (!options.enforceSecureProfile) return // nothing signable
+
+    pending.add(chatPacket.senderUuid, chatPacket.signature, chatPacket.timestamp)
+    if (pending.length > 4096) {
       raise('multiplayer.disconnect.too_many_pending_chats')
       return false
     }
