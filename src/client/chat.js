@@ -3,7 +3,6 @@ const concat = require('../transforms/binaryStream').concat
 
 module.exports = function (client, options) {
   const mcData = require('minecraft-data')(client.version)
-
   client._players = {}
   client._lastChatSignature = null
   client._lastRejectedMessage = null
@@ -16,16 +15,17 @@ module.exports = function (client, options) {
       // Insert a new entry at the top and shift everything to the right
       let last = this[0]
       this[0] = e
-      for (let i = 1; i < this.capacity; i++) {
-        const current = this[i]
-        this[i] = last
-        last = current
-        // If we found an existing entry for the sender ID, we can stop shifting
-        if (current.sender === e.sender) break
+      if (last && last.sender !== e.sender) {
+        for (let i = 1; i < this.capacity; i++) {
+          const current = this[i]
+          this[i] = last
+          last = current
+          // If we found an existing entry for the sender ID, we can stop shifting
+          if (!current || (current.sender === e.sender)) break
+        }
       }
     }
   }()
-
   // This stores last 1024 inbound messages for report lookup
   client._lastChatHistory = new class extends Array {
     capacity = 1024
@@ -54,7 +54,7 @@ module.exports = function (client, options) {
       if (player.hasChainIntegrity) {
         const verifier = crypto.createVerify('RSA-SHA256')
         if (previousHeaderSignature) verifier.update(previousHeaderSignature)
-        verifier.update(concat('uuid', uuid))
+        verifier.update(concat('UUID', uuid))
         verifier.update(payload)
         const ok = verifier.verify(player.publicKey, currentHeaderSignature)
 
@@ -74,7 +74,14 @@ module.exports = function (client, options) {
     if (packet.action === 0) { // add player
       for (const player of packet.data) {
         if (player.crypto) {
-          client._players[player.UUID] = player.crypto
+          // it's already in DER, but node.js crypto methods assume PEM if we don't pass a KeyLike object to verify() fns
+          // https://github.com/nodejs/node/blob/4830a6cf2aa14144a1c36ae92dac7eed66fb8c13/lib/internal/crypto/keys.js#L520
+          client._players[player.UUID] = {
+            publicKey: crypto.createPublicKey({ key: player.crypto.publicKey, format: 'der', type: 'spki' }),
+            publicKeyDER: player.crypto.publicKey,
+            signature: player.crypto.signature,
+            displayName: player.displayName || player.name
+          }
           client._players[player.UUID].hasChainIntegrity = true
         }
       }
@@ -101,7 +108,7 @@ module.exports = function (client, options) {
     if (!mcData.supportFeature('chainedChatWithHashing')) {
       const pubKey = client._players[packet.senderUuid]?.publicKey
       client.emit('playerChat', {
-        message: packet.signedChatContent || packet.unsignedChatContent,
+        formattedMessage: packet.signedChatContent || packet.unsignedChatContent,
         type: packet.type,
         sender: packet.senderUuid,
         senderName: packet.senderName,
@@ -114,13 +121,18 @@ module.exports = function (client, options) {
     const hash = crypto.createHash('sha256')
     hash.update(concat('i64', packet.salt, 'i64', packet.timestamp / 1000n, 'pstring', packet.plainMessage, 'i8', 70))
     if (packet.formattedMessage) hash.update(packet.formattedMessage)
+    for (const previousMessage of packet.previousMessages) {
+      hash.update(concat('i8', 70, 'UUID', previousMessage.messageSender))
+      hash.update(previousMessage.messageSignature)
+    }
 
     const verified = updateAndValidateChat(packet.senderUuid, packet.messageSignature, packet.headerSignature, hash.digest())
     client.emit('playerChat', {
-      message: packet.signedChatContent || packet.unsignedChatContent,
+      message: packet.plainMessage || packet.unsignedChatContent,
+      formattedMessage: packet.formattedMessage,
       type: packet.type,
       sender: packet.senderUuid,
-      senderName: packet.senderName,
+      senderName: client._players[packet.senderUuid]?.displayName,
       senderTeam: packet.senderTeam,
       verified
     })
@@ -169,7 +181,7 @@ module.exports = function (client, options) {
         salt: options.salt,
         signature: client.profileKeys ? client.signMessage(message, options.timestamp, options.salt) : Buffer.alloc(0),
         signedPreview: options.didPreview,
-        lastAcceptedMessages: client._lastSeenMessages.map((e) => ({
+        previousMessages: client._lastSeenMessages.map((e) => ({
           messageSender: e.sender,
           messageSignature: e.signature
         })),
@@ -197,16 +209,35 @@ module.exports = function (client, options) {
   // Signing methods
   client.signMessage = (message, timestamp, salt = 0) => {
     if (!client.profileKeys) throw Error("Can't sign message without profile keys, please set valid auth mode")
-    let signable
-    if (mcData.supportFeature('chainedChatWithHashing')) { // 1.19.2
-      const hash = crypto.createHash('sha256')
-      if (client._lastChatSignature) hash.update(client._lastChatSignature)
-      hash.update(concat('i64', salt, 'i64', timestamp / 1000n, 'pstring', JSON.stringify({ text: message }), 'i8', 70))
-      signable = hash.digest()
+
+    if (mcData.supportFeature('chainedChatWithHashing')) {
+      // 1.19.2
+      const signer = crypto.createSign('RSA-SHA256')
+      if (client._lastChatSignature) signer.update(client._lastChatSignature)
+      signer.update(concat('UUID', client.uuid))
+
+      // Hash of chat body now opposed to signing plaintext. This lets server give us hashes for chat
+      // chain without needing to reveal message contents
+      if (message instanceof Buffer) {
+        signer.update(message)
+      } else {
+        const hash = crypto.createHash('sha256')
+        hash.update(concat('i64', salt, 'i64', timestamp / 1000n, 'pstring', message, 'i8', 70))
+        for (const previousMessage of client._lastSeenMessages) {
+          hash.update(concat('i8', 70, 'UUID', previousMessage.sender))
+          hash.update(previousMessage.signature)
+        }
+        // Feed hash back into signing payload
+        signer.update(hash.digest())
+      }
+
+      client._lastChatSignature = signer.sign(client.profileKeys.private)
     } else {
-      signable = concat('i64', salt, 'UUID', client.uuid, 'i64', timestamp / 1000n, 'pstring', JSON.stringify({ text: message }))
+      // 1.19
+      const signable = concat('i64', salt, 'UUID', client.uuid, 'i64', timestamp / 1000n, 'pstring', JSON.stringify({ text: message }))
+      client._lastChatSignature = crypto.sign('RSA-SHA256', signable, client.profileKeys.private)
     }
-    client._lastChatSignature = crypto.sign('RSA-SHA256', signable, client.profileKeys.private)
+
     return client._lastChatSignature
   }
 

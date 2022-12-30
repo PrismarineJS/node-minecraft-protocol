@@ -26,7 +26,7 @@ module.exports = function (client, options) {
     } else {
       client.on('chat', (packet) => {
         client.emit(packet.position === 0 ? 'playerChat' : 'systemChat', {
-          message: packet.message,
+          formattedMessage: packet.message,
           sender: packet.sender,
           positionId: packet.position,
           verified: false

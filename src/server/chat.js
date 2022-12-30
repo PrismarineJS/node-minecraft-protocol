@@ -1,7 +1,6 @@
 module.exports = function (client, server, options) {
   class VerificationError extends Error {}
   const raise = (translatableError) => client.end(translatableError, JSON.stringify({ translate: translatableError }))
-
   const pending = new class extends Array {
     map = {}
     lastSeen = []
@@ -37,7 +36,6 @@ module.exports = function (client, server, options) {
     // their 5-length lastSeen list anyway. Once we verify/ack the client's lastSeen array,
     // we need to store it in memory to allow those entries to be approved again without
     // erroring about a message we never sent in the next serverbound message packet we get.
-
     setPreviouslyAcknowledged (lastSeen, lastRejected) {
       this.lastSeen = lastSeen.map(e => Object.values(e)).push(Object.values(lastRejected))
     }
