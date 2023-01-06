@@ -3,6 +3,7 @@ const crypto = require('crypto')
 const pluginChannels = require('../client/pluginChannels')
 const states = require('../states')
 const yggdrasil = require('yggdrasil')
+const chatPlugin = require('./chat')
 const { concat } = require('../transforms/binaryStream')
 const { mojangPublicKeyPem } = require('./constants')
 
@@ -33,6 +34,7 @@ module.exports = function (client, server, options) {
 
   function onLogin (packet) {
     const mcData = require('minecraft-data')(client.version)
+    client.supportFeature = mcData.supportFeature
 
     client.username = packet.username
     const isException = !!server.onlineModeExceptions[client.username.toLowerCase()]
@@ -189,6 +191,13 @@ module.exports = function (client, server, options) {
     // TODO: find out what properties are on 'success' packet
     client.state = states.PLAY
 
+    if (client.protocolVersion >= 760) { // 1.19.1+
+      client.write('server_data', {
+        previewsChat: !options.disableChatPreview,
+        enforceSecureProfile: options.enforceSecureProfile
+      })
+    }
+
     clearTimeout(loginKickTimer)
     loginKickTimer = null
 
@@ -197,16 +206,7 @@ module.exports = function (client, server, options) {
       server.playerCount -= 1
     })
     pluginChannels(client, options)
-
-    if (client.profileKeys) {
-      // TODO: this does not apply to 1.19.1 anymore
-      client.verifyMessage = (packet) => {
-        const signable = concat('i64', packet.salt, 'UUID', client.uuid, 'i64',
-          packet.timestamp, 'pstring', packet.message)
-
-        return crypto.verify('sha256WithRSAEncryption', signable, client.profileKeys.public, packet.crypto.signature)
-      }
-    }
+    if (client.protocolVersion >= 759) chatPlugin(client, server, options)
     server.emit('login', client)
   }
 }

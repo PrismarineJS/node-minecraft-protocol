@@ -1,87 +1,48 @@
-module.exports = function (client, server, options) {
-  class VerificationError extends Error {}
-  const raise = (translatableError) => client.end(translatableError, JSON.stringify({ translate: translatableError }))
-  const pending = new class extends Array {
-    map = {}
-    lastSeen = []
+const crypto = require('crypto')
+const concat = require('../transforms/binaryStream').concat
 
-    get (sender, signature) {
-      return this.map[sender]?.[signature]
+class VerificationError extends Error {}
+function validateLastMessages (pending, lastSeen, lastRejected) {
+  if (lastRejected) {
+    const rejectedTs = pending.get(lastRejected.sender, lastRejected.signature)
+    if (!rejectedTs) {
+      throw new VerificationError(`Client rejected a message we never sent from '${lastRejected.sender}'`)
+    } else {
+      pending.acknowledge(lastRejected.sender, lastRejected.signature)
     }
-
-    add (sender, signature, ts) {
-      this.map[sender] = this.map[sender] || {}
-      this.map[sender][signature] = ts
-      this.push([sender, signature])
-    }
-
-    acknowledge (sender, username) {
-      delete this.map[sender][username]
-      this.splice(this.findIndex(([a, b]) => a === sender && b === username), 1)
-    }
-
-    acknowledgePrior (sender, signature) {
-      for (let i = 0; i < this.length; i++) {
-        const [a, b] = this[i]
-        delete this.map[a]
-        if (a === sender && b === signature) {
-          this.splice(0, i)
-          break
-        }
-      }
-    }
-
-    // Once we've acknowledged that the client has saw the messages we sent,
-    // we delete it from our map & pending list. However, the client may keep it in
-    // their 5-length lastSeen list anyway. Once we verify/ack the client's lastSeen array,
-    // we need to store it in memory to allow those entries to be approved again without
-    // erroring about a message we never sent in the next serverbound message packet we get.
-    setPreviouslyAcknowledged (lastSeen, lastRejected) {
-      this.lastSeen = lastSeen.map(e => Object.values(e)).push(Object.values(lastRejected))
-    }
-
-    previouslyAcknowledged (sender, signature) {
-      return this.lastSeen.some(([a, b]) => a === sender && b === signature)
-    }
-  }()
-
-  function validateLastMessages (lastSeen, lastRejected) {
-    if (lastRejected) {
-      const rejectedTs = pending.get(lastRejected.sender, lastRejected.signature)
-      if (!rejectedTs) {
-        throw new VerificationError(`Client rejected a message we never sent from '${lastRejected.sender}'`)
-      } else {
-        pending.acknowledge(lastRejected.sender, lastRejected.signature)
-      }
-    }
-
-    let lastTimestamp
-    const seenSenders = new Set()
-
-    for (const { messageSender, messageSignature } of lastSeen) {
-      if (pending.previouslyAcknowledged(messageSender, messageSignature)) continue
-
-      const ts = pending.get(messageSender)(messageSignature)
-      if (!ts) {
-        throw new VerificationError(`Client saw a message that we never sent from '${messageSender}'`)
-      } else if (lastTimestamp && (ts < lastTimestamp)) {
-        throw new VerificationError(`Received messages out of order: Last acknowledged timestamp was at ${lastTimestamp}, now reading older message at ${ts}`)
-      } else if (seenSenders.has(messageSender)) {
-        // in the lastSeen array, last 5 messages from different players are stored, not just last 5 messages
-        throw new VerificationError(`Two last seen entries from same player not allowed: ${messageSender}`)
-      } else {
-        lastTimestamp = ts
-        seenSenders.add(messageSender)
-        pending.acknowledgePrior(messageSender, messageSignature)
-      }
-    }
-
-    pending.setPreviouslyAcknowledged(lastSeen, lastRejected)
   }
 
-  function validateMessage (packet) {
+  let lastTimestamp
+  const seenSenders = new Set()
+
+  for (const { messageSender, messageSignature } of lastSeen) {
+    if (pending.previouslyAcknowledged(messageSender, messageSignature)) continue
+
+    const ts = pending.get(messageSender)(messageSignature)
+    if (!ts) {
+      throw new VerificationError(`Client saw a message that we never sent from '${messageSender}'`)
+    } else if (lastTimestamp && (ts < lastTimestamp)) {
+      throw new VerificationError(`Received messages out of order: Last acknowledged timestamp was at ${lastTimestamp}, now reading older message at ${ts}`)
+    } else if (seenSenders.has(messageSender)) {
+      // in the lastSeen array, last 5 messages from different players are stored, not just last 5 messages
+      throw new VerificationError(`Two last seen entries from same player not allowed: ${messageSender}`)
+    } else {
+      lastTimestamp = ts
+      seenSenders.add(messageSender)
+      pending.acknowledgePrior(messageSender, messageSignature)
+    }
+  }
+
+  pending.setPreviouslyAcknowledged(lastSeen, lastRejected)
+}
+
+module.exports = function (client, server, options) {
+  const raise = (translatableError) => client.end(translatableError, JSON.stringify({ translate: translatableError }))
+  const pending = new Pending()
+
+  function validateMessageChain (packet) {
     try {
-      validateLastMessages(packet.previousMessages, packet.lastRejectedMessage)
+      validateLastMessages(pending, packet.previousMessages, packet.lastRejectedMessage)
     } catch (e) {
       if (e instanceof VerificationError) {
         raise('multiplayer.disconnect.chat_validation_failed')
@@ -104,19 +65,51 @@ module.exports = function (client, server, options) {
     }
     lastTimestamp = packet.timestamp
 
-    if (client.settings.disabledChat) {
-      return raise('chat.disabled.options')
-    }
-    validateMessage(packet)
+    // Checks here: 1) make sure client can chat, 2) chain is OK, 3) signature is OK
+    if (client.settings.disabledChat) return raise('chat.disabled.options')
+    if (client.supportFeature('chainedChatWithHashing')) validateMessageChain(packet) // 1.19.1
+    if (!client.verifyMessage(packet)) raise('multiplayer.disconnect.unsigned_chat')
   })
 
+  // Client will occasionally send a list of seen messages to the server, here we listen & check chain validity
   client.on('message_acknowledgement', (packet) => {
-    validateMessage(packet)
+    validateMessageChain(packet)
   })
 
-  // Send a signed message from one player to another player on the server
+  client.verifyMessage = (packet) => {
+    if (!client.profileKeys) return null
+    if (client.supportFeature('chainedChatWithHashing')) {
+      const verifier = crypto.createSign('RSA-SHA256')
+      if (client._lastChatSignature) verifier.update(client._lastChatSignature)
+      verifier.update(concat('UUID', client.uuid))
+
+      // Hash of chat body now opposed to signing plaintext. This lets server give us hashes for chat
+      // chain without needing to reveal message contents
+      if (packet.bodyDigest) {
+        // Header
+        verifier.update(packet.bodyDigest)
+      } else {
+        // Player Chat
+        const hash = crypto.createHash('sha256')
+        hash.update(concat('i64', packet.salt, 'i64', packet.timestamp / 1000n, 'pstring', packet.message, 'i8', 70))
+        for (const { messageSender, messageSignature } of packet.previousMessages) {
+          hash.update(concat('i8', 70, 'UUID', messageSender))
+          hash.update(messageSignature)
+        }
+        // Feed hash back into signing payload
+        verifier.update(hash.digest())
+      }
+      return verifier.verify(client.profileKeys.public, packet.signature)
+    } else {
+      const signable = concat('i64', packet.salt, 'UUID', client.uuid, 'i64', packet.timestamp, 'pstring', packet.message)
+      return crypto.verify('sha256WithRSAEncryption', signable, client.profileKeys.public, packet.signature)
+    }
+  }
+
+  // On 1.19.1+, outbound messages from server (client->SERVER->players) are logged so we can verify
+  // the last seen message field in inbound chat packets
   client.logSentMessageFromPeer = (chatPacket) => {
-    if (!options.enforceSecureProfile) return // nothing signable
+    if (!options.enforceSecureProfile || !server.features.signedChat) return // nothing signable
 
     pending.add(chatPacket.senderUuid, chatPacket.signature, chatPacket.timestamp)
     if (pending.length > 4096) {
@@ -124,5 +117,49 @@ module.exports = function (client, server, options) {
       return false
     }
     return true
+  }
+}
+
+class Pending extends Array {
+  map = {}
+  lastSeen = []
+
+  get (sender, signature) {
+    return this.map[sender]?.[signature]
+  }
+
+  add (sender, signature, ts) {
+    this.map[sender] = this.map[sender] || {}
+    this.map[sender][signature] = ts
+    this.push([sender, signature])
+  }
+
+  acknowledge (sender, username) {
+    delete this.map[sender][username]
+    this.splice(this.findIndex(([a, b]) => a === sender && b === username), 1)
+  }
+
+  acknowledgePrior (sender, signature) {
+    for (let i = 0; i < this.length; i++) {
+      const [a, b] = this[i]
+      delete this.map[a]
+      if (a === sender && b === signature) {
+        this.splice(0, i)
+        break
+      }
+    }
+  }
+
+  // Once we've acknowledged that the client has saw the messages we sent,
+  // we delete it from our map & pending list. However, the client may keep it in
+  // their 5-length lastSeen list anyway. Once we verify/ack the client's lastSeen array,
+  // we need to store it in memory to allow those entries to be approved again without
+  // erroring about a message we never sent in the next serverbound message packet we get.
+  setPreviouslyAcknowledged (lastSeen, lastRejected) {
+    this.lastSeen = lastSeen.map(e => Object.values(e)).push(Object.values(lastRejected))
+  }
+
+  previouslyAcknowledged (sender, signature) {
+    return this.lastSeen.some(([a, b]) => a === sender && b === signature)
   }
 }

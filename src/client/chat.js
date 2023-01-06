@@ -8,24 +8,7 @@ module.exports = function (client, options) {
   client._lastRejectedMessage = null
 
   // This stores the last 5 messages that the player has seen, from unique players
-  client._lastSeenMessages = new class extends Array {
-    capacity = 5
-    pending = 0
-    push (e) {
-      // Insert a new entry at the top and shift everything to the right
-      let last = this[0]
-      this[0] = e
-      if (last && last.sender !== e.sender) {
-        for (let i = 1; i < this.capacity; i++) {
-          const current = this[i]
-          this[i] = last
-          last = current
-          // If we found an existing entry for the sender ID, we can stop shifting
-          if (!current || (current.sender === e.sender)) break
-        }
-      }
-    }
-  }()
+  client._lastSeenMessages = new LastSeenMessages()
   // This stores last 1024 inbound messages for report lookup
   client._lastChatHistory = new class extends Array {
     capacity = 1024
@@ -74,8 +57,6 @@ module.exports = function (client, options) {
     if (packet.action === 0) { // add player
       for (const player of packet.data) {
         if (player.crypto) {
-          // it's already in DER, but node.js crypto methods assume PEM if we don't pass a KeyLike object to verify() fns
-          // https://github.com/nodejs/node/blob/4830a6cf2aa14144a1c36ae92dac7eed66fb8c13/lib/internal/crypto/keys.js#L520
           client._players[player.UUID] = {
             publicKey: crypto.createPublicKey({ key: player.crypto.publicKey, format: 'der', type: 'spki' }),
             publicKeyDER: player.crypto.publicKey,
@@ -286,5 +267,24 @@ module.exports = function (client, options) {
       serverAddress: options.host + ':' + options.port,
       realmInfo: undefined // { realmId, slotId }
     })
+  }
+}
+
+class LastSeenMessages extends Array {
+  capacity = 5
+  pending = 0
+  push (e) {
+    // Insert a new entry at the top and shift everything to the right
+    let last = this[0]
+    this[0] = e
+    if (last && last.sender !== e.sender) {
+      for (let i = 1; i < this.capacity; i++) {
+        const current = this[i]
+        this[i] = last
+        last = current
+        // If we found an existing entry for the sender ID, we can stop shifting
+        if (!current || (current.sender === e.sender)) break
+      }
+    }
   }
 }
