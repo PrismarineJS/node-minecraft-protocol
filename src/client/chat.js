@@ -1,5 +1,6 @@
 const crypto = require('crypto')
 const concat = require('../transforms/binaryStream').concat
+const messageExpireTime = 420000 // 7 minutes (ms)
 
 module.exports = function (client, options) {
   const mcData = require('minecraft-data')(client.version)
@@ -39,14 +40,9 @@ module.exports = function (client, options) {
         if (previousHeaderSignature) verifier.update(previousHeaderSignature)
         verifier.update(concat('UUID', uuid))
         verifier.update(payload)
-        const ok = verifier.verify(player.publicKey, currentHeaderSignature)
-
-        if (!ok) {
-          player.hasChainIntegrity = false
-        }
+        player.hasChainIntegrity = verifier.verify(player.publicKey, currentHeaderSignature)
       }
 
-      // TODO: Check if expired among other things
       return player.hasChainIntegrity
     }
 
@@ -107,7 +103,10 @@ module.exports = function (client, options) {
       hash.update(previousMessage.messageSignature)
     }
 
-    const verified = updateAndValidateChat(packet.senderUuid, packet.messageSignature, packet.headerSignature, hash.digest())
+    // Chain integrity remains even if message is considered unverified due to expiry
+    const tsDelta = Date.now() - packet.timestamp
+    const expired = !packet.timestamp || tsDelta > messageExpireTime || tsDelta < 0
+    const verified = updateAndValidateChat(packet.senderUuid, packet.messageSignature, packet.headerSignature, hash.digest()) && !expired
     client.emit('playerChat', {
       message: packet.plainMessage || packet.unsignedChatContent,
       formattedMessage: packet.formattedMessage,
@@ -117,6 +116,7 @@ module.exports = function (client, options) {
       senderTeam: packet.senderTeam,
       verified
     })
+
     // We still accept a message even if the chain is broken. A vanilla client will reject a message
     // if the client sets secure chat to be required and the message from the server isn't signed,
     // or the client has blocked the sender.
@@ -148,8 +148,8 @@ module.exports = function (client, options) {
   })
 
   // Chat Sending
+  let pendingChatRequest
   let lastPreviewRequestId = 0
-  const pendingChatRequests = {}
 
   client._signedChat = (message, options = {}) => {
     options.timestamp = options.timestamp || BigInt(Date.now())
@@ -174,16 +174,15 @@ module.exports = function (client, options) {
         query: lastPreviewRequestId,
         message
       })
-      pendingChatRequests[lastPreviewRequestId] = { message, options }
+      pendingChatRequest = { id: lastPreviewRequestId, message, options }
       lastPreviewRequestId++
     }
   }
 
   client.on('chat_preview', (packet) => {
-    const pending = pendingChatRequests[packet.query]
-    if (pending) {
-      client._signedChat(packet.message, { ...packet.options, skipPreview: true, didPreview: true })
-      delete pendingChatRequests[packet.query]
+    if (pendingChatRequest && pendingChatRequest.id === packet.query) {
+      client._signedChat(packet.message, { ...pendingChatRequest.options, skipPreview: true, didPreview: true })
+      pendingChatRequest = null
     }
   })
 

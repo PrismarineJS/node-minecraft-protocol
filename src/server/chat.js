@@ -1,5 +1,7 @@
 const crypto = require('crypto')
 const concat = require('../transforms/binaryStream').concat
+const debug = require('debug')('minecraft-protocol')
+const messageExpireTime = 300000 // 5 min (ms)
 
 class VerificationError extends Error {}
 function validateLastMessages (pending, lastSeen, lastRejected) {
@@ -46,9 +48,7 @@ module.exports = function (client, server, options) {
     } catch (e) {
       if (e instanceof VerificationError) {
         raise('multiplayer.disconnect.chat_validation_failed')
-        if (!options.hideErrors) {
-          console.error(client.address, 'disconnected because', e)
-        }
+        if (!options.hideErrors) console.error(client.address, 'disconnected because', e)
       } else {
         client.emit('error', e)
       }
@@ -60,21 +60,20 @@ module.exports = function (client, server, options) {
   client.on('chat_message', (packet) => {
     if (!options.enforceSecureProfile) return // nothing signable
 
-    if (lastTimestamp && packet.timestamp < lastTimestamp) {
+    if ((lastTimestamp && packet.timestamp < lastTimestamp) || (packet.timestamp > Date.now())) {
       return raise('multiplayer.disconnect.out_of_order_chat')
     }
     lastTimestamp = packet.timestamp
 
-    // Checks here: 1) make sure client can chat, 2) chain is OK, 3) signature is OK
+    // Checks here: 1) make sure client can chat, 2) chain is OK, 3) signature is OK, 4) log if expired
     if (client.settings.disabledChat) return raise('chat.disabled.options')
     if (client.supportFeature('chainedChatWithHashing')) validateMessageChain(packet) // 1.19.1
     if (!client.verifyMessage(packet)) raise('multiplayer.disconnect.unsigned_chat')
+    if ((Date.now() - packet.timestamp) > messageExpireTime) debug(client.socket.address(), 'sent expired message TS', packet.timestamp)
   })
 
   // Client will occasionally send a list of seen messages to the server, here we listen & check chain validity
-  client.on('message_acknowledgement', (packet) => {
-    validateMessageChain(packet)
-  })
+  client.on('message_acknowledgement', validateMessageChain)
 
   client.verifyMessage = (packet) => {
     if (!client.profileKeys) return null
