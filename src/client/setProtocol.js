@@ -1,7 +1,6 @@
 'use strict'
 
 const states = require('../states')
-const crypto = require('crypto')
 
 module.exports = function (client, options) {
   client.on('connect', onConnect)

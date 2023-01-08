@@ -6,15 +6,19 @@ const yggdrasil = require('yggdrasil')
 const chatPlugin = require('./chat')
 const { concat } = require('../transforms/binaryStream')
 const { mojangPublicKeyPem } = require('./constants')
+const debug = require('debug')('minecraft-protocol')
 
 module.exports = function (client, server, options) {
   const mojangPubKey = crypto.createPublicKey(mojangPublicKeyPem)
-  const raise = (translatableError) => client.end(translatableError, JSON.stringify({ translate: translatableError }))
+  const raise = (translatableError) => { client.end(translatableError, JSON.stringify({ translate: translatableError })); console.warn('Kicked client for', translatableError) }
   const yggdrasilServer = yggdrasil.server({ agent: options.agent })
   const {
     'online-mode': onlineMode = true,
     kickTimeout = 30 * 1000,
-    errorHandler: clientErrorHandler = (client, err) => client.end(err)
+    errorHandler: clientErrorHandler = function (client, err) {
+      if (!options.hideErrors) console.debug('Disconnecting client because error', err)
+      client.end(err)
+    }
   } = options
 
   let serverId
@@ -49,6 +53,7 @@ module.exports = function (client, server, options) {
 
     if (packet.signature) {
       if (packet.signature.timestamp < BigInt(Date.now())) {
+        debug('Client sent expired tokens')
         raise('multiplayer.disconnect.invalid_public_key_signature')
         return // expired tokens, client needs to restart game
       }
@@ -56,16 +61,18 @@ module.exports = function (client, server, options) {
       try {
         const publicKey = crypto.createPublicKey({ key: packet.signature.publicKey, format: 'der', type: 'spki' })
         const signable = mcData.supportFeature('chainedChatWithHashing')
-          ? concat('uuid', packet.profileId, 'i64', packet.signature.timestamp, 'buffer', packet.signature.publicKey)
+          ? concat('UUID', packet.playerUUID, 'i64', packet.signature.timestamp, 'buffer', publicKey.export({ type: 'spki', format: 'der' }))
           : Buffer.from(packet.signature.timestamp + mcPubKeyToPem(packet.signature.publicKey), 'utf8') // (expires at + publicKey)
 
         // This makes sure 'signable' when signed with the mojang private key equals signature in this packet
         if (!crypto.verify('RSA-SHA1', signable, mojangPubKey, packet.signature.signature)) {
+          debug('Signature mismatch')
           raise('multiplayer.disconnect.invalid_public_key_signature')
           return
         }
         client.profileKeys = { public: publicKey }
       } catch (err) {
+        debug(err)
         raise('multiplayer.disconnect.invalid_public_key')
         return
       }
@@ -190,10 +197,11 @@ module.exports = function (client, server, options) {
     })
     // TODO: find out what properties are on 'success' packet
     client.state = states.PLAY
+    client.settings = {}
 
     if (client.protocolVersion >= 760) { // 1.19.1+
       client.write('server_data', {
-        previewsChat: !options.disableChatPreview,
+        previewsChat: options.enableChatPreview,
         enforceSecureProfile: options.enforceSecureProfile
       })
     }

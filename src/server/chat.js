@@ -69,7 +69,7 @@ module.exports = function (client, server, options) {
     if (client.settings.disabledChat) return raise('chat.disabled.options')
     if (client.supportFeature('chainedChatWithHashing')) validateMessageChain(packet) // 1.19.1
     if (!client.verifyMessage(packet)) raise('multiplayer.disconnect.unsigned_chat')
-    if ((Date.now() - packet.timestamp) > messageExpireTime) debug(client.socket.address(), 'sent expired message TS', packet.timestamp)
+    if ((BigInt(Date.now()) - packet.timestamp) > messageExpireTime) debug(client.socket.address(), 'sent expired message TS', packet.timestamp)
   })
 
   // Client will occasionally send a list of seen messages to the server, here we listen & check chain validity
@@ -78,7 +78,8 @@ module.exports = function (client, server, options) {
   client.verifyMessage = (packet) => {
     if (!client.profileKeys) return null
     if (client.supportFeature('chainedChatWithHashing')) {
-      const verifier = crypto.createSign('RSA-SHA256')
+      if (client._lastChatSignature === packet.signature) return true // Called twice
+      const verifier = crypto.createVerify('RSA-SHA256')
       if (client._lastChatSignature) verifier.update(client._lastChatSignature)
       verifier.update(concat('UUID', client.uuid))
 
@@ -98,6 +99,7 @@ module.exports = function (client, server, options) {
         // Feed hash back into signing payload
         verifier.update(hash.digest())
       }
+      client._lastChatSignature = packet.signature
       return verifier.verify(client.profileKeys.public, packet.signature)
     } else {
       const signable = concat('i64', packet.salt, 'UUID', client.uuid, 'i64', packet.timestamp, 'pstring', packet.message)
@@ -154,7 +156,7 @@ class Pending extends Array {
   // their 5-length lastSeen list anyway. Once we verify/ack the client's lastSeen array,
   // we need to store it in memory to allow those entries to be approved again without
   // erroring about a message we never sent in the next serverbound message packet we get.
-  setPreviouslyAcknowledged (lastSeen, lastRejected) {
+  setPreviouslyAcknowledged (lastSeen, lastRejected = {}) {
     this.lastSeen = lastSeen.map(e => Object.values(e)).push(Object.values(lastRejected))
   }
 
