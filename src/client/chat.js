@@ -115,8 +115,8 @@ module.exports = function (client, options) {
       verified
     })
 
-    // We still accept a message (by pushing to seenMessages) even if the chain is broken. A vanilla client 
-    // will reject a message if the client sets secure chat to be required and the message from the server 
+    // We still accept a message (by pushing to seenMessages) even if the chain is broken. A vanilla client
+    // will reject a message if the client sets secure chat to be required and the message from the server
     // isn't signed, or the client has blocked the sender.
     // client1.19.1/client/net/minecraft/client/multiplayer/ClientPacketListener.java#L768
     client._lastSeenMessages.push({ sender: packet.senderUuid, signature: packet.signature })
