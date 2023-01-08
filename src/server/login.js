@@ -10,7 +10,7 @@ const debug = require('debug')('minecraft-protocol')
 
 module.exports = function (client, server, options) {
   const mojangPubKey = crypto.createPublicKey(mojangPublicKeyPem)
-  const raise = (translatableError) => { client.end(translatableError, JSON.stringify({ translate: translatableError })); console.warn('Kicked client for', translatableError) }
+  const raise = (translatableError) => client.end(translatableError, JSON.stringify({ translate: translatableError }))
   const yggdrasilServer = yggdrasil.server({ agent: options.agent })
   const {
     'online-mode': onlineMode = true,

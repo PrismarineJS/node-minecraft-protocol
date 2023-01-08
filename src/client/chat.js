@@ -21,15 +21,15 @@ module.exports = function (client, options) {
     }
   }()
 
-  function updateAndValidateChat (uuid, previousHeaderSignature, currentHeaderSignature, payload) {
+  function updateAndValidateChat (uuid, previousSignature, currentSignature, payload) {
     // Get the player information
     const player = client._players[uuid]
     if (player && player.hasChainIntegrity) {
       if (!player.lastSignature) {
         // First time client is handling a chat message from this player, allow
-        player.lastSignature = currentHeaderSignature
-      } else if (player.lastSignature.equals(previousHeaderSignature)) {
-        player.lastSignature = currentHeaderSignature
+        player.lastSignature = currentSignature
+      } else if (player.lastSignature.equals(previousSignature)) {
+        player.lastSignature = currentSignature
       } else {
         // Not valid, client can no longer authenticate messages until player quits and reconnects
         player.hasChainIntegrity = false
@@ -37,10 +37,10 @@ module.exports = function (client, options) {
 
       if (player.hasChainIntegrity) {
         const verifier = crypto.createVerify('RSA-SHA256')
-        if (previousHeaderSignature) verifier.update(previousHeaderSignature)
+        if (previousSignature) verifier.update(previousSignature)
         verifier.update(concat('UUID', uuid))
         verifier.update(payload)
-        player.hasChainIntegrity = verifier.verify(player.publicKey, currentHeaderSignature)
+        player.hasChainIntegrity = verifier.verify(player.publicKey, currentSignature)
       }
 
       return player.hasChainIntegrity
@@ -70,14 +70,12 @@ module.exports = function (client, options) {
   })
 
   client.on('message_header', (packet) => {
-    // Confusingly, "messageSignature" is the previous header signature, and headerSignature is current one
-    // and the "bodyDigest" is the current message hash
-    updateAndValidateChat(packet.senderUuid, packet.messageSignature, packet.headerSignature, packet.bodyDigest)
+    updateAndValidateChat(packet.senderUuid, packet.previousSignature, packet.signature, packet.messageHash)
 
     client._lastChatHistory.push({
-      previousSignature: packet.messageSignature,
-      signature: packet.headerSignature,
-      messageHash: packet.bodyDigest
+      previousSignature: packet.previousSignature,
+      signature: packet.signature,
+      messageHash: packet.messageHash
     })
   })
 
@@ -106,7 +104,7 @@ module.exports = function (client, options) {
     // Chain integrity remains even if message is considered unverified due to expiry
     const tsDelta = Date.now() - packet.timestamp
     const expired = !packet.timestamp || tsDelta > messageExpireTime || tsDelta < 0
-    const verified = updateAndValidateChat(packet.senderUuid, packet.messageSignature, packet.headerSignature, hash.digest()) && !expired
+    const verified = updateAndValidateChat(packet.senderUuid, packet.previousSignature, packet.signature, hash.digest()) && !expired
     client.emit('playerChat', {
       message: packet.plainMessage || packet.unsignedChatContent,
       formattedMessage: packet.formattedMessage,
@@ -121,10 +119,10 @@ module.exports = function (client, options) {
     // if the client sets secure chat to be required and the message from the server isn't signed,
     // or the client has blocked the sender.
     // client1.19.1/client/net/minecraft/client/multiplayer/ClientPacketListener.java#L768
-    client._lastSeenMessages.push({ sender: packet.senderUuid, signature: packet.headerSignature })
+    client._lastSeenMessages.push({ sender: packet.senderUuid, signature: packet.signature })
     client._lastChatHistory.push({
-      previousSignature: packet.messageSignature,
-      signature: packet.headerSignature,
+      previousSignature: packet.previousSignature,
+      signature: packet.signature,
       message: {
         plain: packet.plainMessage,
         decorated: packet.formattedMessage

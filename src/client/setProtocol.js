@@ -25,14 +25,14 @@ module.exports = function (client, options) {
         nextState: 2
       })
       client.state = states.LOGIN
-      // Remove padding on the public key: not needed in vanilla server but matches how vanilla client looks
-      const publicKey = client.profileKeys.public.export({ type: 'spki', format: 'der' })
+
       client.write('login_start', {
         username: client.username,
         signature: client.profileKeys
           ? {
               timestamp: BigInt(client.profileKeys.expiresOn.getTime()), // should probably be called "expireTime"
-              publicKey,
+              // Remove padding on the public key: not needed in vanilla server but matches how vanilla client looks
+              publicKey: client.profileKeys.public.export({ type: 'spki', format: 'der' }),
               signature: mcData.supportFeature('profileKeySignatureV2')
                 ? client.profileKeys.signatureV2
                 : client.profileKeys.signature
