@@ -80,7 +80,7 @@ module.exports = function (client, options) {
   })
 
   client.on('player_chat', (packet) => {
-    if (!mcData.supportFeature('chainedChatWithHashing')) {
+    if (!mcData.supportFeature('chainedChatWithHashing')) { // 1.19.0
       const pubKey = client._players[packet.senderUuid]?.publicKey
       client.emit('playerChat', {
         formattedMessage: packet.signedChatContent || packet.unsignedChatContent,
@@ -115,9 +115,9 @@ module.exports = function (client, options) {
       verified
     })
 
-    // We still accept a message even if the chain is broken. A vanilla client will reject a message
-    // if the client sets secure chat to be required and the message from the server isn't signed,
-    // or the client has blocked the sender.
+    // We still accept a message (by pushing to seenMessages) even if the chain is broken. A vanilla client 
+    // will reject a message if the client sets secure chat to be required and the message from the server 
+    // isn't signed, or the client has blocked the sender.
     // client1.19.1/client/net/minecraft/client/multiplayer/ClientPacketListener.java#L768
     client._lastSeenMessages.push({ sender: packet.senderUuid, signature: packet.signature })
     client._lastChatHistory.push({
@@ -220,9 +220,9 @@ module.exports = function (client, options) {
   }
 
   client.verifyMessage = (pubKey, packet) => {
-    if (!mcData.supportFeature('chainedChatWithHashing')) {
+    if (!mcData.supportFeature('chainedChatWithHashing')) { // 1.19.0
       // Verification handled internally in 1.19.1+ as previous messages must be stored to verify future messages
-      throw new Error('Please listen to the \'playerChat\' event instead to check message validity. client.verifyMessage is deprecated and only works on version 1.19.')
+      throw new Error("Please listen to the 'playerChat' event instead to check message validity. client.verifyMessage is deprecated and only works on version 1.19.")
     }
 
     if (pubKey instanceof Buffer) pubKey = crypto.createPublicKey({ key: pubKey, format: 'der', type: 'spki' })

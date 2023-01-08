@@ -122,28 +122,28 @@ module.exports = function (client, server, options) {
 }
 
 class Pending extends Array {
-  map = {}
+  m = {}
   lastSeen = []
 
   get (sender, signature) {
-    return this.map[sender]?.[signature]
+    return this.m[sender]?.[signature]
   }
 
   add (sender, signature, ts) {
-    this.map[sender] = this.map[sender] || {}
-    this.map[sender][signature] = ts
+    this.m[sender] = this.m[sender] || {}
+    this.m[sender][signature] = ts
     this.push([sender, signature])
   }
 
   acknowledge (sender, username) {
-    delete this.map[sender][username]
+    delete this.m[sender][username]
     this.splice(this.findIndex(([a, b]) => a === sender && b === username), 1)
   }
 
   acknowledgePrior (sender, signature) {
     for (let i = 0; i < this.length; i++) {
       const [a, b] = this[i]
-      delete this.map[a]
+      delete this.m[a]
       if (a === sender && b === signature) {
         this.splice(0, i)
         break
