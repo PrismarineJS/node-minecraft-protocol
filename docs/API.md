@@ -45,6 +45,10 @@ Write a packet to all `clients` but encode it only once.
 
 Verifies if player's chat message packet was signed with their Mojang provided key
 
+### client.logSentMessageFromPeer(packet)
+(1.19.1+) You must call this function when the server receives a message from a player and that message gets
+broadcast to other players in player_chat packets. This function stores these packets so the server can then verify a player's lastSeenMessages field in inbound chat packets to ensure chain integrity. For more information, see [chat.md].
+
 ### server.onlineModeExceptions
 
 This is a plain old JavaScript object. Add a key with the username you want to
@@ -253,6 +257,18 @@ parameters.
 
 Called when an error occurs within the client. Takes an Error as parameter.
 
+### `playerChat` event
+
+Called when a chat message from another player arrives. The object contains:
+* formattedMessage -- the chat message preformatted, if done on server side
+* message -- the chat message without formatting (for example no `<username> message` ; instead `message`), on version 1.19+
+* type -- the message type - on 1.19, which format string to use to render message ; below, the place where the message is displayed (for example chat or action bar)
+* sender -- the UUID of the player sending the message
+* senderTeam -- scoreboard team of the player (pre 1.19)
+* verified -- true if message is signed, false if not signed, undefined on versions prior to 1.19
+
+See the [chat example](https://github.dev/PrismarineJS/node-minecraft-protocol/blob/master/examples/client_chat/client_chat.js#L1) for usage.
+
 ### per-packet events
 
 Check out the [minecraft-data docs](https://prismarinejs.github.io/minecraft-data/?v=1.8&d=protocol) to know the event names and data field names.
@@ -273,13 +289,16 @@ Start emitting channel events of the given name on the client object.
 
 Unregister a channel `name` and send the unregister packet if `custom` is true.
 
+### client.chat(message)
+Send a chat message to the server, with signing on 1.19+.
+
 ### client.signMessage(message: string, timestamp: BigInt, salt?: number) : Buffer
 
-Generate a signature for a chat message to be sent to server
+(1.19) Generate a signature for a chat message to be sent to server
 
 ### client.verifyMessage(publicKey: Buffer | KeyObject, packet) : boolean
 
-Verifies a player chat packet sent by another player against their public key
+(1.19) Verifies a player chat packet sent by another player against their public key
 
 ## Not Immediately Obvious Data Type Formats
 

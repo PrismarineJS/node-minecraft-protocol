@@ -47,6 +47,7 @@ declare module 'minecraft-protocol' {
 		on(event: 'connect', handler: () => PromiseLike): this
 		on(event: string, handler: (data: any, packetMeta: PacketMeta) => PromiseLike): this
 		on(event: `raw.${string}`, handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
+		on(event: 'playerChat', handler: ({ formattedMessage, message, type, sender, senderName, senderTeam, verified }))
 		once(event: 'error', listener: (error: Error) => PromiseLike): this
 		once(event: 'packet', handler: (data: any, packetMeta: PacketMeta, buffer: Buffer, fullBuffer: Buffer) => PromiseLike): this
 		once(event: 'raw', handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
