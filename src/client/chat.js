@@ -102,7 +102,7 @@ module.exports = function (client, options) {
     }
 
     // Chain integrity remains even if message is considered unverified due to expiry
-    const tsDelta = Date.now() - packet.timestamp
+    const tsDelta = BigInt(Date.now()) - packet.timestamp
     const expired = !packet.timestamp || tsDelta > messageExpireTime || tsDelta < 0
     const verified = updateAndValidateChat(packet.senderUuid, packet.previousSignature, packet.signature, hash.digest()) && !expired
     client.emit('playerChat', {
