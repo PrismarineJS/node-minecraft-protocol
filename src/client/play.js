@@ -19,7 +19,7 @@ module.exports = function (client, options) {
     client.username = packet.username
 
     if (mcData.supportFeature('signedChat')) {
-      if (!options.disableChatSigning && client.serverFeatures.enforcesSecureChat) {
+      if (options.disableChatSigning && client.serverFeatures.enforcesSecureChat) {
         throw new Error('"disableChatSigning" was enabled in client options, but server is enforcing secure chat')
       }
       signedChatPlugin(client, options)
