@@ -1,5 +1,8 @@
 # History
 
+## 1.37.0
+* 1.19.1/2 signed chat support 
+
 ## 1.36.2
 * Throw error on minecraft-data protocol version mismatch (#1044)
 * Make "fakeHost" option working
