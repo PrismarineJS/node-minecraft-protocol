@@ -13,6 +13,7 @@ module.exports = function (client, options) {
     }
 
     function next () {
+      const mcData = require('minecraft-data')(client.version)
       let taggedHost = options.host
       if (client.tagHost) taggedHost += client.tagHost
       if (options.fakeHost) taggedHost = options.fakeHost
@@ -24,15 +25,20 @@ module.exports = function (client, options) {
         nextState: 2
       })
       client.state = states.LOGIN
+
       client.write('login_start', {
         username: client.username,
         signature: client.profileKeys
           ? {
               timestamp: BigInt(client.profileKeys.expiresOn.getTime()), // should probably be called "expireTime"
-              publicKey: client.profileKeys.publicDER,
-              signature: client.profileKeys.signature
+              // Remove padding on the public key: not needed in vanilla server but matches how vanilla client looks
+              publicKey: client.profileKeys.public.export({ type: 'spki', format: 'der' }),
+              signature: mcData.supportFeature('profileKeySignatureV2')
+                ? client.profileKeys.signatureV2
+                : client.profileKeys.signature
             }
-          : null
+          : null,
+        playerUUID: client.session?.selectedProfile?.id
       })
     }
   }

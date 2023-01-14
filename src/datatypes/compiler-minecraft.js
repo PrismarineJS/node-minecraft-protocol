@@ -47,7 +47,7 @@ module.exports = {
   Write: {
     varlong: ['native', minecraft.varlong[1]],
     UUID: ['native', (value, buffer, offset) => {
-      const buf = UUID.parse(value)
+      const buf = value.length === 32 ? Buffer.from(value, 'hex') : UUID.parse(value)
       buf.copy(buffer, offset)
       return offset + 16
     }],

@@ -2,20 +2,6 @@ module.exports = client => {
   const mcData = require('minecraft-data')(client.version)
   const hasSignedChat = mcData.supportFeature('signedChat')
 
-  client.chat = (message) => {
-    if (hasSignedChat) {
-      const timestamp = BigInt(Date.now())
-      client.write('chat_message', {
-        message,
-        timestamp,
-        salt: 0,
-        signature: Buffer.alloc(0)
-      })
-    } else {
-      client.write('chat', { message })
-    }
-  }
-
   client.nextMessage = (containing) => {
     return new Promise((resolve) => {
       function onChat (packet) {
