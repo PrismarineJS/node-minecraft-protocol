@@ -259,7 +259,7 @@ Called when an error occurs within the client. Takes an Error as parameter.
 
 ### `playerChat` event
 
-Called when a chat message from another player arrives. The object contains:
+Called when a chat message from another player arrives. The emitted object contains:
 * formattedMessage -- the chat message preformatted, if done on server side
 * message -- the chat message without formatting (for example no `<username> message` ; instead `message`), on version 1.19+
 * type -- the message type - on 1.19, which format string to use to render message ; below, the place where the message is displayed (for example chat or action bar)
@@ -267,7 +267,7 @@ Called when a chat message from another player arrives. The object contains:
 * senderTeam -- scoreboard team of the player (pre 1.19)
 * verified -- true if message is signed, false if not signed, undefined on versions prior to 1.19
 
-See the [chat example](https://github.dev/PrismarineJS/node-minecraft-protocol/blob/master/examples/client_chat/client_chat.js#L1) for usage.
+See the [chat example](https://github.com/PrismarineJS/node-minecraft-protocol/blob/master/examples/client_chat/client_chat.js#L1) for usage.
 
 ### per-packet events
 
