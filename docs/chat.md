@@ -25,7 +25,7 @@ only Mojang can truly know if a message came from a client (as it stores its own
 ## 1.19.1
 
 Starting with 1.19.1, instead of signing the message itself, a SHA256 hash of the message and last seen messages are
-signed instead. In addition, the hash is prepended with the signature of the previous message sent by the same client,
+signed instead. In addition, the payload of the hash is prepended with the signature of the previous message sent by the same client,
 creating a signed chain of chat messages. See publicly available documentation for more detailed information on this.
 
 Since chat verification happens on the client-side (as well as server side), all clients need to be kept up to date

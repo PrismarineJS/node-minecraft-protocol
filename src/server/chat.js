@@ -77,7 +77,7 @@ module.exports = function (client, server, options) {
 
   client.verifyMessage = (packet) => {
     if (!client.profileKeys) return null
-    if (client.supportFeature('chainedChatWithHashing')) {
+    if (client.supportFeature('chainedChatWithHashing')) { // 1.19.1+
       if (client._lastChatSignature === packet.signature) return true // Called twice
       const verifier = crypto.createVerify('RSA-SHA256')
       if (client._lastChatSignature) verifier.update(client._lastChatSignature)
@@ -101,7 +101,7 @@ module.exports = function (client, server, options) {
       }
       client._lastChatSignature = packet.signature
       return verifier.verify(client.profileKeys.public, packet.signature)
-    } else {
+    } else { // 1.19
       const signable = concat('i64', packet.salt, 'UUID', client.uuid, 'i64', packet.timestamp, 'pstring', packet.message)
       return crypto.verify('sha256WithRSAEncryption', signable, client.profileKeys.public, packet.signature)
     }

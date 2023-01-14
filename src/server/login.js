@@ -199,7 +199,7 @@ module.exports = function (client, server, options) {
     client.state = states.PLAY
     client.settings = {}
 
-    if (client.protocolVersion >= 760) { // 1.19.1+
+    if (client.supportFeature('chainedChatWithHashing')) { // 1.19.1+
       client.write('server_data', {
         previewsChat: options.enableChatPreview,
         enforceSecureProfile: options.enforceSecureProfile
@@ -214,7 +214,7 @@ module.exports = function (client, server, options) {
       server.playerCount -= 1
     })
     pluginChannels(client, options)
-    if (client.protocolVersion >= 759) chatPlugin(client, server, options)
+    if (client.supportFeature('signedChat')) chatPlugin(client, server, options)
     server.emit('login', client)
   }
 }

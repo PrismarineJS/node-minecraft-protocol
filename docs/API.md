@@ -47,7 +47,7 @@ Verifies if player's chat message packet was signed with their Mojang provided k
 
 ### client.logSentMessageFromPeer(packet)
 (1.19.1+) You must call this function when the server receives a message from a player and that message gets
-broadcast to other players in player_chat packets. This function stores these packets so the server can then verify a player's lastSeenMessages field in inbound chat packets to ensure chain integrity. For more information, see [chat.md].
+broadcast to other players in player_chat packets. This function stores these packets so the server can then verify a player's lastSeenMessages field in inbound chat packets to ensure chain integrity. For more information, see [chat.md](chat.md).
 
 ### server.onlineModeExceptions
 
