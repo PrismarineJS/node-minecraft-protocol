@@ -32,6 +32,7 @@ automatically logged in and validated against mojang's auth.
  * agent : a http agent that can be used to set proxy settings for yggdrasil authentication confirmation (see proxy-agent on npm)
  * validateChannelProtocol (optional) : whether or not to enable protocol validation for custom protocols using plugin channels for the connected clients. Defaults to true
  * enforceSecureProfile (optional) : Kick clients that do not have chat signing keys from Mojang (1.19+)
+ * generatePreview (optional) : Function to generate chat previews. Takes the raw message string and should return the message preview as a string.  (1.19-1.19.2)
 
 ## mc.Server(version,[customPackets])
 
