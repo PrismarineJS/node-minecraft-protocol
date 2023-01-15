@@ -201,12 +201,11 @@ module.exports = function (client, options) {
       } else {
         const hash = crypto.createHash('sha256')
         hash.update(concat('i64', salt, 'i64', timestamp / 1000n, 'pstring', message, 'i8', 70))
+        if (preview) hash.update(preview)
         for (const previousMessage of client._lastSeenMessages) {
           hash.update(concat('i8', 70, 'UUID', previousMessage.sender))
           hash.update(previousMessage.signature)
         }
-
-        if (preview) hash.update(preview)
         // Feed hash back into signing payload
         signer.update(hash.digest())
       }
