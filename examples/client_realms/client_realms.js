@@ -13,7 +13,7 @@ const client = mc.createClient({
     // realmId: '1234567', // Connect the client to a Realm using the Realms ID
     pickRealm: (realms) => realms.find(e => e.name === realmName) // Connect the client to a Realm using a function that returns a Realm
   },
-  username: username,
+  username,
   auth: 'microsoft' // This option must be present and set to 'microsoft' to  join a Realm.
 })
 
