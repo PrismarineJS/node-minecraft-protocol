@@ -1,7 +1,12 @@
 # History
 
+## 1.38.0
+* Update convenience chat events (@frej4189)
+* Realm Joining (@LucienHH )
+* Fix chat previews not working (@frej4189)
+
 ## 1.37.0
-* 1.19.1/2 signed chat support 
+* 1.19.1/2 signed chat support  (@frej4189 @extremeheat)
 
 ## 1.36.2
 * Throw error on minecraft-data protocol version mismatch (#1044)
