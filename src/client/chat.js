@@ -228,7 +228,7 @@ module.exports = function (client, options) {
   }
 
   client.verifyMessage = (pubKey, packet) => {
-    if (!mcData.supportFeature('chainedChatWithHashing')) { // 1.19.0
+    if (mcData.supportFeature('chainedChatWithHashing')) { // 1.19.1+
       // Verification handled internally in 1.19.1+ as previous messages must be stored to verify future messages
       throw new Error("Please listen to the 'playerChat' event instead to check message validity. client.verifyMessage is deprecated and only works on version 1.19.")
     }
