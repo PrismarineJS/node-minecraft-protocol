@@ -42,7 +42,7 @@ module.exports = function (client, server, options) {
   const raise = (translatableError) => client.end(translatableError, JSON.stringify({ translate: translatableError }))
   const pending = new Pending()
 
-  if (options.generatePreview) options.generatePreview = message => message
+  if (!options.generatePreview) options.generatePreview = message => message
 
   function validateMessageChain (packet) {
     try {
