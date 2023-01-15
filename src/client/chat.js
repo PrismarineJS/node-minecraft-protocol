@@ -158,7 +158,7 @@ module.exports = function (client, options) {
         message,
         timestamp: options.timestamp,
         salt: options.salt,
-        signature: client.profileKeys ? client.signMessage(options.preview || message, options.timestamp, options.salt) : Buffer.alloc(0),
+        signature: client.profileKeys ? client.signMessage(message, options.timestamp, options.salt, options.preview) : Buffer.alloc(0),
         signedPreview: options.didPreview,
         previousMessages: client._lastSeenMessages.map((e) => ({
           messageSender: e.sender,
@@ -185,7 +185,7 @@ module.exports = function (client, options) {
   })
 
   // Signing methods
-  client.signMessage = (message, timestamp, salt = 0) => {
+  client.signMessage = (message, timestamp, salt = 0, preview) => {
     if (!client.profileKeys) throw Error("Can't sign message without profile keys, please set valid auth mode")
 
     if (mcData.supportFeature('chainedChatWithHashing')) {
@@ -205,6 +205,8 @@ module.exports = function (client, options) {
           hash.update(concat('i8', 70, 'UUID', previousMessage.sender))
           hash.update(previousMessage.signature)
         }
+
+        if(!!preview) hash.update(preview);
         // Feed hash back into signing payload
         signer.update(hash.digest())
       }
