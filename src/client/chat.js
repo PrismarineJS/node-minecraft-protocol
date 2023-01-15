@@ -9,6 +9,7 @@ function isFormatted (message) {
     for (const key in comp) {
       if (key !== 'text') return true
     }
+    if(comp.text && comp.text !== message) return true
     return false
   } catch {
     return false
