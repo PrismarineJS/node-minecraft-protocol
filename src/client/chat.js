@@ -69,6 +69,13 @@ module.exports = function (client, options) {
     }
   })
 
+  client.on('system_chat', (packet) => {
+    client.emit('systemChat', {
+      positionid: packet.isActionBar ? 2 : 1,
+      formattedMessage: packet.content
+    })
+  })
+
   client.on('message_header', (packet) => {
     updateAndValidateChat(packet.senderUuid, packet.previousSignature, packet.signature, packet.messageHash)
 
