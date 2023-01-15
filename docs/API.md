@@ -261,7 +261,8 @@ Called when an error occurs within the client. Takes an Error as parameter.
 
 Called when a chat message from another player arrives. The emitted object contains:
 * formattedMessage -- the chat message preformatted, if done on server side
-* message -- the chat message without formatting (for example no `<username> message` ; instead `message`), on version 1.19+
+* plainMessage -- the chat message without formatting (for example no `<username> message` ; instead `message`), on version 1.19+
+* unsignedContent -- unsigned formatted chat contents ; should only be present when the message is modified and server has chat previews disabled - only on version 1.19 - 1.19.2
 * type -- the message type - on 1.19, which format string to use to render message ; below, the place where the message is displayed (for example chat or action bar)
 * sender -- the UUID of the player sending the message
 * senderTeam -- scoreboard team of the player (pre 1.19)
