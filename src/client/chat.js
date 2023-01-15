@@ -69,6 +69,13 @@ module.exports = function (client, options) {
     }
   })
 
+  client.on('system_chat', (packet) => {
+    client.emit('systemChat', {
+      positionid: packet.isActionBar ? 2 : 1,
+      formattedMessage: packet.content
+    })
+  })
+
   client.on('message_header', (packet) => {
     updateAndValidateChat(packet.senderUuid, packet.previousSignature, packet.signature, packet.messageHash)
 
@@ -106,7 +113,8 @@ module.exports = function (client, options) {
     const expired = !packet.timestamp || tsDelta > messageExpireTime || tsDelta < 0
     const verified = updateAndValidateChat(packet.senderUuid, packet.previousSignature, packet.signature, hash.digest()) && !expired
     client.emit('playerChat', {
-      message: packet.plainMessage || packet.unsignedChatContent,
+      plainMessage: packet.plainMessage,
+      unsignedContent: packet.unsignedChatContent,
       formattedMessage: packet.formattedMessage,
       type: packet.type,
       sender: packet.senderUuid,
@@ -220,7 +228,7 @@ module.exports = function (client, options) {
   }
 
   client.verifyMessage = (pubKey, packet) => {
-    if (!mcData.supportFeature('chainedChatWithHashing')) { // 1.19.0
+    if (mcData.supportFeature('chainedChatWithHashing')) { // 1.19.1+
       // Verification handled internally in 1.19.1+ as previous messages must be stored to verify future messages
       throw new Error("Please listen to the 'playerChat' event instead to check message validity. client.verifyMessage is deprecated and only works on version 1.19.")
     }
