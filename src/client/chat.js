@@ -158,7 +158,7 @@ module.exports = function (client, options) {
         message,
         timestamp: options.timestamp,
         salt: options.salt,
-        signature: client.profileKeys ? client.signMessage(message, options.timestamp, options.salt) : Buffer.alloc(0),
+        signature: client.profileKeys ? client.signMessage(options.preview || message, options.timestamp, options.salt) : Buffer.alloc(0),
         signedPreview: options.didPreview,
         previousMessages: client._lastSeenMessages.map((e) => ({
           messageSender: e.sender,
@@ -178,8 +178,8 @@ module.exports = function (client, options) {
   }
 
   client.on('chat_preview', (packet) => {
-    if (pendingChatRequest && pendingChatRequest.id === packet.query) {
-      client._signedChat(packet.message, { ...pendingChatRequest.options, skipPreview: true, didPreview: true })
+    if (pendingChatRequest && pendingChatRequest.id === packet.queryId) {
+      client._signedChat(pendingChatRequest.message, { ...pendingChatRequest.options, skipPreview: true, didPreview: true, preview: packet.message })
       pendingChatRequest = null
     }
   })
