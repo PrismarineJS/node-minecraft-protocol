@@ -57,6 +57,7 @@
     "node-rsa": "^0.4.2",
     "prismarine-auth": "^2.2.0",
     "prismarine-nbt": "^2.0.0",
+    "prismarine-realms": "^1.2.0",
     "protodef": "^1.8.0",
     "readable-stream": "^4.1.0",
     "uuid-1345": "^1.0.1",

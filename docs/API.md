@@ -139,6 +139,10 @@ Returns a `Client` instance and perform login.
  * id : a numeric client id used for referring to multiple clients in a server
  * validateChannelProtocol (optional) : whether or not to enable protocol validation for custom protocols using plugin channels. Defaults to true
  * disableChatSigning (optional) : Don't try obtaining chat signing keys from Mojang (1.19+)
+ * realms : An object which should contain one of the following properties: `realmId` or `pickRealm`. When defined will attempt to join a Realm without needing to specify host/port. **The authenticated account must either own the Realm or have been invited to it** 
+   * realmId : The id of the Realm to join. 
+   * pickRealm(realms) : A function which will have an array of the user Realms (joined/owned) passed to it. The function should return a Realm. 
+
 
 ## mc.Client(isServer,version,[customPackets])
 

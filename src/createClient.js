@@ -20,7 +20,8 @@ module.exports = createClient
 function createClient (options) {
   assert.ok(options, 'options is required')
   assert.ok(options.username, 'username is required')
-  if (!options.version) { options.version = false }
+  if (!options.version && !options.realms) { options.version = false }
+  if (options.realms && options.auth !== 'microsoft') throw new Error('Currently Realms can only be joined with auth: "microsoft"')
 
   // TODO: avoid setting default version if autoVersion is enabled
   const optVersion = options.version || require('./version').defaultVersion
@@ -43,7 +44,11 @@ function createClient (options) {
         auth(client, options)
         break
       case 'microsoft':
-        microsoftAuth.authenticate(client, options).catch((err) => client.emit('error', err))
+        if (options.realms) {
+          microsoftAuth.realmAuthenticate(client, options).then(() => microsoftAuth.authenticate(client, options)).catch((err) => client.emit('error', err))
+        } else {
+          microsoftAuth.authenticate(client, options).catch((err) => client.emit('error', err))
+        }
         break
       case 'offline':
       default:
