@@ -2,6 +2,20 @@ const crypto = require('crypto')
 const concat = require('../transforms/binaryStream').concat
 const messageExpireTime = 420000 // 7 minutes (ms)
 
+function isFormatted (message) {
+  // This should match the ChatComponent.isDecorated function from Vanilla
+  try {
+    const comp = JSON.parse(message)
+    for (const key in comp) {
+      if (key !== 'text') return true
+    }
+    if (comp.text && comp.text !== message) return true
+    return false
+  } catch {
+    return false
+  }
+}
+
 module.exports = function (client, options) {
   const mcData = require('minecraft-data')(client.version)
   client._players = {}
@@ -166,7 +180,7 @@ module.exports = function (client, options) {
         message,
         timestamp: options.timestamp,
         salt: options.salt,
-        signature: client.profileKeys ? client.signMessage(message, options.timestamp, options.salt) : Buffer.alloc(0),
+        signature: client.profileKeys ? client.signMessage(message, options.timestamp, options.salt, options.preview) : Buffer.alloc(0),
         signedPreview: options.didPreview,
         previousMessages: client._lastSeenMessages.map((e) => ({
           messageSender: e.sender,
@@ -186,14 +200,14 @@ module.exports = function (client, options) {
   }
 
   client.on('chat_preview', (packet) => {
-    if (pendingChatRequest && pendingChatRequest.id === packet.query) {
-      client._signedChat(packet.message, { ...pendingChatRequest.options, skipPreview: true, didPreview: true })
+    if (pendingChatRequest && pendingChatRequest.id === packet.queryId) {
+      client._signedChat(pendingChatRequest.message, { ...pendingChatRequest.options, skipPreview: true, didPreview: true, preview: isFormatted(packet.message) ? packet.message : undefined })
       pendingChatRequest = null
     }
   })
 
   // Signing methods
-  client.signMessage = (message, timestamp, salt = 0) => {
+  client.signMessage = (message, timestamp, salt = 0, preview) => {
     if (!client.profileKeys) throw Error("Can't sign message without profile keys, please set valid auth mode")
 
     if (mcData.supportFeature('chainedChatWithHashing')) {
@@ -209,6 +223,7 @@ module.exports = function (client, options) {
       } else {
         const hash = crypto.createHash('sha256')
         hash.update(concat('i64', salt, 'i64', timestamp / 1000n, 'pstring', message, 'i8', 70))
+        if (preview) hash.update(preview)
         for (const previousMessage of client._lastSeenMessages) {
           hash.update(concat('i8', 70, 'UUID', previousMessage.sender))
           hash.update(previousMessage.signature)
