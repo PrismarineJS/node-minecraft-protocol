@@ -42,6 +42,8 @@ module.exports = function (client, server, options) {
   const raise = (translatableError) => client.end(translatableError, JSON.stringify({ translate: translatableError }))
   const pending = new Pending()
 
+  if (options.generatePreview) options.generatePreview = message => message
+
   function validateMessageChain (packet) {
     try {
       validateLastMessages(pending, packet.previousMessages, packet.lastRejectedMessage)
@@ -92,6 +94,7 @@ module.exports = function (client, server, options) {
         // Player Chat
         const hash = crypto.createHash('sha256')
         hash.update(concat('i64', packet.salt, 'i64', packet.timestamp / 1000n, 'pstring', packet.message, 'i8', 70))
+        if (packet.signedPreview) hash.update(options.generatePreview(packet.message))
         for (const { messageSender, messageSignature } of packet.previousMessages) {
           hash.update(concat('i8', 70, 'UUID', messageSender))
           hash.update(messageSignature)
