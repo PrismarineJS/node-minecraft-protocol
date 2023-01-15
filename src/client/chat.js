@@ -2,6 +2,19 @@ const crypto = require('crypto')
 const concat = require('../transforms/binaryStream').concat
 const messageExpireTime = 420000 // 7 minutes (ms)
 
+function isFormatted (message) {
+  // This should match the ChatComponent.isDecorated function from Vanilla
+  try {
+    const comp = JSON.parse(message)
+    for (const key in comp) {
+      if (key !== 'text') return true
+    }
+    return false
+  } catch {
+    return false
+  }
+}
+
 module.exports = function (client, options) {
   const mcData = require('minecraft-data')(client.version)
   client._players = {}
@@ -179,7 +192,7 @@ module.exports = function (client, options) {
 
   client.on('chat_preview', (packet) => {
     if (pendingChatRequest && pendingChatRequest.id === packet.queryId) {
-      client._signedChat(pendingChatRequest.message, { ...pendingChatRequest.options, skipPreview: true, didPreview: true, preview: packet.message })
+      client._signedChat(pendingChatRequest.message, { ...pendingChatRequest.options, skipPreview: true, didPreview: true, preview: isFormatted(packet.message) ? packet.message : undefined })
       pendingChatRequest = null
     }
   })
