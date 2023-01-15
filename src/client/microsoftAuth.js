@@ -46,12 +46,12 @@ async function authenticate (client, options) {
   options.connect(client)
 }
 
-async function realmAuthenticate (options) {
+async function realmAuthenticate (client, options) {
   validateOptions(options)
 
-  options.authflow = new PrismarineAuth(options.username, options.profilesFolder, options, options.onMsaCode)
+  client.authflow = new PrismarineAuth(options.username, options.profilesFolder, options, options.onMsaCode)
 
-  const api = RealmAPI.from(options.authflow, 'java')
+  const api = RealmAPI.from(client.authflow, 'java')
   const realms = await api.getRealms()
 
   debug('realms', realms)

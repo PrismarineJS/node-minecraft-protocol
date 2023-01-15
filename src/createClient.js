@@ -45,7 +45,7 @@ function createClient (options) {
         break
       case 'microsoft':
         if (options.realms) {
-          microsoftAuth.realmAuthenticate(options).then(() => microsoftAuth.authenticate(client, options)).catch((err) => client.emit('error', err))
+          microsoftAuth.realmAuthenticate(client, options).then(() => microsoftAuth.authenticate(client, options)).catch((err) => client.emit('error', err))
         } else {
           microsoftAuth.authenticate(client, options).catch((err) => client.emit('error', err))
         }
