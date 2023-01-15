@@ -1,5 +1,9 @@
 # History
 
+## 1.37.1
+* Complete type definitions (#1053, @jojomatik)
+* Fix type mismatch (#1052, @frej4189)
+
 ## 1.37.0
 * 1.19.1/2 signed chat support 
 
