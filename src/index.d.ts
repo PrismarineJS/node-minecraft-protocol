@@ -37,7 +37,7 @@ declare module 'minecraft-protocol' {
 		writeChannel(channel: any, params: any): void
 		signMessage(message: string, timestamp: BigInt, salt?: number, preview?: string): Buffer
 		verifyMessage(publicKey: Buffer | KeyObject, packet: object): boolean
-		reportPlayer(uuid: string, reason: 'FALSE_REPORTING' | 'HATE_SPEECH' | 'TERRORISM_OR_VIOLENT_EXTREMISM' | 'CHILD_SEXUAL_EXPLOITATION_OR_ABUSE' | 'IMMINENT_HARM' | 'NON_CONSENSUAL_INTIMATE_IMAGERY' | 'HARASSMENT_OR_BULLYING' | 'DEFAMATION_IMPERSONATION_FALSE_INFORMATION' | 'SELF_HARM_OR_SUICIDE' | 'ALCOHOL_TOBACCO_DRUGS', signatures: Buffer[], comment?: string)
+		reportPlayer(uuid: string, reason: 'FALSE_REPORTING' | 'HATE_SPEECH' | 'TERRORISM_OR_VIOLENT_EXTREMISM' | 'CHILD_SEXUAL_EXPLOITATION_OR_ABUSE' | 'IMMINENT_HARM' | 'NON_CONSENSUAL_INTIMATE_IMAGERY' | 'HARASSMENT_OR_BULLYING' | 'DEFAMATION_IMPERSONATION_FALSE_INFORMATION' | 'SELF_HARM_OR_SUICIDE' | 'ALCOHOL_TOBACCO_DRUGS', signatures: Buffer[], comment?: string): Promise<true>
 		on(event: 'error', listener: (error: Error) => PromiseLike): this
 		on(event: 'packet', handler: (data: any, packetMeta: PacketMeta, buffer: Buffer, fullBuffer: Buffer) => PromiseLike): this
 		on(event: 'raw', handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
@@ -47,7 +47,7 @@ declare module 'minecraft-protocol' {
 		on(event: 'connect', handler: () => PromiseLike): this
 		on(event: string, handler: (data: any, packetMeta: PacketMeta) => PromiseLike): this
 		on(event: `raw.${string}`, handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
-		on(event: 'playerChat', handler: ({ formattedMessage, message, type, sender, senderName, senderTeam, verified }))
+		on(event: 'playerChat', handler: ({ formattedMessage: string, message: string, type: string, sender: string, senderName: string, senderTeam: string, verified?: boolean })): this
 		once(event: 'error', listener: (error: Error) => PromiseLike): this
 		once(event: 'packet', handler: (data: any, packetMeta: PacketMeta, buffer: Buffer, fullBuffer: Buffer) => PromiseLike): this
 		once(event: 'raw', handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
