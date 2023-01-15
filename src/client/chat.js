@@ -206,7 +206,7 @@ module.exports = function (client, options) {
           hash.update(previousMessage.signature)
         }
 
-        if(!!preview) hash.update(preview);
+        if (preview) hash.update(preview)
         // Feed hash back into signing payload
         signer.update(hash.digest())
       }
