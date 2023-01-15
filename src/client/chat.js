@@ -114,7 +114,7 @@ module.exports = function (client, options) {
     const verified = updateAndValidateChat(packet.senderUuid, packet.previousSignature, packet.signature, hash.digest()) && !expired
     client.emit('playerChat', {
       plainMessage: packet.plainMessage,
-      unsignedMessage: packet.unsignedChatContent,
+      unsignedContent: packet.unsignedChatContent,
       formattedMessage: packet.formattedMessage,
       type: packet.type,
       sender: packet.senderUuid,
