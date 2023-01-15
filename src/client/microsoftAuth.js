@@ -18,8 +18,8 @@ function validateOptions (options) {
 async function authenticate (client, options) {
   validateOptions(options)
 
-  const Authflow = options.authflow ?? new PrismarineAuth(options.username, options.profilesFolder, options, options.onMsaCode)
-  const { token, entitlements, profile, certificates } = await Authflow.getMinecraftJavaToken({ fetchProfile: true, fetchCertificates: !options.disableChatSigning }).catch(e => {
+  client.authflow = new PrismarineAuth(options.username, options.profilesFolder, options, options.onMsaCode)
+  const { token, entitlements, profile, certificates } = await client.authflow.getMinecraftJavaToken({ fetchProfile: true, fetchCertificates: !options.disableChatSigning }).catch(e => {
     if (options.password) console.warn('Sign in failed, try removing the password field\n')
     if (e.toString().includes('Not Found')) console.warn(`Please verify that the account ${options.username} owns Minecraft\n`)
     throw e

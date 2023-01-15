@@ -3,8 +3,10 @@ const crypto = require('crypto')
 const pluginChannels = require('../client/pluginChannels')
 const states = require('../states')
 const yggdrasil = require('yggdrasil')
+const chatPlugin = require('./chat')
 const { concat } = require('../transforms/binaryStream')
 const { mojangPublicKeyPem } = require('./constants')
+const debug = require('debug')('minecraft-protocol')
 
 module.exports = function (client, server, options) {
   const mojangPubKey = crypto.createPublicKey(mojangPublicKeyPem)
@@ -13,7 +15,10 @@ module.exports = function (client, server, options) {
   const {
     'online-mode': onlineMode = true,
     kickTimeout = 30 * 1000,
-    errorHandler: clientErrorHandler = (client, err) => client.end(err)
+    errorHandler: clientErrorHandler = function (client, err) {
+      if (!options.hideErrors) console.debug('Disconnecting client because error', err)
+      client.end(err)
+    }
   } = options
 
   let serverId
@@ -33,6 +38,7 @@ module.exports = function (client, server, options) {
 
   function onLogin (packet) {
     const mcData = require('minecraft-data')(client.version)
+    client.supportFeature = mcData.supportFeature
 
     client.username = packet.username
     const isException = !!server.onlineModeExceptions[client.username.toLowerCase()]
@@ -47,21 +53,26 @@ module.exports = function (client, server, options) {
 
     if (packet.signature) {
       if (packet.signature.timestamp < BigInt(Date.now())) {
+        debug('Client sent expired tokens')
         raise('multiplayer.disconnect.invalid_public_key_signature')
         return // expired tokens, client needs to restart game
       }
 
       try {
         const publicKey = crypto.createPublicKey({ key: packet.signature.publicKey, format: 'der', type: 'spki' })
-        const publicPEM = mcPubKeyToPem(packet.signature.publicKey)
-        const signable = packet.signature.timestamp + publicPEM // (expires at + publicKey)
+        const signable = mcData.supportFeature('chainedChatWithHashing')
+          ? concat('UUID', packet.playerUUID, 'i64', packet.signature.timestamp, 'buffer', publicKey.export({ type: 'spki', format: 'der' }))
+          : Buffer.from(packet.signature.timestamp + mcPubKeyToPem(packet.signature.publicKey), 'utf8') // (expires at + publicKey)
 
-        if (!crypto.verify('RSA-SHA1', Buffer.from(signable, 'utf8'), mojangPubKey, packet.signature.signature)) {
+        // This makes sure 'signable' when signed with the mojang private key equals signature in this packet
+        if (!crypto.verify('RSA-SHA1', signable, mojangPubKey, packet.signature.signature)) {
+          debug('Signature mismatch')
           raise('multiplayer.disconnect.invalid_public_key_signature')
           return
         }
-        client.profileKeys = { public: publicKey, publicPEM }
+        client.profileKeys = { public: publicKey }
       } catch (err) {
+        debug(err)
         raise('multiplayer.disconnect.invalid_public_key')
         return
       }
@@ -186,6 +197,14 @@ module.exports = function (client, server, options) {
     })
     // TODO: find out what properties are on 'success' packet
     client.state = states.PLAY
+    client.settings = {}
+
+    if (client.supportFeature('chainedChatWithHashing')) { // 1.19.1+
+      client.write('server_data', {
+        previewsChat: options.enableChatPreview,
+        enforceSecureProfile: options.enforceSecureProfile
+      })
+    }
 
     clearTimeout(loginKickTimer)
     loginKickTimer = null
@@ -195,15 +214,7 @@ module.exports = function (client, server, options) {
       server.playerCount -= 1
     })
     pluginChannels(client, options)
-
-    if (client.profileKeys) {
-      client.verifyMessage = (packet) => {
-        const signable = concat('i64', packet.salt, 'UUID', client.uuid, 'i64',
-          packet.timestamp, 'pstring', packet.message)
-
-        return crypto.verify('sha256WithRSAEncryption', signable, client.profileKeys.public, packet.crypto.signature)
-      }
-    }
+    if (client.supportFeature('signedChat')) chatPlugin(client, server, options)
     server.emit('login', client)
   }
 }

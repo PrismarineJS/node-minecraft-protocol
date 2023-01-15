@@ -43,6 +43,7 @@ function createServer (options = {}) {
   server.playerCount = 0
   server.onlineModeExceptions = Object.create(null)
   server.favicon = favicon
+  server.options = options
 
   // The RSA keypair can take some time to generate
   // and is only needed for online-mode

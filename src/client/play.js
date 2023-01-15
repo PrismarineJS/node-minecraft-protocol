@@ -1,25 +1,43 @@
 const states = require('../states')
-const crypto = require('crypto')
-const concat = require('../transforms/binaryStream').concat
+const signedChatPlugin = require('./chat')
 
 module.exports = function (client, options) {
+  client.serverFeatures = {}
+  client.on('server_data', (packet) => {
+    client.serverFeatures = {
+      chatPreview: packet.previewsChat,
+      enforcesSecureChat: packet.enforcesSecureChat
+    }
+  })
+
   client.once('success', onLogin)
 
   function onLogin (packet) {
+    const mcData = require('minecraft-data')(client.version)
     client.state = states.PLAY
     client.uuid = packet.uuid
     client.username = packet.username
-    client.signMessage = (message, timestamp, salt = 0) => {
-      if (!client.profileKeys) throw Error("Can't sign message without profile keys, please set valid auth mode")
-      const signable = concat('i64', salt, 'UUID', client.uuid, 'i64',
-        timestamp / 1000n, 'pstring', JSON.stringify({ text: message }))
-      return crypto.sign('RSA-SHA256', signable, client.profileKeys.private)
+
+    if (mcData.supportFeature('signedChat')) {
+      if (options.disableChatSigning && client.serverFeatures.enforcesSecureChat) {
+        throw new Error('"disableChatSigning" was enabled in client options, but server is enforcing secure chat')
+      }
+      signedChatPlugin(client, options)
+    } else {
+      client.on('chat', (packet) => {
+        client.emit(packet.position === 0 ? 'playerChat' : 'systemChat', {
+          formattedMessage: packet.message,
+          sender: packet.sender,
+          positionId: packet.position,
+          verified: false
+        })
+      })
     }
-    client.verifyMessage = (pubKey, packet) => {
-      if (pubKey instanceof Buffer) pubKey = crypto.createPublicKey({ key: pubKey, format: 'der', type: 'spki' })
-      const signable = concat('i64', packet.salt, 'UUID', packet.senderUuid,
-        'i64', packet.timestamp / 1000n, 'pstring', packet.signedChatContent)
-      return crypto.verify('RSA-SHA256', signable, pubKey, packet.signature)
+
+    function unsignedChat (message) {
+      client.write('chat', { message })
     }
+
+    client.chat = client._signedChat || unsignedChat
   }
 }
