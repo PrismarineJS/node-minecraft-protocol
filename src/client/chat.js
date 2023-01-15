@@ -113,7 +113,8 @@ module.exports = function (client, options) {
     const expired = !packet.timestamp || tsDelta > messageExpireTime || tsDelta < 0
     const verified = updateAndValidateChat(packet.senderUuid, packet.previousSignature, packet.signature, hash.digest()) && !expired
     client.emit('playerChat', {
-      message: packet.plainMessage || packet.unsignedChatContent,
+      plainMessage: packet.plainMessage,
+      unsignedMessage: packet.unsignedChatContent,
       formattedMessage: packet.formattedMessage,
       type: packet.type,
       sender: packet.senderUuid,
