@@ -71,10 +71,21 @@ module.exports = function (client, options) {
             publicKey: crypto.createPublicKey({ key: player.crypto.publicKey, format: 'der', type: 'spki' }),
             publicKeyDER: player.crypto.publicKey,
             signature: player.crypto.signature,
-            displayName: player.displayName || player.name
+            displayName: player.displayName || player.name,
+            name: player.name
           }
           client._players[player.UUID].hasChainIntegrity = true
+        } else {
+          client._players[player.UUID] = {
+            displayName: player.displayName || player.name,
+            name: player.name
+          }
         }
+      }
+    } else if (packet.action === 3) {
+      for (const player of packet.data) {
+        if (!client._players[player.UUID]) continue
+        client._players[player.UUID].displayName = player.displayName || client._players[player.UUID].name
       }
     } else if (packet.action === 4) { // remove player
       for (const player of packet.data) {
@@ -294,6 +305,8 @@ class LastSeenMessages extends Array {
   capacity = 5
   pending = 0
   push (e) {
+    if (e.signature.length === 0) return // We do not acknowledge unsigned messages
+
     // Insert a new entry at the top and shift everything to the right
     let last = this[0]
     this[0] = e
