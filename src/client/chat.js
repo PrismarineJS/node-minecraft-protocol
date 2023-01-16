@@ -71,11 +71,17 @@ module.exports = function (client, options) {
             publicKey: crypto.createPublicKey({ key: player.crypto.publicKey, format: 'der', type: 'spki' }),
             publicKeyDER: player.crypto.publicKey,
             signature: player.crypto.signature,
-            displayName: player.displayName || player.name
+            displayName: player.displayName || player.name,
+            name: player.name
           }
           client._players[player.UUID].hasChainIntegrity = true
+        } else client._players[player.UUID] = {
+          displayName: player.displayName || player.name,
+          name: player.name
         }
       }
+    } else if (packet.action === 3 && client._players[player.UUID]) {
+      client._players[player.UUID].displayName = player.displayName || client.players[player.UUID].name
     } else if (packet.action === 4) { // remove player
       for (const player of packet.data) {
         delete client._players[player.UUID]
