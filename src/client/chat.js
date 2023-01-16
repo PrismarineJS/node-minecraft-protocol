@@ -75,13 +75,18 @@ module.exports = function (client, options) {
             name: player.name
           }
           client._players[player.UUID].hasChainIntegrity = true
-        } else client._players[player.UUID] = {
-          displayName: player.displayName || player.name,
-          name: player.name
+        } else {
+          client._players[player.UUID] = {
+            displayName: player.displayName || player.name,
+            name: player.name
+          }
         }
       }
-    } else if (packet.action === 3 && client._players[player.UUID]) {
-      client._players[player.UUID].displayName = player.displayName || client.players[player.UUID].name
+    } else if (packet.action === 3) {
+      for (const player of packet.data) {
+        if (!client._players[player.UUID]) continue
+        client._players[player.UUID].displayName = player.displayName || client._players[player.UUID].name
+      }
     } else if (packet.action === 4) { // remove player
       for (const player of packet.data) {
         delete client._players[player.UUID]
