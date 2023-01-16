@@ -50,8 +50,8 @@ client.on('connect', () => {
 
     if (formattedMessage) content = JSON.parse(formattedMessage)
     else if (allowInsecureChat && unsignedContent) content = JSON.parse(unsignedContent)
-    else content = { text: data.plainMessage }
-    
+    else content = { text: plainMessage }
+
     const chat = new ChatMessage(content)
     console.log(senderName, { trugie: 'Verified:', false: 'UNVERIFIED:' }[verified] || '', chat.toAnsi())
   })
