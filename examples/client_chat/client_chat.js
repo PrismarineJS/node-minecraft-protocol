@@ -43,9 +43,17 @@ client.on('connect', () => {
   console.log('Connected to server')
   rl.prompt()
 
-  client.on('playerChat', function ({ senderName, message, formattedMessage, verified }) {
-    const chat = new ChatMessage(formattedMessage ? JSON.parse(formattedMessage) : message)
-    console.log(senderName, { true: 'Verified:', false: 'UNVERIFIED:' }[verified] || '', chat.toAnsi())
+  client.on('playerChat', function ({ senderName, plainMessage, unsignedContent, formattedMessage, verified }) {
+    let content
+
+    const allowInsecureChat = true
+
+    if (formattedMessage) content = JSON.parse(formattedMessage)
+    else if (allowInsecureChat && unsignedContent) content = JSON.parse(unsignedContent)
+    else content = { text: plainMessage }
+
+    const chat = new ChatMessage(content)
+    console.log(senderName, { trugie: 'Verified:', false: 'UNVERIFIED:' }[verified] || '', chat.toAnsi())
   })
 })
 
