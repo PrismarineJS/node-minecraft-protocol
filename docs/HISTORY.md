@@ -1,5 +1,9 @@
 # History
 
+## 1.38.1
+* Update chat example for 1.19 (#1059) (@frej4189)
+* Fix chat not working on offline servers (#1060) (@frej4189)
+
 ## 1.38.0
 * Update convenience chat events (@frej4189)
 * Realm Joining (@LucienHH )
