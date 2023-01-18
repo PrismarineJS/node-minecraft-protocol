@@ -120,7 +120,7 @@ module.exports = function (client, options) {
         sender: packet.senderUuid,
         senderName: packet.senderName,
         senderTeam: packet.senderTeam,
-        verified: pubKey ? client.verifyMessage(pubKey, packet) : false
+        verified: (pubKey && !packet.unsignedChatContent) ? client.verifyMessage(pubKey, packet) : false
       })
       return
     }
@@ -136,7 +136,7 @@ module.exports = function (client, options) {
     // Chain integrity remains even if message is considered unverified due to expiry
     const tsDelta = BigInt(Date.now()) - packet.timestamp
     const expired = !packet.timestamp || tsDelta > messageExpireTime || tsDelta < 0
-    const verified = updateAndValidateChat(packet.senderUuid, packet.previousSignature, packet.signature, hash.digest()) && !expired
+    const verified = !packet.unsignedChatContent && updateAndValidateChat(packet.senderUuid, packet.previousSignature, packet.signature, hash.digest()) && !expired
     client.emit('playerChat', {
       plainMessage: packet.plainMessage,
       unsignedContent: packet.unsignedChatContent,
