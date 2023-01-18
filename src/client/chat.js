@@ -184,7 +184,7 @@ module.exports = function (client, options) {
 
   client._signedChat = (message, options = {}) => {
     options.timestamp = options.timestamp || BigInt(Date.now())
-    options.salt = options.salt || 0
+    options.salt = options.salt || 1n
 
     if (options.skipPreview || !client.serverFeatures.chatPreview) {
       client.write('chat_message', {
