@@ -143,8 +143,8 @@ module.exports = function (client, options) {
       formattedMessage: packet.formattedMessage,
       type: packet.type,
       sender: packet.senderUuid,
-      senderName: client._players[packet.senderUuid]?.displayName,
-      senderTeam: packet.senderTeam,
+      senderName: packet.networkName,
+      targetName: packet.networkTargetName,
       verified
     })
 
