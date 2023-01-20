@@ -247,8 +247,8 @@ module.exports = function (client, options) {
         formattedMessage: packet.formattedMessage,
         type: packet.type,
         sender: packet.senderUuid,
-        senderName: client._players[packet.senderUuid]?.displayName,
-        senderTeam: packet.senderTeam,
+        senderName: packet.networkName,
+        targetName: packet.networkTargetName,
         verified
       })
 
@@ -326,7 +326,7 @@ module.exports = function (client, options) {
         message,
         timestamp: options.timestamp,
         salt: options.salt,
-        signature: client.profileKeys ? client.signMessage(message, options.timestamp, options.salt, undefined, acknowledgements) : Buffer.alloc(0),
+        signature: client.profileKeys ? client.signMessage(message, options.timestamp, options.salt, undefined, acknowledgements) : undefined,
         offset: client._lastSeenMessages.pending,
         acknowledged: bitset
       })

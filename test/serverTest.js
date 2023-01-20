@@ -75,6 +75,7 @@ for (const supportedVersion of mc.supportedVersions) {
   function sendBroadcastMessage(server, clients, message, sender) {
     if (mcData.supportFeature('signedChat')) {
       server.writeToClients(clients, 'player_chat', {
+        plainMessage: message,
         signedChatContent: '',
         unsignedChatContent: JSON.stringify({ text: message }),
         type: 0,  
@@ -83,7 +84,10 @@ for (const supportedVersion of mc.supportedVersions) {
         senderTeam: undefined,
         timestamp: Date.now(),
         salt: 0n,
-        signature: Buffer.alloc(0)
+        signature: mcData.supportFeature('useChatSessions') ? undefined : Buffer.alloc(0),
+        previousMessages: [],
+        filterType: 0,
+        networkName: JSON.stringify({ text: sender })
       })
     } else {
       server.writeToClients(clients, 'chat', { message: JSON.stringify({ text: message }), position: 0, sender: sender || '0' })
@@ -318,6 +322,7 @@ for (const supportedVersion of mc.supportedVersions) {
           version: version.minecraftVersion,
           port: PORT
         }))
+
         player1.on('login', async function (packet) {
           assert.strictEqual(packet.gameMode, 1)
           const player2 = applyClientHelpers(mc.createClient({
@@ -328,6 +333,7 @@ for (const supportedVersion of mc.supportedVersions) {
           }))
 
           const p1Join = await player1.nextMessage('player2')
+          
           assert.strictEqual(p1Join, '{"text":"player2 joined the game."}')
 
           player2.chat('hi')

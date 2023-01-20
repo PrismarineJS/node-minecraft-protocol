@@ -114,6 +114,7 @@ const values = {
       test7: { type: 'intArray', value: [12, 42] }
     }
   },
+  previousMessages: [],
   compressedNbt: {
     type: 'compound',
     name: 'test',

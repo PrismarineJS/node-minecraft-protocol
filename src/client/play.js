@@ -19,7 +19,7 @@ module.exports = function (client, options) {
     client.uuid = packet.uuid
     client.username = packet.username
 
-    if (mcData.supportFeature('useChatSessions')) {
+    if (mcData.supportFeature('useChatSessions') && client.profileKeys) {
       client._session = {
         index: 0,
         uuid: uuid.v4fast()
@@ -27,9 +27,9 @@ module.exports = function (client, options) {
 
       client.write('session', {
         sessionUUID: client._session.uuid,
-        expireTime: BigInt(client.profileKeys.expiresOn.getTime()),
-        publicKey: client.profileKeys.public.export({ type: 'spki', format: 'der' }),
-        signature: client.profileKeys.signatureV2
+        expireTime: client.profileKeys ? BigInt(client.profileKeys.expiresOn.getTime()) : undefined,
+        publicKey: client.profileKeys ? client.profileKeys.public.export({ type: 'spki', format: 'der' }) : undefined,
+        signature: client.profileKeys ? client.profileKeys.signatureV2 : undefined
       })
     }
 
