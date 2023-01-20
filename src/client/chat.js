@@ -22,8 +22,13 @@ module.exports = function (client, options) {
   client._lastChatSignature = null
   client._lastRejectedMessage = null
 
-  // This stores the last 5 messages that the player has seen, from unique players
-  client._lastSeenMessages = new LastSeenMessages()
+  // This stores the last n (5 or 20) messages that the player has seen, from unique players
+  if(mcData.supportFeature('chainedChatWithHashing')) client._lastSeenMessages = new LastSeenMessages()
+  else client._lastSeenMessages = new LastSeenMessagesWithInvalidation()
+
+  // This stores the last 128 inbound (signed) messages for 1.19.3 chat validation
+  client._signatureCache = new SignatureCache()
+
   // This stores last 1024 inbound messages for report lookup
   client._lastChatHistory = new class extends Array {
     capacity = 1024
@@ -34,6 +39,31 @@ module.exports = function (client, options) {
       }
     }
   }()
+
+  function updateAndValidateSession (uuid, message, currentSignature, index, previousMessages, salt, timestamp) {
+    const player = client._players[uuid];
+    
+    if(player && player.hasChainIntegrity) {
+      if(!player.lastSignature || player.lastSignature.equals(currentSignature) || index > player.sessionIndex) {
+        player.lastSignature = currentSignature
+      } else {
+        player.hasChainIntegrity = false
+      }
+
+      if(player.hasChainIntegrity) {
+        const length = Buffer.byteLength(packet.plainMessage, 'utf8')
+        const acknowledgements = previousMessages.length > 0 ? ['i32', previousMessages.length, 'buffer', Buffer.concat(...previousMessages.map(msg => msg.signature || client._signatureCache[msg.id]))] : ['i32', 0]
+
+        const signable = concat('i32', 1, 'UUID', uuid, 'UUID', player.sessionUuid, 'i32', index, 'i64', salt, 'i64', timestamp / 1000n, 'i32', length, 'pstring', message, ...acknowledgements)
+
+        player.hasChainIntegrity = crypto.verify('RSA-SHA256', signable, player.publicKey, currentSignature)  
+      }
+
+      return player.hasChainIntegrity
+    }
+
+    return false
+  }
 
   function updateAndValidateChat (uuid, previousSignature, currentSignature, payload) {
     // Get the player information
@@ -76,8 +106,10 @@ module.exports = function (client, options) {
           client._players[player.UUID] = {
             publicKey: crypto.createPublicKey({ key: player.chatSession.publicKey.keyBytes, format: 'der', type: 'spki' }),
             publicKeyDER: player.chatSession.publicKey.keyBytes,
-            sessionUuid: player.chatSession.uuid
+            sessionUuid: player.chatSession.uuid,
           }
+          client._players[player.UUID].sessionIndex = true
+          client._players[player.UUID].hasChainIntegrity = true
         }
       }
 
@@ -119,83 +151,140 @@ module.exports = function (client, options) {
       positionid: packet.isActionBar ? 2 : 1,
       formattedMessage: packet.content
     })
+
+    client._lastChatHistory.push({
+      type: 2, // System message
+      message: {
+        decorated: packet.content
+      },
+      timestamp: Date.now(),
+    })
   })
 
   client.on('message_header', (packet) => {
     updateAndValidateChat(packet.senderUuid, packet.previousSignature, packet.signature, packet.messageHash)
 
     client._lastChatHistory.push({
+      type: 1, // Message header
       previousSignature: packet.previousSignature,
       signature: packet.signature,
       messageHash: packet.messageHash
     })
   })
 
+  client.on('hide_message', (packet) => {
+    if (mcData.supportFeature('useChatSessions')) {
+      const signature = packet.signature || client._signatureCache[packet.id]
+      if (signature) client._lastSeenMessages = client._lastSeenMessages.map(ack => (ack.signature === signature && ack.pending) ? null : ack)
+    }
+  })
+
   client.on('player_chat', (packet) => {
-    if (!mcData.supportFeature('chainedChatWithHashing')) { // 1.19.0
-      const pubKey = client._players[packet.senderUuid]?.publicKey
+    if(mcData.supportFeature('useChatSessions')) {
+      const tsDelta = BigInt(Date.now()) - packet.timestamp
+      const expired = !packet.timestamp || tsDelta > messageExpireTime || tsDelta < 0
+      const verified = !packet.unsignedChatContent && updateAndValidateSession(packet.senderUuid, packet.plainMessage, packet.signature, packet.index, packet.previousMessages, packet.salt, packet.timestamp) && !expired
       client.emit('playerChat', {
-        formattedMessage: packet.signedChatContent || packet.unsignedChatContent,
+        plainMessage: packet.plainMessage,
+        unsignedContent: packet.unsignedContent,
         type: packet.type,
         sender: packet.senderUuid,
-        senderName: packet.senderName,
-        senderTeam: packet.senderTeam,
-        verified: (pubKey && !packet.unsignedChatContent) ? client.verifyMessage(pubKey, packet) : false
+        senderName: packet.networkName,
+        targetName: packet.networkTargetName,
+        verified
       })
+
+      client._lastChatHistory.push({
+        type: 0, // Player message
+        signature: packet.signature,
+        message: {
+          plain: packet.plainMessage
+        },
+        session: {
+          index: packet.index,
+          uuid: client._players[packet.senderUuid].sessionUuid
+        },
+        timestamp: packet.timestamp,
+        salt: packet.salt,
+        lastSeen: packet.previousMessages.map(msg => msg.signature || client._signatureCache[msg.id])
+      })
+
+      if (client._lastSeenMessages.push(packet.signature) && client._lastSeenMessages.pending++ > 64) {
+        client.write('message_acknowledgement', {
+          count: client._lastSeenMessages.pending
+        })
+        client._lastSeenMessages.pending = 0
+      }
       return
     }
 
-    const hash = crypto.createHash('sha256')
-    hash.update(concat('i64', packet.salt, 'i64', packet.timestamp / 1000n, 'pstring', packet.plainMessage, 'i8', 70))
-    if (packet.formattedMessage) hash.update(packet.formattedMessage)
-    for (const previousMessage of packet.previousMessages) {
-      hash.update(concat('i8', 70, 'UUID', previousMessage.messageSender))
-      hash.update(previousMessage.messageSignature)
+    if(mcData.supportFeature('chainedChatWithHashing')) {
+      const hash = crypto.createHash('sha256')
+      hash.update(concat('i64', packet.salt, 'i64', packet.timestamp / 1000n, 'pstring', packet.plainMessage, 'i8', 70))
+      if (packet.formattedMessage) hash.update(packet.formattedMessage)
+      for (const previousMessage of packet.previousMessages) {
+        hash.update(concat('i8', 70, 'UUID', previousMessage.messageSender))
+        hash.update(previousMessage.messageSignature)
+      }
+
+      // Chain integrity remains even if message is considered unverified due to expiry
+      const tsDelta = BigInt(Date.now()) - packet.timestamp
+      const expired = !packet.timestamp || tsDelta > messageExpireTime || tsDelta < 0
+      const verified = !packet.unsignedChatContent && updateAndValidateChat(packet.senderUuid, packet.previousSignature, packet.signature, hash.digest()) && !expired
+      client.emit('playerChat', {
+        plainMessage: packet.plainMessage,
+        unsignedContent: packet.unsignedChatContent,
+        formattedMessage: packet.formattedMessage,
+        type: packet.type,
+        sender: packet.senderUuid,
+        senderName: client._players[packet.senderUuid]?.displayName,
+        senderTeam: packet.senderTeam,
+        verified
+      })
+
+      // We still accept a message (by pushing to seenMessages) even if the chain is broken. A vanilla client
+      // will reject a message if the client sets secure chat to be required and the message from the server
+      // isn't signed, or the client has blocked the sender.
+      // client1.19.1/client/net/minecraft/client/multiplayer/ClientPacketListener.java#L768
+      client._lastChatHistory.push({
+        type: 0, // Player message
+        previousSignature: packet.previousSignature,
+        signature: packet.signature,
+        message: {
+          plain: packet.plainMessage,
+          decorated: packet.formattedMessage
+        },
+        messageHash: packet.bodyDigest,
+        timestamp: packet.timestamp,
+        salt: packet.salt,
+        lastSeen: packet.previousMessages
+      })
+
+      if (client._lastSeenMessages.push({ sender: packet.senderUuid, signature: packet.signature }) && client._lastSeenMessages.pending++ > 64) {
+        client.write('message_acknowledgement', {
+          previousMessages: client._lastSeenMessages.map((e) => ({
+            messageSender: e.sender,
+            messageSignature: e.signature
+          })),
+          lastRejectedMessage: client._lastRejectedMessage
+        })
+        client._lastSeenMessages.pending = 0
+      }
+
+      return
     }
 
-    // Chain integrity remains even if message is considered unverified due to expiry
-    const tsDelta = BigInt(Date.now()) - packet.timestamp
-    const expired = !packet.timestamp || tsDelta > messageExpireTime || tsDelta < 0
-    const verified = !packet.unsignedChatContent && updateAndValidateChat(packet.senderUuid, packet.previousSignature, packet.signature, hash.digest()) && !expired
+
+
+    const pubKey = client._players[packet.senderUuid]?.publicKey
     client.emit('playerChat', {
-      plainMessage: packet.plainMessage,
-      unsignedContent: packet.unsignedChatContent,
-      formattedMessage: packet.formattedMessage,
+      formattedMessage: packet.signedChatContent || packet.unsignedChatContent,
       type: packet.type,
       sender: packet.senderUuid,
-      senderName: client._players[packet.senderUuid]?.displayName,
+      senderName: packet.senderName,
       senderTeam: packet.senderTeam,
-      verified
+      verified: (pubKey && !packet.unsignedChatContent) ? client.verifyMessage(pubKey, packet) : false
     })
-
-    // We still accept a message (by pushing to seenMessages) even if the chain is broken. A vanilla client
-    // will reject a message if the client sets secure chat to be required and the message from the server
-    // isn't signed, or the client has blocked the sender.
-    // client1.19.1/client/net/minecraft/client/multiplayer/ClientPacketListener.java#L768
-    client._lastSeenMessages.push({ sender: packet.senderUuid, signature: packet.signature })
-    client._lastChatHistory.push({
-      previousSignature: packet.previousSignature,
-      signature: packet.signature,
-      message: {
-        plain: packet.plainMessage,
-        decorated: packet.formattedMessage
-      },
-      messageHash: packet.bodyDigest,
-      timestamp: packet.timestamp,
-      salt: packet.salt,
-      lastSeen: packet.previousMessages
-    })
-
-    if (client._lastSeenMessages.pending++ > 64) {
-      client.write('message_acknowledgement', {
-        previousMessages: client._lastSeenMessages.map((e) => ({
-          messageSender: e.sender,
-          messageSignature: e.signature
-        })),
-        lastRejectedMessage: client._lastRejectedMessage
-      })
-      client._lastSeenMessages.pending = 0
-    }
   })
 
   // Chat Sending
@@ -321,11 +410,40 @@ module.exports = function (client, options) {
   }
 }
 
+class SignatureCache extends Array {
+  capacity = 128
+  index = 0
+
+  push (e) {
+    if(!e) return
+
+    this[index++] = e
+    index %= this.capacity
+  }
+}
+
+class LastSeenMessagesWithInvalidation extends Array {
+  capacity = 20
+  offset = 0
+  pending = 0
+
+  push (e) {
+    if(!e) return false
+
+    this.offset = (this.offset + 1) % this.capacity
+
+    this[this.offset] = { pending: true, signature: e }
+    this.pending++
+    return true
+  }
+}
+
 class LastSeenMessages extends Array {
   capacity = 5
   pending = 0
+
   push (e) {
-    if (e.signature.length === 0) return // We do not acknowledge unsigned messages
+    if (!e) return false // We do not acknowledge unsigned messages
 
     // Insert a new entry at the top and shift everything to the right
     let last = this[0]
@@ -339,5 +457,6 @@ class LastSeenMessages extends Array {
         if (!current || (current.sender === e.sender)) break
       }
     }
+    return true
   }
 }
