@@ -44,7 +44,7 @@ Write a packet to all `clients` but encode it only once.
 
 ### client.verifyMessage(packet) : boolean
 
-Verifies if player's chat message packet was signed with their Mojang provided key
+(1.19-1.19.2) Verifies if player's chat message packet was signed with their Mojang provided key. Handled internally (and thus deprecated) in 1.19.3 and above
 
 ### client.logSentMessageFromPeer(packet)
 (1.19.1+) You must call this function when the server receives a message from a player and that message gets
@@ -211,6 +211,10 @@ The user's username.
 ### client.session
 
 The user's session, as returned by the Yggdrasil system. (only client-side)
+
+### client._session
+
+The user's chat session. Only in 1.19.3 and above. You should not need to access this.
 
 ### client.profile
 
