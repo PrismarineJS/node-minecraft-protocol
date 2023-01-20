@@ -228,7 +228,6 @@ function getValue (_type, packet) {
   }
 }
 
-mc.supportedVersions = ['1.19.3']
 for (const supportedVersion of mc.supportedVersions) {
   let PORT
 
