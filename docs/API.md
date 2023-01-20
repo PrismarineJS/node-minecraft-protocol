@@ -275,6 +275,8 @@ Called when a chat message from another player arrives. The emitted object conta
 * type -- the message type - on 1.19, which format string to use to render message ; below, the place where the message is displayed (for example chat or action bar)
 * sender -- the UUID of the player sending the message
 * senderTeam -- scoreboard team of the player (pre 1.19)
+* senderName -- Name of the sender 
+* targetName -- Name of the target (for outgoing commands like /tell). Only in 1.19.2+
 * verified -- true if message is signed, false if not signed, undefined on versions prior to 1.19
 
 ### `systemChat` event
