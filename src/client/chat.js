@@ -100,9 +100,10 @@ module.exports = function (client, options) {
   })
 
   client.on('player_info', (packet) => {
-    if(mcData.supportFeature("playerInfoActionsIsBitfield")) { // 1.19.3+
+    if(mcData.supportFeature("playerInfoActionIsBitfield")) { // 1.19.3+
       if(packet.action & 2) { // chat session
         for(const player of packet.data) {
+          if(!player.chatSession) continue
           client._players[player.UUID] = {
             publicKey: crypto.createPublicKey({ key: player.chatSession.publicKey.keyBytes, format: 'der', type: 'spki' }),
             publicKeyDER: player.chatSession.publicKey.keyBytes,
@@ -146,6 +147,26 @@ module.exports = function (client, options) {
     }
   })
 
+  client.on('profileless_chat', (packet) => {
+    // Profileless chat is parsed as an unsigned player chat message but logged as a system message
+
+    client.emit('playerChat', {
+      formattedMessage: packet.message,
+      type: packet.type,
+      senderName: packet.name,
+      targetName: packet.target,
+      verified: false
+    })
+
+    client._lastChatHistory.push({
+      type: 2, // System message
+      message: {
+        decorated: packet.content // This should actually decorate the message with the sender and target name using the chat type
+      },
+      timestamp: Date.now()
+    })
+  })
+
   client.on('system_chat', (packet) => {
     client.emit('systemChat', {
       positionid: packet.isActionBar ? 2 : 1,
@@ -157,7 +178,7 @@ module.exports = function (client, options) {
       message: {
         decorated: packet.content
       },
-      timestamp: Date.now(),
+      timestamp: Date.now()
     })
   })
 
@@ -202,14 +223,14 @@ module.exports = function (client, options) {
         },
         session: {
           index: packet.index,
-          uuid: client._players[packet.senderUuid].sessionUuid
+          uuid: client._players[packet.senderUuid]?.sessionUuid
         },
         timestamp: packet.timestamp,
         salt: packet.salt,
         lastSeen: packet.previousMessages.map(msg => msg.signature || client._signatureCache[msg.id])
       })
 
-      if (client._lastSeenMessages.push(packet.signature) && client._lastSeenMessages.pending++ > 64) {
+      if (client._lastSeenMessages.push(packet.signature) && client._lastSeenMessages.pending > 64) {
         client.write('message_acknowledgement', {
           count: client._lastSeenMessages.pending
         })
@@ -295,6 +316,38 @@ module.exports = function (client, options) {
     options.timestamp = options.timestamp || BigInt(Date.now())
     options.salt = options.salt || 1n
 
+    if (mcData.supportFeature('useChatSessions')) {
+      let acc = 0
+      const acknowledgements = []
+
+      for(let i = 0; i < client._lastSeenMessages.capacity; i++) {
+        const idx = (client._lastSeenMessages.offset + i) % 20
+        const message = client._lastSeenMessages[idx]
+        if(message) {
+          acc |= 1 << i
+          acknowledgements.push(message.signature) 
+          message.pending = false
+        }
+      }
+
+      const bitset = Buffer.allocUnsafe(3)
+      bitset[0] = acc & 0xFF
+      bitset[1] = (acc >> 8) & 0xFF
+      bitset[2] = (acc >> 16) & 0xFF
+
+      client.write('chat_message', {
+        message,
+        timestamp: options.timestamp,
+        salt: options.salt,
+        signature: client.profileKeys ? client.signMessage(message, options.timestamp, options.salt, undefined, acknowledgements) : Buffer.alloc(0),
+        offset: client._lastSeenMessages.pending,
+        acknowledged: bitset
+      })
+      client._lastSeenMessages.pending = 0
+      
+      return
+    }
+
     if (options.skipPreview || !client.serverFeatures.chatPreview) {
       client.write('chat_message', {
         message,
@@ -327,10 +380,18 @@ module.exports = function (client, options) {
   })
 
   // Signing methods
-  client.signMessage = (message, timestamp, salt = 0, preview) => {
+  client.signMessage = (message, timestamp, salt = 0, preview, acknowledgements) => {
     if (!client.profileKeys) throw Error("Can't sign message without profile keys, please set valid auth mode")
 
-    if (mcData.supportFeature('chainedChatWithHashing')) {
+    if (mcData.supportFeature('useChatSessions')) {
+      if (!client._session.uuid) throw Error("Chat session not initialized. Can't send chat")
+
+      const length = Buffer.byteLength(message, 'utf8')
+      const previousMessages = acknowledgements.length > 0 ? ['i32', acknowledgements.length, 'buffer', Buffer.concat(acknowledgements)] : ['i32', 0]
+
+      const signable = concat('i32', 1, 'UUID', client.uuid, 'UUID', client._session.uuid, 'i32', client._session.index++, 'i64', salt, 'i64', timestamp / 1000n, 'i32', length, 'pstring', message, ...previousMessages)
+      return crypto.sign('RSA-SHA256', signable, client.profileKeys.private)
+    } else if (mcData.supportFeature('chainedChatWithHashing')) {
       // 1.19.2
       const signer = crypto.createSign('RSA-SHA256')
       if (client._lastChatSignature) signer.update(client._lastChatSignature)
@@ -430,9 +491,8 @@ class LastSeenMessagesWithInvalidation extends Array {
   push (e) {
     if(!e) return false
 
-    this.offset = (this.offset + 1) % this.capacity
-
     this[this.offset] = { pending: true, signature: e }
+    this.offset = (this.offset + 1) % this.capacity
     this.pending++
     return true
   }
