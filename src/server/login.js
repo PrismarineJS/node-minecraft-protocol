@@ -60,7 +60,7 @@ module.exports = function (client, server, options) {
 
       try {
         const publicKey = crypto.createPublicKey({ key: packet.signature.publicKey, format: 'der', type: 'spki' })
-        const signable = mcData.supportFeature('chainedChatWithHashing')
+        const signable = mcData.supportFeature('profileKeySignatureV2')
           ? concat('UUID', packet.playerUUID, 'i64', packet.signature.timestamp, 'buffer', publicKey.export({ type: 'spki', format: 'der' }))
           : Buffer.from(packet.signature.timestamp + mcPubKeyToPem(packet.signature.publicKey), 'utf8') // (expires at + publicKey)
 
