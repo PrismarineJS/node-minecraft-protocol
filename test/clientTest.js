@@ -126,7 +126,6 @@ for (const supportedVersion of mc.supportedVersions) {
           if (!mcData.supportFeature('clientsideChatFormatting')) {
             const message = JSON.parse(data.formattedMessage)
             if (chatCount === 1) {
-              console.log('Parsing message')
               assert.strictEqual(message.translate, 'chat.type.text')
               assert.deepEqual(message.with[0].clickEvent, {
                 action: 'suggest_command',
