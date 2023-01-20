@@ -1,6 +1,4 @@
 module.exports = client => {
-  const mcData = require('minecraft-data')(client.version)
-
   client.nextMessage = (containing) => {
     return new Promise((resolve) => {
       function onChat (packet) {

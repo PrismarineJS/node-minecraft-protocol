@@ -123,10 +123,10 @@ for (const supportedVersion of mc.supportedVersions) {
           chatCount += 1
           assert.ok(chatCount <= 2)
 
-          if(!mcData.supportFeature('clientsideChatFormatting')) {
+          if (!mcData.supportFeature('clientsideChatFormatting')) {
             const message = JSON.parse(data.formattedMessage)
-            if(chatCount === 1) {
-              console.log("Parsing message")
+            if (chatCount === 1) {
+              console.log('Parsing message')
               assert.strictEqual(message.translate, 'chat.type.text')
               assert.deepEqual(message.with[0].clickEvent, {
                 action: 'suggest_command',
@@ -134,7 +134,7 @@ for (const supportedVersion of mc.supportedVersions) {
               })
               assert.deepEqual(message.with[0].text, 'Player')
               assert.strictEqual(message.with[1], 'hello everyone; I have logged in.')
-            } else if(chatCount === 2) {
+            } else if (chatCount === 2) {
               assert.strictEqual(message.translate, 'chat.type.announcement')
               assert.strictEqual(message.with[0].text ? message.with[0].text : message.with[0], 'Server')
               assert.deepEqual(message.with[1].extra
@@ -149,7 +149,7 @@ for (const supportedVersion of mc.supportedVersions) {
           } else {
             // 1.19+
 
-            const message = JSON.parse(data.formattedMessage || JSON.stringify({text: data.plainMessage}))
+            const message = JSON.parse(data.formattedMessage || JSON.stringify({ text: data.plainMessage }))
 
             if (chatCount === 1) {
               assert.strictEqual(message.text, 'hello everyone; I have logged in.')
@@ -176,7 +176,7 @@ for (const supportedVersion of mc.supportedVersions) {
           assert.ok(chatCount <= 2)
 
           const message = JSON.parse(data.formattedMessage)
-          if(chatCount === 1) {
+          if (chatCount === 1) {
             assert.strictEqual(message.translate, 'chat.type.text')
             assert.deepEqual(message.with[0].clickEvent, {
               action: 'suggest_command',
@@ -184,7 +184,7 @@ for (const supportedVersion of mc.supportedVersions) {
             })
             assert.deepEqual(message.with[0].text, 'Player')
             assert.strictEqual(message.with[1], 'hello everyone; I have logged in.')
-          } else if(chatCount === 2) {
+          } else if (chatCount === 2) {
             assert.strictEqual(message.translate, 'chat.type.announcement')
             assert.strictEqual(message.with[0].text ? message.with[0].text : message.with[0], 'Server')
             assert.deepEqual(message.with[1].extra
