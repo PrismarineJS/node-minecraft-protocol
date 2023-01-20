@@ -128,6 +128,8 @@ module.exports = function (client, server, options) {
 
   client.verifyMessage = (packet) => {
     if (!client.profileKeys) return null
+    if (client.supportFeature('useChatSessions')) throw Error("client.verifyMessage is deprecated. Does not work for 1.19.3 and above")
+
     if (client.supportFeature('chainedChatWithHashing')) { // 1.19.1
       if (client._lastChatSignature === packet.signature) return true // Called twice
       const verifier = crypto.createVerify('RSA-SHA256')
