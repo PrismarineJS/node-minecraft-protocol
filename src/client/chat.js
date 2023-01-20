@@ -23,7 +23,7 @@ module.exports = function (client, options) {
   client._lastRejectedMessage = null
 
   // This stores the last n (5 or 20) messages that the player has seen, from unique players
-  if(mcData.supportFeature('chainedChatWithHashing')) client._lastSeenMessages = new LastSeenMessages()
+  if (mcData.supportFeature('chainedChatWithHashing')) client._lastSeenMessages = new LastSeenMessages()
   else client._lastSeenMessages = new LastSeenMessagesWithInvalidation()
 
   // This stores the last 128 inbound (signed) messages for 1.19.3 chat validation
@@ -41,22 +41,22 @@ module.exports = function (client, options) {
   }()
 
   function updateAndValidateSession (uuid, message, currentSignature, index, previousMessages, salt, timestamp) {
-    const player = client._players[uuid];
-    
-    if(player && player.hasChainIntegrity) {
-      if(!player.lastSignature || player.lastSignature.equals(currentSignature) || index > player.sessionIndex) {
+    const player = client._players[uuid]
+
+    if (player && player.hasChainIntegrity) {
+      if (!player.lastSignature || player.lastSignature.equals(currentSignature) || index > player.sessionIndex) {
         player.lastSignature = currentSignature
       } else {
         player.hasChainIntegrity = false
       }
 
-      if(player.hasChainIntegrity) {
-        const length = Buffer.byteLength(packet.plainMessage, 'utf8')
+      if (player.hasChainIntegrity) {
+        const length = Buffer.byteLength(message, 'utf8')
         const acknowledgements = previousMessages.length > 0 ? ['i32', previousMessages.length, 'buffer', Buffer.concat(...previousMessages.map(msg => msg.signature || client._signatureCache[msg.id]))] : ['i32', 0]
 
         const signable = concat('i32', 1, 'UUID', uuid, 'UUID', player.sessionUuid, 'i32', index, 'i64', salt, 'i64', timestamp / 1000n, 'i32', length, 'pstring', message, ...acknowledgements)
 
-        player.hasChainIntegrity = crypto.verify('RSA-SHA256', signable, player.publicKey, currentSignature)  
+        player.hasChainIntegrity = crypto.verify('RSA-SHA256', signable, player.publicKey, currentSignature)
       }
 
       return player.hasChainIntegrity
@@ -94,20 +94,20 @@ module.exports = function (client, options) {
   }
 
   client.on('player_remove', (packet) => {
-    for(const player of packet.players) {
+    for (const player of packet.players) {
       delete client._players[player.UUID]
     }
   })
 
   client.on('player_info', (packet) => {
-    if(mcData.supportFeature("playerInfoActionIsBitfield")) { // 1.19.3+
-      if(packet.action & 2) { // chat session
-        for(const player of packet.data) {
-          if(!player.chatSession) continue
+    if (mcData.supportFeature('playerInfoActionIsBitfield')) { // 1.19.3+
+      if (packet.action & 2) { // chat session
+        for (const player of packet.data) {
+          if (!player.chatSession) continue
           client._players[player.UUID] = {
             publicKey: crypto.createPublicKey({ key: player.chatSession.publicKey.keyBytes, format: 'der', type: 'spki' }),
             publicKeyDER: player.chatSession.publicKey.keyBytes,
-            sessionUuid: player.chatSession.uuid,
+            sessionUuid: player.chatSession.uuid
           }
           client._players[player.UUID].sessionIndex = true
           client._players[player.UUID].hasChainIntegrity = true
@@ -118,23 +118,23 @@ module.exports = function (client, options) {
     }
 
     if (packet.action === 0) { // add player
-        for (const player of packet.data) {
-          if (player.crypto) {
-            client._players[player.UUID] = {
-              publicKey: crypto.createPublicKey({ key: player.crypto.publicKey, format: 'der', type: 'spki' }),
-              publicKeyDER: player.crypto.publicKey,
-              signature: player.crypto.signature,
-              displayName: player.displayName || player.name,
-              name: player.name
-            }
-            client._players[player.UUID].hasChainIntegrity = true
-          } else {
-            client._players[player.UUID] = {
-              displayName: player.displayName || player.name,
-              name: player.name
-            }
+      for (const player of packet.data) {
+        if (player.crypto) {
+          client._players[player.UUID] = {
+            publicKey: crypto.createPublicKey({ key: player.crypto.publicKey, format: 'der', type: 'spki' }),
+            publicKeyDER: player.crypto.publicKey,
+            signature: player.crypto.signature,
+            displayName: player.displayName || player.name,
+            name: player.name
+          }
+          client._players[player.UUID].hasChainIntegrity = true
+        } else {
+          client._players[player.UUID] = {
+            displayName: player.displayName || player.name,
+            name: player.name
           }
         }
+      }
     } else if (packet.action === 3) {
       for (const player of packet.data) {
         if (!client._players[player.UUID]) continue
@@ -201,7 +201,7 @@ module.exports = function (client, options) {
   })
 
   client.on('player_chat', (packet) => {
-    if(mcData.supportFeature('useChatSessions')) {
+    if (mcData.supportFeature('useChatSessions')) {
       const tsDelta = BigInt(Date.now()) - packet.timestamp
       const expired = !packet.timestamp || tsDelta > messageExpireTime || tsDelta < 0
       const verified = !packet.unsignedChatContent && updateAndValidateSession(packet.senderUuid, packet.plainMessage, packet.signature, packet.index, packet.previousMessages, packet.salt, packet.timestamp) && !expired
@@ -239,7 +239,7 @@ module.exports = function (client, options) {
       return
     }
 
-    if(mcData.supportFeature('chainedChatWithHashing')) {
+    if (mcData.supportFeature('chainedChatWithHashing')) {
       const hash = crypto.createHash('sha256')
       hash.update(concat('i64', packet.salt, 'i64', packet.timestamp / 1000n, 'pstring', packet.plainMessage, 'i8', 70))
       if (packet.formattedMessage) hash.update(packet.formattedMessage)
@@ -295,8 +295,6 @@ module.exports = function (client, options) {
       return
     }
 
-
-
     const pubKey = client._players[packet.senderUuid]?.publicKey
     client.emit('playerChat', {
       formattedMessage: packet.signedChatContent || packet.unsignedChatContent,
@@ -320,12 +318,12 @@ module.exports = function (client, options) {
       let acc = 0
       const acknowledgements = []
 
-      for(let i = 0; i < client._lastSeenMessages.capacity; i++) {
+      for (let i = 0; i < client._lastSeenMessages.capacity; i++) {
         const idx = (client._lastSeenMessages.offset + i) % 20
         const message = client._lastSeenMessages[idx]
-        if(message) {
+        if (message) {
           acc |= 1 << i
-          acknowledgements.push(message.signature) 
+          acknowledgements.push(message.signature)
           message.pending = false
         }
       }
@@ -344,7 +342,7 @@ module.exports = function (client, options) {
         acknowledged: bitset
       })
       client._lastSeenMessages.pending = 0
-      
+
       return
     }
 
@@ -476,10 +474,10 @@ class SignatureCache extends Array {
   index = 0
 
   push (e) {
-    if(!e) return
+    if (!e) return
 
-    this[index++] = e
-    index %= this.capacity
+    this[this.index++] = e
+    this.index %= this.capacity
   }
 }
 
@@ -489,7 +487,7 @@ class LastSeenMessagesWithInvalidation extends Array {
   pending = 0
 
   push (e) {
-    if(!e) return false
+    if (!e) return false
 
     this[this.offset] = { pending: true, signature: e }
     this.offset = (this.offset + 1) % this.capacity
