@@ -64,24 +64,38 @@ module.exports = function (client, options) {
   }
 
   client.on('player_info', (packet) => {
-    if (packet.action === 0) { // add player
-      for (const player of packet.data) {
-        if (player.crypto) {
+    if(mcData.supportFeature("playerInfoActionsIsBitfield")) { // 1.19.3+
+      if(packet.action & 2) { // chat session
+        for(const player of packet.data) {
           client._players[player.UUID] = {
-            publicKey: crypto.createPublicKey({ key: player.crypto.publicKey, format: 'der', type: 'spki' }),
-            publicKeyDER: player.crypto.publicKey,
-            signature: player.crypto.signature,
-            displayName: player.displayName || player.name,
-            name: player.name
-          }
-          client._players[player.UUID].hasChainIntegrity = true
-        } else {
-          client._players[player.UUID] = {
-            displayName: player.displayName || player.name,
-            name: player.name
+            publicKey: crypto.createPublicKey({ key: player.chatSession.publicKey.keyBytes, format: 'der', type: 'spki' }),
+            publicKeyDER: player.chatSession.publicKey.keyBytes,
+            sessionUuid: player.chatSession.uuid
           }
         }
       }
+
+      return
+    }
+
+    if (packet.action === 0) { // add player
+        for (const player of packet.data) {
+          if (player.crypto) {
+            client._players[player.UUID] = {
+              publicKey: crypto.createPublicKey({ key: player.crypto.publicKey, format: 'der', type: 'spki' }),
+              publicKeyDER: player.crypto.publicKey,
+              signature: player.crypto.signature,
+              displayName: player.displayName || player.name,
+              name: player.name
+            }
+            client._players[player.UUID].hasChainIntegrity = true
+          } else {
+            client._players[player.UUID] = {
+              displayName: player.displayName || player.name,
+              name: player.name
+            }
+          }
+        }
     } else if (packet.action === 3) {
       for (const player of packet.data) {
         if (!client._players[player.UUID]) continue
