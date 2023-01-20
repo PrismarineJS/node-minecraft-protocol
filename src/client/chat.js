@@ -63,6 +63,12 @@ module.exports = function (client, options) {
     return false
   }
 
+  client.on('player_remove', (packet) => {
+    for(const player of packet.players) {
+      delete client._players[player.UUID]
+    }
+  })
+
   client.on('player_info', (packet) => {
     if(mcData.supportFeature("playerInfoActionsIsBitfield")) { // 1.19.3+
       if(packet.action & 2) { // chat session
