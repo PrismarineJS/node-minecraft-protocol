@@ -212,10 +212,6 @@ The user's username.
 
 The user's session, as returned by the Yggdrasil system. (only client-side)
 
-### client._session
-
-The user's chat session. Only in 1.19.3 and above. You should not need to access this.
-
 ### client.profile
 
 The player's profile, as returned by the Yggdrasil system. (only server-side)
