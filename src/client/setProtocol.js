@@ -37,7 +37,7 @@ module.exports = function (client, options) {
                 : client.profileKeys.signature
             }
           : null,
-        playerUUID: !mcData.supportFeature('useChatSessions') ? client.session?.selectedProfile?.id : undefined
+        playerUUID: client.session?.selectedProfile?.id
       })
     }
   }
