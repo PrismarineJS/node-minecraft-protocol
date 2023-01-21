@@ -25,10 +25,9 @@ module.exports = function (client, options) {
         nextState: 2
       })
       client.state = states.LOGIN
-
       client.write('login_start', {
         username: client.username,
-        signature: client.profileKeys
+        signature: (client.profileKeys && !mcData.supportFeature('useChatSessions'))
           ? {
               timestamp: BigInt(client.profileKeys.expiresOn.getTime()), // should probably be called "expireTime"
               // Remove padding on the public key: not needed in vanilla server but matches how vanilla client looks

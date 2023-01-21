@@ -1,21 +1,20 @@
 module.exports = client => {
-  const mcData = require('minecraft-data')(client.version)
-  const hasSignedChat = mcData.supportFeature('signedChat')
-
   client.nextMessage = (containing) => {
     return new Promise((resolve) => {
       function onChat (packet) {
-        const m = packet.message || packet.unsignedChatContent || packet.signedChatContent
+        const m = packet.formattedMessage || packet.unsignedChatContent || JSON.stringify({ text: packet.plainMessage })
         if (containing) {
           if (m.includes(containing)) return finish(m)
           else return
         }
         return finish(m)
       }
-      client.on(hasSignedChat ? 'player_chat' : 'chat', onChat)
+      client.on('playerChat', onChat)
+      client.on('systemChat', onChat) // For 1.7.10
 
       function finish (m) {
-        client.off(hasSignedChat ? 'player_chat' : 'chat', onChat)
+        client.off('playerChat', onChat)
+        client.off('systemChat', onChat)
         resolve(m)
       }
     })

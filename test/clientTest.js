@@ -105,7 +105,7 @@ for (const supportedVersion of mc.supportedVersions) {
         }))
         client.on('error', err => done(err))
         const lineListener = function (line) {
-          const match = line.match(/\[Server thread\/INFO\]: <(.+?)> (.+)/)
+          const match = line.match(/\[Server thread\/INFO\]: (?:\[Not Secure\] )?<(.+?)> (.+)/)
           if (!match) return
           assert.strictEqual(match[1], 'Player')
           assert.strictEqual(match[2], 'hello everyone; I have logged in.')
@@ -119,11 +119,62 @@ for (const supportedVersion of mc.supportedVersions) {
           client.chat('hello everyone; I have logged in.')
         })
 
-        // 1.18 and below
-        client.on('chat', function (packet) {
+        client.on('playerChat', function (data) {
           chatCount += 1
           assert.ok(chatCount <= 2)
-          const message = JSON.parse(packet.message)
+
+          if (!mcData.supportFeature('clientsideChatFormatting')) {
+            const message = JSON.parse(data.formattedMessage)
+            if (chatCount === 1) {
+              assert.strictEqual(message.translate, 'chat.type.text')
+              assert.deepEqual(message.with[0].clickEvent, {
+                action: 'suggest_command',
+                value: mcData.version.version > 340 ? '/tell Player ' : '/msg Player '
+              })
+              assert.deepEqual(message.with[0].text, 'Player')
+              assert.strictEqual(message.with[1], 'hello everyone; I have logged in.')
+            } else if (chatCount === 2) {
+              assert.strictEqual(message.translate, 'chat.type.announcement')
+              assert.strictEqual(message.with[0].text ? message.with[0].text : message.with[0], 'Server')
+              assert.deepEqual(message.with[1].extra
+                ? (message.with[1].extra[0].text
+                    ? message.with[1].extra[0].text
+                    : message.with[1].extra[0])
+                : message.with[1].text, 'hello')
+              wrap.removeListener('line', lineListener)
+              client.end()
+              done()
+            }
+          } else {
+            // 1.19+
+
+            const message = JSON.parse(data.formattedMessage || JSON.stringify({ text: data.plainMessage }))
+
+            if (chatCount === 1) {
+              assert.strictEqual(message.text, 'hello everyone; I have logged in.')
+              const sender = JSON.parse(data.senderName)
+              assert.deepEqual(sender.clickEvent, {
+                action: 'suggest_command',
+                value: '/tell Player '
+              })
+              assert.strictEqual(sender.text, 'Player')
+            } else if (chatCount === 2) {
+              assert.strictEqual(message.text, 'hello')
+              const sender = JSON.parse(data.senderName)
+              assert.strictEqual(sender.text, 'Server')
+              wrap.removeListener('line', lineListener)
+              client.end()
+              done()
+            }
+          }
+        })
+
+        client.on('systemChat', function (data) {
+          // For 1.7.10
+          chatCount += 1
+          assert.ok(chatCount <= 2)
+
+          const message = JSON.parse(data.formattedMessage)
           if (chatCount === 1) {
             assert.strictEqual(message.translate, 'chat.type.text')
             assert.deepEqual(message.with[0].clickEvent, {
@@ -140,22 +191,6 @@ for (const supportedVersion of mc.supportedVersions) {
                   ? message.with[1].extra[0].text
                   : message.with[1].extra[0])
               : message.with[1].text, 'hello')
-            wrap.removeListener('line', lineListener)
-            client.end()
-            done()
-          }
-        })
-
-        // 1.19 and above
-        let gotClientMessage, gotServerMessage
-        client.on('player_chat', (packet) => {
-          const message = JSON.parse(packet.unsignedChatContent || packet.signedChatContent)
-          // const sender = JSON.parse(packet.senderName)
-
-          if (message.text === 'hello everyone; I have logged in.') gotClientMessage = true
-          if (message.text === 'hello') gotServerMessage = true
-
-          if (gotClientMessage && gotServerMessage) {
             wrap.removeListener('line', lineListener)
             client.end()
             done()

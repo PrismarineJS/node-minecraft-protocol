@@ -1,5 +1,6 @@
 const states = require('../states')
 const signedChatPlugin = require('./chat')
+const uuid = require('uuid-1345')
 
 module.exports = function (client, options) {
   client.serverFeatures = {}
@@ -17,6 +18,20 @@ module.exports = function (client, options) {
     client.state = states.PLAY
     client.uuid = packet.uuid
     client.username = packet.username
+
+    if (mcData.supportFeature('useChatSessions') && client.profileKeys) {
+      client._session = {
+        index: 0,
+        uuid: uuid.v4fast()
+      }
+
+      client.write('session', {
+        sessionUUID: client._session.uuid,
+        expireTime: client.profileKeys ? BigInt(client.profileKeys.expiresOn.getTime()) : undefined,
+        publicKey: client.profileKeys ? client.profileKeys.public.export({ type: 'spki', format: 'der' }) : undefined,
+        signature: client.profileKeys ? client.profileKeys.signatureV2 : undefined
+      })
+    }
 
     if (mcData.supportFeature('signedChat')) {
       if (options.disableChatSigning && client.serverFeatures.enforcesSecureChat) {

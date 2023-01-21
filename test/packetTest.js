@@ -44,7 +44,20 @@ const values = {
   i8: -10,
   u8: 8,
   string: 'hi hi this is my client string',
-  buffer: Buffer.alloc(8),
+  buffer: function (typeArgs, context) {
+    let count
+    if (typeof typeArgs.count === 'number') {
+      count = typeArgs.count
+    } else if (typeof typeArgs.count === 'object') {
+      count = evalCount(typeArgs.count, context)
+    } else if (typeArgs.count !== undefined) {
+      count = getField(typeArgs.count, context)
+    } else if (typeArgs.countType !== undefined) {
+      count = 8
+    }
+
+    return Buffer.alloc(count)
+  },
   array: function (typeArgs, context) {
     let count
     if (typeof typeArgs.count === 'number') {
@@ -114,6 +127,7 @@ const values = {
       test7: { type: 'intArray', value: [12, 42] }
     }
   },
+  previousMessages: [],
   compressedNbt: {
     type: 'compound',
     name: 'test',

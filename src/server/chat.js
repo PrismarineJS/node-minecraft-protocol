@@ -2,6 +2,7 @@ const crypto = require('crypto')
 const concat = require('../transforms/binaryStream').concat
 const debug = require('debug')('minecraft-protocol')
 const messageExpireTime = 300000 // 5 min (ms)
+const { mojangPublicKeyPem } = require('./constants')
 
 class VerificationError extends Error {}
 function validateLastMessages (pending, lastSeen, lastRejected) {
@@ -39,8 +40,9 @@ function validateLastMessages (pending, lastSeen, lastRejected) {
 }
 
 module.exports = function (client, server, options) {
+  const mojangPubKey = crypto.createPublicKey(mojangPublicKeyPem)
   const raise = (translatableError) => client.end(translatableError, JSON.stringify({ translate: translatableError }))
-  const pending = new Pending()
+  const pending = client.supportFeature('useChatSessions') ? new LastSeenMessages() : new Pending()
 
   if (!options.generatePreview) options.generatePreview = message => message
 
@@ -57,6 +59,44 @@ module.exports = function (client, server, options) {
     }
   }
 
+  function validateSession (packet) {
+    try {
+      const unwrapped = pending.unwrap(packet.offset, packet.acknowledged)
+
+      const length = Buffer.byteLength(packet.message, 'utf8')
+      const acknowledgements = unwrapped.length > 0 ? ['i32', unwrapped.length, 'buffer', Buffer.concat(...unwrapped)] : ['i32', 0]
+
+      const signable = concat('i32', 1, 'UUID', client.uuid, 'UUID', client._session.uuid, 'i32', client._session.index++, 'i64', packet.salt, 'i64', packet.timestamp / 1000n, 'i32', length, 'pstring', packet.message, ...acknowledgements)
+      const valid = crypto.verify('RSA-SHA256', signable, client.profileKeys.public, packet.signature)
+      if (!valid) throw VerificationError('Invalid or missing message signature')
+    } catch (e) {
+      if (e instanceof VerificationError) {
+        raise('multiplayer.disconnect.chat_validation_failed')
+        if (!options.hideErrors) console.error(client.address, 'disconnected because', e)
+      } else {
+        client.emit('error', e)
+      }
+    }
+  }
+
+  client.on('session', (packet) => {
+    client._session = {
+      index: 0,
+      uuid: packet.sessionUuid
+    }
+
+    const publicKey = crypto.createPublicKey({ key: packet.publicKey, format: 'der', type: 'spki' })
+    const signable = concat('UUID', client.uuid, 'i64', packet.expireTime, 'buffer', publicKey.export({ type: 'spki', format: 'der' }))
+
+    // This makes sure 'signable' when signed with the mojang private key equals signature in this packet
+    if (!crypto.verify('RSA-SHA1', signable, mojangPubKey, packet.signature)) {
+      debug('Signature mismatch')
+      raise('multiplayer.disconnect.invalid_public_key_signature')
+      return
+    }
+    client.profileKeys = { public: publicKey }
+  })
+
   // Listen to chat messages and verify the `lastSeen` and `lastRejected` messages chain
   let lastTimestamp
   client.on('chat_message', (packet) => {
@@ -67,19 +107,30 @@ module.exports = function (client, server, options) {
     }
     lastTimestamp = packet.timestamp
 
-    // Checks here: 1) make sure client can chat, 2) chain is OK, 3) signature is OK, 4) log if expired
+    // Checks here: 1) make sure client can chat, 2) chain/session is OK, 3) signature is OK, 4) log if expired
     if (client.settings.disabledChat) return raise('chat.disabled.options')
     if (client.supportFeature('chainedChatWithHashing')) validateMessageChain(packet) // 1.19.1
-    if (!client.verifyMessage(packet)) raise('multiplayer.disconnect.unsigned_chat')
+    if (client.supportFeature('useChatSessions')) validateSession(packet) // 1.19.3
+    else if (!client.verifyMessage(packet)) raise('multiplayer.disconnect.unsigned_chat')
     if ((BigInt(Date.now()) - packet.timestamp) > messageExpireTime) debug(client.socket.address(), 'sent expired message TS', packet.timestamp)
   })
 
   // Client will occasionally send a list of seen messages to the server, here we listen & check chain validity
-  client.on('message_acknowledgement', validateMessageChain)
+  client.on('message_acknowledgement', (packet) => {
+    if (client.supportFeature('useChatSessions')) {
+      const valid = client._lastSeenMessages.applyOffset(packet.count)
+      if (!valid) {
+        raise('multiplayer.disconnect.chat_validation_failed')
+        if (!options.hideErrors) console.error(client.address, 'disconnected because', VerificationError('Failed to validate message acknowledgements'))
+      }
+    } else validateMessageChain(packet)
+  })
 
   client.verifyMessage = (packet) => {
     if (!client.profileKeys) return null
-    if (client.supportFeature('chainedChatWithHashing')) { // 1.19.1+
+    if (client.supportFeature('useChatSessions')) throw Error('client.verifyMessage is deprecated. Does not work for 1.19.3 and above')
+
+    if (client.supportFeature('chainedChatWithHashing')) { // 1.19.1
       if (client._lastChatSignature === packet.signature) return true // Called twice
       const verifier = crypto.createVerify('RSA-SHA256')
       if (client._lastChatSignature) verifier.update(client._lastChatSignature)
@@ -121,6 +172,53 @@ module.exports = function (client, server, options) {
       return false
     }
     return true
+  }
+}
+
+class LastSeenMessages extends Array {
+  tracking = 20
+
+  constructor () {
+    super()
+    for (let i = 0; i < this.tracking; i++) this.push(null)
+  }
+
+  add (sender, signature) {
+    this.push({ signature, pending: true })
+  }
+
+  applyOffset (offset) {
+    const diff = this.length - this.tracking
+    if (offset >= 0 && offset <= diff) {
+      this.splice(0, offset)
+      return true
+    }
+
+    return false
+  }
+
+  unwrap (offset, acknowledged) {
+    if (!this.applyOffset(offset)) throw VerificationError('Failed to validate message acknowledgements')
+
+    const n = (acknowledged[2] << 16) | (acknowledged[1] << 8) | acknowledged[0]
+
+    const unwrapped = []
+    for (let i = 0; i < this.tracking; i++) {
+      const ack = n & (1 << i)
+      const tracked = this[i]
+      if (ack) {
+        if (tracked === null) throw VerificationError('Failed to validate message acknowledgements')
+
+        tracked.pending = false
+        unwrapped.push(tracked.signature)
+      } else {
+        if (tracked !== null && !tracked.pending) throw VerificationError('Failed to validate message acknowledgements')
+
+        this[i] = null
+      }
+    }
+
+    return unwrapped
   }
 }
 
