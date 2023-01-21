@@ -310,7 +310,7 @@ Unregister a channel `name` and send the unregister packet if `custom` is true.
 ### client.chat(message)
 Send a chat message to the server, with signing on 1.19+.
 
-### client.signMessage(message: string, timestamp: BigInt, salt?: number) : Buffer
+### client.signMessage(message: string, timestamp: BigInt, salt?: number, preview?: string, acknowledgements?: Buffer[]) : Buffer
 
 (1.19) Generate a signature for a chat message to be sent to server
 

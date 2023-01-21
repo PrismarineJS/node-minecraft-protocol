@@ -36,7 +36,7 @@ declare module 'minecraft-protocol' {
 		registerChannel(name: string, typeDefinition: any, custom?: boolean): void
 		unregisterChannel(name: string): void
 		writeChannel(channel: any, params: any): void
-		signMessage(message: string, timestamp: BigInt, salt?: number, preview?: string): Buffer
+		signMessage(message: string, timestamp: BigInt, salt?: number, preview?: string, acknowledgements?: Buffer[]): Buffer
 		verifyMessage(publicKey: Buffer | KeyObject, packet: object): boolean
 		reportPlayer(uuid: string, reason: 'FALSE_REPORTING' | 'HATE_SPEECH' | 'TERRORISM_OR_VIOLENT_EXTREMISM' | 'CHILD_SEXUAL_EXPLOITATION_OR_ABUSE' | 'IMMINENT_HARM' | 'NON_CONSENSUAL_INTIMATE_IMAGERY' | 'HARASSMENT_OR_BULLYING' | 'DEFAMATION_IMPERSONATION_FALSE_INFORMATION' | 'SELF_HARM_OR_SUICIDE' | 'ALCOHOL_TOBACCO_DRUGS', signatures: Buffer[], comment?: string): Promise<true>
 		on(event: 'error', listener: (error: Error) => PromiseLike): this
