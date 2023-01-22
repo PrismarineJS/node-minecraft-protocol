@@ -490,7 +490,7 @@ class LastSeenMessages extends Array {
   pending = 0
 
   push (e) {
-    if (!e) return false // We do not acknowledge unsigned messages
+    if (!e || !e.signature) return false // We do not acknowledge unsigned messages
 
     // Insert a new entry at the top and shift everything to the right
     let last = this[0]
