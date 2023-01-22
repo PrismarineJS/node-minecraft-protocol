@@ -1,5 +1,8 @@
 # History
 
+## 1.40.1
+* Fix offline mode (@frej4189)
+
 ## 1.40.0
 * Add more fields to playerChat event (@frej4189)
 * Update to 1.19.3 (@frej4189)
