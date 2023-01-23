@@ -1,5 +1,8 @@
 # History
 
+## 1.40.2
+* Small chat.js fix (@frej4189)
+
 ## 1.40.1
 * Fix offline mode (@frej4189)
 
