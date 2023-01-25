@@ -158,7 +158,7 @@ module.exports = function (client, options) {
 
   client.on('system_chat', (packet) => {
     client.emit('systemChat', {
-      positionid: packet.isActionBar ? 2 : 1,
+      positionId: packet.isActionBar ? 2 : 1,
       formattedMessage: packet.content
     })
 
