@@ -279,7 +279,7 @@ Called when a chat message from another player arrives. The emitted object conta
 
 Called when a system chat message arrives. A system chat message is any message not sent by a player. The emitted object contains:
 * formattedMessage -- the chat message preformatted
-* positionid -- the chat type of the message. 1 for system chat and 2 for actionbar
+* positionId -- the chat type of the message. 1 for system chat and 2 for actionbar
 
 See the [chat example](https://github.com/PrismarineJS/node-minecraft-protocol/blob/master/examples/client_chat/client_chat.js#L1) for usage.
 
