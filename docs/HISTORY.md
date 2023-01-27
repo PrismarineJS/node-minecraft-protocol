@@ -1,5 +1,8 @@
 # History
 
+## 1.40.3
+* Use consistent parameter naming for systemChat event
+
 ## 1.40.2
 * Small chat.js fix (@frej4189)
 
