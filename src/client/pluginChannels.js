@@ -51,7 +51,14 @@ module.exports = function (client, options) {
       return channel === packet.channel
     })
     if (channel) {
-      if (proto.types[channel]) { packet.data = proto.parsePacketBuffer(channel, packet.data).data }
+      if (proto.types[channel]) {
+        try {
+          packet.data = proto.parsePacketBuffer(channel, packet.data).data
+        } catch (error) {
+          client.emit('error', error)
+          return
+        }
+      }
       debug('read custom payload ' + channel + ' ' + packet.data)
       client.emit(channel, packet.data)
     }
