@@ -1,7 +1,13 @@
 module.exports = function (client, options) {
   client.on('disconnect', message => {
     if (!message.reason) { return }
-    const parsed = JSON.parse(message.reason)
+    let parsed
+    try {
+      parsed = JSON.parse(message.reason)
+    } catch (error) {
+      client.emit('error', error)
+      return
+    }
     let text = parsed.text ? parsed.text : parsed
     let versionRequired
 
