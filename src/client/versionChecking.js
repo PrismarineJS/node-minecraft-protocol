@@ -4,7 +4,7 @@ module.exports = function (client, options) {
     let parsed
     try {
       parsed = JSON.parse(message.reason)
-    } catch(error) {
+    } catch (error) {
       client.emit('error', error)
       return
     }
