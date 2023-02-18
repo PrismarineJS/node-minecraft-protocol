@@ -19,7 +19,7 @@ module.exports = function (client, options) {
     client.uuid = packet.uuid
     client.username = packet.username
 
-    if (mcData.supportFeature('useChatSessions') && client.profileKeys) {
+    if (mcData.supportFeature('useChatSessions') && client.profileKeys && client._cipher) {
       client._session = {
         index: 0,
         uuid: uuid.v4fast()
