@@ -1,5 +1,11 @@
 # History
 
+## 1.41.0
+
+* Catch errors in custom payloads (@frej4189)
+* Fix client sending session packet when server is in offline mode (@frej4189)
+* Fix client sending chat_session packet before server state transition (@frej4189)
+
 ## 1.40.3
 * Use consistent parameter naming for systemChat event
 
