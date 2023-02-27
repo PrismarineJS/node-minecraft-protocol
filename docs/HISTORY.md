@@ -1,5 +1,8 @@
 # History
 
+## 1.41.1
+* Revert "Fix client sending chat_session packet before server state transition"
+
 ## 1.41.0
 
 * Catch errors in custom payloads (@frej4189)
