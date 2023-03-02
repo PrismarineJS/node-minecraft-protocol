@@ -11,14 +11,8 @@ module.exports = function (client, options) {
     }
   })
 
-  client.once('success', onLogin)
-
-  function onLogin (packet) {
+  client.once('login', () => {
     const mcData = require('minecraft-data')(client.version)
-    client.state = states.PLAY
-    client.uuid = packet.uuid
-    client.username = packet.username
-
     if (mcData.supportFeature('useChatSessions') && client.profileKeys && client._cipher) {
       client._session = {
         index: 0,
@@ -32,6 +26,15 @@ module.exports = function (client, options) {
         signature: client.profileKeys ? client.profileKeys.signatureV2 : undefined
       })
     }
+  });
+
+  client.once('success', onLogin)
+
+  function onLogin (packet) {
+    const mcData = require('minecraft-data')(client.version)
+    client.state = states.PLAY
+    client.uuid = packet.uuid
+    client.username = packet.username
 
     if (mcData.supportFeature('signedChat')) {
       if (options.disableChatSigning && client.serverFeatures.enforcesSecureChat) {
