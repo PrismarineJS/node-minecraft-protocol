@@ -26,7 +26,7 @@ module.exports = function (client, options) {
         signature: client.profileKeys ? client.profileKeys.signatureV2 : undefined
       })
     }
-  });
+  })
 
   client.once('success', onLogin)
 
