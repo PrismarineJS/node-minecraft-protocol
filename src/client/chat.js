@@ -326,7 +326,7 @@ module.exports = function (client, options) {
         message,
         timestamp: options.timestamp,
         salt: options.salt,
-        signature: client.profileKeys ? client.signMessage(message, options.timestamp, options.salt, undefined, acknowledgements) : undefined,
+        signature: (client.profileKeys && client._session) ? client.signMessage(message, options.timestamp, options.salt, undefined, acknowledgements) : undefined,
         offset: client._lastSeenMessages.pending,
         acknowledged: bitset
       })
