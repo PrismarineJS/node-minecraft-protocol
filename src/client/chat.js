@@ -264,7 +264,7 @@ module.exports = function (client, options) {
           plain: packet.plainMessage,
           decorated: packet.formattedMessage
         },
-        messageHash: packet.bodyDigest,
+        messageHash: packet.messageHash,
         timestamp: packet.timestamp,
         salt: packet.salt,
         lastSeen: packet.previousMessages
@@ -295,6 +295,39 @@ module.exports = function (client, options) {
     })
   })
 
+  const sliceIndexForMessage = {}
+  client.on('declare_commands', (packet) => {
+    const nodes = packet.nodes
+    for (const commandNode of nodes[0].children) {
+      const node = nodes[commandNode]
+      const commandName = node.extraNodeData.name
+      function visit (node, depth = 0) {
+        const name = node.extraNodeData.name
+        if (node.extraNodeData.parser === 'minecraft:message') {
+          sliceIndexForMessage[commandName] = [name, depth]
+        }
+        for (const child of node.children) {
+          visit(nodes[child], depth + 1)
+        }
+      }
+      visit(node, 0)
+    }
+  })
+
+  function signaturesForCommand (string, ts, salt) {
+    const signatures = []
+    const slices = string.split(' ')
+    if (sliceIndexForMessage[slices[0]]) {
+      const [fieldName, sliceIndex] = sliceIndexForMessage[slices[0]]
+      const sliced = slices.slice(sliceIndex)
+      if (sliced.length > 0) {
+        const signable = sliced.join(' ')
+        signatures.push({ argumentName: fieldName, signature: client.signMessage(signable, ts, salt) })
+      }
+    }
+    return signatures
+  }
+
   // Chat Sending
   let pendingChatRequest
   let lastPreviewRequestId = 0
@@ -302,6 +335,23 @@ module.exports = function (client, options) {
   client._signedChat = (message, options = {}) => {
     options.timestamp = options.timestamp || BigInt(Date.now())
     options.salt = options.salt || 1n
+
+    if (message.startsWith('/') && !mcData.supportFeature('useChatSessions')) {
+      const command = message.slice(1)
+      client.write('chat_command', {
+        command,
+        timestamp: options.timestamp,
+        salt: options.salt,
+        argumentSignatures: signaturesForCommand(command, options.timestamp, options.salt),
+        signedPreview: options.didPreview,
+        previousMessages: client._lastSeenMessages.map((e) => ({
+          messageSender: e.sender,
+          messageSignature: e.signature
+        })),
+        lastRejectedMessage: client._lastRejectedMessage
+      })
+      return
+    }
 
     if (mcData.supportFeature('useChatSessions')) {
       let acc = 0
@@ -349,7 +399,7 @@ module.exports = function (client, options) {
         lastRejectedMessage: client._lastRejectedMessage
       })
       client._lastSeenMessages.pending = 0
-    } else {
+    } else if (client.serverFeatures.chatPreview) {
       client.write('chat_preview', {
         query: lastPreviewRequestId,
         message

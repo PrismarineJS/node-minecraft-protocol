@@ -265,9 +265,9 @@ Called when an error occurs within the client. Takes an Error as parameter.
 ### `playerChat` event
 
 Called when a chat message from another player arrives. The emitted object contains:
-* formattedMessage -- the chat message preformatted, if done on server side
-* plainMessage -- the chat message without formatting (for example no `<username> message` ; instead `message`), on version 1.19+
-* unsignedContent -- unsigned formatted chat contents ; should only be present when the message is modified and server has chat previews disabled - only on version 1.19 - 1.19.2
+* formattedMessage -- (JSON) the chat message preformatted, if done on server side
+* plainMessage -- (Plaintext) the chat message without formatting (for example no `<username> message` ; instead `message`), on version 1.19+
+* unsignedContent -- (JSON) unsigned formatted chat contents ; should only be present when the message is modified and server has chat previews disabled - only on version 1.19 - 1.19.2
 * type -- the message type - on 1.19, which format string to use to render message ; below, the place where the message is displayed (for example chat or action bar)
 * sender -- the UUID of the player sending the message
 * senderTeam -- scoreboard team of the player (pre 1.19)
@@ -278,7 +278,7 @@ Called when a chat message from another player arrives. The emitted object conta
 ### `systemChat` event
 
 Called when a system chat message arrives. A system chat message is any message not sent by a player. The emitted object contains:
-* formattedMessage -- the chat message preformatted
+* formattedMessage -- (JSON) the chat message preformatted
 * positionId -- the chat type of the message. 1 for system chat and 2 for actionbar
 
 See the [chat example](https://github.com/PrismarineJS/node-minecraft-protocol/blob/master/examples/client_chat/client_chat.js#L1) for usage.
