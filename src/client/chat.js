@@ -46,6 +46,7 @@ module.exports = function (client, options) {
     if (player && player.hasChainIntegrity) {
       if (!player.lastSignature || player.lastSignature.equals(currentSignature) || index > player.sessionIndex) {
         player.lastSignature = currentSignature
+        player.sessionIndex = index
       } else {
         player.hasChainIntegrity = false
       }
@@ -194,6 +195,7 @@ module.exports = function (client, options) {
       const tsDelta = BigInt(Date.now()) - packet.timestamp
       const expired = !packet.timestamp || tsDelta > messageExpireTime || tsDelta < 0
       const verified = !packet.unsignedChatContent && updateAndValidateSession(packet.senderUuid, packet.plainMessage, packet.signature, packet.index, packet.previousMessages, packet.salt, packet.timestamp) && !expired
+      if (verified) client._signatureCache.push(packet.signature)
       client.emit('playerChat', {
         plainMessage: packet.plainMessage,
         unsignedContent: packet.unsignedContent,
