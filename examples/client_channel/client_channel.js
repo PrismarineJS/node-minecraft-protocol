@@ -13,10 +13,10 @@ const client = mc.createClient({
   password: process.argv[5]
 })
 
-client.registerChannel('MC|Brand', ['string', []])
-client.on('MC|Brand', console.log)
+client.registerChannel('minecraft:brand', ['string', []])
+client.on('minecraft:brand', console.log)
 
 client.on('login', function () {
-  client.writeChannel('MC|Brand', 'vanilla')
+  client.writeChannel('minecraft:brand', 'vanilla')
 })
 client.on('error', console.log)
