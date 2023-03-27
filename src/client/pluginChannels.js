@@ -14,14 +14,14 @@ module.exports = function (client, options) {
   client.unregisterChannel = unregisterChannel
   client.writeChannel = writeChannel
 
-  client.registerChannel('REGISTER', ['registerarr', []])
-  client.registerChannel('UNREGISTER', ['registerarr', []])
-
   const above385 = options.protocolVersion >= 385
   if (above385) { // 1.13-pre3 (385) added Added Login Plugin Message (https://wiki.vg/Protocol_History#1.13-pre3)
     client.on('login_plugin_request', onLoginPluginRequest)
   }
   const channelNames = above385 ? ['minecraft:register', 'minecraft:unregister'] : ['REGISTER', 'UNREGISTER']
+
+  client.registerChannel(channelNames[0], ['registerarr', []])
+  client.registerChannel(channelNames[1], ['registerarr', []])
 
   function registerChannel (name, parser, custom) {
     if (custom) {
