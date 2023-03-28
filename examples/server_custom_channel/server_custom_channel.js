@@ -3,8 +3,6 @@ const mc = require('minecraft-protocol')
 const server = mc.createServer({
   'online-mode': false, // optional
   encryption: false, // optional
-  host: undefined, // optional
-  port: 25565, // optional
   version: '1.18.2'
 })
 const mcData = require('minecraft-data')(server.version)
