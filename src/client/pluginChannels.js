@@ -14,7 +14,7 @@ module.exports = function (client, options) {
   client.unregisterChannel = unregisterChannel
   client.writeChannel = writeChannel
 
-  const above385 = options.protocolVersion >= 385
+  const above385 = mcdata.version.version >= 385
   if (above385) { // 1.13-pre3 (385) added Added Login Plugin Message (https://wiki.vg/Protocol_History#1.13-pre3)
     client.on('login_plugin_request', onLoginPluginRequest)
   }
