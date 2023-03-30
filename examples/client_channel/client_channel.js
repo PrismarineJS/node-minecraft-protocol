@@ -5,6 +5,14 @@ if (process.argv.length < 4 || process.argv.length > 6) {
   process.exit(1)
 }
 
+function getBrandChannelName () {
+  const mcData = require('minecraft-data')(client.version)
+  if (mcData.supportFeature('customChannelIdentifier')) {
+    return 'minecraft:brand' // 1.13+
+  }
+  return 'MC|Brand'
+}
+
 const client = mc.createClient({
   version: false,
   host: process.argv[2],
@@ -13,10 +21,11 @@ const client = mc.createClient({
   password: process.argv[5]
 })
 
-client.registerChannel('minecraft:brand', ['string', []])
-client.on('minecraft:brand', console.log)
+client.on('error', console.log)
 
 client.on('login', function () {
-  client.writeChannel('minecraft:brand', 'vanilla')
+  const brandChannel = getBrandChannelName()
+  client.registerChannel(brandChannel, ['string', []])
+  client.on(brandChannel, console.log)
+  client.writeChannel(brandChannel, 'vanilla')
 })
-client.on('error', console.log)
