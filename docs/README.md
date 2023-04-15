@@ -72,22 +72,26 @@ node-minecraft-protocol is pluggable.
 ### Echo client example
 
 ```js
-var mc = require('minecraft-protocol');
-var client = mc.createClient({
+const mc = require('minecraft-protocol');
+const client = mc.createClient({
   host: "localhost",   // optional
   port: 25565,         // optional
   username: "email@example.com",
   password: "12345678",
+  version: '1.16.5', // optional; set to 'false' for latest
   auth: 'microsoft' // optional; by default uses offline mode, if using a microsoft account, set to 'microsoft'
 });
+
 client.on('chat', function(packet) {
   // Listen for chat messages and echo them back.
-  var jsonMsg = JSON.parse(packet.message);
-  if(jsonMsg.translate == 'chat.type.announcement' || jsonMsg.translate == 'chat.type.text') {
-    var username = jsonMsg.with[0].text;
-    var msg = jsonMsg.with[1];
-    if(username === client.username) return;
-    client.write('chat', {message: msg.text});
+  const jsonMsg = JSON.parse(packet.message);
+
+  if (jsonMsg.translate == 'chat.type.announcement' || jsonMsg.translate == 'chat.type.text') {
+    const username = jsonMsg.with[0].text;
+    cnost msg = jsonMsg.with[1];
+    if (username === client.username) return;
+
+    client.write('chat', { message: msg.text });
   }
 });
 ```
@@ -100,8 +104,8 @@ You can also leave out `password` when using a Microsoft account. If provided, p
 Example to connect to a Realm that the authenticating account is owner of or has been invited to:
 
 ```js
-var mc = require('minecraft-protocol');
-var client = mc.createClient({
+const mc = require('minecraft-protocol');
+const client = mc.createClient({
   realms: {
     pickRealm: (realms) => realms[0] // Function which recieves an array of joined/owned Realms and must return a single Realm. Can be async
   },
@@ -112,14 +116,15 @@ var client = mc.createClient({
 ### Hello World server example
 
 ```js
-var mc = require('minecraft-protocol');
-var server = mc.createServer({
+const mc = require('minecraft-protocol');
+const server = mc.createServer({
   'online-mode': true,   // optional
   encryption: true,      // optional
   host: '0.0.0.0',       // optional
   port: 25565,           // optional
-  version: '1.16.3'
+  version: '1.16.5'
 });
+
 const mcData = require('minecraft-data')(server.version)
 
 server.on('login', function(client) {
@@ -130,7 +135,7 @@ server.on('login', function(client) {
     entityId: client.id,
     isHardcore: false,
     gameMode: 0,
-    previousGameMode: 255,
+    previousGameMode: -1,
     worldNames: loginPacket.worldNames,
     dimensionCodec: loginPacket.dimensionCodec,
     dimension: loginPacket.dimension,
@@ -143,6 +148,8 @@ server.on('login', function(client) {
     isDebug: false,
     isFlat: false
   });
+  
+  // Set spawn position
   client.write('position', {
     x: 0,
     y: 1.62,
@@ -151,7 +158,8 @@ server.on('login', function(client) {
     pitch: 0,
     flags: 0x00
   });
-  var msg = {
+
+  const msg = {
     translate: 'chat.type.announcement',
     "with": [
       'Server',
