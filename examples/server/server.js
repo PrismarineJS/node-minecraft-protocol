@@ -65,7 +65,7 @@ server.on('listening', function () {
   console.log('Server listening on port', server.socketServer.address().port)
 })
 
-function broadcast(message, exclude, username) {
+function broadcast (message, exclude, username) {
   let client
   const translate = username ? 'chat.type.announcement' : 'chat.type.text'
   username = username || 'Server'

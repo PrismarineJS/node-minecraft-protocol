@@ -7,10 +7,11 @@ const rl = readline.createInterface({
   prompt: 'Enter a message> '
 })
 
-const [,, host, port, username] = process.argv
+const [, , host, port, username] = process.argv
 if (!host || !port) {
   console.error('Usage: node client_chat.js <host> <port> <username>')
-  console.error('Usage (offline mode): node client_chat.js <host> <port> offline')
+  console.error('Offline mode usage: node client_chat.js <host> <port> offline')
+
   process.exit(1)
 }
 

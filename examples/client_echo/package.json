@@ -1,8 +1,0 @@
-{
-  "name": "node-minecraft-protocol-example",
-  "version": "0.0.0",
-  "private": true,
-  "dependencies": {
-  },
-  "description": "A node-minecraft-protocol example"
-}

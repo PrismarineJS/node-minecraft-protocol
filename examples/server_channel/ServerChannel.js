@@ -34,7 +34,7 @@ server.on('login', function (client) {
 
   client.write('position', {
     x: 0,
-    y: 1.62,
+    y: 256,
     z: 0,
     yaw: 0,
     pitch: 0,
