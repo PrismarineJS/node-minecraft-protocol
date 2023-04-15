@@ -12,13 +12,14 @@ const mcData = require('minecraft-data')(server.version)
 const loginPacket = mcData.loginPacket
 
 server.on('login', function (client) {
-  broadcast(client.username + ' joined the game.')
+  broadcast(client.username + ' joined the game')
+
   const addr = client.socket.remoteAddress + ':' + client.socket.remotePort
-  console.log(client.username + ' connected', '(' + addr + ')')
+  console.info(client.username + ' connected', '(' + addr + ')')
 
   client.on('end', function () {
     broadcast(client.username + ' left the game.', client)
-    console.log(client.username + ' disconnected', '(' + addr + ')')
+    console.info(client.username + ' disconnected', '(' + addr + ')')
   })
 
   // send init data so client will start rendering world
@@ -39,6 +40,7 @@ server.on('login', function (client) {
     isDebug: false,
     isFlat: false
   })
+
   client.write('position', {
     x: 0,
     y: 256,
@@ -63,7 +65,7 @@ server.on('listening', function () {
   console.log('Server listening on port', server.socketServer.address().port)
 })
 
-function broadcast (message, exclude, username) {
+function broadcast(message, exclude, username) {
   let client
   const translate = username ? 'chat.type.announcement' : 'chat.type.text'
   username = username || 'Server'

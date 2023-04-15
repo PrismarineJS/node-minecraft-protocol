@@ -5,12 +5,15 @@ const server = mc.createServer({
   encryption: false, // optional
   host: '0.0.0.0', // optional
   port: 25565, // optional
-  version: '1.16'
+  version: '1.16.5'
 })
 const mcData = require('minecraft-data')(server.version)
 const loginPacket = mcData.loginPacket
 
 server.on('login', function (client) {
+  client.registerChannel('MC|Brand', ['string', []])
+  client.on('MC|Brand', console.log)
+
   client.write('login', {
     entityId: client.id,
     isHardcore: false,
@@ -28,8 +31,7 @@ server.on('login', function (client) {
     isDebug: false,
     isFlat: false
   })
-  client.registerChannel('CUSTOM|ChannelOne', ['i32', []], true)
-  client.registerChannel('CUSTOM|ChannelTwo', ['i32', []], true)
+
   client.write('position', {
     x: 0,
     y: 1.62,
@@ -38,6 +40,6 @@ server.on('login', function (client) {
     pitch: 0,
     flags: 0x00
   })
-  client.writeChannel('CUSTOM|ChannelTwo', 10)
-  client.on('CUSTOM|ChannelOne', console.log)
+
+  client.writeChannel('MC|Brand', 'NMP server')
 })
