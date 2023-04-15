@@ -5,7 +5,7 @@ const server = require('minecraft-protocol').createServer({
   version: false,
   motd: 'Multiprotocol example',
   'online-mode': false
-});
+})
 
 server.on('login', function (client) {
   console.info(client.username + ' joined!')
@@ -13,4 +13,4 @@ server.on('login', function (client) {
   const mcData = require('minecraft-data')(server.version)
 
   client.write('login', mcData.loginPacket)
-});
+})
