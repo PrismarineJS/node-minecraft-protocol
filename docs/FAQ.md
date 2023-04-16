@@ -2,7 +2,7 @@
 
 This Frequently Asked Question document is meant to help people for the most common things.
 
-## How to hide errors ?
+## How to hide errors?
 
 Use `hideErrors: true` in createClient options
 You may also choose to add these listeners :
@@ -12,7 +12,7 @@ client.on('error', () => {})
 client.on('end', () => {})
 ```
 
-## How can I make a proxy with this ?
+## How can I make a proxy with this?
 
 * Check out our WIP proxy lib <https://github.com/PrismarineJS/prismarine-proxy>
 * See this example <https://github.com/PrismarineJS/node-minecraft-protocol/tree/master/examples/proxy>
