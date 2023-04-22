@@ -40,6 +40,7 @@ let version
 let printAllNames = false
 const printNameWhitelist = {}
 const printNameBlacklist = {};
+
 (function () {
   let i = 0
   for (i = 0; i < args.length; i++) {
@@ -75,11 +76,14 @@ const srv = mc.createServer({
   keepAlive: false,
   version
 })
+
 srv.on('login', function (client) {
   const addr = client.socket.remoteAddress
   console.log('Incoming connection', '(' + addr + ')')
+
   let endedClient = false
   let endedTargetClient = false
+
   client.on('end', function () {
     endedClient = true
     console.log('Connection closed by client', '(' + addr + ')')
