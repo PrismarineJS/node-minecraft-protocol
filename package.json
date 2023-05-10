@@ -33,7 +33,7 @@
   },
   "browser": "src/browser.js",
   "devDependencies": {
-    "@types/node": "^18.0.6",
+    "@types/node": "^20.1.2",
     "espower-loader": "^1.0.0",
     "intelli-espower-loader": "^1.0.0",
     "minecraft-packets": "^1.1.5",
