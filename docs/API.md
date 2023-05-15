@@ -33,7 +33,8 @@ automatically logged in and validated against mojang's auth.
  * validateChannelProtocol (optional) : whether or not to enable protocol validation for custom protocols using plugin channels for the connected clients. Defaults to true
  * enforceSecureProfile (optional) : Kick clients that do not have chat signing keys from Mojang (1.19+)
  * generatePreview (optional) : Function to generate chat previews. Takes the raw message string and should return the message preview as a string.  (1.19-1.19.2)
-
+ * socketType (optional) : either `tcp` or `ipc`. Switches from a tcp connection to a ipc socket connection (or named pipes on windows). With the `ipc` option `host` becomes the path off the ipc connection on the local filesystem. Example: `\\.\pipe\minecraft-ipc` (Windows) `/tmp/minecraft-ipc.sock` (unix based systems). See the ipcConnection example for an example.
+ 
 ## mc.Server(version,[customPackets])
 
 Create a server instance for `version` of minecraft.
