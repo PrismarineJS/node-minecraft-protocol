@@ -34,7 +34,7 @@ server.on('login', (client) => {
   console.info(`New user '${client.username}' logged into the server`)
 })
 
-function connectAClient() {
+function connectAClient () {
   const client = nmp.createClient({
     version: '1.18.2',
     username: 'ipc_client',
