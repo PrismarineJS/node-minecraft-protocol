@@ -23,7 +23,8 @@ function createServer (options = {}) {
     version,
     favicon,
     customPackets,
-    motdMsg // This is when you want to send formated motd's from ChatMessage instances
+    motdMsg, // This is when you want to send formated motd's from ChatMessage instances
+    socketType = 'tcp'
   } = options
 
   const maxPlayers = options['max-players'] !== undefined ? maxPlayersOld : maxPlayersNew
@@ -63,6 +64,10 @@ function createServer (options = {}) {
   server.on('connection', function (client) {
     plugins.forEach(plugin => plugin(client, server, options))
   })
-  server.listen(port, host)
+  if (socketType === 'ipc') {
+    server.listen(host)
+  } else {
+    server.listen(port, host)
+  }
   return server
 }

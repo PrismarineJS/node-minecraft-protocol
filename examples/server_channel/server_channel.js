@@ -3,16 +3,14 @@ const mc = require('minecraft-protocol')
 const server = mc.createServer({
   'online-mode': false, // optional
   encryption: false, // optional
-  host: '0.0.0.0', // optional
-  port: 25565, // optional
-  version: '1.16'
+  version: '1.18.2'
 })
 const mcData = require('minecraft-data')(server.version)
 const loginPacket = mcData.loginPacket
 
 server.on('login', function (client) {
-  client.registerChannel('MC|Brand', ['string', []])
-  client.on('MC|Brand', console.log)
+  client.registerChannel('minecraft:brand', ['string', []])
+  client.on('minecraft:brand', console.log)
 
   client.write('login', {
     entityId: client.id,
@@ -39,5 +37,5 @@ server.on('login', function (client) {
     pitch: 0,
     flags: 0x00
   })
-  client.writeChannel('MC|Brand', 'vanilla')
+  client.writeChannel('minecraft:brand', 'vanilla')
 })

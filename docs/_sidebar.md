@@ -2,5 +2,5 @@
 - [API](API.md)
 - [FAQ](FAQ.md)
 - [History](HISTORY.md)
-- [Protocol documentation](http://minecraft-data.prismarine.js.org/?d=protocol)
+- [Protocol Documentation](http://prismarinejs.github.io/minecraft-data?d=protocol)
 - [Wiki.vg](https://wiki.vg/Protocol)

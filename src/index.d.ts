@@ -192,6 +192,7 @@ declare module 'minecraft-protocol' {
 		enforceSecureProfile?: boolean
 		// 1.19.1 & 1.19.2 only: If client should send previews of messages they are typing to the server
 		enableChatPreview?: boolean
+		socketType?: 'tcp' | 'ipc'
 	}
 
 	export interface SerializerOptions {
