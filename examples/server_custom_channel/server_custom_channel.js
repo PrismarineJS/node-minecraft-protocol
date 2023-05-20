@@ -3,9 +3,7 @@ const mc = require('minecraft-protocol')
 const server = mc.createServer({
   'online-mode': false, // optional
   encryption: false, // optional
-  host: '0.0.0.0', // optional
-  port: 25565, // optional
-  version: '1.16'
+  version: '1.18.2'
 })
 const mcData = require('minecraft-data')(server.version)
 const loginPacket = mcData.loginPacket
@@ -28,8 +26,8 @@ server.on('login', function (client) {
     isDebug: false,
     isFlat: false
   })
-  client.registerChannel('CUSTOM|ChannelOne', ['i32', []], true)
-  client.registerChannel('CUSTOM|ChannelTwo', ['i32', []], true)
+  client.registerChannel('node-minecraft-protocol:custom_channel_one', ['string', []], true)
+  client.registerChannel('node-minecraft-protocol:custom_channel_two', ['string', []], true)
   client.write('position', {
     x: 0,
     y: 1.62,
@@ -38,6 +36,6 @@ server.on('login', function (client) {
     pitch: 0,
     flags: 0x00
   })
-  client.writeChannel('CUSTOM|ChannelTwo', 10)
-  client.on('CUSTOM|ChannelOne', console.log)
+  client.writeChannel('node-minecraft-protocol:custom_channel_two', 'hello from the server')
+  client.on('node-minecraft-protocol:custom_channel_one', console.log)
 })
