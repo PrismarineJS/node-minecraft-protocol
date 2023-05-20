@@ -1,4 +1,4 @@
-const net = require('net')
+const net = require('node:net')
 
 const getPort = () => new Promise(resolve => {
   const server = net.createServer()

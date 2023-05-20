@@ -1,8 +1,8 @@
 const UUID = require('uuid-1345')
 const yggdrasil = require('yggdrasil')
-const fs = require('fs').promises
+const fs = require('node:fs').promises
 const mcDefaultFolderPath = require('minecraft-folder-path')
-const path = require('path')
+const path = require('node:path')
 
 const launcherDataFile = 'launcher_accounts.json'
 

@@ -2,7 +2,7 @@
 // Tests packet serialization/deserialization from with raw binary from minecraft-packets
 const { createSerializer, createDeserializer, states } = require('minecraft-protocol')
 const mcPackets = require('minecraft-packets')
-const assert = require('assert')
+const assert = require('node:assert')
 
 const makeClientSerializer = version => createSerializer({ state: states.PLAY, version, isServer: true })
 const makeClientDeserializer = version => createDeserializer({ state: states.PLAY, version })

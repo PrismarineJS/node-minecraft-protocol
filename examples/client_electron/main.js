@@ -1,6 +1,6 @@
 'use strict'
 
-const path = require('path')
+const path = require('node:path')
 const { app, ipcMain, dialog } = require('electron')
 const mc = require('minecraft-protocol')
 

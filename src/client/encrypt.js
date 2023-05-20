@@ -1,6 +1,6 @@
 'use strict'
 
-const crypto = require('crypto')
+const crypto = require('node:crypto')
 const debug = require('debug')('minecraft-protocol')
 const yggdrasil = require('yggdrasil')
 const { concat } = require('../transforms/binaryStream')

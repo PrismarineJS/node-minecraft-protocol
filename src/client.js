@@ -1,6 +1,6 @@
 'use strict'
 
-const EventEmitter = require('events').EventEmitter
+const EventEmitter = require('node:events')
 const debug = require('debug')('minecraft-protocol')
 const compression = require('./transforms/compression')
 const framing = require('./transforms/framing')

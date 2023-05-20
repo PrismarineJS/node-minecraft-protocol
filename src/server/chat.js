@@ -1,4 +1,4 @@
-const crypto = require('crypto')
+const crypto = require('node:crypto')
 const concat = require('../transforms/binaryStream').concat
 const debug = require('debug')('minecraft-protocol')
 const messageExpireTime = 300000 // 5 min (ms)
