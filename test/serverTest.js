@@ -78,7 +78,7 @@ for (const supportedVersion of mc.supportedVersions) {
         plainMessage: message,
         signedChatContent: '',
         unsignedChatContent: JSON.stringify({ text: message }),
-        type: 0,  
+        type: 0,
         senderUuid: 'd3527a0b-bc03-45d5-a878-2aafdd8c8a43', // random
         senderName: JSON.stringify({ text: sender }),
         senderTeam: undefined,
@@ -96,7 +96,7 @@ for (const supportedVersion of mc.supportedVersions) {
 
   describe('mc-server ' + version.minecraftVersion, function () {
     this.timeout(5000)
-    this.beforeAll(async function() {
+    this.beforeAll(async function () {
       PORT = await getPort()
       console.log(`Using port for tests: ${PORT}`)
     })
@@ -140,7 +140,7 @@ for (const supportedVersion of mc.supportedVersions) {
         client.connect(PORT, '127.0.0.1')
       })
 
-      function resolve () {
+      function resolve() {
         count -= 1
         if (count <= 0) done()
       }
@@ -172,7 +172,7 @@ for (const supportedVersion of mc.supportedVersions) {
         })
         client.on('end', resolve)
       })
-      function resolve () {
+      function resolve() {
         count -= 1
         if (count <= 0) done()
       }
@@ -214,7 +214,7 @@ for (const supportedVersion of mc.supportedVersions) {
               sample: []
             },
             description: {
-              extra: [ { color: 'red', text: 'Red text' } ],
+              extra: [{ color: 'red', text: 'Red text' }],
               bold: true,
               text: 'Example chat mesasge'
             }
@@ -278,7 +278,7 @@ for (const supportedVersion of mc.supportedVersions) {
           version: version.minecraftVersion,
           port: PORT
         })
-        client.on('packet', (data, {name})=>{
+        client.on('packet', (data, { name }) => {
           if (name === 'success') {
             assert.strictEqual(data.uuid, notchUUID, 'UUID')
             server.close()
@@ -333,7 +333,7 @@ for (const supportedVersion of mc.supportedVersions) {
           }))
 
           const p1Join = await player1.nextMessage('player2')
-          
+
           assert.strictEqual(p1Join, '{"text":"player2 joined the game."}')
 
           player2.chat('hi')
@@ -376,7 +376,7 @@ for (const supportedVersion of mc.supportedVersions) {
         })
         client.on('end', resolve)
       })
-      function resolve () {
+      function resolve() {
         count -= 1
         if (count <= 0) done()
       }
@@ -408,7 +408,7 @@ for (const supportedVersion of mc.supportedVersions) {
           server.close()
         })
       })
-      function resolve () {
+      function resolve() {
         count -= 1
         if (count <= 0) done()
       }
@@ -450,6 +450,39 @@ for (const supportedVersion of mc.supportedVersions) {
         player2.end()
         await Promise.all([once(player1, 'end'), once(player2, 'end')])
         server.close()
+      })
+    })
+
+    it('supports bundle packet', function (done) {
+      const server = mc.createServer({
+        'online-mode': false,
+        version: version.minecraftVersion,
+        port: PORT
+      })
+      server.on('login', function (client) {
+        client.on('end', function (reason) {
+          assert.strictEqual(reason, 'ServerShutdown')
+        })
+        client.write('login', loginPacket(client, server))
+        client.writeBundle([
+          ['ping', { time: 42 }],
+          ['clear_titles', {}]
+        ])
+      })
+      server.on('close', done)
+      server.on('listening', function () {
+        const client = mc.createClient({
+          username: 'lalalal',
+          host: '127.0.0.1',
+          version: version.minecraftVersion,
+          port: PORT
+        })
+        client.on('ping', function () {
+          // Below handler synchronously defined should be guaranteed to be called after the above one
+          client.on('clear_titles', function () {
+            server.close()
+          })
+        })
       })
     })
   })

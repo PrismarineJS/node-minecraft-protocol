@@ -82,7 +82,7 @@ const values = {
     }
     Object.keys(typeArgs).forEach(function (index) {
       const v = typeArgs[index].name === 'type' && typeArgs[index].type === 'string' && typeArgs[2] !== undefined &&
-      typeArgs[2].type !== undefined
+        typeArgs[2].type !== undefined
         ? (typeArgs[2].type[1].fields['minecraft:crafting_shapeless'] === undefined ? 'crafting_shapeless' : 'minecraft:crafting_shapeless')
         : getValue(typeArgs[index].type, results)
       if (typeArgs[index].anon) {
@@ -95,6 +95,15 @@ const values = {
     })
     delete results['..']
     return results
+  },
+  vec3f: {
+    x: 0, y: 0, z: 0
+  },
+  vec3f64: {
+    x: 0, y: 0, z: 0
+  },
+  vec4f: {
+    x: 0, y: 0, z: 0, w: 0
   },
   count: 1, // TODO : might want to set this to a correct value
   bool: true,
@@ -266,8 +275,7 @@ for (const supportedVersion of mc.supportedVersions) {
         Object.keys(packets[state]).forEach(function (direction) {
           Object.keys(packets[state][direction].types)
             .filter(function (packetName) {
-              return packetName !== 'packet' &&
-              packetName.startsWith('packet_')
+              return packetName !== 'packet' && packetName.startsWith('packet_')
             })
             .forEach(function (packetName) {
               packetInfo = packets[state][direction].types[packetName]
