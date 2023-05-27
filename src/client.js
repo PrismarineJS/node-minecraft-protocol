@@ -1,5 +1,4 @@
 'use strict'
-
 const EventEmitter = require('events').EventEmitter
 const debug = require('debug')('minecraft-protocol')
 const compression = require('./transforms/compression')
@@ -94,7 +93,7 @@ class Client extends EventEmitter {
         const s = JSON.stringify(parsed.data, null, 2)
         debug(s && s.length > 10000 ? parsed.data : s)
       }
-      if (parsed.data && parsed.data.name === 'bundle_delimiter') {
+      if (parsed.metadata.name === 'bundle_delimiter') {
         if (this._mcBundle.length) {
           this._mcBundle = []
           this._mcBundle.forEach(emitPacket)

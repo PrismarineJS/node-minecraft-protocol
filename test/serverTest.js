@@ -465,8 +465,8 @@ for (const supportedVersion of mc.supportedVersions) {
         })
         client.write('login', loginPacket(client, server))
         client.writeBundle([
-          ['ping', { time: 42 }],
-          ['clear_titles', {}]
+          ['update_time', { age: 1, time: 2 }],
+          ['close_window', {windowId:0}]
         ])
       })
       server.on('close', done)
@@ -477,10 +477,15 @@ for (const supportedVersion of mc.supportedVersions) {
           version: version.minecraftVersion,
           port: PORT
         })
-        client.on('ping', function () {
+        client.on('update_time', function () {
           // Below handler synchronously defined should be guaranteed to be called after the above one
-          client.on('clear_titles', function () {
+          const d1 = Date.now()
+          client.on('close_window', function () {
             server.close()
+            const d2 = Date.now()
+            if (mcData.supportFeature('hasBundlePacket') && (d2 - d1) > 2) {
+              throw new Error(`bundle packet constituents did not arrive at once : ${d1}, ${d2}`)
+            }
           })
         })
       })
