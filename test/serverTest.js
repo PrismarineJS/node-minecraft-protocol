@@ -62,17 +62,17 @@ for (const supportedVersion of mc.supportedVersions) {
       // removed `dimension`
       // removed `dimensionCodec`
       registryCodec: {
-        "type": "compound",
-        "name": "",
-        "value": {}
+        type: 'compound',
+        name: '',
+        value: {}
       },
-      worldType: "minecraft:overworld",
+      worldType: 'minecraft:overworld',
       death: undefined
       // more to be added
     }
   }
 
-  function sendBroadcastMessage(server, clients, message, sender) {
+  function sendBroadcastMessage (server, clients, message, sender) {
     if (mcData.supportFeature('signedChat')) {
       server.writeToClients(clients, 'player_chat', {
         plainMessage: message,
@@ -140,7 +140,7 @@ for (const supportedVersion of mc.supportedVersions) {
         client.connect(PORT, '127.0.0.1')
       })
 
-      function resolve() {
+      function resolve () {
         count -= 1
         if (count <= 0) done()
       }
@@ -172,7 +172,7 @@ for (const supportedVersion of mc.supportedVersions) {
         })
         client.on('end', resolve)
       })
-      function resolve() {
+      function resolve () {
         count -= 1
         if (count <= 0) done()
       }
@@ -376,7 +376,7 @@ for (const supportedVersion of mc.supportedVersions) {
         })
         client.on('end', resolve)
       })
-      function resolve() {
+      function resolve () {
         count -= 1
         if (count <= 0) done()
       }
@@ -408,7 +408,7 @@ for (const supportedVersion of mc.supportedVersions) {
           server.close()
         })
       })
-      function resolve() {
+      function resolve () {
         count -= 1
         if (count <= 0) done()
       }
@@ -441,7 +441,7 @@ for (const supportedVersion of mc.supportedVersions) {
 
         sendBroadcastMessage(server, Object.values(server.clients), 'A message from the server.')
 
-        let results = await Promise.all([player1.nextMessage(), player2.nextMessage()])
+        const results = await Promise.all([player1.nextMessage(), player2.nextMessage()])
         for (const msg of results) {
           assert.strictEqual(msg, '{"text":"A message from the server."}')
         }
@@ -466,7 +466,7 @@ for (const supportedVersion of mc.supportedVersions) {
         client.write('login', loginPacket(client, server))
         client.writeBundle([
           ['update_time', { age: 1, time: 2 }],
-          ['close_window', {windowId:0}]
+          ['close_window', { windowId: 0 }]
         ])
       })
       server.on('close', done)
