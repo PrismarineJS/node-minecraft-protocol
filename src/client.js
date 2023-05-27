@@ -95,8 +95,8 @@ class Client extends EventEmitter {
       }
       if (parsed.metadata.name === 'bundle_delimiter') {
         if (this._mcBundle.length) {
-          this._mcBundle = []
           this._mcBundle.forEach(emitPacket)
+          this._mcBundle = []
         } else { // Start bundle
           this._mcBundle.push(parsed)
         }
@@ -236,10 +236,9 @@ class Client extends EventEmitter {
   }
 
   writeBundle (packets) {
-    const zero = Buffer.alloc(1)
-    if (this._hasBundlePacket) this.writeRaw(zero)
+    if (this._hasBundlePacket) this.write('bundle_delimiter', {})
     for (const [name, params] of packets) this.write(name, params)
-    if (this._hasBundlePacket) this.writeRaw(zero)
+    if (this._hasBundlePacket) this.write('bundle_delimiter', {})
   }
 
   writeRaw (buffer) {

@@ -483,7 +483,7 @@ for (const supportedVersion of mc.supportedVersions) {
           client.on('close_window', function () {
             server.close()
             const d2 = Date.now()
-            if (mcData.supportFeature('hasBundlePacket') && (d2 - d1) > 2) {
+            if (mcData.supportFeature('hasBundlePacket') && (d2 - d1) > 1) {
               throw new Error(`bundle packet constituents did not arrive at once : ${d1}, ${d2}`)
             }
           })
