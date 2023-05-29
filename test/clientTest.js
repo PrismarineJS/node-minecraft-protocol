@@ -1,10 +1,10 @@
 /* eslint-env mocha */
 
 const mc = require('../')
-const os = require('node:os')
-const path = require('node:path')
+const os = require('os')
+const path = require('path')
 const assert = require('power-assert')
-const util = require('node:util')
+const util = require('util')
 const applyClientHelpers = require('./common/clientHelpers')
 const download = util.promisify(require('minecraft-wrap').download)
 const { getPort } = require('./common/util')

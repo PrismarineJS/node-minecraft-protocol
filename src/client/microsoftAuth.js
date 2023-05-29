@@ -1,4 +1,4 @@
-const path = require('node:path')
+const path = require('path')
 const { Authflow: PrismarineAuth, Titles } = require('prismarine-auth')
 const minecraftFolderPath = require('minecraft-folder-path')
 const debug = require('debug')('minecraft-protocol')

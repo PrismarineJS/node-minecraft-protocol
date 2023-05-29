@@ -1,5 +1,5 @@
 const mc = require('minecraft-protocol')
-const Http = require('node:http')
+const Http = require('http')
 const ProxyAgent = require('proxy-agent')
 
 if (process.argv.length < 6 || process.argv.length > 8) {

@@ -1,5 +1,5 @@
 const UUID = require('uuid-1345')
-const crypto = require('node:crypto')
+const crypto = require('crypto')
 const pluginChannels = require('../client/pluginChannels')
 const states = require('../states')
 const yggdrasil = require('yggdrasil')

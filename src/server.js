@@ -1,6 +1,6 @@
 'use strict'
 
-const net = require('node:net')
+const net = require('net')
 const EventEmitter = require('events').EventEmitter
 const Client = require('./client')
 const states = require('./states')

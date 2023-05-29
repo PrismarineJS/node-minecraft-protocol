@@ -1,5 +1,5 @@
-const net = require('node:net')
-const dns = require('node:dns')
+const net = require('net')
+const dns = require('dns')
 
 module.exports = function (client, options) {
   // Default options
