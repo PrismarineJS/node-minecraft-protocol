@@ -72,21 +72,25 @@ node-minecraft-protocol is pluggable.
 ### Echo client example
 
 ```js
-var mc = require('minecraft-protocol');
-var client = mc.createClient({
+const mc = require('minecraft-protocol');
+const client = mc.createClient({
   host: "localhost",   // optional
   port: 25565,         // optional
   username: "email@example.com",
   password: "12345678",
   auth: 'microsoft' // optional; by default uses offline mode, if using a microsoft account, set to 'microsoft'
 });
+
 client.on('chat', function(packet) {
   // Listen for chat messages and echo them back.
-  var jsonMsg = JSON.parse(packet.message);
-  if(jsonMsg.translate == 'chat.type.announcement' || jsonMsg.translate == 'chat.type.text') {
-    var username = jsonMsg.with[0].text;
-    var msg = jsonMsg.with[1];
-    if(username === client.username) return;
+  const jsonMsg = JSON.parse(packet.message);
+  
+  if (jsonMsg.translate == 'chat.type.announcement' || jsonMsg.translate == 'chat.type.text') {
+    const username = jsonMsg.with[0].text;
+    const msg = jsonMsg.with[1];
+
+    if (username === client.username) return;
+
     client.write('chat', {message: msg.text});
   }
 });
@@ -100,8 +104,8 @@ You can also leave out `password` when using a Microsoft account. If provided, p
 Example to connect to a Realm that the authenticating account is owner of or has been invited to:
 
 ```js
-var mc = require('minecraft-protocol');
-var client = mc.createClient({
+const mc = require('minecraft-protocol');
+const client = mc.createClient({
   realms: {
     pickRealm: (realms) => realms[0] // Function which recieves an array of joined/owned Realms and must return a single Realm. Can be async
   },
@@ -112,8 +116,8 @@ var client = mc.createClient({
 ### Hello World server example
 
 ```js
-var mc = require('minecraft-protocol');
-var server = mc.createServer({
+const mc = require('minecraft-protocol');
+const server = mc.createServer({
   'online-mode': true,   // optional
   encryption: true,      // optional
   host: '0.0.0.0',       // optional
@@ -123,8 +127,7 @@ var server = mc.createServer({
 const mcData = require('minecraft-data')(server.version)
 
 server.on('login', function(client) {
-  
-  let loginPacket = mcData.loginPacket
+  const loginPacket = mcData.loginPacket
 
   client.write('login', {
     entityId: client.id,
@@ -143,21 +146,24 @@ server.on('login', function(client) {
     isDebug: false,
     isFlat: false
   });
+
   client.write('position', {
     x: 0,
-    y: 1.62,
+    y: 255,
     z: 0,
     yaw: 0,
     pitch: 0,
     flags: 0x00
   });
-  var msg = {
+
+  const msg = {
     translate: 'chat.type.announcement',
     "with": [
       'Server',
       'Hello, world!'
     ]
   };
+  
   client.write("chat", { message: JSON.stringify(msg), position: 0, sender: '0' });
 });
 ```
@@ -175,7 +181,7 @@ You can enable some protocol debugging output using `DEBUG` environment variable
 DEBUG="minecraft-protocol" node [...]
 ```
 
-On windows :
+On Windows:
 ```
 set DEBUG=minecraft-protocol
 node your_script.js
