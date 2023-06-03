@@ -1,5 +1,4 @@
 'use strict'
-
 const EventEmitter = require('events').EventEmitter
 const debug = require('debug')('minecraft-protocol')
 const compression = require('./transforms/compression')
@@ -30,8 +29,9 @@ class Client extends EventEmitter {
     this.latency = 0
     this.hideErrors = hideErrors
     this.closeTimer = null
-
+    const mcData = require('minecraft-data')(version)
     this.state = states.HANDSHAKING
+    this._hasBundlePacket = mcData.supportFeature('hasBundlePacket')
   }
 
   get state () {
@@ -77,7 +77,13 @@ class Client extends EventEmitter {
       if (!this.compressor) { this.splitter.pipe(this.deserializer) } else { this.decompressor.pipe(this.deserializer) }
       this.emit('error', e)
     })
-
+    this._mcBundle = []
+    const emitPacket = (parsed) => {
+      this.emit('packet', parsed.data, parsed.metadata, parsed.buffer, parsed.fullBuffer)
+      this.emit(parsed.metadata.name, parsed.data, parsed.metadata)
+      this.emit('raw.' + parsed.metadata.name, parsed.buffer, parsed.metadata)
+      this.emit('raw', parsed.buffer, parsed.metadata)
+    }
     this.deserializer.on('data', (parsed) => {
       parsed.metadata.name = parsed.data.name
       parsed.data = parsed.data.params
@@ -87,10 +93,18 @@ class Client extends EventEmitter {
         const s = JSON.stringify(parsed.data, null, 2)
         debug(s && s.length > 10000 ? parsed.data : s)
       }
-      this.emit('packet', parsed.data, parsed.metadata, parsed.buffer, parsed.fullBuffer)
-      this.emit(parsed.metadata.name, parsed.data, parsed.metadata)
-      this.emit('raw.' + parsed.metadata.name, parsed.buffer, parsed.metadata)
-      this.emit('raw', parsed.buffer, parsed.metadata)
+      if (parsed.metadata.name === 'bundle_delimiter') {
+        if (this._mcBundle.length) {
+          this._mcBundle.forEach(emitPacket)
+          this._mcBundle = []
+        } else { // Start bundle
+          this._mcBundle.push(parsed)
+        }
+      } else if (this._mcBundle.length) {
+        this._mcBundle.push(parsed)
+      } else {
+        emitPacket(parsed)
+      }
     })
   }
 
@@ -219,6 +233,12 @@ class Client extends EventEmitter {
     debug('writing packet ' + this.state + '.' + name)
     debug(params)
     this.serializer.write({ name, params })
+  }
+
+  writeBundle (packets) {
+    if (this._hasBundlePacket) this.write('bundle_delimiter', {})
+    for (const [name, params] of packets) this.write(name, params)
+    if (this._hasBundlePacket) this.write('bundle_delimiter', {})
   }
 
   writeRaw (buffer) {
