@@ -62,23 +62,23 @@ for (const supportedVersion of mc.supportedVersions) {
       // removed `dimension`
       // removed `dimensionCodec`
       registryCodec: {
-        "type": "compound",
-        "name": "",
-        "value": {}
+        type: 'compound',
+        name: '',
+        value: {}
       },
-      worldType: "minecraft:overworld",
+      worldType: 'minecraft:overworld',
       death: undefined
       // more to be added
     }
   }
 
-  function sendBroadcastMessage(server, clients, message, sender) {
+  function sendBroadcastMessage (server, clients, message, sender) {
     if (mcData.supportFeature('signedChat')) {
       server.writeToClients(clients, 'player_chat', {
         plainMessage: message,
         signedChatContent: '',
         unsignedChatContent: JSON.stringify({ text: message }),
-        type: 0,  
+        type: 0,
         senderUuid: 'd3527a0b-bc03-45d5-a878-2aafdd8c8a43', // random
         senderName: JSON.stringify({ text: sender }),
         senderTeam: undefined,
@@ -96,7 +96,7 @@ for (const supportedVersion of mc.supportedVersions) {
 
   describe('mc-server ' + version.minecraftVersion, function () {
     this.timeout(5000)
-    this.beforeAll(async function() {
+    this.beforeAll(async function () {
       PORT = await getPort()
       console.log(`Using port for tests: ${PORT}`)
     })
@@ -214,7 +214,7 @@ for (const supportedVersion of mc.supportedVersions) {
               sample: []
             },
             description: {
-              extra: [ { color: 'red', text: 'Red text' } ],
+              extra: [{ color: 'red', text: 'Red text' }],
               bold: true,
               text: 'Example chat mesasge'
             }
@@ -278,7 +278,7 @@ for (const supportedVersion of mc.supportedVersions) {
           version: version.minecraftVersion,
           port: PORT
         })
-        client.on('packet', (data, {name})=>{
+        client.on('packet', (data, { name }) => {
           if (name === 'success') {
             assert.strictEqual(data.uuid, notchUUID, 'UUID')
             server.close()
@@ -333,7 +333,7 @@ for (const supportedVersion of mc.supportedVersions) {
           }))
 
           const p1Join = await player1.nextMessage('player2')
-          
+
           assert.strictEqual(p1Join, '{"text":"player2 joined the game."}')
 
           player2.chat('hi')
@@ -441,7 +441,7 @@ for (const supportedVersion of mc.supportedVersions) {
 
         sendBroadcastMessage(server, Object.values(server.clients), 'A message from the server.')
 
-        let results = await Promise.all([player1.nextMessage(), player2.nextMessage()])
+        const results = await Promise.all([player1.nextMessage(), player2.nextMessage()])
         for (const msg of results) {
           assert.strictEqual(msg, '{"text":"A message from the server."}')
         }
@@ -450,6 +450,44 @@ for (const supportedVersion of mc.supportedVersions) {
         player2.end()
         await Promise.all([once(player1, 'end'), once(player2, 'end')])
         server.close()
+      })
+    })
+
+    it('supports bundle packet', function (done) {
+      const server = mc.createServer({
+        'online-mode': false,
+        version: version.minecraftVersion,
+        port: PORT
+      })
+      server.on('login', function (client) {
+        client.on('end', function (reason) {
+          assert.strictEqual(reason, 'ServerShutdown')
+        })
+        client.write('login', loginPacket(client, server))
+        client.writeBundle([
+          ['update_time', { age: 1, time: 2 }],
+          ['close_window', { windowId: 0 }]
+        ])
+      })
+      server.on('close', done)
+      server.on('listening', function () {
+        const client = mc.createClient({
+          username: 'lalalal',
+          host: '127.0.0.1',
+          version: version.minecraftVersion,
+          port: PORT
+        })
+        client.on('update_time', function () {
+          // Below handler synchronously defined should be guaranteed to be called after the above one
+          const d1 = Date.now()
+          client.on('close_window', function () {
+            server.close()
+            const d2 = Date.now()
+            if (mcData.supportFeature('hasBundlePacket') && (d2 - d1) > 1) {
+              throw new Error(`bundle packet constituents did not arrive at once : ${d1}, ${d2}`)
+            }
+          })
+        })
       })
     })
   })

@@ -76,7 +76,7 @@ module.exports = function (client, server, options) {
     }
   }
 
-  client.on('session', (packet) => {
+  client.on('chat_session_update', (packet) => {
     client._session = {
       index: 0,
       uuid: packet.sessionUuid

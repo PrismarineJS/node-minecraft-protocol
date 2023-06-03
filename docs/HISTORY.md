@@ -1,6 +1,14 @@
 # History
 
-##1.41.2
+## 1.42.0
+
+* 1.19.4 support (@extremeheat)
+* Fix plugin channels support (@turikhay)
+* Typo in "cypher" property check (@XHawk87)
+* Add ipc connection option for servers (@IceTank)
+* bug fix (@extremeheat)
+
+## 1.41.2
 * Fix client sending session packet while server is in login state (@frej4189)
 * Fix client attempting to sign messages on offline servers (@frej4189)
 

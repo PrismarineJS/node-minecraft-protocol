@@ -19,7 +19,7 @@ module.exports = function (client, options) {
         uuid: uuid.v4fast()
       }
 
-      client.write('session', {
+      client.write('chat_session_update', {
         sessionUUID: client._session.uuid,
         expireTime: client.profileKeys ? BigInt(client.profileKeys.expiresOn.getTime()) : undefined,
         publicKey: client.profileKeys ? client.profileKeys.public.export({ type: 'spki', format: 'der' }) : undefined,
