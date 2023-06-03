@@ -29,8 +29,6 @@ jobs:
         distribution: 'adopt'
     - name: Install dependencies
       run: npm install
-    - name: TEMP 
-      run: cd node_modules/minecraft-data/ && rm -fr minecraft-data && git clone https://github.com/TFBosoN/minecraft-data && node ./bin/generate_data.js
     - name: Run tests
       run: npm test -- -g ${{ matrix.mcVersion }}
   packet-cycle-test:
