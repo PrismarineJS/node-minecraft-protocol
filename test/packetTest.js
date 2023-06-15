@@ -243,6 +243,9 @@ for (const supportedVersion of mc.supportedVersions) {
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
   const packets = mcData.protocol
+  if (mcData.supportFeature('mcDataHasEntityMetadata')) {
+    values.entityMetadata[0].type = 'direction'
+  }
 
   describe('packets ' + version.minecraftVersion, function () {
     let client, server, serverClient
