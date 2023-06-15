@@ -244,7 +244,9 @@ for (const supportedVersion of mc.supportedVersions) {
   const version = mcData.version
   const packets = mcData.protocol
   if (mcData.supportFeature('mcDataHasEntityMetadata')) {
-    values.entityMetadata[0].type = 'direction'
+    values.entityMetadata[0].type = 'byte'
+  } else {
+    values.entityMetadata[0].type = 0
   }
 
   describe('packets ' + version.minecraftVersion, function () {
