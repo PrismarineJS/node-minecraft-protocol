@@ -243,17 +243,17 @@ for (const supportedVersion of mc.supportedVersions) {
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
   const packets = mcData.protocol
-  if (mcData.supportFeature('mcDataHasEntityMetadata')) {
-    values.entityMetadata[0].type = 'byte'
-  } else {
-    values.entityMetadata[0].type = 0
-  }
 
   describe('packets ' + version.minecraftVersion, function () {
     let client, server, serverClient
     before(async function () {
       PORT = await getPort()
       server = new Server(version.minecraftVersion)
+      if (mcData.supportFeature('mcDataHasEntityMetadata')) {
+        values.entityMetadata[0].type = 'byte'
+      } else {
+        values.entityMetadata[0].type = 0
+      }
       return new Promise((resolve) => {
         console.log(`Using port for tests: ${PORT}`)
         server.once('listening', function () {
