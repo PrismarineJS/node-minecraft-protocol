@@ -1,5 +1,9 @@
 # History
 
+## 1.43.0
+
+* 1.20.0 and .1 support (@PondWader)
+
 ## 1.42.0
 
 * 1.19.4 support (@extremeheat)
