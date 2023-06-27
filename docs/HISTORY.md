@@ -1,5 +1,9 @@
 # History
 
+## 1.43.1
+
+* Temporarily make node 18 not required in package.json
+
 ## 1.43.0
 
 * 1.20.0 and .1 support (@PondWader)
