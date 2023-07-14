@@ -13,7 +13,7 @@ module.exports = function (client, options) {
 
   client.once('login', () => {
     const mcData = require('minecraft-data')(client.version)
-    if (mcData.supportFeature('useChatSessions') && client.profileKeys && client.cipher) {
+    if (mcData.supportFeature('useChatSessions') && client.profileKeys && client.cipher && client.session.selectedProfile.id === client.uuid.replace(/-/g, '')) {
       client._session = {
         index: 0,
         uuid: uuid.v4fast()
