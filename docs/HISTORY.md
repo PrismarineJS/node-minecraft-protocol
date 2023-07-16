@@ -1,5 +1,9 @@
 # History
 
+## 1.43.2
+
+* Fix client sending chat_session_update when local UUID does not match UUID on server (@frej4189)
+
 ## 1.43.1
 
 * Temporarily make node 18 not required in package.json
