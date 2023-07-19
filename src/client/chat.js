@@ -334,6 +334,31 @@ module.exports = function (client, options) {
   let pendingChatRequest
   let lastPreviewRequestId = 0
 
+  function getAcknowledgements () {
+    let acc = 0
+    const acknowledgements = []
+
+    for (let i = 0; i < client._lastSeenMessages.capacity; i++) {
+      const idx = (client._lastSeenMessages.offset + i) % 20
+      const message = client._lastSeenMessages[idx]
+      if (message) {
+        acc |= 1 << i
+        acknowledgements.push(message.signature)
+        message.pending = false
+      }
+    }
+
+    const bitset = Buffer.allocUnsafe(3)
+    bitset[0] = acc & 0xFF
+    bitset[1] = (acc >> 8) & 0xFF
+    bitset[2] = (acc >> 16) & 0xFF
+
+    return {
+      acknowledgements,
+      acknowledged: bitset
+    }
+  }
+
   client._signedChat = (message, options = {}) => {
     options.timestamp = options.timestamp || BigInt(Date.now())
     options.salt = options.salt || 1n
@@ -356,63 +381,28 @@ module.exports = function (client, options) {
     }
 
     if (message.startsWith('/') && mcData.supportFeature('useChatSessions')) {
+      const { acknowledged } = getAcknowledgements()
       const command = message.slice(1)
-
-      let acc = 0
-      const acknowledgements = []
-
-      for (let i = 0; i < client._lastSeenMessages.capacity; i++) {
-        const idx = (client._lastSeenMessages.offset + i) % 20
-        const message = client._lastSeenMessages[idx]
-        if (message) {
-          acc |= 1 << i
-          acknowledgements.push(message.signature)
-          message.pending = false
-        }
-      }
-
-      const bitset = Buffer.allocUnsafe(3)
-      bitset[0] = acc & 0xFF
-      bitset[1] = (acc >> 8) & 0xFF
-      bitset[2] = (acc >> 16) & 0xFF
-
       client.write('chat_command', {
         command,
         timestamp: options.timestamp,
         salt: options.salt,
         argumentSignatures: signaturesForCommand(command, options.timestamp, options.salt),
         messageCount: client._lastSeenMessages.capacity,
-        acknowledged: bitset
+        acknowledged
       })
       return
     }
 
     if (mcData.supportFeature('useChatSessions')) {
-      let acc = 0
-      const acknowledgements = []
-
-      for (let i = 0; i < client._lastSeenMessages.capacity; i++) {
-        const idx = (client._lastSeenMessages.offset + i) % 20
-        const message = client._lastSeenMessages[idx]
-        if (message) {
-          acc |= 1 << i
-          acknowledgements.push(message.signature)
-          message.pending = false
-        }
-      }
-
-      const bitset = Buffer.allocUnsafe(3)
-      bitset[0] = acc & 0xFF
-      bitset[1] = (acc >> 8) & 0xFF
-      bitset[2] = (acc >> 16) & 0xFF
-
+      const { acknowledgements, acknowledged } = getAcknowledgements()
       client.write('chat_message', {
         message,
         timestamp: options.timestamp,
         salt: options.salt,
         signature: (client.profileKeys && client._session) ? client.signMessage(message, options.timestamp, options.salt, undefined, acknowledgements) : undefined,
         offset: client._lastSeenMessages.pending,
-        acknowledged: bitset
+        acknowledged
       })
       client._lastSeenMessages.pending = 0
 
