@@ -363,34 +363,33 @@ module.exports = function (client, options) {
     options.timestamp = options.timestamp || BigInt(Date.now())
     options.salt = options.salt || 1n
 
-    if (message.startsWith('/') && !mcData.supportFeature('useChatSessions')) {
+    if (message.startsWith('/')) {
       const command = message.slice(1)
-      client.write('chat_command', {
-        command,
-        timestamp: options.timestamp,
-        salt: options.salt,
-        argumentSignatures: signaturesForCommand(command, options.timestamp, options.salt),
-        signedPreview: options.didPreview,
-        previousMessages: client._lastSeenMessages.map((e) => ({
-          messageSender: e.sender,
-          messageSignature: e.signature
-        })),
-        lastRejectedMessage: client._lastRejectedMessage
-      })
-      return
-    }
+      if (mcData.supportFeature('useChatSessions')) {
+        const { acknowledged } = getAcknowledgements()
+        client.write('chat_command', {
+          command,
+          timestamp: options.timestamp,
+          salt: options.salt,
+          argumentSignatures: signaturesForCommand(command, options.timestamp, options.salt),
+          messageCount: client._lastSeenMessages.pending,
+          acknowledged
+        })
+      } else {
+        client.write('chat_command', {
+          command,
+          timestamp: options.timestamp,
+          salt: options.salt,
+          argumentSignatures: signaturesForCommand(command, options.timestamp, options.salt),
+          signedPreview: options.didPreview,
+          previousMessages: client._lastSeenMessages.map((e) => ({
+            messageSender: e.sender,
+            messageSignature: e.signature
+          })),
+          lastRejectedMessage: client._lastRejectedMessage
+        })
+      }
 
-    if (message.startsWith('/') && mcData.supportFeature('useChatSessions')) {
-      const { acknowledged } = getAcknowledgements()
-      const command = message.slice(1)
-      client.write('chat_command', {
-        command,
-        timestamp: options.timestamp,
-        salt: options.salt,
-        argumentSignatures: signaturesForCommand(command, options.timestamp, options.salt),
-        messageCount: client._lastSeenMessages.pending,
-        acknowledged
-      })
       return
     }
 
