@@ -346,6 +346,8 @@ module.exports = function (client, options) {
         salt: options.salt,
         argumentSignatures: signaturesForCommand(command, options.timestamp, options.salt),
         signedPreview: options.didPreview,
+        messageCount: 0,
+        acknowledged: Buffer.alloc(3),
         previousMessages: client._lastSeenMessages.map((e) => ({
           messageSender: e.sender,
           messageSignature: e.signature
