@@ -388,7 +388,7 @@ module.exports = function (client, options) {
         timestamp: options.timestamp,
         salt: options.salt,
         argumentSignatures: signaturesForCommand(command, options.timestamp, options.salt),
-        messageCount: client._lastSeenMessages.capacity,
+        messageCount: client._lastSeenMessages.pending,
         acknowledged
       })
       return
