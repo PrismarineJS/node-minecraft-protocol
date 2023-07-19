@@ -338,7 +338,7 @@ module.exports = function (client, options) {
     options.timestamp = options.timestamp || BigInt(Date.now())
     options.salt = options.salt || 1n
 
-    if (message.startsWith('/')) {
+    if (message.startsWith('/') && !mcData.supportFeature('useChatSessions')) {
       const command = message.slice(1)
       client.write('chat_command', {
         command,
@@ -346,13 +346,43 @@ module.exports = function (client, options) {
         salt: options.salt,
         argumentSignatures: signaturesForCommand(command, options.timestamp, options.salt),
         signedPreview: options.didPreview,
-        messageCount: 0,
-        acknowledged: Buffer.alloc(3),
         previousMessages: client._lastSeenMessages.map((e) => ({
           messageSender: e.sender,
           messageSignature: e.signature
         })),
         lastRejectedMessage: client._lastRejectedMessage
+      })
+      return
+    }
+
+    if (message.startsWith('/') && mcData.supportFeature('useChatSessions')) {
+      const command = message.slice(1)
+
+      let acc = 0
+      const acknowledgements = []
+
+      for (let i = 0; i < client._lastSeenMessages.capacity; i++) {
+        const idx = (client._lastSeenMessages.offset + i) % 20
+        const message = client._lastSeenMessages[idx]
+        if (message) {
+          acc |= 1 << i
+          acknowledgements.push(message.signature)
+          message.pending = false
+        }
+      }
+
+      const bitset = Buffer.allocUnsafe(3)
+      bitset[0] = acc & 0xFF
+      bitset[1] = (acc >> 8) & 0xFF
+      bitset[2] = (acc >> 16) & 0xFF
+
+      client.write('chat_command', {
+        command,
+        timestamp: options.timestamp,
+        salt: options.salt,
+        argumentSignatures: signaturesForCommand(command, options.timestamp, options.salt),
+        messageCount: client._lastSeenMessages.capacity,
+        acknowledged: bitset
       })
       return
     }
