@@ -338,7 +338,7 @@ module.exports = function (client, options) {
     options.timestamp = options.timestamp || BigInt(Date.now())
     options.salt = options.salt || 1n
 
-    if (message.startsWith('/') && !mcData.supportFeature('useChatSessions')) {
+    if (message.startsWith('/')) {
       const command = message.slice(1)
       client.write('chat_command', {
         command,
