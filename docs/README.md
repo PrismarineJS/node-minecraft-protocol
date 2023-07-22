@@ -65,7 +65,7 @@ node-minecraft-protocol is pluggable.
 
 * [API doc](API.md)
 * [faq](FAQ.md)
-* [protocol doc](https://prismarinejs.github.io/minecraft-data/) and [wiki.vg/Protocol](https://wiki.vg/Protocol)
+* [protocol doc](https://prismarinejs.github.io/minecraft-data/?d=protocol) and [wiki.vg/Protocol](https://wiki.vg/Protocol)
 
 ## Usage
 
