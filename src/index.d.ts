@@ -12,7 +12,7 @@ type PromiseLike = Promise<void> | void
 
 declare module 'minecraft-protocol' {
 	export class Client extends EventEmitter {
-		constructor(isServer: boolean, version: string, customPackets?: any)
+		constructor(isServer: boolean, version: '1.7' | '1.8', '1.9', '1.10', '1.11.2', '1.12.2', '1.13.2', '1.14.4', '1.15.2', '1.16.5', '1.17.1', '1.18.2', '1.19', '1.19.2', '1.19.3', '1.19.4', '1.20', '1.20.1', customPackets?: any)
 		state: States
 		isServer: boolean
 		socket: Socket
@@ -25,7 +25,7 @@ declare module 'minecraft-protocol' {
 		latency: number
 		customPackets: any
 		protocolVersion: number
-		version: string
+		version: '1.7' | '1.8', '1.9', '1.10', '1.11.2', '1.12.2', '1.13.2', '1.14.4', '1.15.2', '1.16.5', '1.17.1', '1.18.2', '1.19', '1.19.2', '1.19.3', '1.19.4', '1.20', '1.20.1'
 		write(name: string, params: any): void
 		writeRaw(buffer: any): void
 		compressionThreshold: string
@@ -120,7 +120,7 @@ declare module 'minecraft-protocol' {
 		closeTimeout?: number 
 		noPongTimeout?: number
 		checkTimeoutInterval?: number
-		version?: string
+		version?: '1.7' | '1.8', '1.9', '1.10', '1.11.2', '1.12.2', '1.13.2', '1.14.4', '1.15.2', '1.16.5', '1.17.1', '1.18.2', '1.19', '1.19.2', '1.19.3', '1.19.4', '1.20', '1.20.1'
 		customPackets?: any
 		hideErrors?: boolean
 		skipValidation?: boolean
@@ -139,7 +139,7 @@ declare module 'minecraft-protocol' {
 	}
 
 	export class Server extends EventEmitter {
-		constructor(version: string, customPackets?: any)
+		constructor(version: '1.7' | '1.8', '1.9', '1.10', '1.11.2', '1.12.2', '1.13.2', '1.14.4', '1.15.2', '1.16.5', '1.17.1', '1.18.2', '1.19', '1.19.2', '1.19.3', '1.19.4', '1.20', '1.20.1', customPackets?: any)
 		writeToClients(clients: Client[], name: string, params: any): void
 		onlineModeExceptions: object
 		clients: { [key: number]: ServerClient }
@@ -179,7 +179,7 @@ declare module 'minecraft-protocol' {
 		motdMsg?: Object
 		maxPlayers?: number
 		keepAlive?: boolean
-		version?: string | false
+		version?: '1.7' | '1.8', '1.9', '1.10', '1.11.2', '1.12.2', '1.13.2', '1.14.4', '1.15.2', '1.16.5', '1.17.1', '1.18.2', '1.19', '1.19.2', '1.19.3', '1.19.4', '1.20', '1.20.1' | false
 		fallbackVersion?: string
 		favicon?: string
 		customPackets?: any
@@ -199,7 +199,7 @@ declare module 'minecraft-protocol' {
 		customPackets: any
 		isServer?: boolean
 		state?: States
-		version: string
+		version: '1.7' | '1.8', '1.9', '1.10', '1.11.2', '1.12.2', '1.13.2', '1.14.4', '1.15.2', '1.16.5', '1.17.1', '1.18.2', '1.19', '1.19.2', '1.19.3', '1.19.4', '1.20', '1.20.1'
 	}
 	
 	export interface MicrosoftDeviceAuthorizationResponse {
@@ -228,7 +228,7 @@ declare module 'minecraft-protocol' {
 		majorVersion?: string
 		port?: number
 		protocolVersion?: string
-		version?: string
+		version?: '1.7' | '1.8', '1.9', '1.10', '1.11.2', '1.12.2', '1.13.2', '1.14.4', '1.15.2', '1.16.5', '1.17.1', '1.18.2', '1.19', '1.19.2', '1.19.3', '1.19.4', '1.20', '1.20.1'
 		closeTimeout?: number
 		noPongTimeout?: number
 	}
@@ -239,7 +239,7 @@ declare module 'minecraft-protocol' {
 		playerCount: number
 		prefix: string
 		protocol: number
-		version: string
+		version: '1.7' | '1.8', '1.9', '1.10', '1.11.2', '1.12.2', '1.13.2', '1.14.4', '1.15.2', '1.16.5', '1.17.1', '1.18.2', '1.19', '1.19.2', '1.19.3', '1.19.4', '1.20', '1.20.1'
 	}
 
 	export interface NewPingResult {
