@@ -94,8 +94,9 @@ class Client extends EventEmitter {
         debug(s && s.length > 10000 ? parsed.data : s)
       }
       if (parsed.metadata.name === 'bundle_delimiter') {
-        if (this._mcBundle.length) {
+        if (this._mcBundle.length) { // End bundle
           this._mcBundle.forEach(emitPacket)
+          emitPacket(parsed)
           this._mcBundle = []
         } else { // Start bundle
           this._mcBundle.push(parsed)
