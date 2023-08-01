@@ -375,6 +375,7 @@ module.exports = function (client, options) {
           messageCount: client._lastSeenMessages.pending,
           acknowledged
         })
+        client._lastSeenMessages.pending = 0
       } else {
         client.write('chat_command', {
           command,
