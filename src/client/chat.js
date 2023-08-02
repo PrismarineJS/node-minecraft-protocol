@@ -316,7 +316,7 @@ module.exports = function (client, options) {
     }
   })
 
-  function signaturesForCommand (string, ts, salt) {
+  function signaturesForCommand (string, ts, salt, preview, acknowledgements) {
     const signatures = []
     const slices = string.split(' ')
     if (sliceIndexForMessage[slices[0]]) {
@@ -324,7 +324,7 @@ module.exports = function (client, options) {
       const sliced = slices.slice(sliceIndex)
       if (sliced.length > 0) {
         const signable = sliced.join(' ')
-        signatures.push({ argumentName: fieldName, signature: client.signMessage(signable, ts, salt) })
+        signatures.push({ argumentName: fieldName, signature: client.signMessage(signable, ts, salt, preview, acknowledgements) })
       }
     }
     return signatures
@@ -366,12 +366,12 @@ module.exports = function (client, options) {
     if (message.startsWith('/')) {
       const command = message.slice(1)
       if (mcData.supportFeature('useChatSessions')) {
-        const { acknowledged } = getAcknowledgements()
+        const { acknowledged, acknowledgements } = getAcknowledgements()
         client.write('chat_command', {
           command,
           timestamp: options.timestamp,
           salt: options.salt,
-          argumentSignatures: signaturesForCommand(command, options.timestamp, options.salt),
+          argumentSignatures: signaturesForCommand(command, options.timestamp, options.salt, options.preview, acknowledgements),
           messageCount: client._lastSeenMessages.pending,
           acknowledged
         })
