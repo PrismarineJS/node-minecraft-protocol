@@ -316,7 +316,7 @@ module.exports = function (client, options) {
     }
   })
 
-  function signaturesForCommand (string, ts, salt) {
+  function signaturesForCommand (string, ts, salt, preview, acknowledgements) {
     const signatures = []
     const slices = string.split(' ')
     if (sliceIndexForMessage[slices[0]]) {
@@ -324,7 +324,7 @@ module.exports = function (client, options) {
       const sliced = slices.slice(sliceIndex)
       if (sliced.length > 0) {
         const signable = sliced.join(' ')
-        signatures.push({ argumentName: fieldName, signature: client.signMessage(signable, ts, salt) })
+        signatures.push({ argumentName: fieldName, signature: client.signMessage(signable, ts, salt, preview, acknowledgements) })
       }
     }
     return signatures
@@ -334,53 +334,75 @@ module.exports = function (client, options) {
   let pendingChatRequest
   let lastPreviewRequestId = 0
 
+  function getAcknowledgements () {
+    let acc = 0
+    const acknowledgements = []
+
+    for (let i = 0; i < client._lastSeenMessages.capacity; i++) {
+      const idx = (client._lastSeenMessages.offset + i) % 20
+      const message = client._lastSeenMessages[idx]
+      if (message) {
+        acc |= 1 << i
+        acknowledgements.push(message.signature)
+        message.pending = false
+      }
+    }
+
+    const bitset = Buffer.allocUnsafe(3)
+    bitset[0] = acc & 0xFF
+    bitset[1] = (acc >> 8) & 0xFF
+    bitset[2] = (acc >> 16) & 0xFF
+
+    return {
+      acknowledgements,
+      acknowledged: bitset
+    }
+  }
+
   client._signedChat = (message, options = {}) => {
     options.timestamp = options.timestamp || BigInt(Date.now())
     options.salt = options.salt || 1n
 
-    if (message.startsWith('/') && !mcData.supportFeature('useChatSessions')) {
+    if (message.startsWith('/')) {
       const command = message.slice(1)
-      client.write('chat_command', {
-        command,
-        timestamp: options.timestamp,
-        salt: options.salt,
-        argumentSignatures: signaturesForCommand(command, options.timestamp, options.salt),
-        signedPreview: options.didPreview,
-        previousMessages: client._lastSeenMessages.map((e) => ({
-          messageSender: e.sender,
-          messageSignature: e.signature
-        })),
-        lastRejectedMessage: client._lastRejectedMessage
-      })
+      if (mcData.supportFeature('useChatSessions')) {
+        const { acknowledged, acknowledgements } = getAcknowledgements()
+        client.write('chat_command', {
+          command,
+          timestamp: options.timestamp,
+          salt: options.salt,
+          argumentSignatures: signaturesForCommand(command, options.timestamp, options.salt, options.preview, acknowledgements),
+          messageCount: client._lastSeenMessages.pending,
+          acknowledged
+        })
+        client._lastSeenMessages.pending = 0
+      } else {
+        client.write('chat_command', {
+          command,
+          timestamp: options.timestamp,
+          salt: options.salt,
+          argumentSignatures: signaturesForCommand(command, options.timestamp, options.salt),
+          signedPreview: options.didPreview,
+          previousMessages: client._lastSeenMessages.map((e) => ({
+            messageSender: e.sender,
+            messageSignature: e.signature
+          })),
+          lastRejectedMessage: client._lastRejectedMessage
+        })
+      }
+
       return
     }
 
     if (mcData.supportFeature('useChatSessions')) {
-      let acc = 0
-      const acknowledgements = []
-
-      for (let i = 0; i < client._lastSeenMessages.capacity; i++) {
-        const idx = (client._lastSeenMessages.offset + i) % 20
-        const message = client._lastSeenMessages[idx]
-        if (message) {
-          acc |= 1 << i
-          acknowledgements.push(message.signature)
-          message.pending = false
-        }
-      }
-
-      const bitset = Buffer.allocUnsafe(3)
-      bitset[0] = acc & 0xFF
-      bitset[1] = (acc >> 8) & 0xFF
-      bitset[2] = (acc >> 16) & 0xFF
-
+      const { acknowledgements, acknowledged } = getAcknowledgements()
       client.write('chat_message', {
         message,
         timestamp: options.timestamp,
         salt: options.salt,
         signature: (client.profileKeys && client._session) ? client.signMessage(message, options.timestamp, options.salt, undefined, acknowledgements) : undefined,
         offset: client._lastSeenMessages.pending,
-        acknowledged: bitset
+        acknowledged
       })
       client._lastSeenMessages.pending = 0
 
