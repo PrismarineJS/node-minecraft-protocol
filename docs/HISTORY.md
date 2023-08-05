@@ -1,5 +1,12 @@
 # History
 
+## 1.44.0
+* [Send chat commands as chat commands instead of chat messages for 1.19.3-1.20.1 (#1241)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/41f9e4ac4a35b0ce241264a3f964c4874d96a119) (thanks @lkwilson)
+* [Fix end bundle bundle_delimiter packet not being emitted (#1248)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/35b2aa536a4739c11fe78f6e8e5c591abd0b0498) (thanks @PondWader)
+* [Bump @types/readable-stream from 2.3.15 to 4.0.0 (#1247)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/94b9c228b07bbaf210aa9f90ab240cb6aa9d7751) (thanks @dependabot[bot])
+* [fix broken link (#1243)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/cc9aa9416101407421bdd085002ec2b26ccfbc83) (thanks @FurriousFox)
+* [Add command gh workflow allowing to use release command in comments (#1244)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/1a4cfa7f5ee1a896b6a924708536d3f956cb869e) (thanks @rom1504)
+
 ## 1.43.2
 
 * Fix client sending chat_session_update when local UUID does not match UUID on server (@frej4189)
