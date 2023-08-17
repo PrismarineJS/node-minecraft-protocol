@@ -91,7 +91,7 @@ class Client extends EventEmitter {
     }
 
     if (this.customCommunication) {
-      this.customCommunication.receiverSetup((/** @type {{name, params, state?}} */parsed) => {
+      this.customCommunication.receiverSetup.call(this, (/** @type {{name, params, state?}} */parsed) => {
         // debug(`receive in ${this.isServer ? 'server' : 'client'}: ${parsed.metadata.name}`)
         this.emit(parsed.name, parsed.params, parsed)
       })
@@ -254,7 +254,7 @@ class Client extends EventEmitter {
     debug(params)
 
     if (this.customCommunication) {
-      this.customCommunication.sendData({ name, params, state: this.state })
+      this.customCommunication.sendData.call(this, { name, params, state: this.state })
     } else {
       this.serializer.write({ name, params })
     }

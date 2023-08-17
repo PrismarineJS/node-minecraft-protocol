@@ -137,8 +137,8 @@ declare module 'minecraft-protocol' {
 		// 1.19+
 		disableChatSigning?: boolean
 		customCommunication?: {
-			sendData({ name, params, state }): void,
-			receiverSetup(callback: (data: { name, params, state? }) => void): void
+			sendData(this: Client, { name, params, state }): void,
+			receiverSetup(this: Client, callback: (data: { name, params, state? }) => void): void
 		}
 		customClient: Client
 	}
