@@ -140,7 +140,7 @@ declare module 'minecraft-protocol' {
 			sendData(this: Client, { name, params, state }): void,
 			receiverSetup(this: Client, callback: (data: { name, params, state? }) => void): void
 		}
-		customClient: Client
+		customClient?: Client
 	}
 
 	export class Server extends EventEmitter {
