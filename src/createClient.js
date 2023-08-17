@@ -1,6 +1,6 @@
 'use strict'
 
-const Client = require('./client')
+const DefaultClient = require('./client')
 const assert = require('assert')
 
 const encrypt = require('./client/encrypt')
@@ -32,7 +32,8 @@ function createClient (options) {
   options.protocolVersion = version.version
   const hideErrors = options.hideErrors || false
 
-  const client = new Client(false, version.minecraftVersion, options.customPackets, hideErrors)
+  const Client = options.customClient ?? DefaultClient
+  const client = new Client(false, version.minecraftVersion, options.customPackets, hideErrors, options.customCommunication)
 
   tcpDns(client, options)
   if (options.auth instanceof Function) {

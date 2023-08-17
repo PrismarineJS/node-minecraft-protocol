@@ -117,7 +117,7 @@ declare module 'minecraft-protocol' {
 		authTitle?: string
 		sessionServer?: string
 		keepAlive?: boolean
-		closeTimeout?: number 
+		closeTimeout?: number
 		noPongTimeout?: number
 		checkTimeoutInterval?: number
 		version?: string
@@ -136,6 +136,11 @@ declare module 'minecraft-protocol' {
 		realms?: RealmsOptions
 		// 1.19+
 		disableChatSigning?: boolean
+		customCommunication?: {
+			sendData({ name, params, state }): void,
+			receiverSetup(callback: (data: { name, params, state? }) => void): void
+		}
+		customClient: Client
 	}
 
 	export class Server extends EventEmitter {
@@ -162,7 +167,7 @@ declare module 'minecraft-protocol' {
 	export interface ServerClient extends Client {
 		id: number
 		// You must call this function when the server receives a message from a player and that message gets
-		// broadcast to other players in player_chat packets. This function stores these packets so the server 
+		// broadcast to other players in player_chat packets. This function stores these packets so the server
 		// can then verify a player's lastSeenMessages field in inbound chat packets to ensure chain integrity.
 		logSentMessageFromPeer(packet: object): boolean
 	}
@@ -201,7 +206,7 @@ declare module 'minecraft-protocol' {
 		state?: States
 		version: string
 	}
-	
+
 	export interface MicrosoftDeviceAuthorizationResponse {
 		device_code: string
 		user_code: string

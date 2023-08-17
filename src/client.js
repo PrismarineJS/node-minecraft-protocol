@@ -13,9 +13,11 @@ const createDecipher = require('./transforms/encryption').createDecipher
 const closeTimeout = 30 * 1000
 
 class Client extends EventEmitter {
-  constructor (isServer, version, customPackets, hideErrors = false) {
+  constructor (isServer, version, customPackets, hideErrors = false, customCommunication = undefined) {
     super()
     this.customPackets = customPackets
+    // if defined, we don't pipe data into anything, so we don't use serializer / deserializer
+    this.customCommunication = customCommunication
     this.version = version
     this.isServer = !!isServer
     this.splitter = framing.createSplitter()
@@ -39,44 +41,47 @@ class Client extends EventEmitter {
   }
 
   setSerializer (state) {
-    this.serializer = createSerializer({ isServer: this.isServer, version: this.version, state, customPackets: this.customPackets })
-    this.deserializer = createDeserializer({
-      isServer: this.isServer,
-      version: this.version,
-      state,
-      packetsToParse:
-      this.packetsToParse,
-      customPackets: this.customPackets,
-      noErrorLogging: this.hideErrors
-    })
+    if (!this.customCommunication) {
+      this.serializer = createSerializer({ isServer: this.isServer, version: this.version, state, customPackets: this.customPackets })
+      this.deserializer = createDeserializer({
+        isServer: this.isServer,
+        version: this.version,
+        state,
+        packetsToParse:
+          this.packetsToParse,
+        customPackets: this.customPackets,
+        noErrorLogging: this.hideErrors
+      })
 
-    this.splitter.recognizeLegacyPing = state === states.HANDSHAKING
+      this.splitter.recognizeLegacyPing = state === states.HANDSHAKING
 
-    this.serializer.on('error', (e) => {
-      let parts
-      if (e.field) {
-        parts = e.field.split('.')
-        parts.shift()
-      } else { parts = [] }
-      const serializerDirection = !this.isServer ? 'toServer' : 'toClient'
-      e.field = [this.protocolState, serializerDirection].concat(parts).join('.')
-      e.message = `Serialization error for ${e.field} : ${e.message}`
-      if (!this.compressor) { this.serializer.pipe(this.framer) } else { this.serializer.pipe(this.compressor) }
-      this.emit('error', e)
-    })
+      this.serializer.on('error', (e) => {
+        let parts
+        if (e.field) {
+          parts = e.field.split('.')
+          parts.shift()
+        } else { parts = [] }
+        const serializerDirection = !this.isServer ? 'toServer' : 'toClient'
+        e.field = [this.protocolState, serializerDirection].concat(parts).join('.')
+        e.message = `Serialization error for ${e.field} : ${e.message}`
+        if (!this.compressor) { this.serializer.pipe(this.framer) } else { this.serializer.pipe(this.compressor) }
+        this.emit('error', e)
+      })
 
-    this.deserializer.on('error', (e) => {
-      let parts
-      if (e.field) {
-        parts = e.field.split('.')
-        parts.shift()
-      } else { parts = [] }
-      const deserializerDirection = this.isServer ? 'toServer' : 'toClient'
-      e.field = [this.protocolState, deserializerDirection].concat(parts).join('.')
-      e.message = `Deserialization error for ${e.field} : ${e.message}`
-      if (!this.compressor) { this.splitter.pipe(this.deserializer) } else { this.decompressor.pipe(this.deserializer) }
-      this.emit('error', e)
-    })
+      this.deserializer.on('error', (e) => {
+        let parts
+        if (e.field) {
+          parts = e.field.split('.')
+          parts.shift()
+        } else { parts = [] }
+        const deserializerDirection = this.isServer ? 'toServer' : 'toClient'
+        e.field = [this.protocolState, deserializerDirection].concat(parts).join('.')
+        e.message = `Deserialization error for ${e.field} : ${e.message}`
+        if (!this.compressor) { this.splitter.pipe(this.deserializer) } else { this.decompressor.pipe(this.deserializer) }
+        this.emit('error', e)
+      })
+    }
+
     this._mcBundle = []
     const emitPacket = (parsed) => {
       this.emit('packet', parsed.data, parsed.metadata, parsed.buffer, parsed.fullBuffer)
@@ -84,55 +89,67 @@ class Client extends EventEmitter {
       this.emit('raw.' + parsed.metadata.name, parsed.buffer, parsed.metadata)
       this.emit('raw', parsed.buffer, parsed.metadata)
     }
-    this.deserializer.on('data', (parsed) => {
-      parsed.metadata.name = parsed.data.name
-      parsed.data = parsed.data.params
-      parsed.metadata.state = state
-      debug('read packet ' + state + '.' + parsed.metadata.name)
-      if (debug.enabled) {
-        const s = JSON.stringify(parsed.data, null, 2)
-        debug(s && s.length > 10000 ? parsed.data : s)
-      }
-      if (parsed.metadata.name === 'bundle_delimiter') {
-        if (this._mcBundle.length) { // End bundle
-          this._mcBundle.forEach(emitPacket)
-          emitPacket(parsed)
-          this._mcBundle = []
-        } else { // Start bundle
-          this._mcBundle.push(parsed)
+
+    if (this.customCommunication) {
+      this.customCommunication.receiverSetup((/** @type {{name, params, state?}} */parsed) => {
+        // debug(`receive in ${this.isServer ? 'server' : 'client'}: ${parsed.metadata.name}`)
+        this.emit(parsed.name, parsed.params, parsed)
+      })
+    } else {
+      this.deserializer.on('data', (parsed) => {
+        parsed.metadata.name = parsed.data.name
+        parsed.data = parsed.data.params
+        parsed.metadata.state = state
+        debug('read packet ' + state + '.' + parsed.metadata.name)
+        if (debug.enabled) {
+          const s = JSON.stringify(parsed.data, null, 2)
+          debug(s && s.length > 10000 ? parsed.data : s)
         }
-      } else if (this._mcBundle.length) {
-        this._mcBundle.push(parsed)
-      } else {
-        emitPacket(parsed)
-      }
-    })
+        if (parsed.metadata.name === 'bundle_delimiter') {
+          if (this._mcBundle.length) { // End bundle
+            this._mcBundle.forEach(emitPacket)
+            emitPacket(parsed)
+            this._mcBundle = []
+          } else { // Start bundle
+            this._mcBundle.push(parsed)
+          }
+        } else if (this._mcBundle.length) {
+          this._mcBundle.push(parsed)
+        } else {
+          emitPacket(parsed)
+        }
+      })
+    }
   }
 
   set state (newProperty) {
     const oldProperty = this.protocolState
     this.protocolState = newProperty
 
-    if (this.serializer) {
-      if (!this.compressor) {
-        this.serializer.unpipe()
-        this.splitter.unpipe(this.deserializer)
-      } else {
-        this.serializer.unpipe(this.compressor)
-        this.decompressor.unpipe(this.deserializer)
-      }
+    if (!this.customCommunication) {
+      if (this.serializer) {
+        if (!this.compressor) {
+          this.serializer.unpipe()
+          this.splitter.unpipe(this.deserializer)
+        } else {
+          this.serializer.unpipe(this.compressor)
+          this.decompressor.unpipe(this.deserializer)
+        }
 
-      this.serializer.removeAllListeners()
-      this.deserializer.removeAllListeners()
+        this.serializer.removeAllListeners()
+        this.deserializer.removeAllListeners()
+      }
     }
     this.setSerializer(this.protocolState)
 
-    if (!this.compressor) {
-      this.serializer.pipe(this.framer)
-      this.splitter.pipe(this.deserializer)
-    } else {
-      this.serializer.pipe(this.compressor)
-      this.decompressor.pipe(this.deserializer)
+    if (!this.customCommunication) {
+      if (!this.compressor) {
+        this.serializer.pipe(this.framer)
+        this.splitter.pipe(this.deserializer)
+      } else {
+        this.serializer.pipe(this.compressor)
+        this.decompressor.pipe(this.deserializer)
+      }
     }
 
     this.emit('state', newProperty, oldProperty)
@@ -185,6 +202,7 @@ class Client extends EventEmitter {
   }
 
   end (reason) {
+    if (this.customCommunication) return
     this._endReason = reason
     /* ending the serializer will end the whole chain
     serializer -> framer -> socket -> splitter -> deserializer */
@@ -214,6 +232,7 @@ class Client extends EventEmitter {
   }
 
   setCompressionThreshold (threshold) {
+    if (this.customCommunication) return
     if (this.compressor == null) {
       this.compressor = compression.createCompressor(threshold)
       this.compressor.on('error', (err) => this.emit('error', err))
@@ -230,10 +249,15 @@ class Client extends EventEmitter {
   }
 
   write (name, params) {
-    if (!this.serializer.writable) { return }
-    debug('writing packet ' + this.state + '.' + name)
+    if (!this.customCommunication && !this.serializer.writable) { return }
+    debug(`[${this.state}] from ${this.isServer ? 'server' : 'client'}: ` + name)
     debug(params)
-    this.serializer.write({ name, params })
+
+    if (this.customCommunication) {
+      this.customCommunication.sendData({ name, params, state: this.state })
+    } else {
+      this.serializer.write({ name, params })
+    }
   }
 
   writeBundle (packets) {
