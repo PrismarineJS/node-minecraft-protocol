@@ -145,7 +145,7 @@ Returns a `Client` instance and perform login.
  * realms : An object which should contain one of the following properties: `realmId` or `pickRealm`. When defined will attempt to join a Realm without needing to specify host/port. **The authenticated account must either own the Realm or have been invited to it** 
    * realmId : The id of the Realm to join. 
    * pickRealm(realms) : A function which will have an array of the user Realms (joined/owned) passed to it. The function should return a Realm. 
- * customCommunication : Allow to create a custom communication between the client and the server so data can be sent and received in a custom way without having to serialize it. Otherwise you should use `socket` option instead where you can supply custom duplex.
+ * customCommunication : Allow to create a custom communication between the client and the server so data can be sent and received in a custom way without having to serialize it. Otherwise you should use `stream` option instead where you can supply custom duplex.
    * `receiverSetup(this: Client, callback: (data: { name, params }) => void)`: Called when the client is ready to receive data from the server. The `callback` should be called with the handler that will receive the data.
    * `sendData(this: Client, { name, params, state })`: Called when the client wants to send data to the server. The `name` is the name of the packet, `params` is the data to send.
 
