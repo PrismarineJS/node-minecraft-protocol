@@ -1,6 +1,6 @@
 'use strict'
 
-const Client = require('./client')
+const DefaultClientImpl = require('./client')
 const assert = require('assert')
 
 const encrypt = require('./client/encrypt')
@@ -14,7 +14,6 @@ const tcpDns = require('./client/tcp_dns')
 const autoVersion = require('./client/autoVersion')
 const pluginChannels = require('./client/pluginChannels')
 const versionChecking = require('./client/versionChecking')
-const CustomChannelClient = require('./customChannelClient')
 
 module.exports = createClient
 
@@ -32,14 +31,9 @@ function createClient (options) {
   options.majorVersion = version.majorVersion
   options.protocolVersion = version.version
   const hideErrors = options.hideErrors || false
+  const Client = options.Client || DefaultClientImpl
 
-  /** @type {CustomChannelClient | DefaultClient} */
-  let client
-  if (options.customCommunication) {
-    client = new CustomChannelClient(false, version.minecraftVersion, options.customCommunication, hideErrors)
-  } else {
-    client = new Client(false, version.minecraftVersion, options.customPackets, hideErrors, options.customCommunication)
-  }
+  const client = new Client(false, version.minecraftVersion, options.customCommunication, hideErrors)
 
   tcpDns(client, options)
   if (options.auth instanceof Function) {
