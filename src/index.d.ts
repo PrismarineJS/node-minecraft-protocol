@@ -5,7 +5,7 @@ import { Socket } from 'net'
 import * as Stream from 'stream'
 import { Agent } from 'http'
 import { Transform } from "readable-stream";
-import { KeyObject } from 'crypto';
+import { BinaryLike, KeyObject } from 'crypto';
 import { Realm } from "prismarine-realms"
 
 type PromiseLike = Promise<void> | void
@@ -39,6 +39,7 @@ declare module 'minecraft-protocol' {
 		signMessage(message: string, timestamp: BigInt, salt?: number, preview?: string, acknowledgements?: Buffer[]): Buffer
 		verifyMessage(publicKey: Buffer | KeyObject, packet: object): boolean
 		reportPlayer(uuid: string, reason: 'FALSE_REPORTING' | 'HATE_SPEECH' | 'TERRORISM_OR_VIOLENT_EXTREMISM' | 'CHILD_SEXUAL_EXPLOITATION_OR_ABUSE' | 'IMMINENT_HARM' | 'NON_CONSENSUAL_INTIMATE_IMAGERY' | 'HARASSMENT_OR_BULLYING' | 'DEFAMATION_IMPERSONATION_FALSE_INFORMATION' | 'SELF_HARM_OR_SUICIDE' | 'ALCOHOL_TOBACCO_DRUGS', signatures: Buffer[], comment?: string): Promise<true>
+		chat(message: string, options?: { timestamp?: BigInt, salt?: BigInt, preview?: BinaryLike, didPreview?: boolean }): void
 		on(event: 'error', listener: (error: Error) => PromiseLike): this
 		on(event: 'packet', handler: (data: any, packetMeta: PacketMeta, buffer: Buffer, fullBuffer: Buffer) => PromiseLike): this
 		on(event: 'raw', handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
