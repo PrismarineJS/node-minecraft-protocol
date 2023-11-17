@@ -32,7 +32,10 @@ module.exports = function (client, options) {
 
   function onLogin (packet) {
     const mcData = require('minecraft-data')(client.version)
-    client.state = states.PLAY
+    if(mcData.supportFeature('hasConfigurationState')){
+        client.write("login_acknowledged",{})
+    }
+    client.state = mcData.supportFeature('hasConfigurationState') ? states.CONFIGURATION : states.PLAY
     client.uuid = packet.uuid
     client.username = packet.username
 
