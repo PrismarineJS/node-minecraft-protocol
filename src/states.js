@@ -4,7 +4,8 @@ const states = {
   HANDSHAKING: 'handshaking',
   STATUS: 'status',
   LOGIN: 'login',
-  PLAY: 'play'
+  PLAY: 'play',
+  CONFIGURATION: 'configuration'
 }
 
 module.exports = states
