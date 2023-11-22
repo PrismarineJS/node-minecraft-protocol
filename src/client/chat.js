@@ -198,7 +198,7 @@ module.exports = function (client, options) {
       if (verified) client._signatureCache.push(packet.signature)
       client.emit('playerChat', {
         plainMessage: packet.plainMessage,
-        unsignedContent: packet.unsignedContent,
+        unsignedContent: packet.unsignedChatContent,
         type: packet.type,
         sender: packet.senderUuid,
         senderName: packet.networkName,
