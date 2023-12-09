@@ -28,17 +28,37 @@ module.exports = function (client, options) {
     }
   })
 
+
   client.once('success', onLogin)
 
   function onLogin (packet) {
     const mcData = require('minecraft-data')(client.version)
-    if(mcData.supportFeature('hasConfigurationState')){
-        client.write("login_acknowledged",{})
-    }
-    client.state = mcData.supportFeature('hasConfigurationState') ? states.CONFIGURATION : states.PLAY
     client.uuid = packet.uuid
     client.username = packet.username
-
+    if (mcData.supportFeature('hasConfigurationState')) {
+      require('../datatypes/minecraft').setNbtToNetwork() // https://wiki.vg/NBT#Network_NBT_.28Java_Edition.29
+      client.write('login_acknowledged', {})
+      client.state = states.CONFIGURATION
+    } else {
+      client.state = states.PLAY
+      enableChat()
+    }
+  }
+  
+  client.once('finish_configuration', onFinishConfiguration)
+  
+  function onFinishConfiguration (packet) {
+    const mcData = require('minecraft-data')(client.version)
+    if (!mcData.supportFeature('hasConfigurationState'))
+      return;
+    
+    client.write('finish_configuration', {})
+    client.state = states.PLAY
+    enableChat()
+  }
+  
+  function enableChat() {
+    const mcData = require('minecraft-data')(client.version)
     if (mcData.supportFeature('signedChat')) {
       if (options.disableChatSigning && client.serverFeatures.enforcesSecureChat) {
         throw new Error('"disableChatSigning" was enabled in client options, but server is enforcing secure chat')

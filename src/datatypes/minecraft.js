@@ -13,9 +13,11 @@ module.exports = {
   compressedNbt: [readCompressedNbt, writeCompressedNbt, sizeOfCompressedNbt],
   restBuffer: [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
   entityMetadataLoop: [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata],
-  topBitSetTerminatedArray: [readTopBitSetTerminatedArray, writeTopBitSetTerminatedArray, sizeOfTopBitSetTerminatedArray]
+  topBitSetTerminatedArray: [readTopBitSetTerminatedArray, writeTopBitSetTerminatedArray, sizeOfTopBitSetTerminatedArray],
+  setNbtToNetwork
 }
 const PartialReadError = require('protodef').utils.PartialReadError
+let useNbtTypeNetwork = false
 
 function readVarLong (buffer, offset) {
   return readVarInt(buffer, offset)
@@ -43,21 +45,33 @@ function writeUUID (value, buffer, offset) {
   return offset + 16
 }
 
+function setNbtToNetwork() {
+  useNbtTypeNetwork = true
+}
+
 function readNbt (buffer, offset) {
+  if (useNbtTypeNetwork)
+    return nbt.protoNetwork.read(buffer, offset, 'nbt_network')
   return nbt.proto.read(buffer, offset, 'nbt')
 }
 
 function writeNbt (value, buffer, offset) {
+  if (useNbtTypeNetwork)
+    return nbt.protoNetwork.write(value, buffer, offset, 'nbt_network')
   return nbt.proto.write(value, buffer, offset, 'nbt')
 }
 
 function sizeOfNbt (value) {
+  if (useNbtTypeNetwork)
+    return nbt.protoNetwork.sizeOf(value, 'nbt_network')
   return nbt.proto.sizeOf(value, 'nbt')
 }
 
 function readOptionalNbt (buffer, offset) {
   if (offset + 1 > buffer.length) { throw new PartialReadError() }
   if (buffer.readInt8(offset) === 0) return { size: 1 }
+  if (useNbtTypeNetwork)
+    return nbt.protoNetwork.read(buffer, offset, 'nbt_network')
   return nbt.proto.read(buffer, offset, 'nbt')
 }
 
@@ -66,11 +80,15 @@ function writeOptionalNbt (value, buffer, offset) {
     buffer.writeInt8(0, offset)
     return offset + 1
   }
+  if (useNbtTypeNetwork)
+    return nbt.protoNetwork.write(value, buffer, offset, 'nbt_network')
   return nbt.proto.write(value, buffer, offset, 'nbt')
 }
 
 function sizeOfOptionalNbt (value) {
   if (value === undefined) { return 1 }
+  if (useNbtTypeNetwork)
+    return nbt.protoNetwork.sizeOf(value, 'nbt_network')
   return nbt.proto.sizeOf(value, 'nbt')
 }
 
@@ -85,7 +103,7 @@ function readCompressedNbt (buffer, offset) {
 
   const nbtBuffer = zlib.gunzipSync(compressedNbt) // TODO: async
 
-  const results = nbt.proto.read(nbtBuffer, 0, 'nbt')
+  const results = readNbt(nbtBuffer, 0)
   return {
     size: length + 2,
     value: results.value
@@ -111,8 +129,8 @@ function writeCompressedNbt (value, buffer, offset) {
 function sizeOfCompressedNbt (value) {
   if (value === undefined) { return 2 }
 
-  const nbtBuffer = Buffer.alloc(sizeOfNbt(value, 'nbt'))
-  nbt.proto.write(value, nbtBuffer, 0, 'nbt')
+  const nbtBuffer = Buffer.alloc(sizeOfNbt(value))
+  writeNbt(value, nbtBuffer, 0)
 
   const compressedNbt = zlib.gzipSync(nbtBuffer) // TODO: async
 
