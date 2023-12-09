@@ -44,7 +44,13 @@ module.exports = function (client, options) {
       enableChat()
     }
   }
-  
+
+  client.on('ping', onPing)
+
+  function onPing (packet) {
+    client.write('pong', { id: packet.id })
+  }
+
   client.once('finish_configuration', onFinishConfiguration)
   
   function onFinishConfiguration (packet) {
