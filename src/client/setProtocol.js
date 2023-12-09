@@ -1,5 +1,5 @@
 'use strict'
-
+const uuid = require("../uuid")
 const states = require('../states')
 
 module.exports = function (client, options) {
@@ -37,7 +37,7 @@ module.exports = function (client, options) {
                 : client.profileKeys.signature
             }
           : null,
-        playerUUID: client.session?.selectedProfile?.id
+        playerUUID: (client.session?.selectedProfile?.id == null && mcData.supportFeature('hasConfigurationState')) ? uuid.nameToMcOfflineUUID(client.username) : client.session?.selectedProfile?.id
       })
     }
   }
