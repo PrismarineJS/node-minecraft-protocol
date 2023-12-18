@@ -37,7 +37,7 @@ module.exports = function (client, options) {
                 : client.profileKeys.signature
             }
           : null,
-        playerUUID: client.session?.selectedProfile?.id
+        playerUUID: client.session?.selectedProfile?.id ?? client.uuid
       })
     }
   }
