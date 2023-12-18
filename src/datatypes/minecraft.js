@@ -43,35 +43,36 @@ function writeUUID (value, buffer, offset) {
   return offset + 16
 }
 
-function readNbt (buffer, offset) {
-  return nbt.proto.read(buffer, offset, 'nbt')
+function readNbt (buffer, offset, { tagType } = { tagType: 'nbt' }) {
+  return nbt.proto.read(buffer, offset, tagType)
 }
 
-function writeNbt (value, buffer, offset) {
-  return nbt.proto.write(value, buffer, offset, 'nbt')
+function writeNbt (value, buffer, offset, { tagType } = { tagType: 'nbt' }) {
+  console.log('Writing nbt', value, buffer, offset, tagType)
+  return nbt.proto.write(value, buffer, offset, tagType)
 }
 
-function sizeOfNbt (value) {
-  return nbt.proto.sizeOf(value, 'nbt')
+function sizeOfNbt (value, { tagType } = { tagType: 'nbt' }) {
+  return nbt.proto.sizeOf(value, tagType)
 }
 
-function readOptionalNbt (buffer, offset) {
+function readOptionalNbt (buffer, offset, { tagType } = { tagType: 'nbt' }) {
   if (offset + 1 > buffer.length) { throw new PartialReadError() }
   if (buffer.readInt8(offset) === 0) return { size: 1 }
-  return nbt.proto.read(buffer, offset, 'nbt')
+  return nbt.proto.read(buffer, offset, tagType)
 }
 
-function writeOptionalNbt (value, buffer, offset) {
+function writeOptionalNbt (value, buffer, offset, { tagType } = { tagType: 'nbt' }) {
   if (value === undefined) {
     buffer.writeInt8(0, offset)
     return offset + 1
   }
-  return nbt.proto.write(value, buffer, offset, 'nbt')
+  return nbt.proto.write(value, buffer, offset, tagType)
 }
 
-function sizeOfOptionalNbt (value) {
+function sizeOfOptionalNbt (value, { tagType } = { tagType: 'nbt' }) {
   if (value === undefined) { return 1 }
-  return nbt.proto.sizeOf(value, 'nbt')
+  return nbt.proto.sizeOf(value, tagType)
 }
 
 // Length-prefixed compressed NBT, see differences: http://wiki.vg/index.php?title=Slot_Data&diff=6056&oldid=4753
