@@ -35,6 +35,20 @@ const slotValue = {
   }
 }
 
+const nbtValue = {
+  type: 'compound',
+  name: 'test',
+  value: {
+    test1: { type: 'int', value: 4 },
+    test2: { type: 'long', value: [12, 42] },
+    test3: { type: 'byteArray', value: [32] },
+    test4: { type: 'string', value: 'ohi' },
+    test5: { type: 'list', value: { type: 'int', value: [4] } },
+    test6: { type: 'compound', value: { test: { type: 'int', value: 4 } } },
+    test7: { type: 'intArray', value: [12, 42] }
+  }
+}
+
 const values = {
   i32: 123456,
   i16: -123,
@@ -110,46 +124,12 @@ const values = {
   f64: 99999.2222,
   f32: -333.444,
   slot: slotValue,
-  nbt: {
-    type: 'compound',
-    name: 'test',
-    value: {
-      test1: { type: 'int', value: 4 },
-      test2: { type: 'long', value: [12, 42] },
-      test3: { type: 'byteArray', value: [32] },
-      test4: { type: 'string', value: 'ohi' },
-      test5: { type: 'list', value: { type: 'int', value: [4] } },
-      test6: { type: 'compound', value: { test: { type: 'int', value: 4 } } },
-      test7: { type: 'intArray', value: [12, 42] }
-    }
-  },
-  optionalNbt: {
-    type: 'compound',
-    name: 'test',
-    value: {
-      test1: { type: 'int', value: 4 },
-      test2: { type: 'long', value: [12, 42] },
-      test3: { type: 'byteArray', value: [32] },
-      test4: { type: 'string', value: 'ohi' },
-      test5: { type: 'list', value: { type: 'int', value: [4] } },
-      test6: { type: 'compound', value: { test: { type: 'int', value: 4 } } },
-      test7: { type: 'intArray', value: [12, 42] }
-    }
-  },
+  nbt: nbtValue,
+  optionalNbt: nbtValue,
+  compressedNbt: nbtValue,
+  nbtRoot: nbtValue,
+  optionalNbtRoot: nbtValue,
   previousMessages: [],
-  compressedNbt: {
-    type: 'compound',
-    name: 'test',
-    value: {
-      test1: { type: 'int', value: 4 },
-      test2: { type: 'long', value: [12, 42] },
-      test3: { type: 'byteArray', value: [32] },
-      test4: { type: 'string', value: 'ohi' },
-      test5: { type: 'list', value: { type: 'int', value: [4] } },
-      test6: { type: 'compound', value: { test: { type: 'int', value: 4 } } },
-      test7: { type: 'intArray', value: [12, 42] }
-    }
-  },
   i64: [0, 1],
   u64: [0, 1],
   entityMetadata: [

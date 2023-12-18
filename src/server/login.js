@@ -186,6 +186,7 @@ module.exports = function (client, server, options) {
       client.once('login_acknowledged', onClientLoginAck)
     } else {
       client.state = states.PLAY
+      server.emit('playerJoin', client)
     }
     client.settings = {}
 
@@ -209,7 +210,11 @@ module.exports = function (client, server, options) {
   }
 
   function onClientLoginAck () {
-    client.write('registry_data', options.registryCodec)
+    client.state = states.CONFIGURATION
+    client.write('registry_data', { codec: options.registryCodec || {} })
+    client.write('finish_configuration', {})
+    client.state = states.PLAY
+    server.emit('playerJoin', client)
   }
 }
 

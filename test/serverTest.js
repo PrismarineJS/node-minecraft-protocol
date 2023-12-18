@@ -96,7 +96,7 @@ for (const supportedVersion of mc.supportedVersions) {
 
   describe('mc-server ' + version.minecraftVersion, function () {
     this.timeout(5000)
-    this.beforeAll(async function () {
+    this.beforeEach(async function () {
       PORT = await getPort()
       console.log(`Using port for tests: ${PORT}`)
     })
@@ -299,7 +299,7 @@ for (const supportedVersion of mc.supportedVersions) {
 
       const username = ['player1', 'player2']
       let index = 0
-      server.on('login', function (client) {
+      server.on('playerJoin', function (client) {
         assert.notEqual(client.id, null)
         assert.strictEqual(client.username, username[index++])
         broadcast(client.username + ' joined the game.')
@@ -323,7 +323,7 @@ for (const supportedVersion of mc.supportedVersions) {
           port: PORT
         }))
 
-        player1.on('login', async function (packet) {
+        player1.on('playerJoin', async function (packet) {
           assert.strictEqual(packet.gameMode, 1)
           const player2 = applyClientHelpers(mc.createClient({
             username: 'player2',
@@ -389,7 +389,7 @@ for (const supportedVersion of mc.supportedVersions) {
         port: PORT
       })
       let count = 2
-      server.on('login', function (client) {
+      server.on('playerJoin', function (client) {
         client.on('end', function (reason) {
           assert.strictEqual(reason, 'ServerShutdown')
           resolve()
@@ -404,7 +404,7 @@ for (const supportedVersion of mc.supportedVersions) {
           version: version.minecraftVersion,
           port: PORT
         })
-        client.on('login', function () {
+        client.on('playerJoin', function () {
           server.close()
         })
       })
@@ -420,7 +420,7 @@ for (const supportedVersion of mc.supportedVersions) {
         version: version.minecraftVersion,
         port: PORT
       })
-      server.on('login', function (client) {
+      server.on('playerJoin', function (client) {
         client.write('login', loginPacket(client, server))
       })
       server.on('close', done)
@@ -459,7 +459,7 @@ for (const supportedVersion of mc.supportedVersions) {
         version: version.minecraftVersion,
         port: PORT
       })
-      server.on('login', function (client) {
+      server.on('playerJoin', function (client) {
         client.on('end', function (reason) {
           assert.strictEqual(reason, 'ServerShutdown')
         })
