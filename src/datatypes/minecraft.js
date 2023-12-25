@@ -8,8 +8,8 @@ const [readVarInt, writeVarInt, sizeOfVarInt] = require('protodef').types.varint
 module.exports = {
   varlong: [readVarLong, writeVarLong, sizeOfVarLong],
   UUID: [readUUID, writeUUID, 16],
-  nbt: [readNbt, writeNbt, sizeOfNbt],
-  optionalNbt: [readOptionalNbt, writeOptionalNbt, sizeOfOptionalNbt],
+  // nbt: [readNbt, writeNbt, sizeOfNbt],
+  // optionalNbt: [readOptionalNbt, writeOptionalNbt, sizeOfOptionalNbt],
   compressedNbt: [readCompressedNbt, writeCompressedNbt, sizeOfCompressedNbt],
   restBuffer: [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
   entityMetadataLoop: [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata],
