@@ -40,7 +40,7 @@ jobs:
     - name: Install dependencies
       run: npm install
     - name: Run tests
-      run: npm test-client -- -g ${{ matrix.mcVersion }}
+      run: npm run test-client -- -g ${{ matrix.mcVersion }}
   packet-cycle-test:
     runs-on: ubuntu-latest
 
