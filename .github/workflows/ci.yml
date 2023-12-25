@@ -40,19 +40,4 @@ jobs:
     - name: Install dependencies
       run: npm install
     - name: Run tests
-      run: npm run test-client -- -g ${{ matrix.mcVersion }}
-  packet-cycle-test:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js 18.x
-      uses: actions/setup-node@v1
-      with:
-        node-version: 18.x
-    - name: Setup Java JDK
-      uses: actions/setup-java@v1.4.3
-      with:
-        java-version: '16'
-        distribution: 'adopt'
-    - run: npm install && npm run test-not-client
+      run: npm run mochaTest -- -g ${{ matrix.mcVersion }}

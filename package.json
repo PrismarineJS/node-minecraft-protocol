@@ -9,9 +9,8 @@
     "url": "git://github.com/PrismarineJS/node-minecraft-protocol.git"
   },
   "scripts": {
-    "test": "npm test-not-client && npm test-client",
-    "test-not-client": "mocha --recursive --reporter spec --exit --exclude \"test/clientTest.js\"",
-    "test-client": "mocha --recursive --reporter spec --exit \"test/clientTest.js\"",
+    "test": "npm run mochaTest",
+    "mochaTest": "mocha --recursive --reporter spec --exit",
     "lint": "standard",
     "fix": "standard --fix",
     "pretest": "npm run lint",
