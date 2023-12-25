@@ -112,7 +112,7 @@ function writeCompressedNbt (value, buffer, offset) {
 function sizeOfCompressedNbt (value) {
   if (value === undefined) { return 2 }
 
-  const nbtBuffer = Buffer.alloc(sizeOfNbt(value, 'nbt'))
+  const nbtBuffer = Buffer.alloc(sizeOfNbt(value, { tagType: 'nbt' }))
   nbt.proto.write(value, nbtBuffer, 0, 'nbt')
 
   const compressedNbt = zlib.gzipSync(nbtBuffer) // TODO: async
