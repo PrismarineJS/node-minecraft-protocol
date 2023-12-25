@@ -1,14 +1,16 @@
 /* eslint-env mocha */
 // Tests packet serialization/deserialization from with raw binary from minecraft-packets
-const { createSerializer, createDeserializer, states } = require('minecraft-protocol')
+const { createSerializer, createDeserializer, states, supportedVersions } = require('minecraft-protocol')
 const mcPackets = require('minecraft-packets')
 const assert = require('assert')
 
 const makeClientSerializer = version => createSerializer({ state: states.PLAY, version, isServer: true })
 const makeClientDeserializer = version => createDeserializer({ state: states.PLAY, version })
 
-Object.entries(mcPackets.pc).forEach(([ver, data]) => {
+for (const supportedVersion of supportedVersions) {
   let serializer, deserializer
+  const mcData = require('minecraft-data')(supportedVersion)
+  const version = mcData.version
 
   function convertBufferToObject (buffer) {
     return deserializer.parsePacketBuffer(buffer)
@@ -24,9 +26,14 @@ Object.entries(mcPackets.pc).forEach(([ver, data]) => {
     const areEq = buffer.equals(parsedBuffer)
     assert.strictEqual(areEq, true, `Error when testing ${+packetIx + 1} ${packetName} packet`)
   }
-  describe(`Test version ${ver}`, () => {
-    serializer = makeClientSerializer(ver)
-    deserializer = makeClientDeserializer(ver)
+  describe(`Test cycle packet for version ${version.minecraftVersion}`, () => {
+    serializer = makeClientSerializer(version.minecraftVersion)
+    deserializer = makeClientDeserializer(version.minecraftVersion)
+    if (mcPackets.pc[version.minecraftVersion] === undefined) {
+      console.log(`Version ${version.minecraftVersion} has no packet dump.`)
+      return
+    }
+    const data = mcPackets.pc[version.minecraftVersion]
     // server -> client
     Object.entries(data['from-server']).forEach(([packetName, packetData]) => {
       it(`${packetName} packet`, () => {
@@ -36,4 +43,4 @@ Object.entries(mcPackets.pc).forEach(([ver, data]) => {
       })
     })
   })
-})
+}
