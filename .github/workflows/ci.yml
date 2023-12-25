@@ -9,6 +9,16 @@ on:
       - master
 
 jobs:
+  Lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js 18.x
+      uses: actions/setup-node@v1.4.4
+      with:
+        node-version: 18.x
+    - run: npm i && npm run lint
   test:
     runs-on: ubuntu-latest
     strategy:
@@ -30,7 +40,7 @@ jobs:
     - name: Install dependencies
       run: npm install
     - name: Run tests
-      run: npm test -- -g ${{ matrix.mcVersion }}
+      run: npm test-client -- -g ${{ matrix.mcVersion }}
   packet-cycle-test:
     runs-on: ubuntu-latest
 
@@ -45,4 +55,4 @@ jobs:
       with:
         java-version: '16'
         distribution: 'adopt'
-    - run: npm install && npm run test-non-par
+    - run: npm install && npm run test-not-client
