@@ -16,15 +16,14 @@ module.exports = {
         value: buffer.slice(offset),
         size: buffer.length - offset
       }
-      x
     }],
     _nbt: ['native', nbt],
-    nbt: ['parametrizable', (compiler, { tagType }= { tagType: 'nbt' }) => {
-      let code = `return native._nbt.proto.read(buffer, offset, '${tagType}')`
+    nbt: ['parametrizable', (compiler, { tagType } = { tagType: 'nbt' }) => {
+      const code = `return native._nbt.proto.read(buffer, offset, '${tagType}')`
       return compiler.wrapCode(code)
     }],
-    optionalNbt: ['parametrizable', (compiler, { tagType }= { tagType: 'nbt' }) => {
-      let code = `
+    optionalNbt: ['parametrizable', (compiler, { tagType } = { tagType: 'nbt' }) => {
+      const code = `
       if (offset + 1 > buffer.length) { throw new PartialReadError() }
       if (buffer.readInt8(offset) === 0) return { size: 1 }
       return native._nbt.proto.read(buffer, offset, '${tagType}')
@@ -69,14 +68,14 @@ module.exports = {
       return offset + value.length
     }],
     _nbt: ['native', nbt],
-    nbt: ['parametrizable', (compiler, { tagType }= { tagType: 'nbt' }) => {
-      let code = `
+    nbt: ['parametrizable', (compiler, { tagType } = { tagType: 'nbt' }) => {
+      const code = `
       return native._nbt.proto.write(value, buffer, offset, '${tagType}')
       `
       return compiler.wrapCode(code)
     }],
-    optionalNbt: ['parametrizable', (compiler, { tagType }= { tagType: 'nbt' }) => {
-      let code = `
+    optionalNbt: ['parametrizable', (compiler, { tagType } = { tagType: 'nbt' }) => {
+      const code = `
       if (value === undefined) {
         buffer.writeInt8(0, offset)
         return offset + 1
@@ -113,12 +112,12 @@ module.exports = {
       return value.length
     }],
     _nbt: ['native', nbt],
-    nbt: ['parametrizable', (compiler, { tagType }= { tagType: 'nbt' }) => {
-      let code = `return native._nbt.proto.sizeOf(value, '${tagType}')`
+    nbt: ['parametrizable', (compiler, { tagType } = { tagType: 'nbt' }) => {
+      const code = `return native._nbt.proto.sizeOf(value, '${tagType}')`
       return compiler.wrapCode(code)
     }],
-    optionalNbt: ['parametrizable', (compiler, { tagType }= { tagType: 'nbt' }) => {
-      let code = `
+    optionalNbt: ['parametrizable', (compiler, { tagType } = { tagType: 'nbt' }) => {
+      const code = `
       if (value === undefined) { return 1 }
       return native._nbt.proto.sizeOf(value, '${tagType}')
       `
