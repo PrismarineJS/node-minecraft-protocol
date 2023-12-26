@@ -6,7 +6,6 @@ const nbt = require('prismarine-nbt')
 module.exports = function (client, options) {
   const mcdata = require('minecraft-data')(options.version || require('../version').defaultVersion)
   const channels = []
-  options.validateChannelProtocol = false // TODO: fix
   const proto = new ProtoDef(options.validateChannelProtocol ?? true)
   nbt.addTypesToInterpreter('big', proto)
   proto.addTypes(mcdata.protocol.types)
