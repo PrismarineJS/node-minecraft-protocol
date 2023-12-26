@@ -120,11 +120,22 @@ for (const supportedVersion of mc.supportedVersions) {
           assert.strictEqual(packet.gameMode, 0)
           client.chat('hello everyone; I have logged in.')
         })
+        // Dump some data for easier debugging
         client.on('raw.registry_data', (buffer) => {
           fs.writeFileSync(MC_SERVER_DIR + '_registry_data.bin', buffer)
         })
         client.on('registry_data', (json) => {
           fs.writeFileSync(MC_SERVER_DIR + '_registry_data.json', JSON.stringify(json))
+        })
+        client.on('login', (packet) => {
+          fs.writeFileSync(MC_SERVER_DIR + '_login.json', JSON.stringify(packet))
+          if (fs.existsSync(MC_SERVER_DIR + '_registry_data.json')) {
+            // generate a loginPacket.json for minecraft-data
+            fs.writeFileSync(MC_SERVER_DIR + '_loginPacket.json', JSON.stringify({
+              ...packet,
+              dimensionCodec: JSON.parse(fs.readFileSync(MC_SERVER_DIR + '_registry_data.json')).codec
+            }, null, 2))
+          }
         })
         client.on('playerChat', function (data) {
           chatCount += 1
