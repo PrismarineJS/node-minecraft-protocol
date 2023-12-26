@@ -212,9 +212,11 @@ module.exports = function (client, server, options) {
   function onClientLoginAck () {
     client.state = states.CONFIGURATION
     client.write('registry_data', { codec: options.registryCodec || {} })
+    client.once('finish_configuration', () => {
+      client.state = states.PLAY
+      server.emit('playerJoin', client)
+    })
     client.write('finish_configuration', {})
-    client.state = states.PLAY
-    server.emit('playerJoin', client)
   }
 }
 

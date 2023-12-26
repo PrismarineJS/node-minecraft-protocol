@@ -121,10 +121,10 @@ for (const supportedVersion of mc.supportedVersions) {
           client.chat('hello everyone; I have logged in.')
         })
         client.on('raw.registry_data', (buffer) => {
-          fs.writeFileSync(path.join(MC_SERVER_DIR, '/', 'registry_data.bin'), buffer)
+          fs.writeFileSync(MC_SERVER_DIR + '_registry_data.bin', buffer)
         })
         client.on('registry_data', (json) => {
-          fs.writeFileSync(path.join(MC_SERVER_DIR, '/', 'registry_data.json'), JSON.stringify(json))
+          fs.writeFileSync(MC_SERVER_DIR + '_registry_data.json', JSON.stringify(json))
         })
         client.on('playerChat', function (data) {
           chatCount += 1
