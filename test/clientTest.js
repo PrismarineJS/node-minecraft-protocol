@@ -2,6 +2,7 @@
 
 const mc = require('../')
 const os = require('os')
+const fs = require('fs')
 const path = require('path')
 const assert = require('power-assert')
 const util = require('util')
@@ -20,7 +21,8 @@ for (const supportedVersion of mc.supportedVersions) {
   const version = mcData.version
   const MC_SERVER_JAR_DIR = process.env.MC_SERVER_JAR_DIR || os.tmpdir()
   const MC_SERVER_JAR = MC_SERVER_JAR_DIR + '/minecraft_server.' + version.minecraftVersion + '.jar'
-  const wrap = new Wrap(MC_SERVER_JAR, MC_SERVER_PATH + '_' + supportedVersion, {
+  const MC_SERVER_DIR = MC_SERVER_PATH + '_' + supportedVersion
+  const wrap = new Wrap(MC_SERVER_JAR, MC_SERVER_DIR, {
     minMem: 1024,
     maxMem: 1024
   })
@@ -118,7 +120,12 @@ for (const supportedVersion of mc.supportedVersions) {
           assert.strictEqual(packet.gameMode, 0)
           client.chat('hello everyone; I have logged in.')
         })
-
+        client.on('raw.registry_data', (buffer) => {
+          fs.writeFileSync(path.join(MC_SERVER_DIR, '/', 'registry_data.bin'), buffer)
+        })
+        client.on('registry_data', (json) => {
+          fs.writeFileSync(path.join(MC_SERVER_DIR, '/', 'registry_data.json'), json)
+        })
         client.on('playerChat', function (data) {
           chatCount += 1
           assert.ok(chatCount <= 2)

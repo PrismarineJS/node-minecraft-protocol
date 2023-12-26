@@ -300,6 +300,7 @@ for (const supportedVersion of mc.supportedVersions) {
       const username = ['player1', 'player2']
       let index = 0
       server.on('playerJoin', function (client) {
+        console.log('ChatTest: Player has joined')
         assert.notEqual(client.id, null)
         assert.strictEqual(client.username, username[index++])
         broadcast(client.username + ' joined the game.')
@@ -322,8 +323,10 @@ for (const supportedVersion of mc.supportedVersions) {
           version: version.minecraftVersion,
           port: PORT
         }))
+        console.log('ChatTest: Player1 is joining...')
 
-        player1.on('playerJoin', async function (packet) {
+        player1.on('login', async function (packet) {
+          console.log('ChatTest: Player 1 has joined')
           assert.strictEqual(packet.gameMode, 1)
           const player2 = applyClientHelpers(mc.createClient({
             username: 'player2',
@@ -332,14 +335,16 @@ for (const supportedVersion of mc.supportedVersions) {
             port: PORT
           }))
 
+          console.log('ChatTest: waiting for next message from P2')
           const p1Join = await player1.nextMessage('player2')
 
           assert.strictEqual(p1Join, '{"text":"player2 joined the game."}')
-
+          console.log('ChatTest: Got message from P2')
           player2.chat('hi')
           const p2hi = await player1.nextMessage('player2')
           assert.strictEqual(p2hi, '{"text":"<player2> hi"}')
 
+          console.log('ChatTest: Waiting again for next message from P2')
           player1.chat('hello')
           const p1hello = await player2.nextMessage('player1')
           assert.strictEqual(p1hello, '{"text":"<player1> hello"}')

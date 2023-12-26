@@ -29,6 +29,8 @@ jobs:
         distribution: 'adopt'
     - name: Install dependencies
       run: npm install
+    # for testing
+    - run: curl -L https://raw.githubusercontent.com/extremeheat/minecraft-data/1.20.2nbt/data/pc/1.20.2/protocol.json -o ./node_modules/minecraft-data/minecraft-data/data/pc/1.20.2/protocol.json
     - name: Run tests
       run: npm test -- -g ${{ matrix.mcVersion }}
   packet-cycle-test:
