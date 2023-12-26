@@ -124,7 +124,7 @@ for (const supportedVersion of mc.supportedVersions) {
           fs.writeFileSync(path.join(MC_SERVER_DIR, '/', 'registry_data.bin'), buffer)
         })
         client.on('registry_data', (json) => {
-          fs.writeFileSync(path.join(MC_SERVER_DIR, '/', 'registry_data.json'), json)
+          fs.writeFileSync(path.join(MC_SERVER_DIR, '/', 'registry_data.json'), JSON.stringify(json))
         })
         client.on('playerChat', function (data) {
           chatCount += 1

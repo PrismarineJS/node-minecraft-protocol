@@ -53,16 +53,6 @@ module.exports = {
       value.copy(buffer, offset)
       return offset + value.length
     }],
-    optionalNbt: ['parametrizable', (compiler, { tagType } = { tagType: 'nbt' }) => {
-      const code = `
-      if (value === undefined) {
-        buffer.writeInt8(0, offset)
-        return offset + 1
-      }
-      return native._nbt.proto.write(value, buffer, offset, '${tagType}')
-      `
-      return compiler.wrapCode(code)
-    }],
     compressedNbt: ['native', minecraft.compressedNbt[1]],
     entityMetadataLoop: ['parametrizable', (compiler, { type, endVal }) => {
       let code = 'for (const i in value) {\n'
