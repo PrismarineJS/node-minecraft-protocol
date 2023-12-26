@@ -58,6 +58,7 @@ module.exports = function (client, options) {
     }
 
     function onReady () {
+      client.emit('playerJoin')
       if (mcData.supportFeature('signedChat')) {
         if (options.disableChatSigning && client.serverFeatures.enforcesSecureChat) {
           throw new Error('"disableChatSigning" was enabled in client options, but server is enforcing secure chat')

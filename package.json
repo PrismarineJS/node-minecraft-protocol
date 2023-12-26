@@ -56,7 +56,7 @@
     "node-fetch": "^2.6.1",
     "node-rsa": "^0.4.2",
     "prismarine-auth": "^2.2.0",
-    "prismarine-nbt": "^2.4.0",
+    "prismarine-nbt": "github:extremeheat/prismarine-nbt#embed",
     "prismarine-realms": "^1.2.0",
     "protodef": "^1.8.0",
     "readable-stream": "^4.1.0",
