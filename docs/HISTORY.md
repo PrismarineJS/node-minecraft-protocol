@@ -1,5 +1,13 @@
 # History
 
+## 1.45.0
+* [Pc1.20.2 (#1265)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/112926da0cb2490934d122dd8ed7b79f3f6de8eb) (thanks @extremeheat)
+* [Improve CI setup for per version tests (#1267)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/1740124c4722c2c49f8aed0d708ff5ebecc7743c) (thanks @rom1504)
+* [Allow to create custom client & communication between clients (#1254)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/9e991094761d51243cb28a33bb45630f3064511d) (thanks @zardoy)
+* [Fixed 'unsignedContent' field using nonexistent 'packet.unsignedContent' when emitting 'playerChat' event. (#1263)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/066a2b3646cb8bef6be1fa974597b975aaf08d42) (thanks @Ynfuien)
+* [Add chat typing to client (#1260)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/788bff289030fa66c980de82d82cb953bf76332b) (thanks @IceTank)
+* [chat: Only sign command args when profile keys defined (#1257)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/0ac8c087a28b3ccc73f8eea5941e4902e33c494e) (thanks @evan-goode)
+
 ## 1.44.0
 * [Send chat commands as chat commands instead of chat messages for 1.19.3-1.20.1 (#1241)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/41f9e4ac4a35b0ce241264a3f964c4874d96a119) (thanks @lkwilson)
 * [Fix end bundle bundle_delimiter packet not being emitted (#1248)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/35b2aa536a4739c11fe78f6e8e5c591abd0b0498) (thanks @PondWader)
