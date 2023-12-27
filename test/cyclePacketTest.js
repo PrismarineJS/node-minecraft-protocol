@@ -26,7 +26,7 @@ for (const supportedVersion of supportedVersions) {
     const areEq = buffer.equals(parsedBuffer)
     assert.strictEqual(areEq, true, `Error when testing ${+packetIx + 1} ${packetName} packet`)
   }
-  describe(`Test cycle packet for version ${version.minecraftVersion}v`, () => {
+  describe(`Test cycle packet for version ${supportedVersion}v`, () => {
     before(() => {
       serializer = makeClientSerializer(version.minecraftVersion)
       deserializer = makeClientDeserializer(version.minecraftVersion)
