@@ -115,6 +115,8 @@ const client = mc.createClient({
 
 ### Hello World server example
 
+For a more up to date example, see examples/server/server.js.
+
 ```js
 const mc = require('minecraft-protocol');
 const server = mc.createServer({
@@ -126,18 +128,12 @@ const server = mc.createServer({
 });
 const mcData = require('minecraft-data')(server.version)
 
-server.on('login', function(client) {
+server.on('playerJoin', function(client) {
   const loginPacket = mcData.loginPacket
 
   client.write('login', {
+    ...loginPacket,
     entityId: client.id,
-    isHardcore: false,
-    gameMode: 0,
-    previousGameMode: 255,
-    worldNames: loginPacket.worldNames,
-    dimensionCodec: loginPacket.dimensionCodec,
-    dimension: loginPacket.dimension,
-    worldName: 'minecraft:overworld',
     hashedSeed: [0, 0],
     maxPlayers: server.maxPlayers,
     viewDistance: 10,

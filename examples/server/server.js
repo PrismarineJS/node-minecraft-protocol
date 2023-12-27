@@ -11,7 +11,7 @@ const server = mc.createServer(options)
 const mcData = require('minecraft-data')(server.version)
 const loginPacket = mcData.loginPacket
 
-server.on('login', function (client) {
+server.on('playerJoin', function (client) {
   broadcast(client.username + ' joined the game.')
   const addr = client.socket.remoteAddress + ':' + client.socket.remotePort
   console.log(client.username + ' connected', '(' + addr + ')')
@@ -23,14 +23,11 @@ server.on('login', function (client) {
 
   // send init data so client will start rendering world
   client.write('login', {
+    ...loginPacket,
     entityId: client.id,
     isHardcore: false,
     gameMode: 0,
     previousGameMode: 1,
-    worldNames: loginPacket.worldNames,
-    dimensionCodec: loginPacket.dimensionCodec,
-    dimension: loginPacket.dimension,
-    worldName: 'minecraft:overworld',
     hashedSeed: [0, 0],
     maxPlayers: server.maxPlayers,
     viewDistance: 10,
@@ -48,11 +45,13 @@ server.on('login', function (client) {
     flags: 0x00
   })
 
-  client.on('chat', function (data) {
+  function handleChat (data) {
     const message = '<' + client.username + '>' + ' ' + data.message
     broadcast(message, null, client.username)
     console.log(message)
-  })
+  }
+  client.on('chat', handleChat) // pre-1.19
+  client.on('chat_message', handleChat) // post 1.19
 })
 
 server.on('error', function (error) {
@@ -86,4 +85,30 @@ function broadcast (message, exclude, username) {
       })
     }
   }
+}
+
+function sendBroadcastMessage (server, clients, message, sender) {
+  if (mcData.supportFeature('signedChat')) {
+    server.writeToClients(clients, 'player_chat', {
+      plainMessage: message,
+      signedChatContent: '',
+      unsignedChatContent: JSON.stringify({ text: message }),
+      type: 0,
+      senderUuid: 'd3527a0b-bc03-45d5-a878-2aafdd8c8a43', // random
+      senderName: JSON.stringify({ text: sender }),
+      senderTeam: undefined,
+      timestamp: Date.now(),
+      salt: 0n,
+      signature: mcData.supportFeature('useChatSessions') ? undefined : Buffer.alloc(0),
+      previousMessages: [],
+      filterType: 0,
+      networkName: JSON.stringify({ text: sender })
+    })
+  } else {
+    server.writeToClients(clients, 'chat', { message: JSON.stringify({ text: message }), position: 0, sender: sender || '0' })
+  }
+}
+
+function broadcast (message, exclude, username) {
+  sendBroadcastMessage(server, Object.values(server.clients).filter(client => client !== exclude), message)
 }

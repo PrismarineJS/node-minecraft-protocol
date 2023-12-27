@@ -8,15 +8,13 @@ const server = mc.createServer({
 const mcData = require('minecraft-data')(server.version)
 const loginPacket = mcData.loginPacket
 
-server.on('login', function (client) {
+server.on('playerJoin', function (client) {
   client.write('login', {
+    ...loginPacket,
     entityId: client.id,
     isHardcore: false,
     gameMode: 0,
     previousGameMode: 1,
-    worldNames: loginPacket.worldNames,
-    dimensionCodec: loginPacket.dimensionCodec,
-    dimension: loginPacket.dimension,
     worldName: 'minecraft:overworld',
     hashedSeed: [0, 0],
     maxPlayers: server.maxPlayers,
