@@ -62,31 +62,6 @@ server.on('listening', function () {
   console.log('Server listening on port', server.socketServer.address().port)
 })
 
-function broadcast (message, exclude, username) {
-  let client
-  const translate = username ? 'chat.type.announcement' : 'chat.type.text'
-  username = username || 'Server'
-  for (const clientId in server.clients) {
-    if (server.clients[clientId] === undefined) continue
-
-    client = server.clients[clientId]
-    if (client !== exclude) {
-      const msg = {
-        translate,
-        with: [
-          username,
-          message
-        ]
-      }
-      client.write('chat', {
-        message: JSON.stringify(msg),
-        position: 0,
-        sender: '0'
-      })
-    }
-  }
-}
-
 function sendBroadcastMessage (server, clients, message, sender) {
   if (mcData.supportFeature('signedChat')) {
     server.writeToClients(clients, 'player_chat', {
