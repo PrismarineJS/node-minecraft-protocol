@@ -40,7 +40,7 @@ function createProtocol (state, direction, version, customPackets, compiled = tr
   const proto = new ProtoDef(false)
   proto.addTypes(minecraft)
   proto.addProtocol(merge(mcData.protocol, get(customPackets, [mcData.version.majorVersion])), [state, direction])
-  proto.addTypesToInterperter('big', proto)
+  nbt.addTypesToInterperter('big', proto)
   protocols[key] = proto
   return proto
 }
