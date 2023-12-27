@@ -34,7 +34,7 @@ jobs:
       run: |
         node -e "
           const supportedVersions = require('./src/version').supportedVersions;
-          console.log(JSON.stringify({'include': supportedVersions.map(mcVersion => ({mcVersion}))}))
+          console.log('::set-output name=matrix::'+JSON.stringify({'include': supportedVersions.map(mcVersion => ({mcVersion}))}))
         "
   test:
     needs: PrepareSupportedVersions
