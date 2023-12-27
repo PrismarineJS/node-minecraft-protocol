@@ -16,7 +16,7 @@ const testDataWrite = [
 for (const supportedVersion of mc.supportedVersions) {
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
-  describe('benchmark ' + version.minecraftVersion, function () {
+  describe('benchmark ' + supportedVersion + 'v', function () {
     this.timeout(60 * 1000)
     const inputData = []
     it('bench serializing', function (done) {

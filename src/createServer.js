@@ -1,6 +1,6 @@
 'use strict'
 
-const Server = require('./server')
+const DefaultServerImpl = require('./server')
 const NodeRSA = require('node-rsa')
 const plugins = [
   require('./server/handshake'),
@@ -20,6 +20,7 @@ function createServer (options = {}) {
     motd = 'A Minecraft server',
     'max-players': maxPlayersOld = 20,
     maxPlayers: maxPlayersNew = 20,
+    Server = DefaultServerImpl,
     version,
     favicon,
     customPackets,

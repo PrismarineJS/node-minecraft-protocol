@@ -94,7 +94,7 @@ for (const supportedVersion of mc.supportedVersions) {
     }
   }
 
-  describe('mc-server ' + version.minecraftVersion, function () {
+  describe('mc-server ' + supportedVersion + 'v', function () {
     this.timeout(5000)
     this.beforeEach(async function () {
       PORT = await getPort()
