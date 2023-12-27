@@ -203,6 +203,11 @@ const values = {
       },
       suggestionType: 'minecraft:summonable_entities'
     }
+  },
+  soundSource: 'master',
+  packedChunkPos: {
+    x: 10,
+    z: 12
   }
 }
 
