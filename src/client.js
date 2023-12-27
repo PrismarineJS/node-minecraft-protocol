@@ -105,7 +105,6 @@ class Client extends EventEmitter {
         this._mcBundle.push(parsed)
         if (this._mcBundle.length > 32) {
           this._mcBundle.forEach(emitPacket)
-          emitPacket(parsed)
           this._mcBundle = []
           this._hasBundlePacket = false
         }
