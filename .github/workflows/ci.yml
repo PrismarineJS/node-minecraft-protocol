@@ -40,7 +40,7 @@ jobs:
     needs: PrepareSupportedVersions
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{fromJson(needs.job1.outputs.matrix)}}
+      matrix: ${{fromJson(needs.PrepareSupportedVersions.outputs.matrix)}}
       fail-fast: false
 
     steps:
