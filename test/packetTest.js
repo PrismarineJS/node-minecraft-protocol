@@ -244,7 +244,7 @@ for (const supportedVersion of mc.supportedVersions) {
   const version = mcData.version
   const packets = mcData.protocol
 
-  describe('packets ' + version.minecraftVersion, function () {
+  describe('packets ' + version.minecraftVersion + 'v', function () {
     let client, server, serverClient
     before(async function () {
       PORT = await getPort()

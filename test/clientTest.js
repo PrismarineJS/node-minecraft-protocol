@@ -28,7 +28,7 @@ for (const supportedVersion of mc.supportedVersions) {
     console.log(line)
   })
 
-  describe('client ' + version.minecraftVersion, function () {
+  describe('client ' + version.minecraftVersion + 'v', function () {
     this.timeout(10 * 60 * 1000)
 
     before(async function () {

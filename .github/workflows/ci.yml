@@ -40,4 +40,4 @@ jobs:
     - name: Install dependencies
       run: npm install
     - name: Run tests
-      run: npm run mochaTest -- -g ${{ matrix.mcVersion }}
+      run: npm run mochaTest -- -g ${{ matrix.mcVersion }}v
