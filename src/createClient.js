@@ -14,6 +14,7 @@ const tcpDns = require('./client/tcp_dns')
 const autoVersion = require('./client/autoVersion')
 const pluginChannels = require('./client/pluginChannels')
 const versionChecking = require('./client/versionChecking')
+const uuid = require('./datatypes/uuid')
 
 module.exports = createClient
 
@@ -54,6 +55,8 @@ function createClient (options) {
       case 'offline':
       default:
         client.username = options.username
+        client.uuid = uuid.nameToMcOfflineUUID(client.username)
+        options.auth = 'offline'
         options.connect(client)
         break
     }

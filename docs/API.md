@@ -89,6 +89,11 @@ Called when a client connects, but before any login has happened. Takes a
 
 Called when a client is logged in against server. Takes a `Client` parameter.
 
+### `playerJoin` event
+
+Emitted after a player joins and enters the PLAY protocol state and can send and recieve game packets. This is emitted after the `login` event. On 1.20.2 and above after we emit the `login` event, the player will enter a CONFIG state, as opposed to the PLAY state (where game packets can be sent), so you must instead now wait for `playerJoin`.
+
+
 ### `listening` event
 
 Called when the server is listening for connections. This means that the server is ready to accept incoming connections.
@@ -260,6 +265,10 @@ Called when user authentication is resolved. Takes session data as parameter.
 
 Called when the protocol changes state. Takes the new state and old state as
 parameters.
+
+### `playerJoin` event
+
+Emitted after the player enters the PLAY protocol state and can send and recieve game packets
 
 ### `error` event
 

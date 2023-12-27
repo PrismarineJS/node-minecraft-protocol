@@ -93,7 +93,7 @@ class Client extends EventEmitter {
         const s = JSON.stringify(parsed.data, null, 2)
         debug(s && s.length > 10000 ? parsed.data : s)
       }
-      if (parsed.metadata.name === 'bundle_delimiter') {
+      if (this._hasBundlePacket && parsed.metadata.name === 'bundle_delimiter') {
         if (this._mcBundle.length) { // End bundle
           this._mcBundle.forEach(emitPacket)
           emitPacket(parsed)
@@ -103,6 +103,11 @@ class Client extends EventEmitter {
         }
       } else if (this._mcBundle.length) {
         this._mcBundle.push(parsed)
+        if (this._mcBundle.length > 32) {
+          this._mcBundle.forEach(emitPacket)
+          this._mcBundle = []
+          this._hasBundlePacket = false
+        }
       } else {
         emitPacket(parsed)
       }

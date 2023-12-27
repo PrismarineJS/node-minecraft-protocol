@@ -9,7 +9,7 @@ const server = mc.createServer(options)
 const mcData = require('minecraft-data')(server.version)
 const loginPacket = mcData.loginPacket
 
-server.on('login', function (client) {
+server.on('playerJoin', function (client) {
   const addr = client.socket.remoteAddress
   console.log('Incoming connection', '(' + addr + ')')
 

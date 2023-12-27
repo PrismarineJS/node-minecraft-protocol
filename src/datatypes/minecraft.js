@@ -8,8 +8,6 @@ const [readVarInt, writeVarInt, sizeOfVarInt] = require('protodef').types.varint
 module.exports = {
   varlong: [readVarLong, writeVarLong, sizeOfVarLong],
   UUID: [readUUID, writeUUID, 16],
-  nbt: [readNbt, writeNbt, sizeOfNbt],
-  optionalNbt: [readOptionalNbt, writeOptionalNbt, sizeOfOptionalNbt],
   compressedNbt: [readCompressedNbt, writeCompressedNbt, sizeOfCompressedNbt],
   restBuffer: [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
   entityMetadataLoop: [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata],
@@ -43,35 +41,8 @@ function writeUUID (value, buffer, offset) {
   return offset + 16
 }
 
-function readNbt (buffer, offset) {
-  return nbt.proto.read(buffer, offset, 'nbt')
-}
-
-function writeNbt (value, buffer, offset) {
-  return nbt.proto.write(value, buffer, offset, 'nbt')
-}
-
-function sizeOfNbt (value) {
-  return nbt.proto.sizeOf(value, 'nbt')
-}
-
-function readOptionalNbt (buffer, offset) {
-  if (offset + 1 > buffer.length) { throw new PartialReadError() }
-  if (buffer.readInt8(offset) === 0) return { size: 1 }
-  return nbt.proto.read(buffer, offset, 'nbt')
-}
-
-function writeOptionalNbt (value, buffer, offset) {
-  if (value === undefined) {
-    buffer.writeInt8(0, offset)
-    return offset + 1
-  }
-  return nbt.proto.write(value, buffer, offset, 'nbt')
-}
-
-function sizeOfOptionalNbt (value) {
-  if (value === undefined) { return 1 }
-  return nbt.proto.sizeOf(value, 'nbt')
+function sizeOfNbt (value, { tagType } = { tagType: 'nbt' }) {
+  return nbt.proto.sizeOf(value, tagType)
 }
 
 // Length-prefixed compressed NBT, see differences: http://wiki.vg/index.php?title=Slot_Data&diff=6056&oldid=4753
@@ -111,7 +82,7 @@ function writeCompressedNbt (value, buffer, offset) {
 function sizeOfCompressedNbt (value) {
   if (value === undefined) { return 2 }
 
-  const nbtBuffer = Buffer.alloc(sizeOfNbt(value, 'nbt'))
+  const nbtBuffer = Buffer.alloc(sizeOfNbt(value, { tagType: 'nbt' }))
   nbt.proto.write(value, nbtBuffer, 0, 'nbt')
 
   const compressedNbt = zlib.gzipSync(nbtBuffer) // TODO: async

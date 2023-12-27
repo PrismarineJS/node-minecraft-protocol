@@ -46,6 +46,7 @@ function createServer (options = {}) {
   server.onlineModeExceptions = Object.create(null)
   server.favicon = favicon
   server.options = options
+  options.registryCodec = options.registryCodec || mcData.registryCodec || mcData.loginPacket?.dimensionCodec
 
   // The RSA keypair can take some time to generate
   // and is only needed for online-mode

@@ -5,6 +5,7 @@ const Serializer = require('protodef').Serializer
 const Parser = require('protodef').FullPacketParser
 const { ProtoDefCompiler } = require('protodef').Compiler
 
+const nbt = require('prismarine-nbt')
 const minecraft = require('../datatypes/minecraft')
 const states = require('../states')
 const merge = require('lodash.merge')
@@ -30,6 +31,7 @@ function createProtocol (state, direction, version, customPackets, compiled = tr
     const compiler = new ProtoDefCompiler()
     compiler.addTypes(require('../datatypes/compiler-minecraft'))
     compiler.addProtocol(merge(mcData.protocol, get(customPackets, [mcData.version.majorVersion])), [state, direction])
+    nbt.addTypesToCompiler('big', compiler)
     const proto = compiler.compileProtoDefSync()
     protocols[key] = proto
     return proto
@@ -38,6 +40,7 @@ function createProtocol (state, direction, version, customPackets, compiled = tr
   const proto = new ProtoDef(false)
   proto.addTypes(minecraft)
   proto.addProtocol(merge(mcData.protocol, get(customPackets, [mcData.version.majorVersion])), [state, direction])
+  nbt.addTypesToInterperter('big', proto)
   protocols[key] = proto
   return proto
 }

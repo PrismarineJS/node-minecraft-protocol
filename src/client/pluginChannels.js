@@ -1,11 +1,13 @@
 const ProtoDef = require('protodef').ProtoDef
 const minecraft = require('../datatypes/minecraft')
 const debug = require('debug')('minecraft-protocol')
+const nbt = require('prismarine-nbt')
 
 module.exports = function (client, options) {
   const mcdata = require('minecraft-data')(options.version || require('../version').defaultVersion)
   const channels = []
   const proto = new ProtoDef(options.validateChannelProtocol ?? true)
+  nbt.addTypesToInterpreter('big', proto)
   proto.addTypes(mcdata.protocol.types)
   proto.addTypes(minecraft)
   proto.addType('registerarr', [readDumbArr, writeDumbArr, sizeOfDumbArr])

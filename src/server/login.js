@@ -1,4 +1,4 @@
-const UUID = require('uuid-1345')
+const uuid = require('../datatypes/uuid')
 const crypto = require('crypto')
 const pluginChannels = require('../client/pluginChannels')
 const states = require('../states')
@@ -166,37 +166,28 @@ module.exports = function (client, server, options) {
     }
   }
 
-  // https://github.com/openjdk-mirror/jdk7u-jdk/blob/f4d80957e89a19a29bb9f9807d2a28351ed7f7df/src/share/classes/java/util/UUID.java#L163
-  function javaUUID (s) {
-    const hash = crypto.createHash('md5')
-    hash.update(s, 'utf8')
-    const buffer = hash.digest()
-    buffer[6] = (buffer[6] & 0x0f) | 0x30
-    buffer[8] = (buffer[8] & 0x3f) | 0x80
-    return buffer
-  }
-
-  function nameToMcOfflineUUID (name) {
-    return (new UUID(javaUUID('OfflinePlayer:' + name))).toString()
-  }
-
   function loginClient () {
     const isException = !!server.onlineModeExceptions[client.username.toLowerCase()]
     if (onlineMode === false || isException) {
-      client.uuid = nameToMcOfflineUUID(client.username)
+      client.uuid = uuid.nameToMcOfflineUUID(client.username)
     }
     options.beforeLogin?.(client)
     if (client.protocolVersion >= 27) { // 14w28a (27) added whole-protocol compression (http://wiki.vg/Protocol_History#14w28a), earlier versions per-packet compressed TODO: refactor into minecraft-data
       client.write('compress', { threshold: 256 }) // Default threshold is 256
       client.compressionThreshold = 256
     }
+    // TODO: find out what properties are on 'success' packet
     client.write('success', {
       uuid: client.uuid,
       username: client.username,
       properties: []
     })
-    // TODO: find out what properties are on 'success' packet
-    client.state = states.PLAY
+    if (client.supportFeature('hasConfigurationState')) {
+      client.once('login_acknowledged', onClientLoginAck)
+    } else {
+      client.state = states.PLAY
+      server.emit('playerJoin', client)
+    }
     client.settings = {}
 
     if (client.supportFeature('chainedChatWithHashing')) { // 1.19.1+
@@ -216,6 +207,16 @@ module.exports = function (client, server, options) {
     pluginChannels(client, options)
     if (client.supportFeature('signedChat')) chatPlugin(client, server, options)
     server.emit('login', client)
+  }
+
+  function onClientLoginAck () {
+    client.state = states.CONFIGURATION
+    client.write('registry_data', { codec: options.registryCodec || {} })
+    client.once('finish_configuration', () => {
+      client.state = states.PLAY
+      server.emit('playerJoin', client)
+    })
+    client.write('finish_configuration', {})
   }
 }
 
