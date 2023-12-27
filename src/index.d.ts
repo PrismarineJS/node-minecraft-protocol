@@ -118,7 +118,7 @@ declare module 'minecraft-protocol' {
 		authTitle?: string
 		sessionServer?: string
 		keepAlive?: boolean
-		closeTimeout?: number 
+		closeTimeout?: number
 		noPongTimeout?: number
 		checkTimeoutInterval?: number
 		version?: string
@@ -137,6 +137,8 @@ declare module 'minecraft-protocol' {
 		realms?: RealmsOptions
 		// 1.19+
 		disableChatSigning?: boolean
+		/** Pass custom client implementation if needed. */
+		Client?: Client
 	}
 
 	export class Server extends EventEmitter {
@@ -162,9 +164,9 @@ declare module 'minecraft-protocol' {
 
 	export interface ServerClient extends Client {
 		id: number
-		// You must call this function when the server receives a message from a player and that message gets
-		// broadcast to other players in player_chat packets. This function stores these packets so the server 
-		// can then verify a player's lastSeenMessages field in inbound chat packets to ensure chain integrity.
+		/** You must call this function when the server receives a message from a player and that message gets
+		 broadcast to other players in player_chat packets. This function stores these packets so the server
+		 can then verify a player's lastSeenMessages field in inbound chat packets to ensure chain integrity.  */
 		logSentMessageFromPeer(packet: object): boolean
 	}
 
@@ -188,12 +190,12 @@ declare module 'minecraft-protocol' {
 		hideErrors?: boolean
 		agent?: Agent
 		validateChannelProtocol?: boolean
-		// 1.19+
-		// Require connecting clients to have chat signing support enabled
+		/** (1.19+) Require connecting clients to have chat signing support enabled */
 		enforceSecureProfile?: boolean
-		// 1.19.1 & 1.19.2 only: If client should send previews of messages they are typing to the server
+		/** 1.19.1 & 1.19.2 only: If client should send previews of messages they are typing to the server */
 		enableChatPreview?: boolean
 		socketType?: 'tcp' | 'ipc'
+		Server?: Server
 	}
 
 	export interface SerializerOptions {
@@ -202,7 +204,7 @@ declare module 'minecraft-protocol' {
 		state?: States
 		version: string
 	}
-	
+
 	export interface MicrosoftDeviceAuthorizationResponse {
 		device_code: string
 		user_code: string
