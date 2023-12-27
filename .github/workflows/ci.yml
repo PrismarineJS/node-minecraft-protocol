@@ -19,11 +19,24 @@ jobs:
       with:
         node-version: 18.x
     - run: npm i && npm run lint
+  PrepareSupportedVersions:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js 18.x
+      uses: actions/setup-node@v1.4.4
+      with:
+        node-version: 18.x
+    - id: set-matrix
+      run: node -e "const supportedVersions = require('./src/version').supportedVersions; console.log(JSON.stringify({'include': supportedVersions.map(mcVersion => ({mcVersion}))}))"
   test:
+    needs: PrepareSupportedVersions
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        mcVersion: ['1.7', '1.8', '1.9', '1.10', '1.11.2', '1.12.2', '1.13.2', '1.14.4', '1.15.2', '1.16.5', '1.17', '1.17.1', '1.18.2', '1.19', '1.19.2', '1.19.3', '1.19.4', '1.20', '1.20.1']
+      matrix: ${{fromJson(needs.job1.outputs.matrix)}}
       fail-fast: false
 
     steps:
@@ -40,4 +53,4 @@ jobs:
     - name: Install dependencies
       run: npm install
     - name: Run tests
-      run: npm run mochaTest -- -g "${{ matrix.mcVersion }}v"
+      run: npm run mochaTest -- -g ${{ matrix.mcVersion }}v
