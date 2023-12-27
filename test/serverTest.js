@@ -94,7 +94,7 @@ for (const supportedVersion of mc.supportedVersions) {
     }
   }
 
-  describe('mc-server ' + supportedVersion+'v', function () {
+  describe('mc-server ' + supportedVersion + 'v', function () {
     this.timeout(5000)
     this.beforeAll(async function () {
       PORT = await getPort()
