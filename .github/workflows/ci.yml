@@ -31,7 +31,11 @@ jobs:
       with:
         node-version: 18.x
     - id: set-matrix
-      run: node -e "const supportedVersions = require('./src/version').supportedVersions; console.log(JSON.stringify({'include': supportedVersions.map(mcVersion => ({mcVersion}))}))"
+      run: |
+        node -e "
+          const supportedVersions = require('./src/version').supportedVersions;
+          console.log(JSON.stringify({'include': supportedVersions.map(mcVersion => ({mcVersion}))}))
+        "
   test:
     needs: PrepareSupportedVersions
     runs-on: ubuntu-latest
