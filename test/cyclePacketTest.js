@@ -24,6 +24,10 @@ for (const supportedVersion of supportedVersions) {
     const parsed = convertBufferToObject(buffer).data
     const parsedBuffer = convertObjectToBuffer(parsed)
     const areEq = buffer.equals(parsedBuffer)
+    if (!areEq) {
+      console.log('original buffer', buffer.toString('hex'))
+      console.log('cycled buffer', parsedBuffer.toString('hex'))
+    }
     assert.strictEqual(areEq, true, `Error when testing ${+packetIx + 1} ${packetName} packet`)
   }
   describe(`Test cycle packet for version ${supportedVersion}v`, () => {
