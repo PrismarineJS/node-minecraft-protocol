@@ -18,17 +18,22 @@ function isFormatted (message) {
 }
 
 // Used for 1.20.3+ to convert NBT back into the JSON string expected of a chat message.
-function handleNBTStrings (nbtData) {
-  if (nbtData) {
-    if (typeof (nbtData) !== 'string') {
-      if (nbtData.type === 'string') {
-        return JSON.stringify({ text: nbtData.value })
+function handleNBTStrings (nbtDataOrString) {
+  // Check if nbtDataOrString is actually defined
+  if (nbtDataOrString) {
+    // Check if its already a string, if so we don't have to touch it.
+    if (typeof (nbtDataOrString) !== 'string') {
+      // It was not a string, so it much be NBT, if its just a string type we need to handle it a bit differently
+      if (nbtDataOrString.type === 'string') {
+        // Need to return it in the JSON string format that the reset of nmp expects.
+        return JSON.stringify({ text: nbtDataOrString.value })
       } else {
-        return JSON.stringify(nbt.simplify(nbtData))
+        // nbt.simplify drops the extra tag info before we convert it back into a JSON string
+        return JSON.stringify(nbt.simplify(nbtDataOrString))
       }
     }
   }
-  return nbtData
+  return nbtDataOrString
 }
 
 module.exports = function (client, options) {
