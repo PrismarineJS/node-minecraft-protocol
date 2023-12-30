@@ -177,7 +177,6 @@ module.exports = function (client, options) {
   })
 
   client.on('system_chat', (packet) => {
-    console.log(packet)
     client.emit('systemChat', {
       positionId: packet.isActionBar ? 2 : 1,
       formattedMessage: handleNBTStrings(packet.content)
