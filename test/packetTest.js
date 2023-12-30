@@ -208,6 +208,10 @@ const values = {
   packedChunkPos: {
     x: 10,
     z: 12
+  },
+  particle: {
+    particleId: 0,
+    data: null
   }
 }
 
