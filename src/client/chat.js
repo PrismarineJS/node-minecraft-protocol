@@ -17,18 +17,18 @@ function isFormatted (message) {
   }
 }
 
-//Used for 1.20.3+ to convert NBT back into the JSON expected of a chat message.
-function handleNBTStrings(nbt_data){
-  if(nbt_data){
-    if(typeof(nbt_data) !== 'string'){
-      if(nbt_data.type == 'string'){
-        return JSON.stringify({text:nbt_data.value})
-      }else{
-        return JSON.stringify(nbt.simplify(nbt_data))
+// Used for 1.20.3+ to convert NBT back into the JSON string expected of a chat message.
+function handleNBTStrings (nbtData) {
+  if (nbtData) {
+    if (typeof (nbtData) !== 'string') {
+      if (nbtData.type === 'string') {
+        return JSON.stringify({ text: nbtData.value })
+      } else {
+        return JSON.stringify(nbt.simplify(nbtData))
       }
     }
   }
-  return nbt_data
+  return nbtData
 }
 
 module.exports = function (client, options) {
