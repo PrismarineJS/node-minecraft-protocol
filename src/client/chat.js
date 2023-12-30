@@ -1,5 +1,6 @@
 const crypto = require('crypto')
 const concat = require('../transforms/binaryStream').concat
+const nbt = require('prismarine-nbt')
 const messageExpireTime = 420000 // 7 minutes (ms)
 
 function isFormatted (message) {
@@ -14,6 +15,20 @@ function isFormatted (message) {
   } catch {
     return false
   }
+}
+
+//Used for 1.20.3+ to convert NBT back into the JSON expected of a chat message.
+function handleNBTStrings(nbt_data){
+  if(nbt_data){
+    if(typeof(nbt_data) !== 'string'){
+      if(nbt_data.type == 'string'){
+        return JSON.stringify({text:nbt_data.value})
+      }else{
+        return JSON.stringify(nbt.simplify(nbt_data))
+      }
+    }
+  }
+  return nbt_data
 }
 
 module.exports = function (client, options) {
@@ -139,12 +154,11 @@ module.exports = function (client, options) {
 
   client.on('profileless_chat', (packet) => {
     // Profileless chat is parsed as an unsigned player chat message but logged as a system message
-
     client.emit('playerChat', {
-      formattedMessage: packet.message,
+      formattedMessage: handleNBTStrings(packet.message),
       type: packet.type,
-      senderName: packet.name,
-      targetName: packet.target,
+      senderName: handleNBTStrings(packet.name),
+      targetName: handleNBTStrings(packet.target),
       verified: false
     })
 
@@ -158,9 +172,10 @@ module.exports = function (client, options) {
   })
 
   client.on('system_chat', (packet) => {
+    console.log(packet)
     client.emit('systemChat', {
       positionId: packet.isActionBar ? 2 : 1,
-      formattedMessage: packet.content
+      formattedMessage: handleNBTStrings(packet.content)
     })
 
     client._lastChatHistory.push({
@@ -198,11 +213,11 @@ module.exports = function (client, options) {
       if (verified) client._signatureCache.push(packet.signature)
       client.emit('playerChat', {
         plainMessage: packet.plainMessage,
-        unsignedContent: packet.unsignedChatContent,
+        unsignedContent: handleNBTStrings(packet.unsignedChatContent),
         type: packet.type,
         sender: packet.senderUuid,
-        senderName: packet.networkName,
-        targetName: packet.networkTargetName,
+        senderName: handleNBTStrings(packet.networkName),
+        targetName: handleNBTStrings(packet.networkTargetName),
         verified
       })
 
