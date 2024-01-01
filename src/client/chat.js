@@ -371,7 +371,7 @@ module.exports = function (client, options) {
           command,
           timestamp: options.timestamp,
           salt: options.salt,
-          argumentSignatures: client.profileKeys ? signaturesForCommand(command, options.timestamp, options.salt, options.preview, acknowledgements) : [],
+          argumentSignatures: (client.profileKeys && client._session) ? signaturesForCommand(command, options.timestamp, options.salt, options.preview, acknowledgements) : [],
           messageCount: client._lastSeenMessages.pending,
           acknowledged
         })
