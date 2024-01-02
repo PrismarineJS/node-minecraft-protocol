@@ -141,6 +141,8 @@ declare module 'minecraft-protocol' {
 		disableChatSigning?: boolean
 		/** Pass custom client implementation if needed. */
 		Client?: Client
+		// Enable bounds checking
+		fullParser?: boolean
 	}
 
 	export class Server extends EventEmitter {
@@ -200,6 +202,8 @@ declare module 'minecraft-protocol' {
 		enableChatPreview?: boolean
 		socketType?: 'tcp' | 'ipc'
 		Server?: Server
+		// Enable bounds checking
+		fullParser?: boolean
 	}
 
 	export interface SerializerOptions {
@@ -207,6 +211,7 @@ declare module 'minecraft-protocol' {
 		isServer?: boolean
 		state?: States
 		version: string
+		fullParser?: boolean
 	}
 
 	export interface MicrosoftDeviceAuthorizationResponse {
@@ -284,7 +289,7 @@ declare module 'minecraft-protocol' {
 
 	// TODO: Create typings on protodef to define here
 	export function createSerializer({ state, isServer, version, customPackets }: SerializerOptions): any
-	export function createDeserializer({ state, isServer, version, customPackets }: SerializerOptions): any
+	export function createDeserializer({ state, isServer, version, customPackets, fullParser }: SerializerOptions): any
 
 	export function ping(options: PingOptions, callback?: (error: Error, result: OldPingResult | NewPingResult) => void): Promise<OldPingResult | NewPingResult>
 }
