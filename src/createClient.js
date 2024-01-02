@@ -34,7 +34,7 @@ function createClient (options) {
   const hideErrors = options.hideErrors || false
   const Client = options.Client || DefaultClientImpl
 
-  const client = new Client(false, version.minecraftVersion, options.customPackets, hideErrors)
+  const client = new Client(false, version.minecraftVersion, options.customPackets, hideErrors, options.fullParser ?? true)
 
   tcpDns(client, options)
   if (options.auth instanceof Function) {
