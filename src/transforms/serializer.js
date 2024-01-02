@@ -1,9 +1,6 @@
 'use strict'
 
-const ProtoDef = require('protodef').ProtoDef
-const Serializer = require('protodef').Serializer
-const Parser = require('protodef').Parser
-const { ProtoDefCompiler } = require('protodef').Compiler
+const { ProtoDef, Serializer, Parser, FullPacketParser, Compiler: { ProtoDefCompiler } } = require('protodef')
 
 const nbt = require('prismarine-nbt')
 const minecraft = require('../datatypes/minecraft')
@@ -49,8 +46,9 @@ function createSerializer ({ state = states.HANDSHAKING, isServer = false, versi
   return new Serializer(createProtocol(state, !isServer ? 'toServer' : 'toClient', version, customPackets, compiled), 'packet')
 }
 
-function createDeserializer ({ state = states.HANDSHAKING, isServer = false, version, customPackets, compiled = true, noErrorLogging = false } = {}) {
-  return new Parser(createProtocol(state, isServer ? 'toServer' : 'toClient', version, customPackets, compiled), 'packet', noErrorLogging)
+function createDeserializer ({ state = states.HANDSHAKING, isServer = false, version, customPackets, compiled = true, noErrorLogging = false, fullParser = true } = {}) {
+  return fullParser ? new FullPacketParser(createProtocol(state, isServer ? 'toServer' : 'toClient', version, customPackets, compiled), 'packet', noErrorLogging) :
+    new Parser(createProtocol(state, isServer ? 'toServer' : 'toClient', version, customPackets, compiled), 'packet', noErrorLogging)
 }
 
 module.exports = {
