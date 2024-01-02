@@ -1,6 +1,6 @@
 'use strict'
 
-const Server = require('./server')
+const DefaultServerImpl = require('./server')
 const NodeRSA = require('node-rsa')
 const plugins = [
   require('./server/handshake'),
@@ -20,10 +20,12 @@ function createServer (options = {}) {
     motd = 'A Minecraft server',
     'max-players': maxPlayersOld = 20,
     maxPlayers: maxPlayersNew = 20,
+    Server = DefaultServerImpl,
     version,
     favicon,
     customPackets,
-    motdMsg // This is when you want to send formated motd's from ChatMessage instances
+    motdMsg, // This is when you want to send formated motd's from ChatMessage instances
+    socketType = 'tcp'
   } = options
 
   const maxPlayers = options['max-players'] !== undefined ? maxPlayersOld : maxPlayersNew
@@ -44,6 +46,7 @@ function createServer (options = {}) {
   server.onlineModeExceptions = Object.create(null)
   server.favicon = favicon
   server.options = options
+  options.registryCodec = options.registryCodec || mcData.registryCodec || mcData.loginPacket?.dimensionCodec
 
   // The RSA keypair can take some time to generate
   // and is only needed for online-mode
@@ -63,6 +66,10 @@ function createServer (options = {}) {
   server.on('connection', function (client) {
     plugins.forEach(plugin => plugin(client, server, options))
   })
-  server.listen(port, host)
+  if (socketType === 'ipc') {
+    server.listen(host)
+  } else {
+    server.listen(port, host)
+  }
   return server
 }

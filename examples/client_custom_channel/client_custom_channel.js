@@ -10,15 +10,15 @@ const client = mc.createClient({
   port: parseInt(process.argv[3]),
   username: process.argv[4] ? process.argv[4] : 'test',
   password: process.argv[5],
-  version: '1.10'
+  version: false
 })
 
 client.on('login', onlogin)
 client.on('error', console.log)
 
 function onlogin () {
-  client.registerChannel('CUSTOM|ChannelOne', ['i32', []], true)
-  client.registerChannel('CUSTOM|ChannelTwo', ['i32', []], true)
-  client.writeChannel('CUSTOM|ChannelOne', 4)
-  client.on('CUSTOM|ChannelTwo', console.log)
+  client.registerChannel('node-minecraft-protocol:custom_channel_one', ['string', []], true)
+  client.registerChannel('node-minecraft-protocol:custom_channel_two', ['string', []], true)
+  client.writeChannel('node-minecraft-protocol:custom_channel_one', 'hello from the client')
+  client.on('node-minecraft-protocol:custom_channel_two', console.log)
 }

@@ -1,11 +1,13 @@
 const ProtoDef = require('protodef').ProtoDef
 const minecraft = require('../datatypes/minecraft')
 const debug = require('debug')('minecraft-protocol')
+const nbt = require('prismarine-nbt')
 
 module.exports = function (client, options) {
   const mcdata = require('minecraft-data')(options.version || require('../version').defaultVersion)
   const channels = []
   const proto = new ProtoDef(options.validateChannelProtocol ?? true)
+  nbt.addTypesToInterpreter('big', proto)
   proto.addTypes(mcdata.protocol.types)
   proto.addTypes(minecraft)
   proto.addType('registerarr', [readDumbArr, writeDumbArr, sizeOfDumbArr])
@@ -14,14 +16,14 @@ module.exports = function (client, options) {
   client.unregisterChannel = unregisterChannel
   client.writeChannel = writeChannel
 
-  client.registerChannel('REGISTER', ['registerarr', []])
-  client.registerChannel('UNREGISTER', ['registerarr', []])
-
-  const above385 = options.protocolVersion >= 385
+  const above385 = mcdata.version.version >= 385
   if (above385) { // 1.13-pre3 (385) added Added Login Plugin Message (https://wiki.vg/Protocol_History#1.13-pre3)
     client.on('login_plugin_request', onLoginPluginRequest)
   }
   const channelNames = above385 ? ['minecraft:register', 'minecraft:unregister'] : ['REGISTER', 'UNREGISTER']
+
+  client.registerChannel(channelNames[0], ['registerarr', []])
+  client.registerChannel(channelNames[1], ['registerarr', []])
 
   function registerChannel (name, parser, custom) {
     if (custom) {

@@ -16,8 +16,6 @@ module.exports = {
         size: buffer.length - offset
       }
     }],
-    nbt: ['native', minecraft.nbt[0]],
-    optionalNbt: ['native', minecraft.optionalNbt[0]],
     compressedNbt: ['native', minecraft.compressedNbt[0]],
     entityMetadataLoop: ['parametrizable', (compiler, { type, endVal }) => {
       let code = 'let cursor = offset\n'
@@ -55,8 +53,6 @@ module.exports = {
       value.copy(buffer, offset)
       return offset + value.length
     }],
-    nbt: ['native', minecraft.nbt[1]],
-    optionalNbt: ['native', minecraft.optionalNbt[1]],
     compressedNbt: ['native', minecraft.compressedNbt[1]],
     entityMetadataLoop: ['parametrizable', (compiler, { type, endVal }) => {
       let code = 'for (const i in value) {\n'
@@ -84,8 +80,6 @@ module.exports = {
     restBuffer: ['native', (value) => {
       return value.length
     }],
-    nbt: ['native', minecraft.nbt[2]],
-    optionalNbt: ['native', minecraft.optionalNbt[2]],
     compressedNbt: ['native', minecraft.compressedNbt[2]],
     entityMetadataLoop: ['parametrizable', (compiler, { type }) => {
       let code = 'let size = 1\n'

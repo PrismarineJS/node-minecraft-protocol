@@ -1,6 +1,6 @@
 {
   "name": "minecraft-protocol",
-  "version": "1.41.1",
+  "version": "1.45.0",
   "description": "Parse and serialize minecraft packets, plus authentication and encryption.",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -9,8 +9,8 @@
     "url": "git://github.com/PrismarineJS/node-minecraft-protocol.git"
   },
   "scripts": {
-    "test": "mocha --recursive --reporter spec --exit --exclude \"non-par-test.js\"",
-    "test-non-par": "mocha --recursive --reporter spec --exit \"test/non-par-test.js\"",
+    "test": "npm run mochaTest",
+    "mochaTest": "mocha --recursive --reporter spec --exit",
     "lint": "standard",
     "fix": "standard --fix",
     "pretest": "npm run lint",
@@ -33,7 +33,7 @@
   },
   "browser": "src/browser.js",
   "devDependencies": {
-    "@types/node": "^18.0.6",
+    "@types/node": "^20.2.1",
     "espower-loader": "^1.0.0",
     "intelli-espower-loader": "^1.0.0",
     "minecraft-packets": "^1.1.5",
@@ -44,19 +44,19 @@
     "standard": "^17.0.0"
   },
   "dependencies": {
-    "@types/readable-stream": "^2.3.13",
+    "@types/readable-stream": "^4.0.0",
     "aes-js": "^3.1.2",
     "buffer-equal": "^1.0.0",
     "debug": "^4.3.2",
     "endian-toggle": "^0.0.0",
     "lodash.get": "^4.1.2",
     "lodash.merge": "^4.3.0",
-    "minecraft-data": "^3.21.0",
+    "minecraft-data": "^3.53.0",
     "minecraft-folder-path": "^1.2.0",
     "node-fetch": "^2.6.1",
     "node-rsa": "^0.4.2",
     "prismarine-auth": "^2.2.0",
-    "prismarine-nbt": "^2.0.0",
+    "prismarine-nbt": "^2.5.0",
     "prismarine-realms": "^1.2.0",
     "protodef": "^1.8.0",
     "readable-stream": "^4.1.0",

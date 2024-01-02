@@ -5,7 +5,7 @@ import { Socket } from 'net'
 import * as Stream from 'stream'
 import { Agent } from 'http'
 import { Transform } from "readable-stream";
-import { KeyObject } from 'crypto';
+import { BinaryLike, KeyObject } from 'crypto';
 import { Realm } from "prismarine-realms"
 
 type PromiseLike = Promise<void> | void
@@ -39,6 +39,7 @@ declare module 'minecraft-protocol' {
 		signMessage(message: string, timestamp: BigInt, salt?: number, preview?: string, acknowledgements?: Buffer[]): Buffer
 		verifyMessage(publicKey: Buffer | KeyObject, packet: object): boolean
 		reportPlayer(uuid: string, reason: 'FALSE_REPORTING' | 'HATE_SPEECH' | 'TERRORISM_OR_VIOLENT_EXTREMISM' | 'CHILD_SEXUAL_EXPLOITATION_OR_ABUSE' | 'IMMINENT_HARM' | 'NON_CONSENSUAL_INTIMATE_IMAGERY' | 'HARASSMENT_OR_BULLYING' | 'DEFAMATION_IMPERSONATION_FALSE_INFORMATION' | 'SELF_HARM_OR_SUICIDE' | 'ALCOHOL_TOBACCO_DRUGS', signatures: Buffer[], comment?: string): Promise<true>
+		chat(message: string, options?: { timestamp?: BigInt, salt?: BigInt, preview?: BinaryLike, didPreview?: boolean }): void
 		on(event: 'error', listener: (error: Error) => PromiseLike): this
 		on(event: 'packet', handler: (data: any, packetMeta: PacketMeta, buffer: Buffer, fullBuffer: Buffer) => PromiseLike): this
 		on(event: 'raw', handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
@@ -50,6 +51,8 @@ declare module 'minecraft-protocol' {
 		on(event: `raw.${string}`, handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
 		on(event: 'playerChat', handler: (data: { formattedMessage: string, message: string, type: string, sender: string, senderName: string, senderTeam: string, verified?: boolean }) => PromiseLike): this
 		on(event: 'systemChat', handler: (data: { positionId: number, formattedMessage: string }) => PromiseLike): this
+		// Emitted after the player enters the PLAY state and can send and recieve game packets
+		on(event: 'playerJoin', handler: () => void): this
 		once(event: 'error', listener: (error: Error) => PromiseLike): this
 		once(event: 'packet', handler: (data: any, packetMeta: PacketMeta, buffer: Buffer, fullBuffer: Buffer) => PromiseLike): this
 		once(event: 'raw', handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
@@ -117,7 +120,7 @@ declare module 'minecraft-protocol' {
 		authTitle?: string
 		sessionServer?: string
 		keepAlive?: boolean
-		closeTimeout?: number 
+		closeTimeout?: number
 		noPongTimeout?: number
 		checkTimeoutInterval?: number
 		version?: string
@@ -136,6 +139,8 @@ declare module 'minecraft-protocol' {
 		realms?: RealmsOptions
 		// 1.19+
 		disableChatSigning?: boolean
+		/** Pass custom client implementation if needed. */
+		Client?: Client
 	}
 
 	export class Server extends EventEmitter {
@@ -153,6 +158,8 @@ declare module 'minecraft-protocol' {
 		on(event: 'error', listener: (error: Error) => PromiseLike): this
 		on(event: 'login', handler: (client: ServerClient) => PromiseLike): this
 		on(event: 'listening', listener: () => PromiseLike): this
+		// Emitted after the player enters the PLAY state and can send and recieve game packets
+		on(event: 'playerJoin', handler: (client: ServerClient) => void): this
 		once(event: 'connection', handler: (client: ServerClient) => PromiseLike): this
 		once(event: 'error', listener: (error: Error) => PromiseLike): this
 		once(event: 'login', handler: (client: ServerClient) => PromiseLike): this
@@ -161,9 +168,9 @@ declare module 'minecraft-protocol' {
 
 	export interface ServerClient extends Client {
 		id: number
-		// You must call this function when the server receives a message from a player and that message gets
-		// broadcast to other players in player_chat packets. This function stores these packets so the server 
-		// can then verify a player's lastSeenMessages field in inbound chat packets to ensure chain integrity.
+		/** You must call this function when the server receives a message from a player and that message gets
+		 broadcast to other players in player_chat packets. This function stores these packets so the server
+		 can then verify a player's lastSeenMessages field in inbound chat packets to ensure chain integrity.  */
 		logSentMessageFromPeer(packet: object): boolean
 	}
 
@@ -187,11 +194,12 @@ declare module 'minecraft-protocol' {
 		hideErrors?: boolean
 		agent?: Agent
 		validateChannelProtocol?: boolean
-		// 1.19+
-		// Require connecting clients to have chat signing support enabled
+		/** (1.19+) Require connecting clients to have chat signing support enabled */
 		enforceSecureProfile?: boolean
-		// 1.19.1 & 1.19.2 only: If client should send previews of messages they are typing to the server
+		/** 1.19.1 & 1.19.2 only: If client should send previews of messages they are typing to the server */
 		enableChatPreview?: boolean
+		socketType?: 'tcp' | 'ipc'
+		Server?: Server
 	}
 
 	export interface SerializerOptions {
@@ -200,7 +208,7 @@ declare module 'minecraft-protocol' {
 		state?: States
 		version: string
 	}
-	
+
 	export interface MicrosoftDeviceAuthorizationResponse {
 		device_code: string
 		user_code: string

@@ -7,12 +7,9 @@ const { mojangPublicKeyPem } = require('./constants')
 class VerificationError extends Error {}
 function validateLastMessages (pending, lastSeen, lastRejected) {
   if (lastRejected) {
-    const rejectedTs = pending.get(lastRejected.sender, lastRejected.signature)
-    if (!rejectedTs) {
-      throw new VerificationError(`Client rejected a message we never sent from '${lastRejected.sender}'`)
-    } else {
-      pending.acknowledge(lastRejected.sender, lastRejected.signature)
-    }
+    const rejectedTime = pending.get(lastRejected.sender, lastRejected.signature)
+    if (rejectedTime) pending.acknowledge(lastRejected.sender, lastRejected.signature)
+    else throw new VerificationError(`Client rejected a message we never sent from '${lastRejected.sender}'`)
   }
 
   let lastTimestamp
@@ -79,7 +76,7 @@ module.exports = function (client, server, options) {
     }
   }
 
-  client.on('session', (packet) => {
+  client.on('chat_session_update', (packet) => {
     client._session = {
       index: 0,
       uuid: packet.sessionUuid

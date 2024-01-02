@@ -2,6 +2,7 @@
 
 const mc = require('../')
 const os = require('os')
+const fs = require('fs')
 const path = require('path')
 const assert = require('power-assert')
 const util = require('util')
@@ -20,7 +21,8 @@ for (const supportedVersion of mc.supportedVersions) {
   const version = mcData.version
   const MC_SERVER_JAR_DIR = process.env.MC_SERVER_JAR_DIR || os.tmpdir()
   const MC_SERVER_JAR = MC_SERVER_JAR_DIR + '/minecraft_server.' + version.minecraftVersion + '.jar'
-  const wrap = new Wrap(MC_SERVER_JAR, MC_SERVER_PATH + '_' + supportedVersion, {
+  const MC_SERVER_DIR = MC_SERVER_PATH + '_' + supportedVersion
+  const wrap = new Wrap(MC_SERVER_JAR, MC_SERVER_DIR, {
     minMem: 1024,
     maxMem: 1024
   })
@@ -28,7 +30,7 @@ for (const supportedVersion of mc.supportedVersions) {
     console.log(line)
   })
 
-  describe('client ' + version.minecraftVersion, function () {
+  describe('client ' + supportedVersion + 'v', function () {
     this.timeout(10 * 60 * 1000)
 
     before(async function () {
@@ -118,7 +120,23 @@ for (const supportedVersion of mc.supportedVersions) {
           assert.strictEqual(packet.gameMode, 0)
           client.chat('hello everyone; I have logged in.')
         })
-
+        // Dump some data for easier debugging
+        client.on('raw.registry_data', (buffer) => {
+          fs.writeFileSync(MC_SERVER_DIR + '_registry_data.bin', buffer)
+        })
+        client.on('registry_data', (json) => {
+          fs.writeFileSync(MC_SERVER_DIR + '_registry_data.json', JSON.stringify(json))
+        })
+        client.on('login', (packet) => {
+          fs.writeFileSync(MC_SERVER_DIR + '_login.json', JSON.stringify(packet))
+          if (fs.existsSync(MC_SERVER_DIR + '_registry_data.json')) {
+            // generate a loginPacket.json for minecraft-data
+            fs.writeFileSync(MC_SERVER_DIR + '_loginPacket.json', JSON.stringify({
+              ...packet,
+              dimensionCodec: JSON.parse(fs.readFileSync(MC_SERVER_DIR + '_registry_data.json')).codec
+            }, null, 2))
+          }
+        })
         client.on('playerChat', function (data) {
           chatCount += 1
           assert.ok(chatCount <= 2)

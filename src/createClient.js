@@ -1,6 +1,6 @@
 'use strict'
 
-const Client = require('./client')
+const DefaultClientImpl = require('./client')
 const assert = require('assert')
 
 const encrypt = require('./client/encrypt')
@@ -14,6 +14,7 @@ const tcpDns = require('./client/tcp_dns')
 const autoVersion = require('./client/autoVersion')
 const pluginChannels = require('./client/pluginChannels')
 const versionChecking = require('./client/versionChecking')
+const uuid = require('./datatypes/uuid')
 
 module.exports = createClient
 
@@ -31,6 +32,7 @@ function createClient (options) {
   options.majorVersion = version.majorVersion
   options.protocolVersion = version.version
   const hideErrors = options.hideErrors || false
+  const Client = options.Client || DefaultClientImpl
 
   const client = new Client(false, version.minecraftVersion, options.customPackets, hideErrors)
 
@@ -53,6 +55,8 @@ function createClient (options) {
       case 'offline':
       default:
         client.username = options.username
+        client.uuid = uuid.nameToMcOfflineUUID(client.username)
+        options.auth = 'offline'
         options.connect(client)
         break
     }

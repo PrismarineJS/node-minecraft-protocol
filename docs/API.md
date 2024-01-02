@@ -12,7 +12,7 @@ automatically logged in and validated against mojang's auth.
  * kickTimeout : default to `10*1000` (10s), kick client that doesn't answer to keepalive after that time
  * checkTimeoutInterval : default to `4*1000` (4s), send keepalive packet at that period
  * online-mode : default to true
- * beforePing : allow customisation of the answer to ping the server does. 
+ * beforePing : allow customisation of the answer to ping the server does.
  It takes a function with argument response and client, response is the default json response, and client is client who sent a ping.
  It can take as third argument a callback. If the callback is passed, the function should pass its result to the callback, if not it should return.
  If the result is `false` instead of a response object then the connection is terminated and no ping is returned to the client.
@@ -33,6 +33,8 @@ automatically logged in and validated against mojang's auth.
  * validateChannelProtocol (optional) : whether or not to enable protocol validation for custom protocols using plugin channels for the connected clients. Defaults to true
  * enforceSecureProfile (optional) : Kick clients that do not have chat signing keys from Mojang (1.19+)
  * generatePreview (optional) : Function to generate chat previews. Takes the raw message string and should return the message preview as a string.  (1.19-1.19.2)
+ * socketType (optional) : either `tcp` or `ipc`. Switches from a tcp connection to a ipc socket connection (or named pipes on windows). With the `ipc` option `host` becomes the path off the ipc connection on the local filesystem. Example: `\\.\pipe\minecraft-ipc` (Windows) `/tmp/minecraft-ipc.sock` (unix based systems). See the ipcConnection example for an example.
+ * Server : You can pass a custom server class to use instead of the default one.
 
 ## mc.Server(version,[customPackets])
 
@@ -87,6 +89,11 @@ Called when a client connects, but before any login has happened. Takes a
 
 Called when a client is logged in against server. Takes a `Client` parameter.
 
+### `playerJoin` event
+
+Emitted after a player joins and enters the PLAY protocol state and can send and recieve game packets. This is emitted after the `login` event. On 1.20.2 and above after we emit the `login` event, the player will enter a CONFIG state, as opposed to the PLAY state (where game packets can be sent), so you must instead now wait for `playerJoin`.
+
+
 ### `listening` event
 
 Called when the server is listening for connections. This means that the server is ready to accept incoming connections.
@@ -111,7 +118,7 @@ Returns a `Client` instance and perform login.
    is blank, and `profilesFolder` is specified, we auth with the tokens there instead.
    If neither `password` or `profilesFolder` are specified, we connect in offline mode.
  * host : default to localhost
- * session : An object holding clientToken, accessToken and selectedProfile. Generated after logging in using username + password with mojang auth or after logging in using microsoft auth. `clientToken`, `accessToken` and `selectedProfile: {name: '<username>', id: '<selected profile uuid>'}` can be set inside of `session` when using createClient to login with a client and access Token instead of a password. `session` is also emitted by the `Client` instance with the event 'session' after successful authentication. 
+ * session : An object holding clientToken, accessToken and selectedProfile. Generated after logging in using username + password with mojang auth or after logging in using microsoft auth. `clientToken`, `accessToken` and `selectedProfile: {name: '<username>', id: '<selected profile uuid>'}` can be set inside of `session` when using createClient to login with a client and access Token instead of a password. `session` is also emitted by the `Client` instance with the event 'session' after successful authentication.
    * clientToken : generated if a password is given or can be set when when using createClient
    * accessToken : generated if a password or microsoft account is given or can be set when using createBot
    * selectedProfile : generated if a password or microsoft account is given. Can be set as a object with property `name` and `id` that specifies the selected profile.
@@ -128,21 +135,22 @@ Returns a `Client` instance and perform login.
  * hideErrors : do not display errors, default to false
  * skipValidation : do not try to validate given session, defaults to false
  * stream : a stream to use as connection
- * connect : a function taking the client as parameter and that should client.setSocket(socket) 
+ * connect : a function taking the client as parameter and that should client.setSocket(socket)
  and client.emit('connect') when appropriate (see the proxy examples for an example of use)
- * agent : a http agent that can be used to set proxy settings for yggdrasil authentication (see proxy-agent on npm) 
+ * agent : a http agent that can be used to set proxy settings for yggdrasil authentication (see proxy-agent on npm)
  * fakeHost : (optional) hostname to send to the server in the set_protocol packet
  * profilesFolder : optional
-   * (mojang account) the path to the folder that contains your `launcher_profiles.json`. defaults to your minecraft folder if it exists, otherwise the local directory. set to `false` to disable managing profiles 
+   * (mojang account) the path to the folder that contains your `launcher_profiles.json`. defaults to your minecraft folder if it exists, otherwise the local directory. set to `false` to disable managing profiles
    * (microsoft account) the path to store authentication caches, defaults to .minecraft
  * onMsaCode(data) : (optional) callback called when signing in with a microsoft account
  with device code auth. `data` is an object documented [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-device-code#device-authorization-response)
  * id : a numeric client id used for referring to multiple clients in a server
  * validateChannelProtocol (optional) : whether or not to enable protocol validation for custom protocols using plugin channels. Defaults to true
  * disableChatSigning (optional) : Don't try obtaining chat signing keys from Mojang (1.19+)
- * realms : An object which should contain one of the following properties: `realmId` or `pickRealm`. When defined will attempt to join a Realm without needing to specify host/port. **The authenticated account must either own the Realm or have been invited to it** 
-   * realmId : The id of the Realm to join. 
-   * pickRealm(realms) : A function which will have an array of the user Realms (joined/owned) passed to it. The function should return a Realm. 
+ * realms : An object which should contain one of the following properties: `realmId` or `pickRealm`. When defined will attempt to join a Realm without needing to specify host/port. **The authenticated account must either own the Realm or have been invited to it**
+   * realmId : The id of the Realm to join.
+   * pickRealm(realms) : A function which will have an array of the user Realms (joined/owned) passed to it. The function should return a Realm.
+ * Client : You can pass a custom client class to use instead of the default one, which would allow you to create completely custom communication. Also note that you can use the `stream` option instead where you can supply custom duplex, but this will still use serialization/deserialization of packets.
 
 
 ## mc.Client(isServer,version,[customPackets])
@@ -234,7 +242,7 @@ The client's version
 
 ### `packet` event
 
-Called with every packet parsed. Takes four paramaters, the JSON data we parsed, the packet metadata (name, state), the buffer (raw data) and the full buffer (includes surplus data and may include the data of following packets on versions below 1.8) 
+Called with every packet parsed. Takes four paramaters, the JSON data we parsed, the packet metadata (name, state), the buffer (raw data) and the full buffer (includes surplus data and may include the data of following packets on versions below 1.8)
 
 ### `raw` event
 
@@ -258,6 +266,10 @@ Called when user authentication is resolved. Takes session data as parameter.
 Called when the protocol changes state. Takes the new state and old state as
 parameters.
 
+### `playerJoin` event
+
+Emitted after the player enters the PLAY protocol state and can send and recieve game packets
+
 ### `error` event
 
 Called when an error occurs within the client. Takes an Error as parameter.
@@ -265,20 +277,20 @@ Called when an error occurs within the client. Takes an Error as parameter.
 ### `playerChat` event
 
 Called when a chat message from another player arrives. The emitted object contains:
-* formattedMessage -- the chat message preformatted, if done on server side
-* plainMessage -- the chat message without formatting (for example no `<username> message` ; instead `message`), on version 1.19+
-* unsignedContent -- unsigned formatted chat contents ; should only be present when the message is modified and server has chat previews disabled - only on version 1.19 - 1.19.2
+* formattedMessage -- (JSON) the chat message preformatted, if done on server side
+* plainMessage -- (Plaintext) the chat message without formatting (for example no `<username> message` ; instead `message`), on version 1.19+
+* unsignedContent -- (JSON) unsigned formatted chat contents ; should only be present when the message is modified and server has chat previews disabled - only on version 1.19 - 1.19.2
 * type -- the message type - on 1.19, which format string to use to render message ; below, the place where the message is displayed (for example chat or action bar)
 * sender -- the UUID of the player sending the message
 * senderTeam -- scoreboard team of the player (pre 1.19)
-* senderName -- Name of the sender 
+* senderName -- Name of the sender
 * targetName -- Name of the target (for outgoing commands like /tell). Only in 1.19.2+
 * verified -- true if message is signed, false if not signed, undefined on versions prior to 1.19
 
 ### `systemChat` event
 
 Called when a system chat message arrives. A system chat message is any message not sent by a player. The emitted object contains:
-* formattedMessage -- the chat message preformatted
+* formattedMessage -- (JSON) the chat message preformatted
 * positionId -- the chat type of the message. 1 for system chat and 2 for actionbar
 
 See the [chat example](https://github.com/PrismarineJS/node-minecraft-protocol/blob/master/examples/client_chat/client_chat.js#L1) for usage.

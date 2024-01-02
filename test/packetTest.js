@@ -35,6 +35,20 @@ const slotValue = {
   }
 }
 
+const nbtValue = {
+  type: 'compound',
+  name: 'test',
+  value: {
+    test1: { type: 'int', value: 4 },
+    test2: { type: 'long', value: [12, 42] },
+    test3: { type: 'byteArray', value: [32] },
+    test4: { type: 'string', value: 'ohi' },
+    test5: { type: 'list', value: { type: 'int', value: [4] } },
+    test6: { type: 'compound', value: { test: { type: 'int', value: 4 } } },
+    test7: { type: 'intArray', value: [12, 42] }
+  }
+}
+
 const values = {
   i32: 123456,
   i16: -123,
@@ -82,7 +96,7 @@ const values = {
     }
     Object.keys(typeArgs).forEach(function (index) {
       const v = typeArgs[index].name === 'type' && typeArgs[index].type === 'string' && typeArgs[2] !== undefined &&
-      typeArgs[2].type !== undefined
+        typeArgs[2].type !== undefined
         ? (typeArgs[2].type[1].fields['minecraft:crafting_shapeless'] === undefined ? 'crafting_shapeless' : 'minecraft:crafting_shapeless')
         : getValue(typeArgs[index].type, results)
       if (typeArgs[index].anon) {
@@ -96,51 +110,26 @@ const values = {
     delete results['..']
     return results
   },
+  vec3f: {
+    x: 0, y: 0, z: 0
+  },
+  vec3f64: {
+    x: 0, y: 0, z: 0
+  },
+  vec4f: {
+    x: 0, y: 0, z: 0, w: 0
+  },
   count: 1, // TODO : might want to set this to a correct value
   bool: true,
   f64: 99999.2222,
   f32: -333.444,
   slot: slotValue,
-  nbt: {
-    type: 'compound',
-    name: 'test',
-    value: {
-      test1: { type: 'int', value: 4 },
-      test2: { type: 'long', value: [12, 42] },
-      test3: { type: 'byteArray', value: [32] },
-      test4: { type: 'string', value: 'ohi' },
-      test5: { type: 'list', value: { type: 'int', value: [4] } },
-      test6: { type: 'compound', value: { test: { type: 'int', value: 4 } } },
-      test7: { type: 'intArray', value: [12, 42] }
-    }
-  },
-  optionalNbt: {
-    type: 'compound',
-    name: 'test',
-    value: {
-      test1: { type: 'int', value: 4 },
-      test2: { type: 'long', value: [12, 42] },
-      test3: { type: 'byteArray', value: [32] },
-      test4: { type: 'string', value: 'ohi' },
-      test5: { type: 'list', value: { type: 'int', value: [4] } },
-      test6: { type: 'compound', value: { test: { type: 'int', value: 4 } } },
-      test7: { type: 'intArray', value: [12, 42] }
-    }
-  },
+  nbt: nbtValue,
+  optionalNbt: nbtValue,
+  compressedNbt: nbtValue,
+  anonymousNbt: nbtValue,
+  anonOptionalNbt: nbtValue,
   previousMessages: [],
-  compressedNbt: {
-    type: 'compound',
-    name: 'test',
-    value: {
-      test1: { type: 'int', value: 4 },
-      test2: { type: 'long', value: [12, 42] },
-      test3: { type: 'byteArray', value: [32] },
-      test4: { type: 'string', value: 'ohi' },
-      test5: { type: 'list', value: { type: 'int', value: [4] } },
-      test6: { type: 'compound', value: { test: { type: 'int', value: 4 } } },
-      test7: { type: 'intArray', value: [12, 42] }
-    }
-  },
   i64: [0, 1],
   u64: [0, 1],
   entityMetadata: [
@@ -214,6 +203,11 @@ const values = {
       },
       suggestionType: 'minecraft:summonable_entities'
     }
+  },
+  soundSource: 'master',
+  packedChunkPos: {
+    x: 10,
+    z: 12
   }
 }
 
@@ -235,11 +229,16 @@ for (const supportedVersion of mc.supportedVersions) {
   const version = mcData.version
   const packets = mcData.protocol
 
-  describe('packets ' + version.minecraftVersion, function () {
+  describe('packets ' + supportedVersion + 'v', function () {
     let client, server, serverClient
     before(async function () {
       PORT = await getPort()
       server = new Server(version.minecraftVersion)
+      if (mcData.supportFeature('mcDataHasEntityMetadata')) {
+        values.entityMetadata[0].type = 'byte'
+      } else {
+        values.entityMetadata[0].type = 0
+      }
       return new Promise((resolve) => {
         console.log(`Using port for tests: ${PORT}`)
         server.once('listening', function () {
@@ -266,8 +265,7 @@ for (const supportedVersion of mc.supportedVersions) {
         Object.keys(packets[state]).forEach(function (direction) {
           Object.keys(packets[state][direction].types)
             .filter(function (packetName) {
-              return packetName !== 'packet' &&
-              packetName.startsWith('packet_')
+              return packetName !== 'packet' && packetName.startsWith('packet_')
             })
             .forEach(function (packetName) {
               packetInfo = packets[state][direction].types[packetName]
