@@ -13,7 +13,7 @@ const createDecipher = require('./transforms/encryption').createDecipher
 const closeTimeout = 30 * 1000
 
 class Client extends EventEmitter {
-  constructor (isServer, version, customPackets, hideErrors = false) {
+  constructor (isServer, version, customPackets, hideErrors = false, fullParser = true) {
     super()
     this.customPackets = customPackets
     this.version = version
@@ -28,6 +28,7 @@ class Client extends EventEmitter {
     this.ended = true
     this.latency = 0
     this.hideErrors = hideErrors
+    this.fullParser = fullParser
     this.closeTimer = null
     const mcData = require('minecraft-data')(version)
     this.state = states.HANDSHAKING
@@ -47,7 +48,8 @@ class Client extends EventEmitter {
       packetsToParse:
       this.packetsToParse,
       customPackets: this.customPackets,
-      noErrorLogging: this.hideErrors
+      noErrorLogging: this.hideErrors,
+      fullParser: this.fullParser
     })
 
     this.splitter.recognizeLegacyPing = state === states.HANDSHAKING
