@@ -25,7 +25,8 @@ function createServer (options = {}) {
     favicon,
     customPackets,
     motdMsg, // This is when you want to send formated motd's from ChatMessage instances
-    socketType = 'tcp'
+    socketType = 'tcp',
+    fullParser = true
   } = options
 
   const maxPlayers = options['max-players'] !== undefined ? maxPlayersOld : maxPlayersNew
@@ -37,7 +38,7 @@ function createServer (options = {}) {
   const mcversion = mcData.version
   const hideErrors = options.hideErrors || false
 
-  const server = new Server(mcversion.minecraftVersion, customPackets, hideErrors)
+  const server = new Server(mcversion.minecraftVersion, customPackets, hideErrors, fullParser)
   server.mcversion = mcversion
   server.motd = motd
   server.motdMsg = motdMsg
