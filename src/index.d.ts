@@ -146,7 +146,7 @@ declare module 'minecraft-protocol' {
 	}
 
 	export class Server extends EventEmitter {
-		constructor(version: string, customPackets?: any, , hideErrors?: boolean | undefined, fullParser?: boolean | undefined, hideErrors?: boolean | undefined, fullParser?: boolean | undefinedhideErrors?: boolean | undefined, fullParser?: boolean | undefined)
+		constructor(version: string, customPackets?: any, hideErrors?: boolean | undefined, fullParser?: boolean | undefined)
 		writeToClients(clients: Client[], name: string, params: any): void
 		onlineModeExceptions: object
 		clients: { [key: number]: ServerClient }
