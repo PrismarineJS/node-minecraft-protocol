@@ -7,7 +7,7 @@ const states = require('./states')
 const { createSerializer } = require('./transforms/serializer')
 
 class Server extends EventEmitter {
-  constructor (version, customPackets, hideErrors = false) {
+  constructor (version, customPackets, hideErrors = false, fullParser = true) {
     super()
     this.version = version
     this.socketServer = null
@@ -16,6 +16,7 @@ class Server extends EventEmitter {
     this.clients = {}
     this.customPackets = customPackets
     this.hideErrors = hideErrors
+    this.fullParser = fullParser
     this.serializer = createSerializer({ state: 'play', isServer: true, version, customPackets })
   }
 
@@ -24,7 +25,7 @@ class Server extends EventEmitter {
     let nextId = 0
     self.socketServer = net.createServer()
     self.socketServer.on('connection', socket => {
-      const client = new Client(true, this.version, this.customPackets, this.hideErrors)
+      const client = new Client(true, this.version, this.customPackets, this.hideErrors, this.fullParser)
       client._end = client.end
       client.end = function end (endReason, fullReason = JSON.stringify({ text: endReason })) {
         if (client.state === states.PLAY) {
