@@ -14,7 +14,7 @@
     "lint": "standard",
     "fix": "standard --fix",
     "pretest": "npm run lint",
-    "prepublishOnly": "cp docs/README.md README.md"
+    "prepublishOnly": "cp docs/README.md README.md && node scripts/genTypes.js"
   },
   "keywords": [
     "minecraft",

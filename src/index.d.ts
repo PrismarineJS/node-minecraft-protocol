@@ -7,6 +7,7 @@ import { Agent } from 'http'
 import { Transform } from "readable-stream";
 import { BinaryLike, KeyObject } from 'crypto';
 import { Realm } from "prismarine-realms"
+import { clientWrite } from './protocol'
 
 type PromiseLike = Promise<void> | void
 
@@ -26,7 +27,7 @@ declare module 'minecraft-protocol' {
 		customPackets: any
 		protocolVersion: number
 		version: string
-		write(name: string, params: any): void
+		write: typeof clientWrite
 		writeRaw(buffer: any): void
 		compressionThreshold: string
 		ended: boolean
