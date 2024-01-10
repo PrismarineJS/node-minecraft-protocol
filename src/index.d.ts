@@ -10,6 +10,7 @@ import { Realm } from "prismarine-realms"
 import { clientWrite } from './protocol'
 
 type PromiseLike = Promise<void> | void
+type IsAny<T> = 0 extends 1 & T ? true : false
 
 declare module 'minecraft-protocol' {
 	export class Client extends EventEmitter {
@@ -27,7 +28,7 @@ declare module 'minecraft-protocol' {
 		customPackets: any
 		protocolVersion: number
 		version: string
-		write: typeof clientWrite
+		write: IsAny<typeof clientWrite> extends true ? (name: string, params: any) => void : typeof clientWrite
 		writeRaw(buffer: any): void
 		compressionThreshold: string
 		ended: boolean
