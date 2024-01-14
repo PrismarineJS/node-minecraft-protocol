@@ -38,6 +38,7 @@ module.exports = function (client, options) {
     // already plaintext JSON or empty
     return nbtDataOrString
   }
+  client._handleNbtComponent = handleNbtComponent
 
   // This stores the last n (5 or 20) messages that the player has seen, from unique players
   if (mcData.supportFeature('chainedChatWithHashing')) client._lastSeenMessages = new LastSeenMessages()

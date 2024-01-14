@@ -33,7 +33,7 @@ module.exports = client => {
   })
 
   client.on('playerJoin', () => {
-    const ChatMessage = require('prismarine-chat')(client.registry)
+    const ChatMessage = require('prismarine-chat')(client.registry || client.version)
     client.parseMessage = (comp) => {
       return new ChatMessage(comp)
     }
