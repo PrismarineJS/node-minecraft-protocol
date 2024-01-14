@@ -17,7 +17,7 @@ function nameToMcOfflineUUID (name) {
 
 function fromIntArray (arr) {
   const buf = Buffer.alloc(16)
-  arr.forEach((num, index) => { buf.writeInt32LE(num, index * 4) })
+  arr.forEach((num, index) => { buf.writeInt32BE(num, index * 4) })
   return buf.toString('hex')
 }
 

@@ -27,16 +27,16 @@ module.exports = function (client, options) {
   // 1.20.3+ serializes chat components in chat packets with NBT. Non-chat packets that send messages (like disconnect) still use JSON chat.
   // NMP API expects a JSON string, so since the schema is mostly the same we can convert the NBT to JSON with a transform to UUID encoding
   function handleNbtComponent (nbtDataOrString) {
-    if (mcData.supportFeature('chatPacketsUseNbtComponents')) {
-      const simplified = nbt.simplify(nbtDataOrString)
+    if (mcData.supportFeature('chatPacketsUseNbtComponents') && nbtDataOrString) {
+      // UUIDs are encoded in NBT as a 4x i32 array, so convert to a hex string. Also add `text` wrapper to plaintext strings for compat
+      const simplified = nbtDataOrString.type === 'string' ? ({ text: nbtDataOrString.value }) : nbt.simplify(nbtDataOrString)
       return JSON.stringify(simplified, (key, val) => {
-        // UUIDs are encoded in NBT as a 4x i32 array, so we need to convert to a hex string
         if (key === 'id' && Array.isArray(val)) return uuid.fromIntArray(val)
         return val
       })
-    } else {
-      return nbtDataOrString // already plaintext JSON
     }
+    // already plaintext JSON or empty
+    return nbtDataOrString
   }
 
   // This stores the last n (5 or 20) messages that the player has seen, from unique players
