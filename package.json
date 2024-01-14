@@ -41,6 +41,7 @@
     "minecraft-wrap": "^1.2.3",
     "mocha": "^10.0.0",
     "power-assert": "^1.0.0",
+    "prismarine-chat": "^1.9.1",
     "standard": "^17.0.0"
   },
   "dependencies": {

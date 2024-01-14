@@ -238,7 +238,7 @@ The client's protocol version
 
 ### client.version
 
-The client's version
+The client's version, as a string
 
 ### `packet` event
 

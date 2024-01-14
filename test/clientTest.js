@@ -59,6 +59,7 @@ for (const supportedVersion of mc.supportedVersions) {
             'server-port': PORT,
             motd: 'test1234',
             'max-players': 120,
+            // 'level-type': 'flat',
             'use-native-transport': 'false' // java 16 throws errors without this, https://www.spigotmc.org/threads/unable-to-access-address-of-buffer.311602
           }, (err) => {
             if (err) reject(err)
@@ -165,21 +166,22 @@ for (const supportedVersion of mc.supportedVersions) {
             }
           } else {
             // 1.19+
-
-            const message = JSON.parse(data.formattedMessage || JSON.stringify({ text: data.plainMessage }))
+            console.log('Chat Message', data)
+            const sender = JSON.parse(data.senderName)
+            const msgPayload = data.formattedMessage ? JSON.parse(data.formattedMessage) : data.plainMessage
+            const plainMessage = client.parseMessage(msgPayload).toString()
 
             if (chatCount === 1) {
-              assert.strictEqual(message.text, 'hello everyone; I have logged in.')
-              const sender = JSON.parse(data.senderName)
+              assert.strictEqual(plainMessage, 'hello everyone; I have logged in.')
               assert.deepEqual(sender.clickEvent, {
                 action: 'suggest_command',
                 value: '/tell Player '
               })
               assert.strictEqual(sender.text, 'Player')
             } else if (chatCount === 2) {
-              assert.strictEqual(message.text, 'hello')
-              const sender = JSON.parse(data.senderName)
-              assert.strictEqual(sender.text, 'Server')
+              const plainSender = client.parseMessage(sender).toString()
+              assert.strictEqual(plainMessage, 'hello')
+              assert.strictEqual(plainSender, 'Server')
               wrap.removeListener('line', lineListener)
               client.end()
               done()
