@@ -1,6 +1,7 @@
 const crypto = require('crypto')
 const concat = require('../transforms/binaryStream').concat
 const nbt = require('prismarine-nbt')
+const uuid = require('../datatypes/uuid')
 const messageExpireTime = 420000 // 7 minutes (ms)
 
 function isFormatted (message) {
@@ -17,30 +18,26 @@ function isFormatted (message) {
   }
 }
 
-// Used for 1.20.3+ to convert NBT back into the JSON string expected of a chat message.
-function handleNBTStrings (nbtDataOrString) {
-  // Check if nbtDataOrString is actually defined
-  if (nbtDataOrString) {
-    // Check if its already a string, if so we don't have to touch it.
-    if (typeof (nbtDataOrString) !== 'string') {
-      // It was not a string, so it much be NBT, if its just a string type we need to handle it a bit differently
-      if (nbtDataOrString.type === 'string') {
-        // Need to return it in the JSON string format that the reset of nmp expects.
-        return JSON.stringify({ text: nbtDataOrString.value })
-      } else {
-        // nbt.simplify drops the extra tag info before we convert it back into a JSON string
-        return JSON.stringify(nbt.simplify(nbtDataOrString))
-      }
-    }
-  }
-  return nbtDataOrString
-}
-
 module.exports = function (client, options) {
   const mcData = require('minecraft-data')(client.version)
   client._players = {}
   client._lastChatSignature = null
   client._lastRejectedMessage = null
+
+  // 1.20.3+ serializes chat components in chat packets with NBT. Non-chat packets that send messages (like disconnect) still use JSON chat.
+  // NMP API expects a JSON string, so since the schema is mostly the same we can convert the NBT to JSON with a transform to UUID encoding
+  function handleNbtComponent (nbtDataOrString) {
+    if (mcData.supportFeature('chatPacketsUseNbtComponents')) {
+      const simplified = nbt.simplify(nbtDataOrString)
+      return JSON.stringify(simplified, (key, val) => {
+        // UUIDs are encoded in NBT as a 4x i32 array, so we need to convert to a hex string
+        if (key === 'id' && Array.isArray(val)) return uuid.fromIntArray(val)
+        return val
+      })
+    } else {
+      return nbtDataOrString // already plaintext JSON
+    }
+  }
 
   // This stores the last n (5 or 20) messages that the player has seen, from unique players
   if (mcData.supportFeature('chainedChatWithHashing')) client._lastSeenMessages = new LastSeenMessages()
@@ -160,10 +157,10 @@ module.exports = function (client, options) {
   client.on('profileless_chat', (packet) => {
     // Profileless chat is parsed as an unsigned player chat message but logged as a system message
     client.emit('playerChat', {
-      formattedMessage: handleNBTStrings(packet.message),
+      formattedMessage: handleNbtComponent(packet.message),
       type: packet.type,
-      senderName: handleNBTStrings(packet.name),
-      targetName: handleNBTStrings(packet.target),
+      senderName: handleNbtComponent(packet.name),
+      targetName: handleNbtComponent(packet.target),
       verified: false
     })
 
@@ -179,7 +176,7 @@ module.exports = function (client, options) {
   client.on('system_chat', (packet) => {
     client.emit('systemChat', {
       positionId: packet.isActionBar ? 2 : 1,
-      formattedMessage: handleNBTStrings(packet.content)
+      formattedMessage: handleNbtComponent(packet.content)
     })
 
     client._lastChatHistory.push({
@@ -217,11 +214,11 @@ module.exports = function (client, options) {
       if (verified) client._signatureCache.push(packet.signature)
       client.emit('playerChat', {
         plainMessage: packet.plainMessage,
-        unsignedContent: handleNBTStrings(packet.unsignedChatContent),
+        unsignedContent: handleNbtComponent(packet.unsignedChatContent),
         type: packet.type,
         sender: packet.senderUuid,
-        senderName: handleNBTStrings(packet.networkName),
-        targetName: handleNBTStrings(packet.networkTargetName),
+        senderName: handleNbtComponent(packet.networkName),
+        targetName: handleNbtComponent(packet.networkTargetName),
         verified
       })
 

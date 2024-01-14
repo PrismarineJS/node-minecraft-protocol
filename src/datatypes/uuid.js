@@ -15,4 +15,10 @@ function nameToMcOfflineUUID (name) {
   return (new UUID(javaUUID('OfflinePlayer:' + name))).toString()
 }
 
-module.exports = { nameToMcOfflineUUID }
+function fromIntArray (arr) {
+  const buf = Buffer.alloc(16)
+  arr.forEach((num, index) => { buf.writeInt32LE(num, index * 4) })
+  return buf.toString('hex')
+}
+
+module.exports = { nameToMcOfflineUUID, fromIntArray }
