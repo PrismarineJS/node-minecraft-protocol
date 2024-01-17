@@ -274,6 +274,10 @@ Emitted after the player enters the PLAY protocol state and can send and recieve
 
 Called when an error occurs within the client. Takes an Error as parameter.
 
+### `noCredentials` event
+
+Emitted when client didn't supply credentials and server is in online mode (authenticating is required).
+
 ### `playerChat` event
 
 Called when a chat message from another player arrives. The emitted object contains:
