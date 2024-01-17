@@ -51,6 +51,7 @@ declare module 'minecraft-protocol' {
 		on(event: `raw.${string}`, handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
 		on(event: 'playerChat', handler: (data: { formattedMessage: string, message: string, type: string, sender: string, senderName: string, senderTeam: string, verified?: boolean }) => PromiseLike): this
 		on(event: 'systemChat', handler: (data: { positionId: number, formattedMessage: string }) => PromiseLike): this
+		on(event: 'noCredentials', handler: () => PromiseLike): this
 		// Emitted after the player enters the PLAY state and can send and recieve game packets
 		on(event: 'playerJoin', handler: () => void): this
 		once(event: 'error', listener: (error: Error) => PromiseLike): this
@@ -62,6 +63,7 @@ declare module 'minecraft-protocol' {
 		once(event: 'connect', handler: () => PromiseLike): this
 		once(event: string, handler: (data: any, packetMeta: PacketMeta) => PromiseLike): this
 		once(event: `raw.${string}`, handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
+		once(event: 'noCredentials', handler: () => PromiseLike): this
 	}
 
 	class FullPacketParser extends Transform {

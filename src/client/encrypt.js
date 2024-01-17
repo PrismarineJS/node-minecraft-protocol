@@ -24,6 +24,7 @@ module.exports = function (client, options) {
       } else {
         if (packet.serverId !== '-') {
           debug('This server appears to be an online server and you are providing no password, the authentication will probably fail')
+          client.emit('noCredentials')
         }
         sendEncryptionKeyResponse()
       }
