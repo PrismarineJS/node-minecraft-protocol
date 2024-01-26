@@ -49,7 +49,7 @@ module.exports = function (client, options) {
       if (client.state === states.CONFIGURATION) return
       // If we are returning to the configuration state from the play state, we ahve to acknowledge it.
       if (client.state === states.PLAY) {
-        client.write('configuation_acknowledged', {})
+        client.write('configuration_acknowledged', {})
       }
       client.state = states.CONFIGURATION
       // Server should send finish_configuration on its own right after sending the client a dimension codec
