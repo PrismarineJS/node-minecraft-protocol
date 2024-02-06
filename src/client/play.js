@@ -37,15 +37,15 @@ module.exports = function (client, options) {
 
     if (mcData.supportFeature('hasConfigurationState')) {
       client.write('login_acknowledged', {})
-      enterConfigState()
+      enterConfigState(onReady)
       // Server can tell client to re-enter config state
-      client.on('start_configuration', enterConfigState)
+      client.on('start_configuration', () => enterConfigState())
     } else {
       client.state = states.PLAY
       onReady()
     }
 
-    function enterConfigState () {
+    function enterConfigState (finishCb) {
       if (client.state === states.CONFIGURATION) return
       // If we are returning to the configuration state from the play state, we ahve to acknowledge it.
       if (client.state === states.PLAY) {
@@ -57,7 +57,7 @@ module.exports = function (client, options) {
       client.once('finish_configuration', () => {
         client.write('finish_configuration', {})
         client.state = states.PLAY
-        onReady()
+        finishCb?.()
       })
     }
 
