@@ -1,5 +1,13 @@
 # History
 
+## 1.46.0
+* [Ensure `onReady` in client is called once (#1287)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/85a26a52944c89af273bc974380b438073280981) (thanks @extremeheat)
+* [Acknowledge returning to configuration state if in play state. (#1284)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/092e10c53d33a7b9be52b5cbb67b1e3e55ac2690) (thanks @wgaylord)
+* [Allow commands not to be signed (#1277)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/21240f8ab2fd41c76f50b64e3b3a945f50b25b5e) (thanks @forester302)
+* [Add test to make sure version that are tested are mentioned in the RE… (#1276)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/80d038bd61d1933daa1e5e3251635be9ce2116b6) (thanks @rom1504)
+* [Print if there is a diff in packets in the cycle packet test (#1273)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/614be919d0f20a43e238751c829a6d584ae636cd) (thanks @rom1504)
+* [Align supported versions with mineflayer (#1272)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/ccaf538ffd2ab1e25dabd752d721f97bd8bd188f) (thanks @rom1504)
+
 ## 1.45.0
 * [Pc1.20.2 (#1265)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/112926da0cb2490934d122dd8ed7b79f3f6de8eb) (thanks @extremeheat)
 * [Improve CI setup for per version tests (#1267)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/1740124c4722c2c49f8aed0d708ff5ebecc7743c) (thanks @rom1504)
