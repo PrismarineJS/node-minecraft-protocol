@@ -1,7 +1,6 @@
 const crypto = require('crypto')
 const concat = require('../transforms/binaryStream').concat
-const nbt = require('prismarine-nbt')
-const uuid = require('../datatypes/uuid')
+const { processNbtMessage } = require('prismarine-chat')
 const messageExpireTime = 420000 // 7 minutes (ms)
 
 function isFormatted (message) {
@@ -23,22 +22,6 @@ module.exports = function (client, options) {
   client._players = {}
   client._lastChatSignature = null
   client._lastRejectedMessage = null
-
-  // 1.20.3+ serializes chat components in chat packets with NBT. Non-chat packets that send messages (like disconnect) still use JSON chat.
-  // NMP API expects a JSON string, so since the schema is mostly the same we can convert the NBT to JSON with a transform to UUID encoding
-  function handleNbtComponent (nbtDataOrString) {
-    if (mcData.supportFeature('chatPacketsUseNbtComponents') && nbtDataOrString) {
-      // UUIDs are encoded in NBT as a 4x i32 array, so convert to a hex string
-      const simplified = nbt.simplify(nbtDataOrString)
-      return JSON.stringify(simplified, (key, val) => {
-        if (key === 'id' && Array.isArray(val)) return uuid.fromIntArray(val)
-        return val
-      })
-    }
-    // already plaintext JSON or empty
-    return nbtDataOrString
-  }
-  client._handleNbtComponent = handleNbtComponent
 
   // This stores the last n (5 or 20) messages that the player has seen, from unique players
   if (mcData.supportFeature('chainedChatWithHashing')) client._lastSeenMessages = new LastSeenMessages()
@@ -155,13 +138,17 @@ module.exports = function (client, options) {
     }
   })
 
+  // 1.20.3+ serializes chat components in either NBT or JSON. If the chat is sent as NBT, then the structure read will differ
+  // from the normal JSON structure, so it needs to be normalized. prismarine-chat processNbtMessage will do that by default
+  // on a fromNotch call. Since we don't call fromNotch here (done in mineflayer), we manually call processNbtMessage
+
   client.on('profileless_chat', (packet) => {
     // Profileless chat is parsed as an unsigned player chat message but logged as a system message
     client.emit('playerChat', {
-      formattedMessage: handleNbtComponent(packet.message),
+      formattedMessage: processNbtMessage(packet.message),
       type: packet.type,
-      senderName: handleNbtComponent(packet.name),
-      targetName: handleNbtComponent(packet.target),
+      senderName: processNbtMessage(packet.name),
+      targetName: processNbtMessage(packet.target),
       verified: false
     })
 
@@ -177,7 +164,7 @@ module.exports = function (client, options) {
   client.on('system_chat', (packet) => {
     client.emit('systemChat', {
       positionId: packet.isActionBar ? 2 : 1,
-      formattedMessage: handleNbtComponent(packet.content)
+      formattedMessage: processNbtMessage(packet.content)
     })
 
     client._lastChatHistory.push({
@@ -215,11 +202,11 @@ module.exports = function (client, options) {
       if (verified) client._signatureCache.push(packet.signature)
       client.emit('playerChat', {
         plainMessage: packet.plainMessage,
-        unsignedContent: handleNbtComponent(packet.unsignedChatContent),
+        unsignedContent: processNbtMessage(packet.unsignedChatContent),
         type: packet.type,
         sender: packet.senderUuid,
-        senderName: handleNbtComponent(packet.networkName),
-        targetName: handleNbtComponent(packet.networkTargetName),
+        senderName: processNbtMessage(packet.networkName),
+        targetName: processNbtMessage(packet.networkTargetName),
         verified
       })
 

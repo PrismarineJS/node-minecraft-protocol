@@ -41,7 +41,6 @@
     "minecraft-wrap": "^1.2.3",
     "mocha": "^10.0.0",
     "power-assert": "^1.0.0",
-    "prismarine-chat": "^1.9.1",
     "standard": "^17.0.0"
   },
   "dependencies": {
@@ -59,6 +58,7 @@
     "prismarine-auth": "^2.2.0",
     "prismarine-nbt": "^2.5.0",
     "prismarine-realms": "^1.2.0",
+    "prismarine-chat": "github:extremeheat/prismarine-chat#nbt-chat",
     "protodef": "^1.8.0",
     "readable-stream": "^4.1.0",
     "uuid-1345": "^1.0.1",
