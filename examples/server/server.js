@@ -10,6 +10,11 @@ const options = {
 const server = mc.createServer(options)
 const mcData = require('minecraft-data')(server.version)
 const loginPacket = mcData.loginPacket
+function chatText (text) {
+  return mcData.supportFeature('chatPacketsUseNbtComponents')
+    ? nbt.comp({ text: nbt.string(text) })
+    : JSON.stringify({ text })
+}
 
 server.on('playerJoin', function (client) {
   broadcast(client.username + ' joined the game.')
@@ -67,7 +72,7 @@ function sendBroadcastMessage (server, clients, message, sender) {
     server.writeToClients(clients, 'player_chat', {
       plainMessage: message,
       signedChatContent: '',
-      unsignedChatContent: JSON.stringify({ text: message }),
+      unsignedChatContent: chatText(message),
       type: 0,
       senderUuid: 'd3527a0b-bc03-45d5-a878-2aafdd8c8a43', // random
       senderName: JSON.stringify({ text: sender }),
