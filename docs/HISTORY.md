@@ -1,5 +1,8 @@
 # History
 
+## 1.47.0
+* [1.20.3 / 1.20.4 support (#1275)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/1d9a38253a28a515d82fffa13806cb0874c5b36c) (thanks @wgaylord)
+
 ## 1.46.0
 * [Ensure `onReady` in client is called once (#1287)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/85a26a52944c89af273bc974380b438073280981) (thanks @extremeheat)
 * [Acknowledge returning to configuration state if in play state. (#1284)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/092e10c53d33a7b9be52b5cbb67b1e3e55ac2690) (thanks @wgaylord)
