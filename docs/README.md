@@ -118,15 +118,22 @@ const client = mc.createClient({
 For a more up to date example, see examples/server/server.js.
 
 ```js
-const mc = require('minecraft-protocol');
+const mc = require('minecraft-protocol')
+const nbt = require('prismarine-nbt')
 const server = mc.createServer({
   'online-mode': true,   // optional
   encryption: true,      // optional
   host: '0.0.0.0',       // optional
   port: 25565,           // optional
-  version: '1.16.3'
-});
+  version: '1.20.4'
+})
 const mcData = require('minecraft-data')(server.version)
+
+function chatText (text) {
+  return mcData.supportFeature('chatPacketsUseNbtComponents')
+    ? nbt.comp({ text: nbt.string(text) })
+    : JSON.stringify({ text })
+}
 
 server.on('playerJoin', function(client) {
   const loginPacket = mcData.loginPacket
@@ -141,7 +148,7 @@ server.on('playerJoin', function(client) {
     enableRespawnScreen: true,
     isDebug: false,
     isFlat: false
-  });
+  })
 
   client.write('position', {
     x: 0,
@@ -150,18 +157,35 @@ server.on('playerJoin', function(client) {
     yaw: 0,
     pitch: 0,
     flags: 0x00
-  });
+  })
 
-  const msg = {
+  const message = {
     translate: 'chat.type.announcement',
-    "with": [
+    with: [
       'Server',
       'Hello, world!'
     ]
-  };
-  
-  client.write("chat", { message: JSON.stringify(msg), position: 0, sender: '0' });
-});
+  }
+  if (mcData.supportFeature('signedChat')) {
+    client.write('player_chat', {
+      plainMessage: message,
+      signedChatContent: '',
+      unsignedChatContent: chatText(message),
+      type: 0,
+      senderUuid: 'd3527a0b-bc03-45d5-a878-2aafdd8c8a43', // random
+      senderName: JSON.stringify({ text: 'me' }),
+      senderTeam: undefined,
+      timestamp: Date.now(),
+      salt: 0n,
+      signature: mcData.supportFeature('useChatSessions') ? undefined : Buffer.alloc(0),
+      previousMessages: [],
+      filterType: 0,
+      networkName: JSON.stringify({ text: 'me' })
+    })
+  } else {
+    client.write('chat', { message: JSON.stringify({ text: message }), position: 0, sender: 'me' })
+  }
+})
 ```
 
 ## Testing
