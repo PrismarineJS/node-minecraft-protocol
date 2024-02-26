@@ -1,3 +1,4 @@
+const Registry = require('prismarine-registry')
 module.exports = client => {
   client.nextMessage = (containing) => {
     return new Promise((resolve) => {
@@ -19,6 +20,24 @@ module.exports = client => {
       }
     })
   }
+
+  client.on('login', (packet) => {
+    client.registry ??= Registry(client.version)
+    if (packet.dimensionCodec) {
+      client.registry.loadDimensionCodec(packet.dimensionCodec)
+    }
+  })
+  client.on('registry_data', (data) => {
+    client.registry ??= Registry(client.version)
+    client.registry.loadDimensionCodec(data.codec)
+  })
+
+  client.on('playerJoin', () => {
+    const ChatMessage = require('prismarine-chat')(client.registry || client.version)
+    client.parseMessage = (comp) => {
+      return new ChatMessage(comp)
+    }
+  })
 
   return client
 }

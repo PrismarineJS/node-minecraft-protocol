@@ -1,5 +1,6 @@
 const crypto = require('crypto')
 const concat = require('../transforms/binaryStream').concat
+const { processNbtMessage } = require('prismarine-chat')
 const messageExpireTime = 420000 // 7 minutes (ms)
 
 function isFormatted (message) {
@@ -25,6 +26,10 @@ module.exports = function (client, options) {
   // This stores the last n (5 or 20) messages that the player has seen, from unique players
   if (mcData.supportFeature('chainedChatWithHashing')) client._lastSeenMessages = new LastSeenMessages()
   else client._lastSeenMessages = new LastSeenMessagesWithInvalidation()
+  // 1.20.3+ serializes chat components in either NBT or JSON. If the chat is sent as NBT, then the structure read will differ
+  // from the normal JSON structure, so it needs to be normalized. prismarine-chat processNbtMessage will do that by default
+  // on a fromNotch call. Since we don't call fromNotch here (done in mineflayer), we manually call processNbtMessage
+  const processMessage = (msg) => mcData.supportFeature('chatPacketsUseNbtComponents') ? processNbtMessage(msg) : msg
 
   // This stores the last 128 inbound (signed) messages for 1.19.3 chat validation
   client._signatureCache = new SignatureCache()
@@ -139,12 +144,11 @@ module.exports = function (client, options) {
 
   client.on('profileless_chat', (packet) => {
     // Profileless chat is parsed as an unsigned player chat message but logged as a system message
-
     client.emit('playerChat', {
-      formattedMessage: packet.message,
+      formattedMessage: processMessage(packet.message),
       type: packet.type,
-      senderName: packet.name,
-      targetName: packet.target,
+      senderName: processMessage(packet.name),
+      targetName: processMessage(packet.target),
       verified: false
     })
 
@@ -160,7 +164,7 @@ module.exports = function (client, options) {
   client.on('system_chat', (packet) => {
     client.emit('systemChat', {
       positionId: packet.isActionBar ? 2 : 1,
-      formattedMessage: packet.content
+      formattedMessage: processMessage(packet.content)
     })
 
     client._lastChatHistory.push({
@@ -198,11 +202,11 @@ module.exports = function (client, options) {
       if (verified) client._signatureCache.push(packet.signature)
       client.emit('playerChat', {
         plainMessage: packet.plainMessage,
-        unsignedContent: packet.unsignedChatContent,
+        unsignedContent: processMessage(packet.unsignedChatContent),
         type: packet.type,
         sender: packet.senderUuid,
-        senderName: packet.networkName,
-        targetName: packet.networkTargetName,
+        senderName: processMessage(packet.networkName),
+        targetName: processMessage(packet.networkTargetName),
         verified
       })
 
