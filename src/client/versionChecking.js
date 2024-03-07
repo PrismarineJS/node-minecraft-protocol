@@ -3,6 +3,8 @@ const states = require('../states')
 module.exports = function (client, options) {
   client.on('disconnect', message => {
     if (!message.reason) { return }
+    // Prevent the disconnect packet handler in the versionChecking code from triggering on PLAY or CONFIGURATION state disconnects
+    // Making it so the handler only runs when a version related disconnect occurs.
     if (client.state === states.PLAY | client.state === states.CONFIGURATION) { return }
     let parsed
     try {
@@ -14,7 +16,9 @@ module.exports = function (client, options) {
     let text = parsed.text ? parsed.text : parsed
     let versionRequired
 
-    if (text.translate && (text.translate.startsWith('multiplayer.disconnect.outdated_') | text.translate.startsWith('multiplayer.disconnect.incompatible'))) { versionRequired = text.with[0] } else {
+    if (text.translate && (text.translate.startsWith('multiplayer.disconnect.outdated_') | text.translate.startsWith('multiplayer.disconnect.incompatible'))) {
+      versionRequired = text.with[0]
+    } else {
       if (text.extra) text = text.extra[0].text
       versionRequired = /(?:Outdated client! Please use|Outdated server! I'm still on) (.+)/.exec(text)
       versionRequired = versionRequired ? versionRequired[1] : null
