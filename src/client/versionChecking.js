@@ -4,7 +4,7 @@ module.exports = function (client, options) {
   client.on('disconnect', message => {
     if (!message.reason) { return }
     // Prevent the disconnect packet handler in the versionChecking code from triggering on PLAY or CONFIGURATION state disconnects
-    // Making it so the handler only runs when a version related disconnect occurs.
+    // Since version checking only happens during that HANDSHAKE / LOGIN state.
     if (client.state === states.PLAY | client.state === states.CONFIGURATION) { return }
     let parsed
     try {
