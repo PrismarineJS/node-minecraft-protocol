@@ -5,7 +5,7 @@ module.exports = function (client, options) {
     if (!message.reason) { return }
     // Prevent the disconnect packet handler in the versionChecking code from triggering on PLAY or CONFIGURATION state disconnects
     // Since version checking only happens during that HANDSHAKE / LOGIN state.
-    if (client.state === states.PLAY | client.state === states.CONFIGURATION) { return }
+    if (client.state === states.PLAY || client.state === states.CONFIGURATION) { return }
     let parsed
     try {
       parsed = JSON.parse(message.reason)
@@ -16,7 +16,7 @@ module.exports = function (client, options) {
     let text = parsed.text ? parsed.text : parsed
     let versionRequired
 
-    if (text.translate && (text.translate.startsWith('multiplayer.disconnect.outdated_') | text.translate.startsWith('multiplayer.disconnect.incompatible'))) {
+    if (text.translate && (text.translate.startsWith('multiplayer.disconnect.outdated_') || text.translate.startsWith('multiplayer.disconnect.incompatible'))) {
       versionRequired = text.with[0]
     } else {
       if (text.extra) text = text.extra[0].text
