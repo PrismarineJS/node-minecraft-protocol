@@ -151,6 +151,7 @@ Returns a `Client` instance and perform login.
    * realmId : The id of the Realm to join.
    * pickRealm(realms) : A function which will have an array of the user Realms (joined/owned) passed to it. The function should return a Realm.
  * Client : You can pass a custom client class to use instead of the default one, which would allow you to create completely custom communication. Also note that you can use the `stream` option instead where you can supply custom duplex, but this will still use serialization/deserialization of packets.
+ * onLoginPluginRequest(packet, meta) : (optional) callback that is called when a `login_plugin_request` packet is received. When this option is defined and of type function then the callback is called and expected to write a `login_plugin_response` packet on client with at least `messageId: packet.messageId` in the payload. If no login_plugin_response is send the connection will halt. When the `onLoginPluginRequest` option is not defined or not of type function then a login_plugin_response packet with `messageId: packet.messageId` and no data is send.
 
 
 ## mc.Client(isServer,version,[customPackets])

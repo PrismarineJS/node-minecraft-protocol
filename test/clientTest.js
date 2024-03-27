@@ -259,6 +259,36 @@ for (const supportedVersion of mc.supportedVersions) {
           })
         })
       })
+
+      it('sends a valid login_plugin_request packet', function (done) {
+        const onLoginPluginRequest = function (packet) {
+          client.write('login_plugin_response', {
+            messageId: packet.messageId,
+            data: Buffer.from('Hallo from nmp')
+          })
+        }
+        const client = mc.createClient({
+          username: 'Player',
+          version: version.minecraftVersion,
+          port: PORT,
+          onLoginPluginRequest: onLoginPluginRequest
+        })
+        client.on('error', err => done(err))
+        client.on('login', function () {
+          client.write('login_plugin_request', {
+            messageId: 0,
+            channel: 'minecraft:brand',
+            data: Buffer.from([0x00])
+          })
+        })
+        client.on('login_plugin_response', function (packet) {
+          assert.strictEqual(packet.messageId, 0)
+          assert.strictEqual(!!packet.data)
+          console.info('Client send in plugin response: ' + packet.data.toString())
+          client.end()
+          done()
+        })
+      })
     })
 
     describe.skip('online', function () {

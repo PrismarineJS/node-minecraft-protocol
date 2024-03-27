@@ -18,7 +18,13 @@ module.exports = function (client, options) {
 
   const above385 = mcdata.version.version >= 385
   if (above385) { // 1.13-pre3 (385) added Added Login Plugin Message (https://wiki.vg/Protocol_History#1.13-pre3)
-    client.on('login_plugin_request', onLoginPluginRequest)
+    client.on('login_plugin_request', (...args) => {
+      if (options.onLoginPluginRequest != null && typeof options.onLoginPluginRequest === 'function') {
+        options.onLoginPluginRequest(...args)
+      } else {
+        onLoginPluginRequest(...args)
+      }
+    })
   }
   const channelNames = above385 ? ['minecraft:register', 'minecraft:unregister'] : ['REGISTER', 'UNREGISTER']
 
