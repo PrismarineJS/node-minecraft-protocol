@@ -17,7 +17,7 @@ module.exports = async function (client, options) {
     options.profilesFolder = mcFolderExists ? mcDefaultFolderPath : '.' // local folder if mc folder doesn't exist
   }
 
-  const yggdrasilClient = yggdrasil({ agent: options.agent, host: options.authServer || 'https://authserver.mojang.com' })
+  const yggdrasilClient = yggdrasil({ agent: options.agent, host: options.authServer || 'https://sessionserver.mojang.com' })
   const clientToken = options.clientToken || (options.session && options.session.clientToken) || (options.profilesFolder && (await getLauncherProfiles()).mojangClientToken) || UUID.v4().toString().replace(/-/g, '')
   const skipValidation = false || options.skipValidation
   options.accessToken = null
