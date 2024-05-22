@@ -22,7 +22,8 @@ Parse and serialize minecraft packets, plus authentication and encryption.
    - Encryption
    - Compression
    - Both online and offline mode
-   - Respond to keep-alive packets.
+   - Respond to keep-alive packets
+   - Follow DNS service records (SRV)
    - Ping a server for status
  * Server
    - Online/Offline mode
@@ -75,29 +76,30 @@ node-minecraft-protocol is pluggable.
 const mc = require('minecraft-protocol');
 const client = mc.createClient({
   host: "localhost",   // optional
-  port: 25565,         // optional
-  username: "email@example.com",
-  password: "12345678",
-  auth: 'microsoft' // optional; by default uses offline mode, if using a microsoft account, set to 'microsoft'
+  port: 25565,                 // set if you need a port that isn't 25565
+  username: 'Bot',             // username to join as if auth is `offline`, else a unique identifier for this account. Switch if you want to change accounts
+  // version: false,           // only set if you need a specific version or snapshot (ie: "1.8.9" or "1.16.5"), otherwise it's set automatically
+  // password: '12345678'      // set if you want to use password-based auth (may be unreliable). If specified, the `username` must be an email
 });
 
-client.on('chat', function(packet) {
+client.on('playerChat', function (ev) {
   // Listen for chat messages and echo them back.
-  const jsonMsg = JSON.parse(packet.message);
-  
-  if (jsonMsg.translate == 'chat.type.announcement' || jsonMsg.translate == 'chat.type.text') {
-    const username = jsonMsg.with[0].text;
-    const msg = jsonMsg.with[1];
-
-    if (username === client.username) return;
-
-    client.write('chat', {message: msg.text});
-  }
+  const content = ev.formattedMessage
+    ? JSON.parse(ev.formattedMessage)
+    : ev.unsignedChat
+      ? JSON.parse(ev.unsignedContent)
+      : ev.plainMessage
+  const jsonMsg = JSON.parse(packet.message)
+  if (ev.senderName === client.username) return
+  client.chat(JSON.stringify(content))
 });
 ```
 
-If the server is in offline mode, you may leave out the `password` option and switch auth to `offline`.
-You can also leave out `password` when using a Microsoft account. If provided, password based auth will be attempted first which may fail. *Note:* if using a Microsoft account, your account age must be >= 18 years old.
+Set `auth` to `offline` if the server is in offline mode. If `auth` is set to `microsoft`, you will be prompted to login to microsoft.com with a code in your browser. After signing in on your browser, the client will automatically obtain and cache authentication tokens (under your specified username) so you don't have to sign-in again.
+
+To switch the account, update the supplied username. By default, cached tokens will be stored in your user's .minecraft folder, or if profilesFolder is specified, they'll instead be stored there. For more information on bot options see the [API doc](./API.md).
+
+Note: SRV records will only be looked up if the port is unspecified or set to 25565 and if the `host` is a valid non-local domain name.
 
 ### Client example joining a Realm
 
@@ -125,7 +127,7 @@ const server = mc.createServer({
   encryption: true,      // optional
   host: '0.0.0.0',       // optional
   port: 25565,           // optional
-  version: '1.20.4'
+  version: '1.18'
 })
 const mcData = require('minecraft-data')(server.version)
 
