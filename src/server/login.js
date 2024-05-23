@@ -223,7 +223,7 @@ module.exports = function (client, server, options) {
 function mcPubKeyToPem (mcPubKeyBuffer) {
   let pem = '-----BEGIN RSA PUBLIC KEY-----\n'
   let base64PubKey = mcPubKeyBuffer.toString('base64')
-  const maxLineLength = 76
+  const maxLineLength = 64
   while (base64PubKey.length > 0) {
     pem += base64PubKey.substring(0, maxLineLength) + '\n'
     base64PubKey = base64PubKey.substring(maxLineLength)
