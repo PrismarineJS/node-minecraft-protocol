@@ -10,7 +10,6 @@ module.exports = function (client, options) {
     try {
       parsed = JSON.parse(message.reason)
     } catch (error) {
-      client.emit('error', error)
       return
     }
     let text = parsed.text ? parsed.text : parsed

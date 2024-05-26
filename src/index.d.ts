@@ -49,7 +49,20 @@ declare module 'minecraft-protocol' {
 		on(event: 'connect', handler: () => PromiseLike): this
 		on(event: string, handler: (data: any, packetMeta: PacketMeta) => PromiseLike): this
 		on(event: `raw.${string}`, handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
-		on(event: 'playerChat', handler: (data: { formattedMessage: string, plainMessage: string, type: string, sender: string, senderName: string, senderTeam: string, verified?: boolean }) => PromiseLike): this
+		on(event: 'playerChat', handler: (data: {
+			// (JSON string) The chat message preformatted, if done on server side
+			formattedMessage: string,
+			// (Plaintext) The chat message without formatting (for example no `<username> message` ; instead `message`), on version 1.19+
+			plainMessage: string,
+			// (JSON string) Unsigned formatted chat contents. Should only be present when the message is modified and server has chat previews disabled. Only on versions 1.19.0, 1.19.1 and 1.19.2
+			unsignedContent?: string,
+			type: string,
+			sender: string,
+			senderName: string,
+			senderTeam: string,
+			targetName: string,
+			verified?: boolean
+		}) => PromiseLike): this
 		on(event: 'systemChat', handler: (data: { positionId: number, formattedMessage: string }) => PromiseLike): this
 		// Emitted after the player enters the PLAY state and can send and recieve game packets
 		on(event: 'playerJoin', handler: () => void): this
