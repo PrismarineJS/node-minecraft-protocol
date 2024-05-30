@@ -141,6 +141,7 @@ declare module 'minecraft-protocol' {
 		disableChatSigning?: boolean
 		/** Pass custom client implementation if needed. */
 		Client?: Client
+		onLoginPluginRequest?: (packet: any, meta: any, ...args: any[]) => void
 	}
 
 	export class Server extends EventEmitter {
