@@ -193,7 +193,8 @@ module.exports = function (client, server, options) {
     if (client.supportFeature('chainedChatWithHashing')) { // 1.19.1+
       client.write('server_data', {
         previewsChat: options.enableChatPreview,
-        enforceSecureProfile: options.enforceSecureProfile
+        // Note: in 1.20.5+ user must send this with `login`
+        enforcesSecureChat: options.enforceSecureProfile
       })
     }
 

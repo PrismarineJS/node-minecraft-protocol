@@ -176,7 +176,7 @@ module.exports = function (client, options) {
     })
   })
 
-  client.on('message_header', (packet) => {
+  client.on('message_header', (packet) => { // [1.19.2]
     updateAndValidateChat(packet.senderUuid, packet.previousSignature, packet.signature, packet.messageHash)
 
     client._lastChatHistory.push({
