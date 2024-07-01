@@ -67,7 +67,9 @@ for (const supportedVersion of mc.supportedVersions) {
         value: {}
       },
       worldType: 'minecraft:overworld',
-      death: undefined
+      death: undefined,
+      // 1.20.5
+      enforceSecureChat: false
       // more to be added
     }
   }

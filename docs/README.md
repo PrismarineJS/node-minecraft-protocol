@@ -142,6 +142,7 @@ server.on('playerJoin', function(client) {
 
   client.write('login', {
     ...loginPacket,
+    enforceSecureChat: false,
     entityId: client.id,
     hashedSeed: [0, 0],
     maxPlayers: server.maxPlayers,
