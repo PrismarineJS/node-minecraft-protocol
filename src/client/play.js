@@ -7,11 +7,12 @@ module.exports = function (client, options) {
   client.on('server_data', (packet) => {
     client.serverFeatures = {
       chatPreview: packet.previewsChat,
-      enforcesSecureChat: packet.enforcesSecureChat
+      enforcesSecureChat: packet.enforcesSecureChat // in LoginPacket v>=1.20.5
     }
   })
 
-  client.once('login', () => {
+  client.once('login', (packet) => {
+    if (packet.enforcesSecureChat) client.serverFeatures.enforcesSecureChat = packet.enforcesSecureChat
     const mcData = require('minecraft-data')(client.version)
     if (mcData.supportFeature('useChatSessions') && client.profileKeys && client.cipher && client.session.selectedProfile.id === client.uuid.replace(/-/g, '')) {
       client._session = {
