@@ -30,6 +30,7 @@ server.on('playerJoin', function (client) {
   // send init data so client will start rendering world
   client.write('login', {
     ...loginPacket,
+    enforceSecureChat: false,
     entityId: client.id,
     isHardcore: false,
     gameMode: 0,

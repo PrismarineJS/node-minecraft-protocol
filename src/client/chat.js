@@ -176,7 +176,7 @@ module.exports = function (client, options) {
     })
   })
 
-  client.on('message_header', (packet) => {
+  client.on('message_header', (packet) => { // [1.19.2]
     updateAndValidateChat(packet.senderUuid, packet.previousSignature, packet.signature, packet.messageHash)
 
     client._lastChatHistory.push({
@@ -369,13 +369,14 @@ module.exports = function (client, options) {
 
     if (message.startsWith('/')) {
       const command = message.slice(1)
-      if (mcData.supportFeature('useChatSessions')) {
+      if (mcData.supportFeature('useChatSessions')) { // 1.19.3+
         const { acknowledged, acknowledgements } = getAcknowledgements()
-        client.write('chat_command', {
+        const canSign = client.profileKeys && client._session
+        client.write((mcData.supportFeature('seperateSignedChatCommandPacket') && canSign) ? 'chat_command_signed' : 'chat_command', {
           command,
           timestamp: options.timestamp,
           salt: options.salt,
-          argumentSignatures: (client.profileKeys && client._session) ? signaturesForCommand(command, options.timestamp, options.salt, options.preview, acknowledgements) : [],
+          argumentSignatures: canSign ? signaturesForCommand(command, options.timestamp, options.salt, options.preview, acknowledgements) : [],
           messageCount: client._lastSeenMessages.pending,
           acknowledged
         })
