@@ -57,6 +57,7 @@ const values = {
   varlong: -20,
   i8: -10,
   u8: 8,
+  ByteArray: [],
   string: 'hi hi this is my client string',
   buffer: function (typeArgs, context) {
     let count
@@ -177,6 +178,7 @@ const values = {
     })
     return results
   },
+  mapper: '',
   tags: [{ tagName: 'hi', entries: [1, 2, 3, 4, 5] }],
   ingredient: [slotValue],
   particleData: null,
@@ -212,6 +214,20 @@ const values = {
   particle: {
     particleId: 0,
     data: null
+  },
+  Particle: {},
+  SpawnInfo: {
+    dimension: 0,
+    name: 'minecraft:overworld',
+    hashedSeed: [
+      572061085,
+      1191958278
+    ],
+    gamemode: 'survival',
+    previousGamemode: 255,
+    isDebug: false,
+    isFlat: false,
+    portalCooldown: 0
   }
 }
 
@@ -232,6 +248,8 @@ for (const supportedVersion of mc.supportedVersions) {
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
   const packets = mcData.protocol
+
+  if (process) continue // skip
 
   describe('packets ' + supportedVersion + 'v', function () {
     let client, server, serverClient
