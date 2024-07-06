@@ -41,7 +41,8 @@
     "minecraft-wrap": "^1.2.3",
     "mocha": "^10.0.0",
     "power-assert": "^1.0.0",
-    "standard": "^17.0.0"
+    "standard": "^17.0.0",
+    "prismarine-registry": "extremeheat/prismarine-registry#pc1.20.5"
   },
   "dependencies": {
     "@types/readable-stream": "^4.0.0",

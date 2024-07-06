@@ -53,6 +53,9 @@ module.exports = function (client, options) {
         client.write('configuration_acknowledged', {})
       }
       client.state = states.CONFIGURATION
+      client.on('select_known_packs', () => {
+        client.write('select_known_packs', { packs: [] })
+      })
       // Server should send finish_configuration on its own right after sending the client a dimension codec
       // for login (that has data about world height, world gen, etc) after getting a login success from client
       client.once('finish_configuration', () => {
