@@ -249,8 +249,6 @@ for (const supportedVersion of mc.supportedVersions) {
   const version = mcData.version
   const packets = mcData.protocol
 
-  if (process) continue // skip
-
   describe('packets ' + supportedVersion + 'v', function () {
     let client, server, serverClient
     before(async function () {
@@ -292,6 +290,7 @@ for (const supportedVersion of mc.supportedVersions) {
             .forEach(function (packetName) {
               packetInfo = packets[state][direction].types[packetName]
               packetInfo = packetInfo || null
+              if (['packet_set_projectile_power', 'packet_debug_sample_subscription'].includes(packetName)) return
               it(state + ',' + (direction === 'toServer' ? 'Server' : 'Client') + 'Bound,' + packetName,
                 callTestPacket(packetName.substr(7), packetInfo, state, direction === 'toServer'))
             })
@@ -309,6 +308,7 @@ for (const supportedVersion of mc.supportedVersions) {
       // empty object uses default values
       const packet = getValue(packetInfo, {})
       if (toServer) {
+        console.log('Writing', packetName, JSON.stringify(packet))
         serverClient.once(packetName, function (receivedPacket) {
           try {
             assertPacketsMatch(packet, receivedPacket)
@@ -320,6 +320,7 @@ for (const supportedVersion of mc.supportedVersions) {
         })
         client.write(packetName, packet)
       } else {
+        console.log('Writing', packetName, JSON.stringify(packet))
         client.once(packetName, function (receivedPacket) {
           assertPacketsMatch(packet, receivedPacket)
           done()
