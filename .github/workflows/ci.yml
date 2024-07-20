@@ -56,6 +56,6 @@ jobs:
         distribution: 'adopt'
     - name: Install dependencies
       run: npm install
-    - run: cd node_modules && cd minecraft-data && mv minecraft-data minecraft-data-old && git clone -b 1.20.5protocol https://github.com/extremeheat/minecraft-data/ --depth 1 && node bin/generate_data.js
+    - run: cd node_modules && cd minecraft-data && mv minecraft-data minecraft-data-old && git clone -b pc1.20.5 https://github.com/extremeheat/minecraft-data/ --depth 1 && node bin/generate_data.js
     - name: Run tests
       run: npm run mochaTest -- -g ${{ matrix.mcVersion }}v
