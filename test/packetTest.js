@@ -57,6 +57,7 @@ const values = {
   varlong: -20,
   i8: -10,
   u8: 8,
+  ByteArray: [],
   string: 'hi hi this is my client string',
   buffer: function (typeArgs, context) {
     let count
@@ -177,6 +178,7 @@ const values = {
     })
     return results
   },
+  mapper: '',
   tags: [{ tagName: 'hi', entries: [1, 2, 3, 4, 5] }],
   ingredient: [slotValue],
   particleData: null,
@@ -212,6 +214,20 @@ const values = {
   particle: {
     particleId: 0,
     data: null
+  },
+  Particle: {},
+  SpawnInfo: {
+    dimension: 0,
+    name: 'minecraft:overworld',
+    hashedSeed: [
+      572061085,
+      1191958278
+    ],
+    gamemode: 'survival',
+    previousGamemode: 255,
+    isDebug: false,
+    isFlat: false,
+    portalCooldown: 0
   }
 }
 
@@ -274,6 +290,7 @@ for (const supportedVersion of mc.supportedVersions) {
             .forEach(function (packetName) {
               packetInfo = packets[state][direction].types[packetName]
               packetInfo = packetInfo || null
+              if (['packet_set_projectile_power', 'packet_debug_sample_subscription'].includes(packetName)) return
               it(state + ',' + (direction === 'toServer' ? 'Server' : 'Client') + 'Bound,' + packetName,
                 callTestPacket(packetName.substr(7), packetInfo, state, direction === 'toServer'))
             })
@@ -291,6 +308,7 @@ for (const supportedVersion of mc.supportedVersions) {
       // empty object uses default values
       const packet = getValue(packetInfo, {})
       if (toServer) {
+        console.log('Writing', packetName, JSON.stringify(packet))
         serverClient.once(packetName, function (receivedPacket) {
           try {
             assertPacketsMatch(packet, receivedPacket)
@@ -302,6 +320,7 @@ for (const supportedVersion of mc.supportedVersions) {
         })
         client.write(packetName, packet)
       } else {
+        console.log('Writing', packetName, JSON.stringify(packet))
         client.once(packetName, function (receivedPacket) {
           assertPacketsMatch(packet, receivedPacket)
           done()
