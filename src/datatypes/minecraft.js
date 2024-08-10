@@ -212,5 +212,5 @@ function writeArrayWithLengthOffset (value, buffer, offset, typeArgs, rootNode) 
 function sizeOfArrayWithLengthOffset (value, typeArgs, rootNode) {
   let size = calcCount.call(this, value.length, typeArgs, rootNode)
   size = value.reduce((size, v, index) => tryDoc(() => size + this.sizeOf(v, typeArgs.type, rootNode), index), size)
-  return size + typeArgs.lengthOffset
+  return size + typeArgs
 }
