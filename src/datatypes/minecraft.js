@@ -182,8 +182,8 @@ function sizeOfTopBitSetTerminatedArray (value, { type }) {
   return size
 }
 
-// 
-const { getField, getCount, sendCount, calcCount, tryDoc } = require('protodef/src/utils')
+//
+const { getCount, sendCount, calcCount, tryDoc } = require('protodef/src/utils')
 
 function readArrayWithLengthOffset (buffer, offset, typeArgs, rootNode) {
   const results = {

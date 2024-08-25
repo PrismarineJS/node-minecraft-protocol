@@ -106,7 +106,7 @@ module.exports = {
       code += '}\n'
       code += 'return offset'
       return compiler.wrapCode(code)
-    }],
+    }]
   },
   SizeOf: {
     varlong: ['native', minecraft.varlong[2]],
