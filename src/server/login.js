@@ -176,15 +176,17 @@ module.exports = function (client, server, options) {
       client.write('compress', { threshold: 256 }) // Default threshold is 256
       client.compressionThreshold = 256
     }
+    const isConfigStateSupported = client.supportFeature('hasConfigurationState');
+    if (isConfigStateSupported) {
+      client.once('login_acknowledged', onClientLoginAck)
+    }
     // TODO: find out what properties are on 'success' packet
     client.write('success', {
       uuid: client.uuid,
       username: client.username,
       properties: []
     })
-    if (client.supportFeature('hasConfigurationState')) {
-      client.once('login_acknowledged', onClientLoginAck)
-    } else {
+    if (!isConfigStateSupported) {
       client.state = states.PLAY
       server.emit('playerJoin', client)
     }
