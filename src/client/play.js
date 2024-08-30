@@ -36,8 +36,9 @@ module.exports = function (client, options) {
     client.username = packet.username
 
     if (mcData.supportFeature('hasConfigurationState')) {
-      client.write('login_acknowledged', {})
-      enterConfigState(onReady)
+      enterConfigState(onReady, () => {
+        client.write('login_acknowledged', {})
+      })
       // Server can tell client to re-enter config state
       client.on('start_configuration', () => enterConfigState())
     } else {
@@ -45,13 +46,12 @@ module.exports = function (client, options) {
       onReady()
     }
 
-    function enterConfigState (finishCb) {
+    function enterConfigState (finishCb, beforeStateSwitch = () => {}) {
       if (client.state === states.CONFIGURATION) return
       // If we are returning to the configuration state from the play state, we ahve to acknowledge it.
       if (client.state === states.PLAY) {
         client.write('configuration_acknowledged', {})
       }
-      client.state = states.CONFIGURATION
       // Server should send finish_configuration on its own right after sending the client a dimension codec
       // for login (that has data about world height, world gen, etc) after getting a login success from client
       client.once('finish_configuration', () => {
@@ -59,6 +59,8 @@ module.exports = function (client, options) {
         client.state = states.PLAY
         finishCb?.()
       })
+      beforeStateSwitch?.()
+      client.state = states.CONFIGURATION
     }
 
     function onReady () {
