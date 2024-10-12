@@ -125,6 +125,15 @@ const values = {
   f64: 99999.2222,
   f32: -333.444,
   slot: slotValue,
+  Slot: {
+    itemCount: 1,
+    itemId: 1111,
+    addedComponentCount: 0,
+    removedComponentCount: 0,
+    components: [],
+    removeComponents: []
+  },
+  SlotComponent: {},
   nbt: nbtValue,
   optionalNbt: nbtValue,
   compressedNbt: nbtValue,
