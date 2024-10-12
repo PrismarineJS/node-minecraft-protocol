@@ -32,7 +32,14 @@ const slotValue = {
       test6: { type: 'compound', value: { test: { type: 'int', value: 4 } } },
       test7: { type: 'intArray', value: [12, 42] }
     }
-  }
+  },
+  // 1.20.5
+  itemCount: 1,
+  itemId: 1111,
+  addedComponentCount: 0,
+  removedComponentCount: 0,
+  components: [],
+  removeComponents: []
 }
 
 const nbtValue = {
@@ -125,14 +132,7 @@ const values = {
   f64: 99999.2222,
   f32: -333.444,
   slot: slotValue,
-  Slot: {
-    itemCount: 1,
-    itemId: 1111,
-    addedComponentCount: 0,
-    removedComponentCount: 0,
-    components: [],
-    removeComponents: []
-  },
+  Slot: slotValue,
   SlotComponent: {},
   nbt: nbtValue,
   optionalNbt: nbtValue,
