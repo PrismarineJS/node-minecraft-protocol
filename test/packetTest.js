@@ -55,6 +55,24 @@ const nbtValue = {
   }
 }
 
+function getFixedPacketPayload (version, packetName) {
+  if (packetName === 'declare_recipes') {
+    if (version['>=']('1.20.5')) {
+      return {
+        recipes: [
+          {
+            name: 'minecraft:crafting_decorated_pot',
+            type: 'minecraft:crafting_decorated_pot',
+            data: {
+              category: 0
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+
 const values = {
   i32: 123456,
   i16: -123,
@@ -132,7 +150,10 @@ const values = {
   f32: -333.444,
   slot: slotValue,
   Slot: slotValue,
-  SlotComponent: {},
+  SlotComponent: {
+    type: 'hide_tooltip'
+  },
+  SlotComponentType: 0,
   nbt: nbtValue,
   optionalNbt: nbtValue,
   compressedNbt: nbtValue,
@@ -298,26 +319,28 @@ for (const supportedVersion of mc.supportedVersions) {
             .forEach(function (packetName) {
               packetInfo = packets[state][direction].types[packetName]
               packetInfo = packetInfo || null
+              if (packetName.includes('bundle_delimiter')) return // not a real packet
               if (['packet_set_projectile_power', 'packet_debug_sample_subscription'].includes(packetName)) return
               it(state + ',' + (direction === 'toServer' ? 'Server' : 'Client') + 'Bound,' + packetName,
-                callTestPacket(packetName.substr(7), packetInfo, state, direction === 'toServer'))
+                callTestPacket(mcData, packetName.substr(7), packetInfo, state, direction === 'toServer'))
             })
         })
       })
-    function callTestPacket (packetName, packetInfo, state, toServer) {
+    function callTestPacket (mcData, packetName, packetInfo, state, toServer) {
       return function (done) {
         client.state = state
         serverClient.state = state
-        testPacket(packetName, packetInfo, state, toServer, done)
+        testPacket(mcData, packetName, packetInfo, state, toServer, done)
       }
     }
 
-    function testPacket (packetName, packetInfo, state, toServer, done) {
+    function testPacket (mcData, packetName, packetInfo, state, toServer, done) {
       // empty object uses default values
-      const packet = getValue(packetInfo, {})
+      const packet = getFixedPacketPayload(mcData.version, packetName) || getValue(packetInfo, {})
       if (toServer) {
-        console.log('Writing', packetName, JSON.stringify(packet))
+        console.log('Writing to server', packetName, JSON.stringify(packet))
         serverClient.once(packetName, function (receivedPacket) {
+          console.log('Recv', packetName)
           try {
             assertPacketsMatch(packet, receivedPacket)
           } catch (e) {
@@ -328,8 +351,9 @@ for (const supportedVersion of mc.supportedVersions) {
         })
         client.write(packetName, packet)
       } else {
-        console.log('Writing', packetName, JSON.stringify(packet))
+        console.log('Writing to client', packetName, JSON.stringify(packet))
         client.once(packetName, function (receivedPacket) {
+          console.log('Recv', packetName)
           assertPacketsMatch(packet, receivedPacket)
           done()
         })
