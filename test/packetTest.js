@@ -171,8 +171,8 @@ const values = {
     const i = typeArgs.fields[getField(typeArgs.compareTo, context)]
     if (i === undefined) {
       if (typeArgs.default === undefined) {
-        throw new Error("couldn't find the field " + typeArgs.compareTo +
-          ' of the compareTo and the default is not defined')
+        typeArgs.default = 'void'
+        // throw new Error("couldn't find the field " + typeArgs.compareTo + ' of the compareTo and the default is not defined')
       }
       return getValue(typeArgs.default, context)
     } else { return getValue(i, context) }
