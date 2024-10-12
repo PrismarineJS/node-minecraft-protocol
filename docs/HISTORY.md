@@ -1,5 +1,8 @@
 # History
 
+## 1.49.0
+* [support 1.20.6 (#1338)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/0b0012d60f0f1648be5ff705e7694bb1cd4ec37c) (thanks @rom1504)
+
 ## 1.48.0
 * [1.20.5 (#1309)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/9b029e8b6f33d4e8ee1476de6821bad942f1ab6b) (thanks @extremeheat)
 * [Fix realms loading issue due to createClient plugin init order (#1303)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/7057ad979b416192ada235f2f4e3b5eb26af5fa1) (thanks @extremeheat)
