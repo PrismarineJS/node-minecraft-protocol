@@ -40,6 +40,27 @@ module.exports = {
       code += '  if ((item & 128) === 0) return { value: data, size: cursor - offset }\n'
       code += '}'
       return compiler.wrapCode(code)
+    }],
+    arrayWithLengthOffset: ['parametrizable', (compiler, array) => {
+      let code = ''
+      if (array.countType) {
+        code += 'const { value: count, size: countSize } = ' + compiler.callType(array.countType) + '\n'
+      } else if (array.count) {
+        code += 'const count = ' + array.count + '\n'
+        code += 'const countSize = 0\n'
+      } else {
+        throw new Error('Array must contain either count or countType')
+      }
+      code += 'if (count > 0xffffff) throw new Error("array size is abnormally large, not reading: " + count)\n'
+      code += 'const data = []\n'
+      code += 'let size = countSize\n'
+      code += `for (let i = 0; i < count + ${array.lengthOffset}; i++) {\n`
+      code += '  const elem = ' + compiler.callType(array.type, 'offset + size') + '\n'
+      code += '  data.push(elem.value)\n'
+      code += '  size += elem.size\n'
+      code += '}\n'
+      code += 'return { value: data, size }'
+      return compiler.wrapCode(code)
     }]
   },
   Write: {
@@ -72,6 +93,19 @@ module.exports = {
       code += '}\n'
       code += 'return offset'
       return compiler.wrapCode(code)
+    }],
+    arrayWithLengthOffset: ['parametrizable', (compiler, array) => {
+      let code = ''
+      if (array.countType) {
+        code += 'offset = ' + compiler.callType('value.length', array.countType) + '\n'
+      } else if (array.count === null) {
+        throw new Error('Array must contain either count or countType')
+      }
+      code += 'for (let i = 0; i < value.length; i++) {\n'
+      code += '  offset = ' + compiler.callType('value[i]', array.type) + '\n'
+      code += '}\n'
+      code += 'return offset'
+      return compiler.wrapCode(code)
     }]
   },
   SizeOf: {
@@ -94,6 +128,25 @@ module.exports = {
       code += 'for (const i in value) {\n'
       code += '  size += ' + compiler.callType('value[i]', type) + '\n'
       code += '}\n'
+      code += 'return size'
+      return compiler.wrapCode(code)
+    }],
+    arrayWithLengthOffset: ['parametrizable', (compiler, array) => {
+      let code = ''
+      if (array.countType) {
+        code += 'let size = ' + compiler.callType('value.length', array.countType) + '\n'
+      } else if (array.count) {
+        code += 'let size = 0\n'
+      } else {
+        throw new Error('Array must contain either count or countType')
+      }
+      if (!isNaN(compiler.callType('value[i]', array.type))) {
+        code += 'size += value.length * ' + compiler.callType('value[i]', array.type) + '\n'
+      } else {
+        code += 'for (let i = 0; i < value.length; i++) {\n'
+        code += '  size += ' + compiler.callType('value[i]', array.type) + '\n'
+        code += '}\n'
+      }
       code += 'return size'
       return compiler.wrapCode(code)
     }]

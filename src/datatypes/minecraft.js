@@ -11,7 +11,8 @@ module.exports = {
   compressedNbt: [readCompressedNbt, writeCompressedNbt, sizeOfCompressedNbt],
   restBuffer: [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
   entityMetadataLoop: [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata],
-  topBitSetTerminatedArray: [readTopBitSetTerminatedArray, writeTopBitSetTerminatedArray, sizeOfTopBitSetTerminatedArray]
+  topBitSetTerminatedArray: [readTopBitSetTerminatedArray, writeTopBitSetTerminatedArray, sizeOfTopBitSetTerminatedArray],
+  arrayWithLengthOffset: [readArrayWithLengthOffset, writeArrayWithLengthOffset, sizeOfArrayWithLengthOffset]
 }
 const PartialReadError = require('protodef').utils.PartialReadError
 
@@ -179,4 +180,37 @@ function sizeOfTopBitSetTerminatedArray (value, { type }) {
     size += this.sizeOf(value[i], type, {})
   }
   return size
+}
+
+//
+const { getCount, sendCount, calcCount, tryDoc } = require('protodef/src/utils')
+
+function readArrayWithLengthOffset (buffer, offset, typeArgs, rootNode) {
+  const results = {
+    value: [],
+    size: 0
+  }
+  let value
+  let { count, size } = getCount.call(this, buffer, offset, typeArgs, rootNode)
+  offset += size
+  results.size += size
+  for (let i = 0; i < count + typeArgs.lengthOffset; i++) {
+    ({ size, value } = tryDoc(() => this.read(buffer, offset, typeArgs.type, rootNode), i))
+    results.size += size
+    offset += size
+    results.value.push(value)
+  }
+  return results
+}
+
+// no changes
+function writeArrayWithLengthOffset (value, buffer, offset, typeArgs, rootNode) {
+  offset = sendCount.call(this, value.length, buffer, offset, typeArgs, rootNode)
+  return value.reduce((offset, v, index) => tryDoc(() => this.write(v, buffer, offset, typeArgs.type, rootNode), index), offset)
+}
+
+function sizeOfArrayWithLengthOffset (value, typeArgs, rootNode) {
+  let size = calcCount.call(this, value.length, typeArgs, rootNode)
+  size = value.reduce((size, v, index) => tryDoc(() => size + this.sizeOf(v, typeArgs.type, rootNode), index), size)
+  return size + typeArgs
 }

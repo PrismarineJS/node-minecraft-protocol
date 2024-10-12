@@ -41,7 +41,8 @@
     "minecraft-wrap": "^1.2.3",
     "mocha": "^10.0.0",
     "power-assert": "^1.0.0",
-    "standard": "^17.0.0"
+    "standard": "^17.0.0",
+    "prismarine-registry": "^1.8.0"
   },
   "dependencies": {
     "@types/readable-stream": "^4.0.0",
@@ -51,7 +52,7 @@
     "endian-toggle": "^0.0.0",
     "lodash.get": "^4.1.2",
     "lodash.merge": "^4.3.0",
-    "minecraft-data": "^3.55.0",
+    "minecraft-data": "^3.71.0",
     "minecraft-folder-path": "^1.2.0",
     "node-fetch": "^2.6.1",
     "node-rsa": "^0.4.2",
@@ -59,7 +60,7 @@
     "prismarine-chat": "^1.10.0",
     "prismarine-nbt": "^2.5.0",
     "prismarine-realms": "^1.2.0",
-    "protodef": "^1.8.0",
+    "protodef": "^1.17.0",
     "readable-stream": "^4.1.0",
     "uuid-1345": "^1.0.1",
     "yggdrasil": "^1.4.0"
