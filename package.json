@@ -42,7 +42,7 @@
     "mocha": "^10.0.0",
     "power-assert": "^1.0.0",
     "standard": "^17.0.0",
-    "prismarine-registry": "extremeheat/prismarine-registry#pc1.20.5"
+    "prismarine-registry": "^1.8.0"
   },
   "dependencies": {
     "@types/readable-stream": "^4.0.0",
@@ -60,7 +60,7 @@
     "prismarine-chat": "^1.10.0",
     "prismarine-nbt": "^2.5.0",
     "prismarine-realms": "^1.2.0",
-    "protodef": "^1.8.0",
+    "protodef": "^1.17.0",
     "readable-stream": "^4.1.0",
     "uuid-1345": "^1.0.1",
     "yggdrasil": "^1.4.0"
