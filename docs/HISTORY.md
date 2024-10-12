@@ -1,5 +1,11 @@
 # History
 
+## 1.48.0
+* [1.20.5 (#1309)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/9b029e8b6f33d4e8ee1476de6821bad942f1ab6b) (thanks @extremeheat)
+* [Fix realms loading issue due to createClient plugin init order (#1303)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/7057ad979b416192ada235f2f4e3b5eb26af5fa1) (thanks @extremeheat)
+* [Update doc (#1300)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/495eed56ab230b2615596590064671356d86a2dc) (thanks @extremeheat)
+* [Fix handling of disconnect in versionChecking on 1.20.3+.  (#1291)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/ccab9fb39681f3ebe0d264e2a3f833aa3c5a1ac7) (thanks @wgaylord)
+
 ## 1.47.0
 * [1.20.3 / 1.20.4 support (#1275)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/1d9a38253a28a515d82fffa13806cb0874c5b36c) (thanks @wgaylord)
 
