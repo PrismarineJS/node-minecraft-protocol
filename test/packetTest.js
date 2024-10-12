@@ -18,7 +18,6 @@ function evalCount (count, fields) {
 const slotValue = {
   present: true,
   blockId: 5,
-  itemCount: 56,
   itemDamage: 2,
   nbtData: {
     type: 'compound',
