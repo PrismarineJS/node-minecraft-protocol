@@ -157,7 +157,7 @@ const values = {
     type: 'hide_tooltip'
   },
   ChatTypes: {
-    registryIndex: 1,
+    registryIndex: 1
   },
   SlotComponentType: 0,
   nbt: nbtValue,
