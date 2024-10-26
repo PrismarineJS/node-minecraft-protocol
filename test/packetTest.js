@@ -135,6 +135,9 @@ const values = {
     delete results['..']
     return results
   },
+  vec2f: {
+    x: 0, y: 0
+  },
   vec3f: {
     x: 0, y: 0, z: 0
   },
@@ -152,6 +155,9 @@ const values = {
   Slot: slotValue,
   SlotComponent: {
     type: 'hide_tooltip'
+  },
+  ChatTypes: {
+    registryIndex: 1
   },
   SlotComponentType: 0,
   nbt: nbtValue,

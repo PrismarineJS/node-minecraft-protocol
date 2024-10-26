@@ -83,7 +83,7 @@ for (const supportedVersion of mc.supportedVersions) {
         plainMessage: message,
         signedChatContent: '',
         unsignedChatContent: JSON.stringify({ text: message }),
-        type: 0,
+        type: mcData.supportFeature('incrementedChatType') ? { registryIndex: 1 } : 0,
         senderUuid: 'd3527a0b-bc03-45d5-a878-2aafdd8c8a43', // random
         senderName: JSON.stringify({ text: sender }),
         senderTeam: undefined,
