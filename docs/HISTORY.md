@@ -1,5 +1,8 @@
 # History
 
+## 1.50.0
+* [1.21 Support (#1342)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/5bebac36620d8f8ec256d19483e20e643d63de2a) (thanks @GroobleDierne)
+
 ## 1.49.0
 * [support 1.20.6 (#1338)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/0b0012d60f0f1648be5ff705e7694bb1cd4ec37c) (thanks @rom1504)
 
