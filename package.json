@@ -41,10 +41,11 @@
     "minecraft-wrap": "^1.2.3",
     "mocha": "^10.0.0",
     "power-assert": "^1.0.0",
-    "standard": "^17.0.0",
-    "prismarine-registry": "^1.8.0"
+    "prismarine-registry": "^1.8.0",
+    "standard": "^17.0.0"
   },
   "dependencies": {
+    "@types/node-rsa": "^1.1.4",
     "@types/readable-stream": "^4.0.0",
     "aes-js": "^3.1.2",
     "buffer-equal": "^1.0.0",

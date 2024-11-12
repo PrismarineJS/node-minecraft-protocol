@@ -8,6 +8,11 @@ const { concat } = require('../transforms/binaryStream')
 const { mojangPublicKeyPem } = require('./constants')
 const debug = require('debug')('minecraft-protocol')
 
+/**
+ * @param {import('../index').Client} client
+ * @param {import('../index').Server} server
+ * @param {Object} options
+ */
 module.exports = function (client, server, options) {
   const mojangPubKey = crypto.createPublicKey(mojangPublicKeyPem)
   const raise = (translatableError) => client.end(translatableError, JSON.stringify({ translate: translatableError }))
