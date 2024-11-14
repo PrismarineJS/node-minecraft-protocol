@@ -1,3 +1,4 @@
+/* eslint-disable no-return-assign */
 const UUID = require('uuid-1345')
 const minecraft = require('./minecraft')
 
@@ -41,7 +42,7 @@ module.exports = {
       code += '}'
       return compiler.wrapCode(code)
     }],
-    arrayWithLengthOffset: ['parametrizable', (compiler, array) => {
+    arrayWithLengthOffset: ['parametrizable', (compiler, array) => { // TODO: remove
       let code = ''
       if (array.countType) {
         code += 'const { value: count, size: countSize } = ' + compiler.callType(array.countType) + '\n'
@@ -60,6 +61,56 @@ module.exports = {
       code += '  size += elem.size\n'
       code += '}\n'
       code += 'return { value: data, size }'
+      return compiler.wrapCode(code)
+    }],
+    bitflags: ['parametrizable', (compiler, { type, flags, shift, big }) => {
+      let fstr = JSON.stringify(flags)
+      if (Array.isArray(flags)) {
+        fstr = '{'
+        for (const [k, v] of Object.entries(flags)) fstr += `"${v}": ${big ? (1n << BigInt(k)) : (1 << k)}` + (big ? 'n,' : ',')
+        fstr += '}'
+      } else if (shift) {
+        fstr = '{'
+        for (const key in flags) fstr += `"${key}": ${1 << flags[key]},`
+        fstr += '}'
+      }
+      return compiler.wrapCode(`
+        const { value: _value, size } = ${compiler.callType(type, 'offset')}
+        const value = { _value }
+        const flags = ${fstr}
+        for (const key in flags) {
+          value[key] = (_value & flags[key]) == flags[key]
+        }
+        return { value, size }
+      `.trim())
+    }],
+    registryEntryHolder: ['parametrizable', (compiler, opts) => {
+      let code = ''
+      code += 'const { value: n, size: nSize } = ' + compiler.callType('varint') + '\n'
+      code += 'if (n !== 0) {'
+      code += `  return { value: { ${opts.baseName}: n - 1 }, size: nSize }`
+      code += '} else {'
+      code += `  const holder = ${compiler.callType(opts.otherwise.type)}`
+      code += `  return { value: { ${opts.otherwise.name}: holder.data }, size: nSize + holder.size }`
+      code += '}'
+      return compiler.wrapCode(code)
+    }],
+    registryEntryHolderSet: ['parametrizable', (compiler, opts) => {
+      let code = ''
+      code += 'const { value: n, size: nSize } = ' + compiler.callType('varint') + '\n'
+      code += 'if (n === 0) {'
+      code += `  const base = ${compiler.callType(opts.base.type)}`
+      code += `  return { value: { ${opts.base.type}: base.value }, size: base.size + nSize }`
+      code += '} else {'
+      code += '  const set = []'
+      code += '  let accSize = nSize'
+      code += '  for (let i = 0; i < n - 1; i++) {'
+      code += `    const entry = ${compiler.callType(opts.otherwise.type)}`
+      code += '    set.push(entry.value)'
+      code += '    accSize += entry.size'
+      code += '  }'
+      code += `  return { value: { ${opts.otherwise.name}: set }, size: accSize }`
+      code += '}'
       return compiler.wrapCode(code)
     }]
   },
@@ -106,6 +157,54 @@ module.exports = {
       code += '}\n'
       code += 'return offset'
       return compiler.wrapCode(code)
+    }],
+    bitflags: ['parametrizable', (compiler, { type, flags, shift, big }) => {
+      let fstr = JSON.stringify(flags)
+      if (Array.isArray(flags)) {
+        fstr = '{'
+        for (const [k, v] of Object.entries(flags)) fstr += `"${v}": ${big ? (1n << BigInt(k)) : (1 << k)}` + (big ? 'n,' : ',')
+        fstr += '}'
+      } else if (shift) {
+        fstr = '{'
+        for (const key in flags) fstr += `"${key}": ${1 << flags[key]},`
+        fstr += '}'
+      }
+      return compiler.wrapCode(`
+        const flags = ${fstr}
+        let val = value._value ${big ? '|| 0n' : ''}
+        for (const key in flags) {
+          if (value[key]) val |= flags[key]
+        }
+        return (ctx.${type})(val, buffer, offset)
+      `.trim())
+    }],
+    registryEntryHolder: ['parametrizable', (compiler, opts) => {
+      let code = ''
+      const baseName = `value.${opts.baseName}`
+      const otherwiseName = `value.${opts.otherwise.name}`
+      code += `if (${baseName}) {`
+      code += '  offset = ' + compiler.callType(`${baseName} + 1`, 'varint') + '\n'
+      code += `} else if (${otherwiseName}) {`
+      code += '  offset = ' + compiler.callType(`${otherwiseName}`, opts.otherwise.type) + '\n'
+      code += `} else throw new Error('registryEntryHolder type requires "${baseName}" or "${otherwiseName}" fields to be set')`
+      code += 'return offset'
+      return compiler.wrapCode(code)
+    }],
+    registryEntryHolderSet: ['parametrizable', (compiler, opts) => {
+      let code = ''
+      const baseName = `value.${opts.base.name}`
+      const otherwiseName = `value.${opts.otherwise.name}`
+      code += `if (${baseName}) {`
+      code += '  offset = ' + compiler.callType(0, 'varint') + '\n'
+      code += '  offset = ' + compiler.callType(`${baseName}`, opts.base.type) + '\n'
+      code += `} else if (${otherwiseName}) {`
+      code += '  offset = ' + compiler.callType(`${otherwiseName}.length + 1`, 'varint') + '\n'
+      code += `  for (let i = 0; i < ${otherwiseName}.length; i++) {`
+      code += `    offset = ${compiler.callType(opts.otherwise.type)}`
+      code += '  }'
+      code += `} else throw new Error('registryEntryHolder type requires "${baseName}" or "${otherwiseName}" fields to be set')`
+      code += 'return offset'
+      return compiler.wrapCode(code)
     }]
   },
   SizeOf: {
@@ -147,6 +246,54 @@ module.exports = {
         code += '  size += ' + compiler.callType('value[i]', array.type) + '\n'
         code += '}\n'
       }
+      code += 'return size'
+      return compiler.wrapCode(code)
+    }],
+    bitflags: ['parametrizable', (compiler, { type, flags, shift, big }) => {
+      let fstr = JSON.stringify(flags)
+      if (Array.isArray(flags)) {
+        fstr = '{'
+        for (const [k, v] of Object.entries(flags)) fstr += `"${v}": ${big ? (1n << BigInt(k)) : (1 << k)}` + (big ? 'n,' : ',')
+        fstr += '}'
+      } else if (shift) {
+        fstr = '{'
+        for (const key in flags) fstr += `"${key}": ${1 << flags[key]},`
+        fstr += '}'
+      }
+      return compiler.wrapCode(`
+        const flags = ${fstr}
+        let val = value._value ${big ? '|| 0n' : ''}
+        for (const key in flags) {
+          if (value[key]) val |= flags[key]
+        }
+        return (ctx.${type})(val)
+      `.trim())
+    }],
+    registryEntryHolder: ['parametrizable', (compiler, opts) => {
+      let code = 'let size = 0'
+      const baseName = `value.${opts.baseName}`
+      const otherwiseName = `value.${opts.otherwise.name}`
+      code += `if (${baseName}) {`
+      code += '  size += ' + compiler.callType(`${baseName} + 1`, 'varint') + '\n'
+      code += `} else if (${otherwiseName}) {`
+      code += '  size += ' + compiler.callType(`${otherwiseName}`, opts.otherwise.type) + '\n'
+      code += `} else throw new Error('registryEntryHolder type requires "${baseName}" or "${otherwiseName}" fields to be set')`
+      code += 'return size'
+      return compiler.wrapCode(code)
+    }],
+    registryEntryHolderSet: ['parametrizable', (compiler, opts) => {
+      let code = 'let size = 0'
+      const baseName = `value.${opts.base.name}`
+      const otherwiseName = `value.${opts.otherwise.name}`
+      code += `if (${baseName}) {`
+      code += '  size += ' + compiler.callType(0, 'varint') + '\n'
+      code += '  size += ' + compiler.callType(`${baseName}`, opts.base.type) + '\n'
+      code += `} else if (${otherwiseName}) {`
+      code += '  size += ' + compiler.callType(`${otherwiseName}.length + 1`, 'varint') + '\n'
+      code += `  for (let i = 0; i < ${otherwiseName}.length; i++) {`
+      code += `    size += ${compiler.callType(opts.otherwise.type)}`
+      code += '  }'
+      code += `} else throw new Error('registryEntryHolder type requires "${baseName}" or "${otherwiseName}" fields to be set')`
       code += 'return size'
       return compiler.wrapCode(code)
     }]
