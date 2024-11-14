@@ -85,33 +85,33 @@ module.exports = {
       `.trim())
     }],
     registryEntryHolder: ['parametrizable', (compiler, opts) => {
-      let code = ''
-      code += 'const { value: n, size: nSize } = ' + compiler.callType('varint') + '\n'
-      code += 'if (n !== 0) {'
-      code += `  return { value: { ${opts.baseName}: n - 1 }, size: nSize }`
-      code += '} else {'
-      code += `  const holder = ${compiler.callType(opts.otherwise.type)}`
-      code += `  return { value: { ${opts.otherwise.name}: holder.data }, size: nSize + holder.size }`
-      code += '}'
-      return compiler.wrapCode(code)
+      return compiler.wrapCode(`
+const { value: n, size: nSize } = ${compiler.callType('varint')}
+if (n !== 0) {
+  return { value: { ${opts.baseName}: n - 1 }, size: nSize }
+} else {
+  const holder = ${compiler.callType(opts.otherwise.type)}
+  return { value: { ${opts.otherwise.name}: holder.data }, size: nSize + holder.size }
+}
+      `.trim())
     }],
     registryEntryHolderSet: ['parametrizable', (compiler, opts) => {
-      let code = ''
-      code += 'const { value: n, size: nSize } = ' + compiler.callType('varint') + '\n'
-      code += 'if (n === 0) {'
-      code += `  const base = ${compiler.callType(opts.base.type)}`
-      code += `  return { value: { ${opts.base.type}: base.value }, size: base.size + nSize }`
-      code += '} else {'
-      code += '  const set = []'
-      code += '  let accSize = nSize'
-      code += '  for (let i = 0; i < n - 1; i++) {'
-      code += `    const entry = ${compiler.callType(opts.otherwise.type)}`
-      code += '    set.push(entry.value)'
-      code += '    accSize += entry.size'
-      code += '  }'
-      code += `  return { value: { ${opts.otherwise.name}: set }, size: accSize }`
-      code += '}'
-      return compiler.wrapCode(code)
+      return compiler.wrapCode(`
+  const { value: n, size: nSize } = ${compiler.callType('varint')}
+  if (n === 0) {
+    const base = ${compiler.callType(opts.base.type)}
+    return { value: { ${opts.base.type}: base.value }, size: base.size + nSize }
+  } else {
+    const set = []
+    let accSize = nSize
+    for (let i = 0; i < n - 1; i++) {
+      const entry = ${compiler.callType(opts.otherwise.type)}
+      set.push(entry.value)
+      accSize += entry.size
+    }
+    return { value: { ${opts.otherwise.name}: set }, size: accSize }
+  }
+    `.trim())
     }]
   },
   Write: {
@@ -179,32 +179,36 @@ module.exports = {
       `.trim())
     }],
     registryEntryHolder: ['parametrizable', (compiler, opts) => {
-      let code = ''
       const baseName = `value.${opts.baseName}`
       const otherwiseName = `value.${opts.otherwise.name}`
-      code += `if (${baseName}) {`
-      code += '  offset = ' + compiler.callType(`${baseName} + 1`, 'varint') + '\n'
-      code += `} else if (${otherwiseName}) {`
-      code += '  offset = ' + compiler.callType(`${otherwiseName}`, opts.otherwise.type) + '\n'
-      code += `} else throw new Error('registryEntryHolder type requires "${baseName}" or "${otherwiseName}" fields to be set')`
-      code += 'return offset'
-      return compiler.wrapCode(code)
+      return compiler.wrapCode(`
+if (${baseName}) {
+  offset = ${compiler.callType(`${baseName} + 1`, 'varint')}
+} else if (${otherwiseName}) {
+  offset = ${compiler.callType(`${otherwiseName}`, opts.otherwise.type)}
+} else {
+  throw new Error('registryEntryHolder type requires "${baseName}" or "${otherwiseName}" fields to be set')
+}
+return offset
+      `.trim())
     }],
     registryEntryHolderSet: ['parametrizable', (compiler, opts) => {
-      let code = ''
       const baseName = `value.${opts.base.name}`
       const otherwiseName = `value.${opts.otherwise.name}`
-      code += `if (${baseName}) {`
-      code += '  offset = ' + compiler.callType(0, 'varint') + '\n'
-      code += '  offset = ' + compiler.callType(`${baseName}`, opts.base.type) + '\n'
-      code += `} else if (${otherwiseName}) {`
-      code += '  offset = ' + compiler.callType(`${otherwiseName}.length + 1`, 'varint') + '\n'
-      code += `  for (let i = 0; i < ${otherwiseName}.length; i++) {`
-      code += `    offset = ${compiler.callType(opts.otherwise.type)}`
-      code += '  }'
-      code += `} else throw new Error('registryEntryHolder type requires "${baseName}" or "${otherwiseName}" fields to be set')`
-      code += 'return offset'
-      return compiler.wrapCode(code)
+      return compiler.wrapCode(`
+if (${baseName}) {
+  offset = ${compiler.callType(0, 'varint')}
+  offset = ${compiler.callType(`${baseName}`, opts.base.type)}
+} else if (${otherwiseName}) {
+  offset = ${compiler.callType(`${otherwiseName}.length + 1`, 'varint')}
+  for (let i = 0; i < ${otherwiseName}.length; i++) {
+    offset = ${compiler.callType(opts.otherwise.type)}
+  }
+} else {
+  throw new Error('registryEntryHolder type requires "${baseName}" or "${otherwiseName}" fields to be set')
+}
+return offset
+    `.trim())
     }]
   },
   SizeOf: {
@@ -270,32 +274,38 @@ module.exports = {
       `.trim())
     }],
     registryEntryHolder: ['parametrizable', (compiler, opts) => {
-      let code = 'let size = 0'
       const baseName = `value.${opts.baseName}`
       const otherwiseName = `value.${opts.otherwise.name}`
-      code += `if (${baseName}) {`
-      code += '  size += ' + compiler.callType(`${baseName} + 1`, 'varint') + '\n'
-      code += `} else if (${otherwiseName}) {`
-      code += '  size += ' + compiler.callType(`${otherwiseName}`, opts.otherwise.type) + '\n'
-      code += `} else throw new Error('registryEntryHolder type requires "${baseName}" or "${otherwiseName}" fields to be set')`
-      code += 'return size'
-      return compiler.wrapCode(code)
+      return compiler.wrapCode(`
+let size = 0
+if (${baseName}) {
+  size += ${compiler.callType(`${baseName} + 1`, 'varint')}
+} else if (${otherwiseName}) {
+  size += ${compiler.callType(`${otherwiseName}`, opts.otherwise.type)}
+} else {
+  throw new Error('registryEntryHolder type requires "${baseName}" or "${otherwiseName}" fields to be set')
+}
+return size
+      `.trim())
     }],
     registryEntryHolderSet: ['parametrizable', (compiler, opts) => {
-      let code = 'let size = 0'
       const baseName = `value.${opts.base.name}`
       const otherwiseName = `value.${opts.otherwise.name}`
-      code += `if (${baseName}) {`
-      code += '  size += ' + compiler.callType(0, 'varint') + '\n'
-      code += '  size += ' + compiler.callType(`${baseName}`, opts.base.type) + '\n'
-      code += `} else if (${otherwiseName}) {`
-      code += '  size += ' + compiler.callType(`${otherwiseName}.length + 1`, 'varint') + '\n'
-      code += `  for (let i = 0; i < ${otherwiseName}.length; i++) {`
-      code += `    size += ${compiler.callType(opts.otherwise.type)}`
-      code += '  }'
-      code += `} else throw new Error('registryEntryHolder type requires "${baseName}" or "${otherwiseName}" fields to be set')`
-      code += 'return size'
-      return compiler.wrapCode(code)
+      return compiler.wrapCode(`
+let size = 0
+if (${baseName}) {
+  size += ${compiler.callType(0, 'varint')}
+  size += ${compiler.callType(`${baseName}`, opts.base.type)}
+} else if (${otherwiseName}) {
+  size += ${compiler.callType(`${otherwiseName}.length + 1`, 'varint')}
+  for (let i = 0; i < ${otherwiseName}.length; i++) {
+    size += ${compiler.callType(opts.otherwise.type)}
+  }
+} else {
+  throw new Error('registryEntryHolder type requires "${baseName}" or "${otherwiseName}" fields to be set')
+}
+return size
+      `.trim())
     }]
   }
 }
