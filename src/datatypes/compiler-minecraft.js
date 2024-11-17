@@ -100,7 +100,7 @@ if (n !== 0) {
   const { value: n, size: nSize } = ${compiler.callType('varint')}
   if (n === 0) {
     const base = ${compiler.callType(opts.base.type)}
-    return { value: { ${opts.base.type}: base.value }, size: base.size + nSize }
+    return { value: { ${opts.base.name}: base.value }, size: base.size + nSize }
   } else {
     const set = []
     let accSize = nSize
