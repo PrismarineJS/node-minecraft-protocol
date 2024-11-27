@@ -99,13 +99,13 @@ if (n !== 0) {
       return compiler.wrapCode(`
   const { value: n, size: nSize } = ${compiler.callType('varint')}
   if (n === 0) {
-    const base = ${compiler.callType(opts.base.type)}
+    const base = ${compiler.callType(opts.base.type, 'offset + nSize')}
     return { value: { ${opts.base.name}: base.value }, size: base.size + nSize }
   } else {
     const set = []
     let accSize = nSize
     for (let i = 0; i < n - 1; i++) {
-      const entry = ${compiler.callType(opts.otherwise.type)}
+      const entry = ${compiler.callType(opts.otherwise.type, 'offset + accSize')}
       set.push(entry.value)
       accSize += entry.size
     }
