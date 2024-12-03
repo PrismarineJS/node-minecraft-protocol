@@ -57,7 +57,11 @@ const nbtValue = {
 
 function getFixedPacketPayload (version, packetName) {
   if (packetName === 'declare_recipes') {
-    if (version['>=']('1.20.5')) {
+    if (version['>=']('1.21.3')) {
+      return {
+        // TODO
+      }
+    } else if (version['>=']('1.20.5')) {
       return {
         recipes: [
           {
@@ -263,6 +267,22 @@ const values = {
     isDebug: false,
     isFlat: false,
     portalCooldown: 0
+  },
+  MovementFlags: {
+    onGround: true,
+    hasHorizontalCollision: false
+  },
+  ContainerID: 0,
+  PositionUpdateRelatives: {
+    x: true,
+    y: true,
+    z: true,
+    yaw: true,
+    pitch: true,
+    dx: true,
+    dy: true,
+    dz: true,
+    yawDelta: true
   }
 }
 
