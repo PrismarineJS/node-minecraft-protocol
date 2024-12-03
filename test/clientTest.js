@@ -191,7 +191,6 @@ for (const supportedVersion of mc.supportedVersions) {
             }
           } else {
             // 1.19+
-            console.log('Chat Message', data)
             const sender = JSON.parse(data.senderName)
             const msgPayload = data.formattedMessage ? JSON.parse(data.formattedMessage) : data.plainMessage
             const plainMessage = client.parseMessage(msgPayload).toString()
