@@ -202,10 +202,10 @@ if (${baseName}) {
 } else if (${otherwiseName}) {
   offset = ${compiler.callType(`${otherwiseName}.length + 1`, 'varint')}
   for (let i = 0; i < ${otherwiseName}.length; i++) {
-    offset = ${compiler.callType(opts.otherwise.type)}
+    offset = ${compiler.callType(`${otherwiseName}[i]`, opts.otherwise.type)}
   }
 } else {
-  throw new Error('registryEntryHolder type requires "${baseName}" or "${otherwiseName}" fields to be set')
+  throw new Error('registryEntryHolder type requires "${opts.base.name}" or "${opts.otherwise.name}" fields to be set')
 }
 return offset
     `.trim())
@@ -299,10 +299,10 @@ if (${baseName}) {
 } else if (${otherwiseName}) {
   size += ${compiler.callType(`${otherwiseName}.length + 1`, 'varint')}
   for (let i = 0; i < ${otherwiseName}.length; i++) {
-    size += ${compiler.callType(opts.otherwise.type)}
+    size += ${compiler.callType(`${otherwiseName}[i]`, opts.otherwise.type)}
   }
 } else {
-  throw new Error('registryEntryHolder type requires "${baseName}" or "${otherwiseName}" fields to be set')
+  throw new Error('registryEntryHolder type requires "${opts.base.name}" or "${opts.otherwise.name}" fields to be set')
 }
 return size
       `.trim())
