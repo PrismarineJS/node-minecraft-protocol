@@ -24,8 +24,7 @@ for (const supportedVersion of mc.supportedVersions) {
   const MC_SERVER_DIR = MC_SERVER_PATH + '_' + supportedVersion
   const wrap = new Wrap(MC_SERVER_JAR, MC_SERVER_DIR, {
     minMem: 1024,
-    maxMem: 1024,
-    noOverride: true
+    maxMem: 1024
   })
   wrap.on('line', function (line) {
     console.log(line)
@@ -61,7 +60,7 @@ for (const supportedVersion of mc.supportedVersions) {
             motd: 'test1234',
             'max-players': 120,
             'level-type': 'flat',
-            'generate-structures': 'false',
+            'generate-structures': 'false', // 12m
             'use-native-transport': 'false' // java 16 throws errors without this, https://www.spigotmc.org/threads/unable-to-access-address-of-buffer.311602
           }, (err) => {
             if (err) reject(err)
