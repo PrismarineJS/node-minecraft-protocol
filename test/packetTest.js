@@ -59,7 +59,28 @@ function getFixedPacketPayload (version, packetName) {
   if (packetName === 'declare_recipes') {
     if (version['>=']('1.21.3')) {
       return {
-        // TODO
+        recipes: [
+          {
+            name: 'minecraft:campfire_input',
+            items: [
+              903,
+              976
+            ]
+          }
+        ],
+        stoneCutterRecipes: [
+          {
+            input: {
+              ids: [
+                6
+              ]
+            },
+            slotDisplay: {
+              type: 'item_stack',
+              data: slotValue
+            }
+          }
+        ]
       }
     } else if (version['>=']('1.20.5')) {
       return {
@@ -245,6 +266,13 @@ const values = {
       suggestionType: 'minecraft:summonable_entities'
     }
   },
+  bitflags: function (typeArgs, context) {
+    const results = {}
+    Object.keys(typeArgs.flags).forEach(function (index) {
+      results[typeArgs.flags[index]] = true
+    })
+    return results
+  },
   soundSource: 'master',
   packedChunkPos: {
     x: 10,
@@ -283,7 +311,33 @@ const values = {
     dy: true,
     dz: true,
     yawDelta: true
-  }
+  },
+  RecipeDisplay: {
+    type: 'stonecutter',
+    data: {
+      ingredient: { type: 'empty' },
+      result: { type: 'empty' },
+      craftingStation: { type: 'empty' }
+    }
+  },
+  SlotDisplay: { type: 'empty' },
+  game_profile: {
+    name: 'test',
+    properties: [{
+      key: 'foo',
+      value: 'bar'
+    }]
+  },
+  optvarint: 1,
+  chat_session: {
+    uuid: '00112233-4455-6677-8899-aabbccddeeff',
+    publicKey: {
+      expireTime: 30,
+      keyBytes: [],
+      keySignature: []
+    }
+  },
+  IDSet: { ids: [2, 5] }
 }
 
 function getValue (_type, packet) {
