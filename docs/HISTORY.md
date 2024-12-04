@@ -1,5 +1,10 @@
 # History
 
+## 1.51.0
+* [Add type to serverKey in server (#1349)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/d6b4e82eb170984380e7ea9f125ea5d72777bef2) (thanks @u9g)
+* [support 1.21.3 (#1347)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/2224d824065908e910520dfa8ea9f3f3ade242e4) (thanks @rom1504)
+* [Bump @types/node from 20.16.15 to 22.7.9 (#1345)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/590dc33fed2100e77ef58e7db716dfc45eb61159) (thanks @dependabot[bot])
+
 ## 1.50.0
 * [1.21 Support (#1342)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/5bebac36620d8f8ec256d19483e20e643d63de2a) (thanks @GroobleDierne)
 
