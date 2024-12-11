@@ -7,7 +7,7 @@ import { Agent } from 'http'
 import { Transform } from "readable-stream";
 import { BinaryLike, KeyObject } from 'crypto';
 import { Realm } from "prismarine-realms"
-import NodeRSA from 'node-rsa';
+import * as NodeRSA from 'node-rsa';
 
 type PromiseLike = Promise<void> | void
 
