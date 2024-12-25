@@ -1,5 +1,22 @@
 # History
 
+## 1.51.0
+* [Add type to serverKey in server (#1349)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/d6b4e82eb170984380e7ea9f125ea5d72777bef2) (thanks @u9g)
+* [support 1.21.3 (#1347)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/2224d824065908e910520dfa8ea9f3f3ade242e4) (thanks @rom1504)
+* [Bump @types/node from 20.16.15 to 22.7.9 (#1345)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/590dc33fed2100e77ef58e7db716dfc45eb61159) (thanks @dependabot[bot])
+
+## 1.50.0
+* [1.21 Support (#1342)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/5bebac36620d8f8ec256d19483e20e643d63de2a) (thanks @GroobleDierne)
+
+## 1.49.0
+* [support 1.20.6 (#1338)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/0b0012d60f0f1648be5ff705e7694bb1cd4ec37c) (thanks @rom1504)
+
+## 1.48.0
+* [1.20.5 (#1309)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/9b029e8b6f33d4e8ee1476de6821bad942f1ab6b) (thanks @extremeheat)
+* [Fix realms loading issue due to createClient plugin init order (#1303)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/7057ad979b416192ada235f2f4e3b5eb26af5fa1) (thanks @extremeheat)
+* [Update doc (#1300)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/495eed56ab230b2615596590064671356d86a2dc) (thanks @extremeheat)
+* [Fix handling of disconnect in versionChecking on 1.20.3+.  (#1291)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/ccab9fb39681f3ebe0d264e2a3f833aa3c5a1ac7) (thanks @wgaylord)
+
 ## 1.47.0
 * [1.20.3 / 1.20.4 support (#1275)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/1d9a38253a28a515d82fffa13806cb0874c5b36c) (thanks @wgaylord)
 

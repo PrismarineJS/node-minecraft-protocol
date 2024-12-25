@@ -29,7 +29,7 @@ module.exports = client => {
   })
   client.on('registry_data', (data) => {
     client.registry ??= Registry(client.version)
-    client.registry.loadDimensionCodec(data.codec)
+    client.registry.loadDimensionCodec(data.codec || data)
   })
 
   client.on('playerJoin', () => {

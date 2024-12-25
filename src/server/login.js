@@ -9,6 +9,11 @@ const { mojangPublicKeyPem } = require('./constants')
 const debug = require('debug')('minecraft-protocol')
 const NodeRSA = require('node-rsa')
 
+/**
+ * @param {import('../index').Client} client
+ * @param {import('../index').Server} server
+ * @param {Object} options
+ */
 module.exports = function (client, server, options) {
   const mojangPubKey = crypto.createPublicKey(mojangPublicKeyPem)
   const raise = (translatableError) => client.end(translatableError, JSON.stringify({ translate: translatableError }))
@@ -190,7 +195,8 @@ module.exports = function (client, server, options) {
     if (client.supportFeature('chainedChatWithHashing')) { // 1.19.1+
       client.write('server_data', {
         previewsChat: options.enableChatPreview,
-        enforceSecureProfile: options.enforceSecureProfile
+        // Note: in 1.20.5+ user must send this with `login`
+        enforcesSecureChat: options.enforceSecureProfile
       })
     }
 
@@ -208,7 +214,14 @@ module.exports = function (client, server, options) {
 
   function onClientLoginAck () {
     client.state = states.CONFIGURATION
-    client.write('registry_data', { codec: options.registryCodec || {} })
+    if (client.supportFeature('segmentedRegistryCodecData')) {
+      for (const key in options.registryCodec) {
+        const entry = options.registryCodec[key]
+        client.write('registry_data', entry)
+      }
+    } else {
+      client.write('registry_data', { codec: options.registryCodec || {} })
+    }
     client.once('finish_configuration', () => {
       client.state = states.PLAY
       server.emit('playerJoin', client)

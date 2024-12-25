@@ -18,7 +18,6 @@ function evalCount (count, fields) {
 const slotValue = {
   present: true,
   blockId: 5,
-  itemCount: 56,
   itemDamage: 2,
   nbtData: {
     type: 'compound',
@@ -32,7 +31,14 @@ const slotValue = {
       test6: { type: 'compound', value: { test: { type: 'int', value: 4 } } },
       test7: { type: 'intArray', value: [12, 42] }
     }
-  }
+  },
+  // 1.20.5
+  itemCount: 1,
+  itemId: 1111,
+  addedComponentCount: 0,
+  removedComponentCount: 0,
+  components: [],
+  removeComponents: []
 }
 
 const nbtValue = {
@@ -49,6 +55,49 @@ const nbtValue = {
   }
 }
 
+function getFixedPacketPayload (version, packetName) {
+  if (packetName === 'declare_recipes') {
+    if (version['>=']('1.21.3')) {
+      return {
+        recipes: [
+          {
+            name: 'minecraft:campfire_input',
+            items: [
+              903,
+              976
+            ]
+          }
+        ],
+        stoneCutterRecipes: [
+          {
+            input: {
+              ids: [
+                6
+              ]
+            },
+            slotDisplay: {
+              type: 'item_stack',
+              data: slotValue
+            }
+          }
+        ]
+      }
+    } else if (version['>=']('1.20.5')) {
+      return {
+        recipes: [
+          {
+            name: 'minecraft:crafting_decorated_pot',
+            type: 'minecraft:crafting_decorated_pot',
+            data: {
+              category: 0
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+
 const values = {
   i32: 123456,
   i16: -123,
@@ -57,6 +106,7 @@ const values = {
   varlong: -20,
   i8: -10,
   u8: 8,
+  ByteArray: [],
   string: 'hi hi this is my client string',
   buffer: function (typeArgs, context) {
     let count
@@ -110,6 +160,9 @@ const values = {
     delete results['..']
     return results
   },
+  vec2f: {
+    x: 0, y: 0
+  },
   vec3f: {
     x: 0, y: 0, z: 0
   },
@@ -124,6 +177,14 @@ const values = {
   f64: 99999.2222,
   f32: -333.444,
   slot: slotValue,
+  Slot: slotValue,
+  SlotComponent: {
+    type: 'hide_tooltip'
+  },
+  ChatTypes: {
+    registryIndex: 1
+  },
+  SlotComponentType: 0,
   nbt: nbtValue,
   optionalNbt: nbtValue,
   compressedNbt: nbtValue,
@@ -161,8 +222,8 @@ const values = {
     const i = typeArgs.fields[getField(typeArgs.compareTo, context)]
     if (i === undefined) {
       if (typeArgs.default === undefined) {
-        throw new Error("couldn't find the field " + typeArgs.compareTo +
-          ' of the compareTo and the default is not defined')
+        typeArgs.default = 'void'
+        // throw new Error("couldn't find the field " + typeArgs.compareTo + ' of the compareTo and the default is not defined')
       }
       return getValue(typeArgs.default, context)
     } else { return getValue(i, context) }
@@ -177,6 +238,7 @@ const values = {
     })
     return results
   },
+  mapper: '',
   tags: [{ tagName: 'hi', entries: [1, 2, 3, 4, 5] }],
   ingredient: [slotValue],
   particleData: null,
@@ -204,6 +266,13 @@ const values = {
       suggestionType: 'minecraft:summonable_entities'
     }
   },
+  bitflags: function (typeArgs, context) {
+    const results = {}
+    Object.keys(typeArgs.flags).forEach(function (index) {
+      results[typeArgs.flags[index]] = true
+    })
+    return results
+  },
   soundSource: 'master',
   packedChunkPos: {
     x: 10,
@@ -212,7 +281,63 @@ const values = {
   particle: {
     particleId: 0,
     data: null
-  }
+  },
+  Particle: {},
+  SpawnInfo: {
+    dimension: 0,
+    name: 'minecraft:overworld',
+    hashedSeed: [
+      572061085,
+      1191958278
+    ],
+    gamemode: 'survival',
+    previousGamemode: 255,
+    isDebug: false,
+    isFlat: false,
+    portalCooldown: 0
+  },
+  MovementFlags: {
+    onGround: true,
+    hasHorizontalCollision: false
+  },
+  ContainerID: 0,
+  PositionUpdateRelatives: {
+    x: true,
+    y: true,
+    z: true,
+    yaw: true,
+    pitch: true,
+    dx: true,
+    dy: true,
+    dz: true,
+    yawDelta: true
+  },
+  RecipeDisplay: {
+    type: 'stonecutter',
+    data: {
+      ingredient: { type: 'empty' },
+      result: { type: 'empty' },
+      craftingStation: { type: 'empty' }
+    }
+  },
+  SlotDisplay: { type: 'empty' },
+  game_profile: {
+    name: 'test',
+    properties: [{
+      key: 'foo',
+      value: 'bar'
+    }]
+  },
+  optvarint: 1,
+  chat_session: {
+    uuid: '00112233-4455-6677-8899-aabbccddeeff',
+    publicKey: {
+      expireTime: 30,
+      keyBytes: [],
+      keySignature: []
+    }
+  },
+  IDSet: { ids: [2, 5] }
 }
 
 function getValue (_type, packet) {
@@ -274,24 +399,28 @@ for (const supportedVersion of mc.supportedVersions) {
             .forEach(function (packetName) {
               packetInfo = packets[state][direction].types[packetName]
               packetInfo = packetInfo || null
+              if (packetName.includes('bundle_delimiter')) return // not a real packet
+              if (['packet_set_projectile_power', 'packet_debug_sample_subscription'].includes(packetName)) return
               it(state + ',' + (direction === 'toServer' ? 'Server' : 'Client') + 'Bound,' + packetName,
-                callTestPacket(packetName.substr(7), packetInfo, state, direction === 'toServer'))
+                callTestPacket(mcData, packetName.substr(7), packetInfo, state, direction === 'toServer'))
             })
         })
       })
-    function callTestPacket (packetName, packetInfo, state, toServer) {
+    function callTestPacket (mcData, packetName, packetInfo, state, toServer) {
       return function (done) {
         client.state = state
         serverClient.state = state
-        testPacket(packetName, packetInfo, state, toServer, done)
+        testPacket(mcData, packetName, packetInfo, state, toServer, done)
       }
     }
 
-    function testPacket (packetName, packetInfo, state, toServer, done) {
+    function testPacket (mcData, packetName, packetInfo, state, toServer, done) {
       // empty object uses default values
-      const packet = getValue(packetInfo, {})
+      const packet = getFixedPacketPayload(mcData.version, packetName) || getValue(packetInfo, {})
       if (toServer) {
+        console.log('Writing to server', packetName, JSON.stringify(packet))
         serverClient.once(packetName, function (receivedPacket) {
+          console.log('Recv', packetName)
           try {
             assertPacketsMatch(packet, receivedPacket)
           } catch (e) {
@@ -302,7 +431,9 @@ for (const supportedVersion of mc.supportedVersions) {
         })
         client.write(packetName, packet)
       } else {
+        console.log('Writing to client', packetName, JSON.stringify(packet))
         client.once(packetName, function (receivedPacket) {
+          console.log('Recv', packetName)
           assertPacketsMatch(packet, receivedPacket)
           done()
         })

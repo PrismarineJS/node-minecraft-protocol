@@ -137,6 +137,7 @@ class Client extends EventEmitter {
       this.splitter.pipe(this.deserializer)
     } else {
       this.serializer.pipe(this.compressor)
+      if (globalThis.debugNMP) this.decompressor.on('data', (data) => { console.log('DES>', data.toString('hex')) })
       this.decompressor.pipe(this.deserializer)
     }
 
