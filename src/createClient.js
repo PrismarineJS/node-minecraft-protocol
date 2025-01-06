@@ -36,7 +36,6 @@ function createClient (options) {
 
   const client = new Client(false, version.minecraftVersion, options.customPackets, hideErrors)
 
-  client._supportFeature = mcData.supportFeature
   tcpDns(client, options)
   if (options.auth instanceof Function) {
     options.auth(client, options)
