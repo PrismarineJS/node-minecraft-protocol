@@ -196,7 +196,12 @@ module.exports = function (client, server, options) {
     client.settings = {}
 
     if (client.supportFeature('chainedChatWithHashing')) { // 1.19.1+
+      const jsonMotd = server.motdMsg ?? { text: server.motd }
+      const nbtMotd = nbt.comp({ text: nbt.string(server.motd) })
       client.write('server_data', {
+        motd: client.supportFeature('chatPacketsUseNbtComponents') ? nbtMotd : motd,
+        icon: server.favicon, // b64
+        iconBytes: server.favicon ? Buffer.from(server.favicon, 'base64') : undefined,
         previewsChat: options.enableChatPreview,
         // Note: in 1.20.5+ user must send this with `login`
         enforcesSecureChat: options.enforceSecureProfile
