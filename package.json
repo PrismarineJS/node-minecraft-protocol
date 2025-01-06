@@ -1,6 +1,6 @@
 {
   "name": "minecraft-protocol",
-  "version": "1.50.0",
+  "version": "1.51.0",
   "description": "Parse and serialize minecraft packets, plus authentication and encryption.",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -45,6 +45,7 @@
     "prismarine-registry": "^1.8.0"
   },
   "dependencies": {
+    "@types/node-rsa": "^1.1.4",
     "@types/readable-stream": "^4.0.0",
     "aes-js": "^3.1.2",
     "buffer-equal": "^1.0.0",
