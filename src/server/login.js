@@ -7,6 +7,7 @@ const chatPlugin = require('./chat')
 const { concat } = require('../transforms/binaryStream')
 const { mojangPublicKeyPem } = require('./constants')
 const debug = require('debug')('minecraft-protocol')
+const nbt = require('prismarine-nbt')
 
 /**
  * @param {import('../index').Client} client
@@ -196,7 +197,12 @@ module.exports = function (client, server, options) {
     client.settings = {}
 
     if (client.supportFeature('chainedChatWithHashing')) { // 1.19.1+
+      const jsonMotd = JSON.stringify(server.motdMsg ?? { text: server.motd })
+      const nbtMotd = nbt.comp({ text: nbt.string(server.motd) })
       client.write('server_data', {
+        motd: client.supportFeature('chatPacketsUseNbtComponents') ? nbtMotd : jsonMotd,
+        icon: server.favicon, // b64
+        iconBytes: server.favicon ? Buffer.from(server.favicon, 'base64') : undefined,
         previewsChat: options.enableChatPreview,
         // Note: in 1.20.5+ user must send this with `login`
         enforcesSecureChat: options.enforceSecureProfile
