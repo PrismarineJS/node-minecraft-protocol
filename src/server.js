@@ -46,9 +46,6 @@ class Server extends EventEmitter {
       self.emit('error', err)
     })
     self.socketServer.on('close', function () {
-      if (process.env.CI) {
-        console.trace('Server closed')
-      }
       self.emit('close')
     })
     self.socketServer.on('listening', function () {
