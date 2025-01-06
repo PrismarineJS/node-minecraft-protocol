@@ -102,6 +102,7 @@ for (const supportedVersion of mc.supportedVersions) {
   describe('mc-server ' + supportedVersion + 'v', function () {
     this.timeout(5000)
     this.beforeEach(async function () {
+      console.log('🔻 Starting test', this.currentTest.title)
       PORT = await getPort()
       console.log(`Using port for tests: ${PORT}`)
     })
@@ -531,4 +532,10 @@ for (const supportedVersion of mc.supportedVersions) {
       })
     })
   })
+}
+
+function callOnce(fn, ...args) {
+  if (fn.called) return
+  fn(...args)
+  fn.called = true
 }
