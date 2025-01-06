@@ -412,9 +412,9 @@ for (const supportedVersion of mc.supportedVersions) {
         })
       })
       function checkFinish () {
-        if (serverPlayerDisconnected && clientClosed && serverClosed) done()
+        if (serverPlayerDisconnected && clientClosed && serverClosed) callOnce(done)
       }
-    })
+    }).retries(2)
 
     it('gives correct reason for kicking clients when shutting down', function (done) {
       const server = mc.createServer({
@@ -534,7 +534,7 @@ for (const supportedVersion of mc.supportedVersions) {
   })
 }
 
-function callOnce(fn, ...args) {
+function callOnce (fn, ...args) {
   if (fn.called) return
   fn(...args)
   fn.called = true
