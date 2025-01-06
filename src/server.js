@@ -28,11 +28,13 @@ class Server extends EventEmitter {
       const client = new Client(true, this.version, this.customPackets, this.hideErrors)
       client._end = client.end
       client.end = function end (endReason, fullReason) {
-        fullReason ??= this._supportFeature('chatPacketsUseNbtComponents') ? nbt.comp({ text: nbt.string(endReason) }) : JSON.stringify({ text: endReason })
         if (client.state === states.PLAY) {
+          fullReason ||= this._supportFeature('chatPacketsUseNbtComponents')
+            ? nbt.comp({ text: nbt.string(endReason) })
+            : JSON.stringify({ text: endReason })
           client.write('kick_disconnect', { reason: fullReason })
         } else if (client.state === states.LOGIN) {
-          client.write('disconnect', { reason: fullReason })
+          client.write('disconnect', { reason: fullReason || endReason })
         }
         client._end(endReason)
       }
