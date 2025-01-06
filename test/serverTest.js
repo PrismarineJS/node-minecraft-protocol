@@ -412,7 +412,10 @@ for (const supportedVersion of mc.supportedVersions) {
         })
       })
       function checkFinish () {
-        if (serverPlayerDisconnected && clientClosed && serverClosed) callOnce(done)
+        if (serverPlayerDisconnected && clientClosed && serverClosed) {
+          console.log('Kick test is done')
+          callOnce(done)
+        }
       }
     }).retries(2)
 
@@ -535,6 +538,7 @@ for (const supportedVersion of mc.supportedVersions) {
 }
 
 function callOnce (fn, ...args) {
+  console.log('Call Fn', fn.called)
   if (fn.called) return
   fn(...args)
   fn.called = true
