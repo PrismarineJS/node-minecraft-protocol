@@ -7,6 +7,7 @@ const chatPlugin = require('./chat')
 const { concat } = require('../transforms/binaryStream')
 const { mojangPublicKeyPem } = require('./constants')
 const debug = require('debug')('minecraft-protocol')
+const nbt = require('prismarine-nbt')
 
 /**
  * @param {import('../index').Client} client
@@ -199,7 +200,7 @@ module.exports = function (client, server, options) {
       const jsonMotd = server.motdMsg ?? { text: server.motd }
       const nbtMotd = nbt.comp({ text: nbt.string(server.motd) })
       client.write('server_data', {
-        motd: client.supportFeature('chatPacketsUseNbtComponents') ? nbtMotd : motd,
+        motd: client.supportFeature('chatPacketsUseNbtComponents') ? nbtMotd : jsonMotd,
         icon: server.favicon, // b64
         iconBytes: server.favicon ? Buffer.from(server.favicon, 'base64') : undefined,
         previewsChat: options.enableChatPreview,
