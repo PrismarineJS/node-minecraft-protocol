@@ -30,6 +30,7 @@ class Client extends EventEmitter {
     this.hideErrors = hideErrors
     this.closeTimer = null
     const mcData = require('minecraft-data')(version)
+    this._supportFeature = mcData.supportFeature
     this.state = states.HANDSHAKING
     this._hasBundlePacket = mcData.supportFeature('hasBundlePacket')
   }
@@ -137,6 +138,7 @@ class Client extends EventEmitter {
       this.splitter.pipe(this.deserializer)
     } else {
       this.serializer.pipe(this.compressor)
+      if (globalThis.debugNMP) this.decompressor.on('data', (data) => { console.log('DES>', data.toString('hex')) })
       this.decompressor.pipe(this.deserializer)
     }
 

@@ -7,6 +7,7 @@ import { Agent } from 'http'
 import { Transform } from "readable-stream";
 import { BinaryLike, KeyObject } from 'crypto';
 import { Realm } from "prismarine-realms"
+import NodeRSA from 'node-rsa';
 
 type PromiseLike = Promise<void> | void
 
@@ -167,6 +168,7 @@ declare module 'minecraft-protocol' {
 		motd: string
 		motdMsg?: Object
 		favicon: string
+		serverKey: NodeRSA
 		close(): void
 		on(event: 'connection', handler: (client: ServerClient) => PromiseLike): this
 		on(event: 'error', listener: (error: Error) => PromiseLike): this

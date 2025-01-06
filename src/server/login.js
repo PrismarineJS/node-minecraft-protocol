@@ -7,7 +7,13 @@ const chatPlugin = require('./chat')
 const { concat } = require('../transforms/binaryStream')
 const { mojangPublicKeyPem } = require('./constants')
 const debug = require('debug')('minecraft-protocol')
+const nbt = require('prismarine-nbt')
 
+/**
+ * @param {import('../index').Client} client
+ * @param {import('../index').Server} server
+ * @param {Object} options
+ */
 module.exports = function (client, server, options) {
   const mojangPubKey = crypto.createPublicKey(mojangPublicKeyPem)
   const raise = (translatableError) => client.end(translatableError, JSON.stringify({ translate: translatableError }))
@@ -191,9 +197,15 @@ module.exports = function (client, server, options) {
     client.settings = {}
 
     if (client.supportFeature('chainedChatWithHashing')) { // 1.19.1+
+      const jsonMotd = JSON.stringify(server.motdMsg ?? { text: server.motd })
+      const nbtMotd = nbt.comp({ text: nbt.string(server.motd) })
       client.write('server_data', {
+        motd: client.supportFeature('chatPacketsUseNbtComponents') ? nbtMotd : jsonMotd,
+        icon: server.favicon, // b64
+        iconBytes: server.favicon ? Buffer.from(server.favicon, 'base64') : undefined,
         previewsChat: options.enableChatPreview,
-        enforceSecureProfile: options.enforceSecureProfile
+        // Note: in 1.20.5+ user must send this with `login`
+        enforcesSecureChat: options.enforceSecureProfile
       })
     }
 
@@ -211,7 +223,14 @@ module.exports = function (client, server, options) {
 
   function onClientLoginAck () {
     client.state = states.CONFIGURATION
-    client.write('registry_data', { codec: options.registryCodec || {} })
+    if (client.supportFeature('segmentedRegistryCodecData')) {
+      for (const key in options.registryCodec) {
+        const entry = options.registryCodec[key]
+        client.write('registry_data', entry)
+      }
+    } else {
+      client.write('registry_data', { codec: options.registryCodec || {} })
+    }
     client.once('finish_configuration', () => {
       client.state = states.PLAY
       server.emit('playerJoin', client)

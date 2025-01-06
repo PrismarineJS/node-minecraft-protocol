@@ -11,6 +11,7 @@ const loginPacket = mcData.loginPacket
 server.on('playerJoin', function (client) {
   client.write('login', {
     ...loginPacket,
+    enforceSecureChat: false,
     entityId: client.id,
     isHardcore: false,
     gameMode: 0,
