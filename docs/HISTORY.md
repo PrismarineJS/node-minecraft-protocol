@@ -1,5 +1,8 @@
 # History
 
+## 1.52.0
+* [Fix server_data payload for 1.19+, fix kicks messages on 1.20.3+ (#1364)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/8e131c359ebd5509136fd849a82cc59cd0dc1e58) (thanks @extremeheat)
+
 ## 1.51.0
 * [Add type to serverKey in server (#1349)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/d6b4e82eb170984380e7ea9f125ea5d72777bef2) (thanks @u9g)
 * [support 1.21.3 (#1347)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/2224d824065908e910520dfa8ea9f3f3ade242e4) (thanks @rom1504)
