@@ -1,5 +1,9 @@
 # History
 
+## 1.53.0
+* [1.21.4 (#1366)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/e74d11f66a835c08337b47dc5a2a7848c7e6e94c) (thanks @extremeheat)
+* [Bump mocha from 10.8.2 to 11.0.1 (#1352)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/502513b432695bd9e0fdff039bd8a7de02b307e0) (thanks @dependabot[bot])
+
 ## 1.52.0
 * [Fix server_data payload for 1.19+, fix kicks messages on 1.20.3+ (#1364)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/8e131c359ebd5509136fd849a82cc59cd0dc1e58) (thanks @extremeheat)
 
