@@ -67,14 +67,15 @@ class Client extends EventEmitter {
     })
 
     this.deserializer.on('error', (e) => {
-      let parts
+      let parts = []
       if (e.field) {
         parts = e.field.split('.')
         parts.shift()
-      } else { parts = [] }
+      }
       const deserializerDirection = this.isServer ? 'toServer' : 'toClient'
       e.field = [this.protocolState, deserializerDirection].concat(parts).join('.')
-      e.message = `Deserialization error for ${e.field} : ${e.message}`
+      // "Parse error for play.toClient (22 bytes, 1a1316...) : varint too big"
+      e.message = `Parse error for ${e.field} (${e.buffer.length} bytes, ${e.buffer.toString('hex').slice(0, 6)}...) : ${e.message}`
       if (!this.compressor) { this.splitter.pipe(this.deserializer) } else { this.decompressor.pipe(this.deserializer) }
       this.emit('error', e)
     })

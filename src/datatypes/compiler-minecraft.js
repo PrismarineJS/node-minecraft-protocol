@@ -42,48 +42,6 @@ module.exports = {
       code += '}'
       return compiler.wrapCode(code)
     }],
-    arrayWithLengthOffset: ['parametrizable', (compiler, array) => { // TODO: remove
-      let code = ''
-      if (array.countType) {
-        code += 'const { value: count, size: countSize } = ' + compiler.callType(array.countType) + '\n'
-      } else if (array.count) {
-        code += 'const count = ' + array.count + '\n'
-        code += 'const countSize = 0\n'
-      } else {
-        throw new Error('Array must contain either count or countType')
-      }
-      code += 'if (count > 0xffffff) throw new Error("array size is abnormally large, not reading: " + count)\n'
-      code += 'const data = []\n'
-      code += 'let size = countSize\n'
-      code += `for (let i = 0; i < count + ${array.lengthOffset}; i++) {\n`
-      code += '  const elem = ' + compiler.callType(array.type, 'offset + size') + '\n'
-      code += '  data.push(elem.value)\n'
-      code += '  size += elem.size\n'
-      code += '}\n'
-      code += 'return { value: data, size }'
-      return compiler.wrapCode(code)
-    }],
-    bitflags: ['parametrizable', (compiler, { type, flags, shift, big }) => {
-      let fstr = JSON.stringify(flags)
-      if (Array.isArray(flags)) {
-        fstr = '{'
-        for (const [k, v] of Object.entries(flags)) fstr += `"${v}": ${big ? (1n << BigInt(k)) : (1 << k)}` + (big ? 'n,' : ',')
-        fstr += '}'
-      } else if (shift) {
-        fstr = '{'
-        for (const key in flags) fstr += `"${key}": ${1 << flags[key]},`
-        fstr += '}'
-      }
-      return compiler.wrapCode(`
-        const { value: _value, size } = ${compiler.callType(type, 'offset')}
-        const value = { _value }
-        const flags = ${fstr}
-        for (const key in flags) {
-          value[key] = (_value & flags[key]) == flags[key]
-        }
-        return { value, size }
-      `.trim())
-    }],
     registryEntryHolder: ['parametrizable', (compiler, opts) => {
       return compiler.wrapCode(`
 const { value: n, size: nSize } = ${compiler.callType('varint')}
@@ -145,39 +103,6 @@ if (n !== 0) {
       code += 'return offset'
       return compiler.wrapCode(code)
     }],
-    arrayWithLengthOffset: ['parametrizable', (compiler, array) => {
-      let code = ''
-      if (array.countType) {
-        code += 'offset = ' + compiler.callType('value.length', array.countType) + '\n'
-      } else if (array.count === null) {
-        throw new Error('Array must contain either count or countType')
-      }
-      code += 'for (let i = 0; i < value.length; i++) {\n'
-      code += '  offset = ' + compiler.callType('value[i]', array.type) + '\n'
-      code += '}\n'
-      code += 'return offset'
-      return compiler.wrapCode(code)
-    }],
-    bitflags: ['parametrizable', (compiler, { type, flags, shift, big }) => {
-      let fstr = JSON.stringify(flags)
-      if (Array.isArray(flags)) {
-        fstr = '{'
-        for (const [k, v] of Object.entries(flags)) fstr += `"${v}": ${big ? (1n << BigInt(k)) : (1 << k)}` + (big ? 'n,' : ',')
-        fstr += '}'
-      } else if (shift) {
-        fstr = '{'
-        for (const key in flags) fstr += `"${key}": ${1 << flags[key]},`
-        fstr += '}'
-      }
-      return compiler.wrapCode(`
-        const flags = ${fstr}
-        let val = value._value ${big ? '|| 0n' : ''}
-        for (const key in flags) {
-          if (value[key]) val |= flags[key]
-        }
-        return (ctx.${type})(val, buffer, offset)
-      `.trim())
-    }],
     registryEntryHolder: ['parametrizable', (compiler, opts) => {
       const baseName = `value.${opts.baseName}`
       const otherwiseName = `value.${opts.otherwise.name}`
@@ -233,45 +158,6 @@ return offset
       code += '}\n'
       code += 'return size'
       return compiler.wrapCode(code)
-    }],
-    arrayWithLengthOffset: ['parametrizable', (compiler, array) => {
-      let code = ''
-      if (array.countType) {
-        code += 'let size = ' + compiler.callType('value.length', array.countType) + '\n'
-      } else if (array.count) {
-        code += 'let size = 0\n'
-      } else {
-        throw new Error('Array must contain either count or countType')
-      }
-      if (!isNaN(compiler.callType('value[i]', array.type))) {
-        code += 'size += value.length * ' + compiler.callType('value[i]', array.type) + '\n'
-      } else {
-        code += 'for (let i = 0; i < value.length; i++) {\n'
-        code += '  size += ' + compiler.callType('value[i]', array.type) + '\n'
-        code += '}\n'
-      }
-      code += 'return size'
-      return compiler.wrapCode(code)
-    }],
-    bitflags: ['parametrizable', (compiler, { type, flags, shift, big }) => {
-      let fstr = JSON.stringify(flags)
-      if (Array.isArray(flags)) {
-        fstr = '{'
-        for (const [k, v] of Object.entries(flags)) fstr += `"${v}": ${big ? (1n << BigInt(k)) : (1 << k)}` + (big ? 'n,' : ',')
-        fstr += '}'
-      } else if (shift) {
-        fstr = '{'
-        for (const key in flags) fstr += `"${key}": ${1 << flags[key]},`
-        fstr += '}'
-      }
-      return compiler.wrapCode(`
-        const flags = ${fstr}
-        let val = value._value ${big ? '|| 0n' : ''}
-        for (const key in flags) {
-          if (value[key]) val |= flags[key]
-        }
-        return (ctx.${type})(val)
-      `.trim())
     }],
     registryEntryHolder: ['parametrizable', (compiler, opts) => {
       const baseName = `value.${opts.baseName}`
