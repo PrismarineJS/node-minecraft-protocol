@@ -29,7 +29,7 @@ module.exports = function (client, options) {
       .sort(function (a, b) { return b.version - a.version })
     const versions = (minecraftData.postNettyVersionsByProtocolVersion.pc[protocolVersion] || []).concat(guessFromName)
     if (versions.length === 0) {
-      client.emit('error', new Error(`unsupported/unknown protocol version: ${protocolVersion}, update minecraft-data`))
+      client.emit('error', new Error(`Unsupported protocol version '${protocolVersion}'; try updating your packages with 'npm update'`))
     }
     const minecraftVersion = versions[0].minecraftVersion
 
