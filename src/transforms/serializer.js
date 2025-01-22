@@ -24,7 +24,7 @@ function createProtocol (state, direction, version, customPackets, compiled = tr
     throw new Error(`No data available for version ${version}`)
   } else if (versionInfo && versionInfo.version !== mcData.version.version) {
     // The protocol version returned by node-minecraft-data constructor does not match the data in minecraft-data's protocolVersions.json
-    throw new Error(`Do not have protocol data for protocol version ${versionInfo.version} (attempted to use ${mcData.version.version} data)`)
+    throw new Error(`Unsupported protocol version '${versionInfo.version}' (attempted to use '${mcData.version.version}' data); try updating your packages with 'npm update'`)
   }
 
   if (compiled) {
