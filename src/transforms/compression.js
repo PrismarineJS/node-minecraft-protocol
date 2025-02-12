@@ -51,6 +51,12 @@ class Decompressor extends Transform {
     if (value === 0) {
       this.push(chunk.slice(size))
       return cb()
+    } else if (this.compressionThreshold < 0) {
+      const buf = Buffer.alloc(sizeOfVarInt(0) + chunk.length)
+      const offset = writeVarInt(0, buf, 0)
+      chunk.copy(buf, offset)
+      this.push(chunk)
+      return cb()
     } else {
       zlib.unzip(chunk.slice(size), { finishFlush: 2 /*  Z_SYNC_FLUSH = 2, but when using Browserify/Webpack it doesn't exist */ }, (err, newBuf) => { /** Fix by lefela4. */
         if (err) {
