@@ -98,7 +98,8 @@ module.exports = function (client, server, options) {
       client.write('encryption_begin', {
         serverId,
         publicKey: client.publicKey,
-        verifyToken: client.verifyToken
+        verifyToken: client.verifyToken,
+        shouldAuthenticate: true
       })
     } else {
       loginClient()
