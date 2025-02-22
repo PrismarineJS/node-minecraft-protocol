@@ -29,7 +29,7 @@ class Server extends EventEmitter {
       client._end = client.end
       client.end = function end (endReason, fullReason) {
         if (client.state === states.PLAY) {
-          fullReason ||= this._supportFeature('chatPacketsUseNbtComponents')
+          fullReason ||= client._supportFeature('chatPacketsUseNbtComponents')
             ? nbt.comp({ text: nbt.string(endReason) })
             : JSON.stringify({ text: endReason })
           client.write('kick_disconnect', { reason: fullReason })
