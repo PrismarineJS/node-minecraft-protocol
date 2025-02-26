@@ -34,7 +34,8 @@ class Server extends EventEmitter {
             : JSON.stringify({ text: endReason })
           client.write('kick_disconnect', { reason: fullReason })
         } else if (client.state === states.LOGIN) {
-          client.write('disconnect', { reason: fullReason || endReason })
+          fullReason ||= JSON.stringify({ text: endReason })
+          client.write('disconnect', { reason: fullReason })
         }
         client._end(endReason)
       }
