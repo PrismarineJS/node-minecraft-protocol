@@ -1,5 +1,12 @@
 # History
 
+## 1.55.0
+* [Fix `client.end()` (#1376)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/3bd4dc1b2002cd7badfa5b9cf8dda35cd6cc9ac1) (thanks @h5mcbox)
+* [Fix #1369 online-mode error 1.20.5-1.21.4 (#1375)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/5ec3dd4b367fcc039fbcb3edd214fe3cf8178a6d) (thanks @h5mcbox)
+* [Update to node 22 (#1371)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/e9eb551ba30ec2e742c49e6927be6402b413bb76) (thanks @rom1504)
+* [Add npm update to version error message](https://github.com/PrismarineJS/node-minecraft-protocol/commit/080aa52c5bd70a5f9c4ecc37480497dd335a9e83) (thanks @extremeheat)
+* [Add `npm update` to version error message](https://github.com/PrismarineJS/node-minecraft-protocol/commit/c9cf36354914a57bac9e17e2076670b37c04d4a9) (thanks @extremeheat)
+
 ## 1.54.0
 * [fix: use node-rsa for decryption for higher node compatibility (#1319)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/c879d0e753f4f16fe5889ba53c9c004cc8832a56) (thanks @jacobk999)
 
