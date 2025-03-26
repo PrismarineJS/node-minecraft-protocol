@@ -23,6 +23,19 @@ module.exports = function (client, options) {
   client._lastChatSignature = null
   client._lastRejectedMessage = null
 
+  // Chat packet index tracking (for 1.21.5+)
+  client._expectedChatIndex = 0
+
+  client.on('login', () => {
+    // Reset expected chat index on login
+    client._expectedChatIndex = 0
+  })
+
+  // Reset expected chat index when entering configuration state
+  client.on('finish_configuration', () => {
+    client._expectedChatIndex = 0
+  })
+
   // This stores the last n (5 or 20) messages that the player has seen, from unique players
   if (mcData.supportFeature('chainedChatWithHashing')) client._lastSeenMessages = new LastSeenMessages()
   else client._lastSeenMessages = new LastSeenMessagesWithInvalidation()
@@ -44,6 +57,23 @@ module.exports = function (client, options) {
       }
     }
   }()
+
+  // Calculate checksum for the lastSeen message signatures (1.21.5+)
+  const calculateChecksum = (lastSeen) => {
+    if (!mcData.supportFeature('chatChecksum') || !lastSeen || lastSeen.length === 0) {
+      return 0 // Default value for backward compatibility
+    }
+
+    // Simple hash calculation from the last seen signatures
+    let checksum = 0
+    for (const msg of lastSeen) {
+      if (msg.messageSignature) {
+        // XOR the first byte of each signature for a simple checksum
+        checksum ^= msg.messageSignature[0] || 0
+      }
+    }
+    return checksum
+  }
 
   function updateAndValidateSession (uuid, message, currentSignature, index, previousMessages, salt, timestamp) {
     const player = client._players[uuid]
@@ -195,6 +225,16 @@ module.exports = function (client, options) {
   })
 
   client.on('player_chat', (packet) => {
+    // Validate chat packet index for 1.21.5+
+    if (mcData.supportFeature('chatIndex') && 'index' in packet) {
+      if (packet.index !== client._expectedChatIndex) {
+        client.emit('error', new Error(`Chat index mismatch. Expected: ${client._expectedChatIndex}, got: ${packet.index}`))
+        client.end('Chat message received out of order')
+        return
+      }
+      client._expectedChatIndex++
+    }
+
     if (mcData.supportFeature('useChatSessions')) {
       const tsDelta = BigInt(Date.now()) - packet.timestamp
       const expired = !packet.timestamp || tsDelta > messageExpireTime || tsDelta < 0
@@ -372,17 +412,27 @@ module.exports = function (client, options) {
       if (mcData.supportFeature('useChatSessions')) { // 1.19.3+
         const { acknowledged, acknowledgements } = getAcknowledgements()
         const canSign = client.profileKeys && client._session
-        client.write((mcData.supportFeature('seperateSignedChatCommandPacket') && canSign) ? 'chat_command_signed' : 'chat_command', {
+
+        // Prepare the packet parameters
+        const params = {
           command,
           timestamp: options.timestamp,
           salt: options.salt,
           argumentSignatures: canSign ? signaturesForCommand(command, options.timestamp, options.salt, options.preview, acknowledgements) : [],
           messageCount: client._lastSeenMessages.pending,
           acknowledged
-        })
+        }
+
+        // Add checksum for 1.21.5+
+        if (mcData.supportFeature('chatChecksum')) {
+          params.checksum = options.checksum !== undefined ? options.checksum : calculateChecksum(client._lastSeenMessages)
+        }
+
+        client.write((mcData.supportFeature('seperateSignedChatCommandPacket') && canSign) ? 'chat_command_signed' : 'chat_command', params)
         client._lastSeenMessages.pending = 0
       } else {
-        client.write('chat_command', {
+        // Prepare the packet parameters
+        const params = {
           command,
           timestamp: options.timestamp,
           salt: options.salt,
@@ -393,7 +443,14 @@ module.exports = function (client, options) {
             messageSignature: e.signature
           })),
           lastRejectedMessage: client._lastRejectedMessage
-        })
+        }
+
+        // Add checksum for 1.21.5+
+        if (mcData.supportFeature('chatChecksum')) {
+          params.checksum = options.checksum !== undefined ? options.checksum : calculateChecksum(client._lastSeenMessages)
+        }
+
+        client.write('chat_command', params)
       }
 
       return
@@ -401,21 +458,31 @@ module.exports = function (client, options) {
 
     if (mcData.supportFeature('useChatSessions')) {
       const { acknowledgements, acknowledged } = getAcknowledgements()
-      client.write('chat_message', {
+
+      // Prepare the packet parameters
+      const params = {
         message,
         timestamp: options.timestamp,
         salt: options.salt,
         signature: (client.profileKeys && client._session) ? client.signMessage(message, options.timestamp, options.salt, undefined, acknowledgements) : undefined,
         offset: client._lastSeenMessages.pending,
         acknowledged
-      })
+      }
+
+      // Add checksum for 1.21.5+
+      if (mcData.supportFeature('chatChecksum')) {
+        params.checksum = options.checksum !== undefined ? options.checksum : calculateChecksum(client._lastSeenMessages)
+      }
+
+      client.write('chat_message', params)
       client._lastSeenMessages.pending = 0
 
       return
     }
 
     if (options.skipPreview || !client.serverFeatures.chatPreview) {
-      client.write('chat_message', {
+      // Prepare the packet parameters
+      const params = {
         message,
         timestamp: options.timestamp,
         salt: options.salt,
@@ -426,7 +493,14 @@ module.exports = function (client, options) {
           messageSignature: e.signature
         })),
         lastRejectedMessage: client._lastRejectedMessage
-      })
+      }
+
+      // Add checksum for 1.21.5+
+      if (mcData.supportFeature('chatChecksum')) {
+        params.checksum = options.checksum !== undefined ? options.checksum : calculateChecksum(client._lastSeenMessages)
+      }
+
+      client.write('chat_message', params)
       client._lastSeenMessages.pending = 0
     } else if (client.serverFeatures.chatPreview) {
       client.write('chat_preview', {

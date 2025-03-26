@@ -43,6 +43,19 @@ module.exports = function (client, server, options) {
 
   if (!options.generatePreview) options.generatePreview = message => message
 
+  // Chat index tracking for 1.21.5+
+  client._chatMessageIndex = 0
+
+  // Reset chat index when client enters play state
+  client.on('login', () => {
+    client._chatMessageIndex = 0
+  })
+
+  // Reset chat index when entering configuration state
+  client.on('finish_configuration', () => {
+    client._chatMessageIndex = 0
+  })
+
   function validateMessageChain (packet) {
     try {
       validateLastMessages(pending, packet.previousMessages, packet.lastRejectedMessage)
@@ -104,12 +117,33 @@ module.exports = function (client, server, options) {
     }
     lastTimestamp = packet.timestamp
 
+    // Verify checksum if supported
+    if (client.supportFeature('chatChecksum') && 'checksum' in packet) {
+      const calculatedChecksum = calculateChecksum(packet.previousMessages)
+      if (packet.checksum !== 0 && packet.checksum !== calculatedChecksum) {
+        debug('Chat checksum mismatch', packet.checksum, calculatedChecksum)
+        raise('multiplayer.disconnect.chat_validation_failed')
+        return
+      }
+    }
+
     // Checks here: 1) make sure client can chat, 2) chain/session is OK, 3) signature is OK, 4) log if expired
     if (client.settings.disabledChat) return raise('chat.disabled.options')
     if (client.supportFeature('chainedChatWithHashing')) validateMessageChain(packet) // 1.19.1
     if (client.supportFeature('useChatSessions')) validateSession(packet) // 1.19.3
     else if (!client.verifyMessage(packet)) raise('multiplayer.disconnect.unsigned_chat')
     if ((BigInt(Date.now()) - packet.timestamp) > messageExpireTime) debug(client.socket.address(), 'sent expired message TS', packet.timestamp)
+  })
+
+  client.on('chat_command', (packet) => {
+    // Verify checksum if supported
+    if (client.supportFeature('chatChecksum') && 'checksum' in packet) {
+      const calculatedChecksum = calculateChecksum(packet.previousMessages)
+      if (packet.checksum !== 0 && packet.checksum !== calculatedChecksum) {
+        debug('Chat command checksum mismatch', packet.checksum, calculatedChecksum)
+        raise('multiplayer.disconnect.chat_validation_failed')
+      }
+    }
   })
 
   // Client will occasionally send a list of seen messages to the server, here we listen & check chain validity
@@ -169,6 +203,31 @@ module.exports = function (client, server, options) {
       return false
     }
     return true
+  }
+
+  // Helper function to calculate checksum
+  function calculateChecksum (messages) {
+    if (!messages || messages.length === 0) return 0
+
+    let checksum = 0
+    for (const msg of messages) {
+      if (msg.signature) {
+        // XOR the first byte of each signature for a simple checksum
+        checksum ^= msg.signature[0] || 0
+      }
+    }
+    return checksum
+  }
+
+  // Override and extend logSentMessageFromPeer to increment index
+  const originalLogSent = client.logSentMessageFromPeer
+  client.logSentMessageFromPeer = function (chatPacket) {
+    // Include chat index in outgoing player_chat packets
+    if (client.supportFeature('chatIndex')) {
+      chatPacket.index = client._chatMessageIndex++
+    }
+
+    return originalLogSent ? originalLogSent.call(this, chatPacket) : true
   }
 }
 
