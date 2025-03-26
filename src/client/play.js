@@ -48,9 +48,13 @@ module.exports = function (client, options) {
 
     function enterConfigState (finishCb) {
       if (client.state === states.CONFIGURATION) return
-      // If we are returning to the configuration state from the play state, we ahve to acknowledge it.
+      // If we are returning to the configuration state from the play state, we have to acknowledge it.
       if (client.state === states.PLAY) {
         client.write('configuration_acknowledged', {})
+        // Reset chat index counter when returning to configuration state
+        if (client._expectedChatIndex !== undefined) {
+          client._expectedChatIndex = 0
+        }
       }
       client.state = states.CONFIGURATION
       client.on('select_known_packs', () => {
@@ -66,6 +70,11 @@ module.exports = function (client, options) {
     }
 
     function onReady () {
+      // Reset chat index on player join
+      if (mcData.supportFeature('chatIndex')) {
+        client._expectedChatIndex = 0
+      }
+
       client.emit('playerJoin')
       if (mcData.supportFeature('signedChat')) {
         if (options.disableChatSigning && client.serverFeatures.enforcesSecureChat) {
