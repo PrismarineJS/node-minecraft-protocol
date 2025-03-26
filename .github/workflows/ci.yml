@@ -56,5 +56,6 @@ jobs:
         distribution: 'adopt'
     - name: Install dependencies
       run: npm install
+    - run: cd node_modules/minecraft-data && mv minecraft-data minecraft-data-old && git clone --depth 1 https://github.com/SuperGamerTron/minecraft-data -b consistent-entity-metadata && node bin/generate_data.js
     - name: Run tests
       run: npm run mochaTest -- -g ${{ matrix.mcVersion }}v
