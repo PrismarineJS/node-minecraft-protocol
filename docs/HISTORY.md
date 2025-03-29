@@ -1,5 +1,22 @@
 # History
 
+## 1.55.0
+* [Fix `client.end()` (#1376)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/3bd4dc1b2002cd7badfa5b9cf8dda35cd6cc9ac1) (thanks @h5mcbox)
+* [Fix #1369 online-mode error 1.20.5-1.21.4 (#1375)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/5ec3dd4b367fcc039fbcb3edd214fe3cf8178a6d) (thanks @h5mcbox)
+* [Update to node 22 (#1371)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/e9eb551ba30ec2e742c49e6927be6402b413bb76) (thanks @rom1504)
+* [Add npm update to version error message](https://github.com/PrismarineJS/node-minecraft-protocol/commit/080aa52c5bd70a5f9c4ecc37480497dd335a9e83) (thanks @extremeheat)
+* [Add `npm update` to version error message](https://github.com/PrismarineJS/node-minecraft-protocol/commit/c9cf36354914a57bac9e17e2076670b37c04d4a9) (thanks @extremeheat)
+
+## 1.54.0
+* [fix: use node-rsa for decryption for higher node compatibility (#1319)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/c879d0e753f4f16fe5889ba53c9c004cc8832a56) (thanks @jacobk999)
+
+## 1.53.0
+* [1.21.4 (#1366)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/e74d11f66a835c08337b47dc5a2a7848c7e6e94c) (thanks @extremeheat)
+* [Bump mocha from 10.8.2 to 11.0.1 (#1352)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/502513b432695bd9e0fdff039bd8a7de02b307e0) (thanks @dependabot[bot])
+
+## 1.52.0
+* [Fix server_data payload for 1.19+, fix kicks messages on 1.20.3+ (#1364)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/8e131c359ebd5509136fd849a82cc59cd0dc1e58) (thanks @extremeheat)
+
 ## 1.51.0
 * [Add type to serverKey in server (#1349)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/d6b4e82eb170984380e7ea9f125ea5d72777bef2) (thanks @u9g)
 * [support 1.21.3 (#1347)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/2224d824065908e910520dfa8ea9f3f3ade242e4) (thanks @rom1504)
