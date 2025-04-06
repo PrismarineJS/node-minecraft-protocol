@@ -1,5 +1,8 @@
 # History
 
+## 1.56.0
+* [Update serializer.js to remove usage of lodash.get (#1390)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/6a445312d384a7ca739e29d61bc37e4525da21e4) (thanks @rom1504)
+
 ## 1.55.0
 * [Fix `client.end()` (#1376)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/3bd4dc1b2002cd7badfa5b9cf8dda35cd6cc9ac1) (thanks @h5mcbox)
 * [Fix #1369 online-mode error 1.20.5-1.21.4 (#1375)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/5ec3dd4b367fcc039fbcb3edd214fe3cf8178a6d) (thanks @h5mcbox)
