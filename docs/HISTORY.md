@@ -1,5 +1,8 @@
 # History
 
+## 1.57.0
+* [Update package.json to remove lodash.get](https://github.com/PrismarineJS/node-minecraft-protocol/commit/031f13fea45264775311ae82e5a4efe74ebba96d) (thanks @rom1504)
+
 ## 1.56.0
 * [Update serializer.js to remove usage of lodash.get (#1390)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/6a445312d384a7ca739e29d61bc37e4525da21e4) (thanks @rom1504)
 
