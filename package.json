@@ -1,6 +1,6 @@
 {
   "name": "minecraft-protocol",
-  "version": "1.54.0",
+  "version": "1.57.0",
   "description": "Parse and serialize minecraft packets, plus authentication and encryption.",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -29,7 +29,7 @@
   "author": "Andrew Kelley",
   "license": "BSD-3-Clause",
   "engines": {
-    "node": ">=14"
+    "node": ">=22"
   },
   "browser": "src/browser.js",
   "devDependencies": {
@@ -51,7 +51,6 @@
     "buffer-equal": "^1.0.0",
     "debug": "^4.3.2",
     "endian-toggle": "^0.0.0",
-    "lodash.get": "^4.1.2",
     "lodash.merge": "^4.3.0",
     "minecraft-data": "^3.78.0",
     "minecraft-folder-path": "^1.2.0",

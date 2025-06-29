@@ -9,8 +9,11 @@ module.exports = function (client, server, { version, fallbackVersion }) {
     client.protocolVersion = packet.protocolVersion
 
     if (version === false) {
-      if (require('minecraft-data')(client.protocolVersion)) {
+      const mcData = require('minecraft-data')(client.protocolVersion)
+      if (mcData) {
         client.version = client.protocolVersion
+        client._supportFeature = mcData.supportFeature
+        client._hasBundlePacket = mcData.supportFeature('hasBundlePacket')
       } else {
         let fallback
         if (fallbackVersion !== undefined) {
@@ -18,6 +21,8 @@ module.exports = function (client, server, { version, fallbackVersion }) {
         }
         if (fallback) {
           client.version = fallback.version.version
+          client._supportFeature = fallback.supportFeature
+          client._hasBundlePacket = fallback.supportFeature('hasBundlePacket')
         } else {
           client.end('Protocol version ' + client.protocolVersion + ' is not supported')
         }
