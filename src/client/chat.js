@@ -106,6 +106,8 @@ module.exports = function (client, options) {
   })
 
   client.on('player_info', (packet) => {
+    console.log('player_info')
+    console.dir(packet, { depth: null })
     if (mcData.supportFeature('playerInfoActionIsBitfield')) { // 1.19.3+
       if (packet.action & 2) { // chat session
         for (const player of packet.data) {
