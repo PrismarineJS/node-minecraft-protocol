@@ -11,11 +11,6 @@ module.exports = function (client, options) {
     }
   })
 
-  client.on('player_info', (packet) => {
-    console.log('player_info')
-    console.dir(packet, { depth: null })
-  })
-
   client.once('login', (packet) => {
     if (packet.enforcesSecureChat) client.serverFeatures.enforcesSecureChat = packet.enforcesSecureChat
     const mcData = require('minecraft-data')(client.version)

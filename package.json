@@ -10,7 +10,7 @@
   },
   "scripts": {
     "test": "npm run mochaTest",
-    "mochaTest": "mocha --recursive --reporter spec --exit --bail",
+    "mochaTest": "mocha --recursive --reporter spec --exit",
     "lint": "standard",
     "fix": "standard --fix",
     "pretest": "npm run lint",
