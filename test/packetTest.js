@@ -96,6 +96,46 @@ function getFixedPacketPayload (version, packetName) {
       }
     }
   }
+  if (packetName === 'player_info') {
+    if (version['>=']('1.21.3')) {
+      return {
+        action: {
+          _value: 63,
+          add_player: true,
+          initialize_chat: true,
+          update_game_mode: true,
+          update_listed: true,
+          update_latency: true,
+          update_display_name: true
+        },
+        data: [
+          {
+            uuid: 'a01e3843-e521-3998-958a-f459800e4d11',
+            player: { name: 'Player', properties: [] },
+            chatSession: undefined,
+            gamemode: 0,
+            listed: 1,
+            latency: 0,
+            displayName: undefined
+          }
+        ]
+      }
+    } else {
+      return {
+        action: 'add_player',
+        data: [
+          {
+            uuid: 'a01e3843-e521-3998-958a-f459800e4d11',
+            name: 'Player',
+            properties: [],
+            gamemode: 0,
+            ping: 0,
+            displayName: undefined
+          }
+        ]
+      }
+    }
+  }
 }
 
 const values = {
