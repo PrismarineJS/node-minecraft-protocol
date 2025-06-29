@@ -97,7 +97,8 @@ function getFixedPacketPayload (version, packetName) {
     }
   }
   if (packetName === 'player_info') {
-    if (version['>=']('1.21.3')) {
+    if (version.majorVersion === '1.7') return { playerName: 'test', online: true, ping: 1 }
+    if (version['>=']('1.19.3')) {
       return {
         action: {
           _value: 63,
@@ -377,7 +378,9 @@ const values = {
       keySignature: []
     }
   },
-  IDSet: { ids: [2, 5] }
+  IDSet: { ids: [2, 5] },
+  ItemSoundHolder: { soundId: 1 },
+  ChatTypesHolder: { chatType: 1 }
 }
 
 function getValue (_type, packet) {
