@@ -107,7 +107,7 @@ if (n !== 0) {
       const baseName = `value.${opts.baseName}`
       const otherwiseName = `value.${opts.otherwise.name}`
       return compiler.wrapCode(`
-if (${baseName}) {
+if (${baseName} != null) {
   offset = ${compiler.callType(`${baseName} + 1`, 'varint')}
 } else if (${otherwiseName}) {
   offset = ${compiler.callType(`${otherwiseName}`, opts.otherwise.type)}
@@ -121,7 +121,7 @@ return offset
       const baseName = `value.${opts.base.name}`
       const otherwiseName = `value.${opts.otherwise.name}`
       return compiler.wrapCode(`
-if (${baseName}) {
+if (${baseName} != null) {
   offset = ${compiler.callType(0, 'varint')}
   offset = ${compiler.callType(`${baseName}`, opts.base.type)}
 } else if (${otherwiseName}) {
@@ -164,7 +164,7 @@ return offset
       const otherwiseName = `value.${opts.otherwise.name}`
       return compiler.wrapCode(`
 let size = 0
-if (${baseName}) {
+if (${baseName} != null) {
   size += ${compiler.callType(`${baseName} + 1`, 'varint')}
 } else if (${otherwiseName}) {
   size += ${compiler.callType(`${otherwiseName}`, opts.otherwise.type)}
@@ -179,7 +179,7 @@ return size
       const otherwiseName = `value.${opts.otherwise.name}`
       return compiler.wrapCode(`
 let size = 0
-if (${baseName}) {
+if (${baseName} != null) {
   size += ${compiler.callType(0, 'varint')}
   size += ${compiler.callType(`${baseName}`, opts.base.type)}
 } else if (${otherwiseName}) {
