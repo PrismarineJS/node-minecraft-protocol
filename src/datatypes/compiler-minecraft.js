@@ -48,8 +48,8 @@ const { value: n, size: nSize } = ${compiler.callType('varint')}
 if (n !== 0) {
   return { value: { ${opts.baseName}: n - 1 }, size: nSize }
 } else {
-  const holder = ${compiler.callType(opts.otherwise.type)}
-  return { value: { ${opts.otherwise.name}: holder.data }, size: nSize + holder.size }
+  const holder = ${compiler.callType(opts.otherwise.type, 'offset + nSize')}
+  return { value: { ${opts.otherwise.name}: holder.value }, size: nSize + holder.size }
 }
       `.trim())
     }],
@@ -110,6 +110,7 @@ if (n !== 0) {
 if (${baseName} != null) {
   offset = ${compiler.callType(`${baseName} + 1`, 'varint')}
 } else if (${otherwiseName}) {
+  offset += 1
   offset = ${compiler.callType(`${otherwiseName}`, opts.otherwise.type)}
 } else {
   throw new Error('registryEntryHolder type requires "${baseName}" or "${otherwiseName}" fields to be set')
@@ -167,6 +168,7 @@ let size = 0
 if (${baseName} != null) {
   size += ${compiler.callType(`${baseName} + 1`, 'varint')}
 } else if (${otherwiseName}) {
+  size += 1
   size += ${compiler.callType(`${otherwiseName}`, opts.otherwise.type)}
 } else {
   throw new Error('registryEntryHolder type requires "${baseName}" or "${otherwiseName}" fields to be set')
