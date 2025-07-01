@@ -100,6 +100,8 @@ for (const supportedVersion of mc.supportedVersions) {
         })
       })
 
+      // chat/Style.java
+      const CLICK_EVENT = mcData.version['>=']('1.21.5') ? 'click_event' : 'clickEvent'
       it('connects successfully - offline mode', function (done) {
         const client = applyClientHelpers(mc.createClient({
           username: 'Player',
@@ -198,10 +200,9 @@ for (const supportedVersion of mc.supportedVersions) {
 
             if (chatCount === 1) {
               assert.strictEqual(plainMessage, 'hello everyone; I have logged in.')
-              assert.deepEqual(sender.clickEvent, {
-                action: 'suggest_command',
-                value: '/tell Player '
-              })
+              const clickEvent = sender[CLICK_EVENT]
+              assert.strictEqual(clickEvent.action, 'suggest_command')
+              assert.ok(['/tell Player ', '/msg Player '].includes(clickEvent.value || clickEvent.command))
               assert.strictEqual(sender.text, 'Player')
             } else if (chatCount === 2) {
               const plainSender = client.parseMessage(sender).toString()
@@ -222,7 +223,7 @@ for (const supportedVersion of mc.supportedVersions) {
           const message = JSON.parse(data.formattedMessage)
           if (chatCount === 1) {
             assert.strictEqual(message.translate, 'chat.type.text')
-            assert.deepEqual(message.with[0].clickEvent, {
+            assert.deepEqual(message.with[0][CLICK_EVENT], {
               action: 'suggest_command',
               value: mcData.version.version > 340 ? '/tell Player ' : '/msg Player '
             })

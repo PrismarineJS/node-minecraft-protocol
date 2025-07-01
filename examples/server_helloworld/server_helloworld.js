@@ -10,6 +10,9 @@ const mcData = require('minecraft-data')(server.version)
 const loginPacket = mcData.loginPacket
 const nbt = require('prismarine-nbt')
 
+// Global chat index counter for 1.21.5+
+let nextChatIndex = 1
+
 function chatText (text) {
   return mcData.supportFeature('chatPacketsUseNbtComponents')
     ? nbt.comp({ text: nbt.string(text) })
@@ -65,6 +68,7 @@ server.on('playerJoin', function (client) {
   }
   if (mcData.supportFeature('signedChat')) {
     client.write('player_chat', {
+      globalIndex: nextChatIndex++,
       plainMessage: message,
       signedChatContent: '',
       unsignedChatContent: chatText(message),

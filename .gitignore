@@ -4,3 +4,4 @@ test/server_*
 package-lock.json
 versions/
 src/client/*.json
+test_*
