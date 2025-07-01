@@ -1,4 +1,5 @@
 const crypto = require('crypto')
+const { computeChatChecksum } = require('../datatypes/checksums')
 const concat = require('../transforms/binaryStream').concat
 const { processNbtMessage } = require('prismarine-chat')
 const messageExpireTime = 420000 // 7 minutes (ms)
@@ -192,6 +193,7 @@ module.exports = function (client, options) {
       const verified = !packet.unsignedChatContent && updateAndValidateSession(packet.senderUuid, packet.plainMessage, packet.signature, packet.index, packet.previousMessages, packet.salt, packet.timestamp) && !expired
       if (verified) client._signatureCache.push(packet.signature)
       client.emit('playerChat', {
+        globalIndex: packet.globalIndex,
         plainMessage: packet.plainMessage,
         unsignedContent: processMessage(packet.unsignedChatContent),
         type: packet.type,
@@ -363,14 +365,16 @@ module.exports = function (client, options) {
       if (mcData.supportFeature('useChatSessions')) { // 1.19.3+
         const { acknowledged, acknowledgements } = getAcknowledgements()
         const canSign = client.profileKeys && client._session
-        client.write((mcData.supportFeature('seperateSignedChatCommandPacket') && canSign) ? 'chat_command_signed' : 'chat_command', {
+        const chatPacket = {
           command,
           timestamp: options.timestamp,
           salt: options.salt,
           argumentSignatures: canSign ? signaturesForCommand(command, options.timestamp, options.salt, options.preview, acknowledgements) : [],
           messageCount: client._lastSeenMessages.pending,
+          checksum: computeChatChecksum(client._lastSeenMessages), // 1.21.5+
           acknowledged
-        })
+        }
+        client.write((mcData.supportFeature('seperateSignedChatCommandPacket') && canSign) ? 'chat_command_signed' : 'chat_command', chatPacket)
         client._lastSeenMessages.pending = 0
       } else {
         client.write('chat_command', {
@@ -383,6 +387,7 @@ module.exports = function (client, options) {
             messageSender: e.sender,
             messageSignature: e.signature
           })),
+          checksum: computeChatChecksum(client._lastSeenMessages),
           lastRejectedMessage: client._lastRejectedMessage
         })
       }
@@ -398,6 +403,7 @@ module.exports = function (client, options) {
         salt: options.salt,
         signature: (client.profileKeys && client._session) ? client.signMessage(message, options.timestamp, options.salt, undefined, acknowledgements) : undefined,
         offset: client._lastSeenMessages.pending,
+        checksum: computeChatChecksum(client._lastSeenMessages), // 1.21.5+
         acknowledged
       })
       client._lastSeenMessages.pending = 0
@@ -416,7 +422,8 @@ module.exports = function (client, options) {
           messageSender: e.sender,
           messageSignature: e.signature
         })),
-        lastRejectedMessage: client._lastRejectedMessage
+        lastRejectedMessage: client._lastRejectedMessage,
+        checksum: computeChatChecksum(client._lastSeenMessages) // 1.21.5+
       })
       client._lastSeenMessages.pending = 0
     } else if (client.serverFeatures.chatPreview) {

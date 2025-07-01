@@ -213,6 +213,9 @@ const values = {
   vec4f: {
     x: 0, y: 0, z: 0, w: 0
   },
+  vec3i: {
+    x: 0, y: 0, z: 0
+  },
   count: 1, // TODO : might want to set this to a correct value
   bool: true,
   f64: 99999.2222,
@@ -380,7 +383,17 @@ const values = {
   },
   IDSet: { ids: [2, 5] },
   ItemSoundHolder: { soundId: 1 },
-  ChatTypesHolder: { chatType: 1 }
+  ChatTypesHolder: { chatType: 1 },
+  ExactComponentMatcher: [],
+  HashedStack: {
+    itemId: 1,
+    count: 1,
+    addedComponents: [],
+    removedComponents: []
+  },
+  UntrustedSlot: {
+    present: false
+  }
 }
 
 function getValue (_type, packet) {
