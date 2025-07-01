@@ -106,38 +106,29 @@ module.exports = function (client, options) {
   })
 
   client.on('player_info', (packet) => {
-    if (mcData.supportFeature('playerInfoActionIsBitfield')) { // 1.19.3+
-      if (packet.action & 2) { // chat session
-        for (const player of packet.data) {
-          if (!player.chatSession) continue
-          client._players[player.UUID] = {
-            publicKey: crypto.createPublicKey({ key: player.chatSession.publicKey.keyBytes, format: 'der', type: 'spki' }),
-            publicKeyDER: player.chatSession.publicKey.keyBytes,
-            sessionUuid: player.chatSession.uuid
-          }
-          client._players[player.UUID].sessionIndex = true
-          client._players[player.UUID].hasChainIntegrity = true
+    for (const player of packet.data) {
+      if (player.chatSession) {
+        client._players[player.uuid] = {
+          publicKey: crypto.createPublicKey({ key: player.chatSession.publicKey.keyBytes, format: 'der', type: 'spki' }),
+          publicKeyDER: player.chatSession.publicKey.keyBytes,
+          sessionUuid: player.chatSession.uuid
         }
+        client._players[player.uuid].sessionIndex = true
+        client._players[player.uuid].hasChainIntegrity = true
       }
 
-      return
-    }
-
-    if (packet.action === 0) { // add player
-      for (const player of packet.data) {
-        if (player.crypto) {
-          client._players[player.UUID] = {
-            publicKey: crypto.createPublicKey({ key: player.crypto.publicKey, format: 'der', type: 'spki' }),
-            publicKeyDER: player.crypto.publicKey,
-            signature: player.crypto.signature,
-            displayName: player.displayName || player.name
-          }
-          client._players[player.UUID].hasChainIntegrity = true
+      if (player.crypto) {
+        client._players[player.uuid] = {
+          publicKey: crypto.createPublicKey({ key: player.crypto.publicKey, format: 'der', type: 'spki' }),
+          publicKeyDER: player.crypto.publicKey,
+          signature: player.crypto.signature,
+          displayName: player.displayName || player.name
         }
+        client._players[player.uuid].hasChainIntegrity = true
       }
-    } else if (packet.action === 4) { // remove player
-      for (const player of packet.data) {
-        delete client._players[player.UUID]
+
+      if (packet.action === 'remove_player') { // Only 1.8-1.9
+        delete client._players[player.uuid]
       }
     }
   })
