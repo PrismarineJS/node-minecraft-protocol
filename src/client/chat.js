@@ -58,7 +58,7 @@ module.exports = function (client, options) {
 
       if (player.hasChainIntegrity) {
         const length = Buffer.byteLength(message, 'utf8')
-        const acknowledgements = previousMessages.length > 0 ? ['i32', previousMessages.length, 'buffer', Buffer.concat(...previousMessages.map(msg => msg.signature || client._signatureCache[msg.id]))] : ['i32', 0]
+        const acknowledgements = previousMessages.length > 0 ? ['i32', previousMessages.length, 'buffer', Buffer.concat([...previousMessages.map(msg => msg.signature || client._signatureCache[msg.id])])] : ['i32', 0]
 
         const signable = concat('i32', 1, 'UUID', uuid, 'UUID', player.sessionUuid, 'i32', index, 'i64', salt, 'i64', timestamp / 1000n, 'i32', length, 'pstring', message, ...acknowledgements)
 
