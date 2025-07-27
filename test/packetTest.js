@@ -222,6 +222,8 @@ const values = {
   f32: -333.444,
   slot: slotValue,
   Slot: slotValue,
+  UntrustedSlot: slotValue,
+  HashedSlot: slotValue,
   SlotComponent: {
     type: 'hide_tooltip'
   },
@@ -390,9 +392,6 @@ const values = {
     count: 1,
     addedComponents: [],
     removedComponents: []
-  },
-  UntrustedSlot: {
-    present: false
   }
 }
 
