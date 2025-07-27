@@ -1,5 +1,8 @@
 # History
 
+## 1.59.0
+* [fix: Wrap base64-encoded PEM with 64-char line boundary (#1292)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/0f6da566975a262e4e6f12a11e9b311496682508) (thanks @littledivy)
+
 ## 1.58.0
 * [Fixes to protocol Holder implementation (#1355)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/7207b61f3a809ec9db01869a90c5ccaeafee4ca1) (thanks @extremeheat)
 * [Bump @types/node from 22.15.33 to 24.0.4 (#1405)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/1e38d8fc1e1bbe7aa834055cfd38ed0fa22c2085) (thanks @dependabot[bot])
