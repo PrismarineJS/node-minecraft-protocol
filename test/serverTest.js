@@ -76,10 +76,12 @@ for (const supportedVersion of mc.supportedVersions) {
       // more to be added
     }
   }
+  let nextChatIndex = 1
 
   function sendBroadcastMessage (server, clients, message, sender) {
     if (mcData.supportFeature('signedChat')) {
       server.writeToClients(clients, 'player_chat', {
+        globalIndex: nextChatIndex++, // 1.21.5+
         plainMessage: message,
         signedChatContent: '',
         unsignedChatContent: JSON.stringify({ text: message }),
