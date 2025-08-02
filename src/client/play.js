@@ -52,6 +52,8 @@ module.exports = function (client, options) {
       if (client.state === states.PLAY) {
         client.write('configuration_acknowledged', {})
       }
+      // Write the settings packet. Helps log in to servers
+      client.write('settings', {locale: "en_us", viewDistance: 10, chatFlags: 0, chatColors: true, skinParts: 127, mainHand: 1, enableTextFiltering: false, enableServerListing: true})
       client.state = states.CONFIGURATION
       client.on('select_known_packs', () => {
         client.write('select_known_packs', { packs: [] })
