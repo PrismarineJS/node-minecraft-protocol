@@ -1,5 +1,8 @@
 # History
 
+## 1.60.0
+* [1.21.5 (#1408)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/2467716b6f52d2c83a6c2173bcfa686d4a437868) (thanks @extremeheat)
+
 ## 1.59.0
 * [fix: Wrap base64-encoded PEM with 64-char line boundary (#1292)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/0f6da566975a262e4e6f12a11e9b311496682508) (thanks @littledivy)
 
