@@ -57,7 +57,7 @@ const nbtValue = {
 
 function getFixedPacketPayload (version, packetName) {
   if (packetName === 'teams') {
-    if (version['>=']('1.21.5')) {
+    if (version['>=']('1.21.6')) {
       return {
         team: 'test_team',
         mode: 'add',
