@@ -27,7 +27,7 @@ Add this step to a workflow in the minecraft-data repository:
         workflow_id: 'update-from-minecraft-data.yml',
         ref: 'master', // or the target branch
         inputs: {
-          triggering_repo: 'minecraft-data',
+          trigger_source: 'minecraft-data',
           trigger_reason: 'data_update',
           data_version: '${{ steps.get_version.outputs.version }}' // or your version variable
         }

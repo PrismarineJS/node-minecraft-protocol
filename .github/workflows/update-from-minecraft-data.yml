@@ -6,7 +6,7 @@ on:
   # Allow manual triggering
   workflow_dispatch:
     inputs:
-      triggering_repo:
+      trigger_source:
         description: 'Repository branch that triggered this update'
         required: false
         default: 'minecraft-data'
@@ -47,7 +47,7 @@ jobs:
     
     - name: Set environment variables
       run: |
-        echo "TRIGGERING_REPO=${{ github.event.inputs.triggering_repo || github.event.client_payload.repository || 'minecraft-data' }}" >> $GITHUB_ENV
+        echo "TRIGGER_SOURCE=${{ github.event.inputs.trigger_source || github.event.client_payload.repository || 'minecraft-data' }}" >> $GITHUB_ENV
         echo "TRIGGER_REASON=${{ github.event.inputs.trigger_reason || github.event.client_payload.reason || 'repository_dispatch' }}" >> $GITHUB_ENV
         echo "DATA_VERSION=${{ github.event.inputs.data_version || github.event.client_payload.version || 'unknown' }}" >> $GITHUB_ENV
  
@@ -55,7 +55,7 @@ jobs:
       run: node .github/helper/updator.js
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        TRIGGERING_REPO: ${{ env.TRIGGERING_REPO }}
+        TRIGGER_SOURCE: ${{ env.TRIGGER_SOURCE }}
         TRIGGER_REASON: ${{ env.TRIGGER_REASON }}
         DATA_VERSION: ${{ env.DATA_VERSION }}
     

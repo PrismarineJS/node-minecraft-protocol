@@ -10,7 +10,7 @@ const { join } = require('path')
 const exec = (cmd) => github.mock ? console.log('> ', cmd) : (console.log('> ', cmd), cp.execSync(cmd, { stdio: 'inherit' }))
 
 console.log('Starting update process...')
-const triggerBranch = process.env.TRIGGERING_REPO
+const triggerBranch = process.env.TRIGGER_SOURCE
 const newVersion = process.env.DATA_VERSION
 const onBehalfOf = process.env.TRIGGER_REASON || 'workflow_dispatch'
 console.log('Trigger reason:', onBehalfOf)
@@ -66,7 +66,7 @@ async function main () {
   //     createPullRequest(title: string, body: string, fromBranch: string, intoBranch?: string): Promise<{ number: number, url: string }>;
   const pr = await github.createPullRequest(
     `${newVersion} updates`,
-    `Minecraft version ${newVersion}.\n\nRef: ${onBehalfOf}`,
+    `Automatically generated PR for Minecraft version ${newVersion}.\n\nRef: ${onBehalfOf}`,
     branchName,
     'master'
   )
