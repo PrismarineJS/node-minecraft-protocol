@@ -60,12 +60,12 @@ module.exports = function (client, options) {
         const length = Buffer.byteLength(message, 'utf8')
         const validBuffers = previousMessages
           .filter(msg => msg.signature || client._signatureCache[msg.id]) // Filter out invalid messages
-          .map(msg => msg.signature || client._signatureCache[msg.id])   // Map to signatures
-          .filter(buf => Buffer.isBuffer(buf));                          // Ensure only Buffers are included
+          .map(msg => msg.signature || client._signatureCache[msg.id])
+          .filter(buf => Buffer.isBuffer(buf))
 
         const acknowledgements = validBuffers.length > 0
           ? ['i32', validBuffers.length, 'buffer', Buffer.concat(validBuffers)]
-          : ['i32', 0]; // Handle empty array case
+          : ['i32', 0]
         const signable = concat('i32', 1, 'UUID', uuid, 'UUID', player.sessionUuid, 'i32', index, 'i64', salt, 'i64', timestamp / 1000n, 'i32', length, 'pstring', message, ...acknowledgements)
 
         player.hasChainIntegrity = crypto.verify('RSA-SHA256', signable, player.publicKey, currentSignature)
