@@ -392,6 +392,11 @@ const values = {
     count: 1,
     addedComponents: [],
     removedComponents: []
+  },
+  registryEntryHolder: {},
+  RecipeBookSetting: {
+    open: false,
+    filtering: false
   }
 }
 
