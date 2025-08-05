@@ -1,0 +1,61 @@
+name: Update from minecraft-data
+
+# This workflow can be triggered from external repositories (like minecraft-data)
+# via workflow_dispatch API call or repository_dispatch webhook
+on:
+  # Allow manual triggering
+  workflow_dispatch:
+    inputs:
+      trigger_source:
+        description: 'Repository branch that triggered this update'
+        required: false
+        default: 'minecraft-data'
+        type: string
+      trigger_reason:
+        description: 'What PR or issue triggered this update'
+        required: false
+        default: ''
+        type: string
+      data_version:
+        description: 'MC Version that triggered this update'
+        required: false
+        type: string
+
+  # Listen for repository dispatch events (webhook-based triggers)
+  repository_dispatch:
+    types: [minecraft-data-update]
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        # Use a token that has write permissions if you need to push changes
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm install gh-helpers
+    
+    - name: Set environment variables
+      run: |
+        echo "TRIGGER_SOURCE=${{ github.event.inputs.trigger_source || github.event.client_payload.repository || 'minecraft-data' }}" >> $GITHUB_ENV
+        echo "TRIGGER_REASON=${{ github.event.inputs.trigger_reason || github.event.client_payload.reason || 'repository_dispatch' }}" >> $GITHUB_ENV
+        echo "DATA_VERSION=${{ github.event.inputs.data_version || github.event.client_payload.version || 'unknown' }}" >> $GITHUB_ENV
+ 
+    - name: Run updator script
+      run: node .github/helper/updator.js
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        TRIGGER_SOURCE: ${{ env.TRIGGER_SOURCE }}
+        TRIGGER_REASON: ${{ env.TRIGGER_REASON }}
+        DATA_VERSION: ${{ env.DATA_VERSION }}
+    
