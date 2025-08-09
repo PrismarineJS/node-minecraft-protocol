@@ -3,6 +3,7 @@ const yggdrasil = require('yggdrasil')
 const fs = require('fs').promises
 const mcDefaultFolderPath = require('minecraft-folder-path')
 const path = require('path')
+const crypto = require('crypto')
 
 const launcherDataFile = 'launcher_accounts.json'
 
@@ -33,6 +34,32 @@ module.exports = async function (client, options) {
     }
   }
 
+  // Adapted from https://github.com/PrismarineJS/prismarine-auth/blob/1aef6e1387d94fca839f2811d17ac6659ae556b4/src/TokenManagers/MinecraftJavaTokenManager.js#L101
+  const toDER = pem => pem.split('\n').slice(1, -1).reduce((acc, cur) => Buffer.concat([acc, Buffer.from(cur, 'base64')]), Buffer.alloc(0))
+  async function fetchCertificates (accessToken) {
+    const servicesServer = options.servicesServer ?? 'https://api.minecraftservices.com'
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`
+    }
+    const res = await fetch(`${servicesServer}/player/certificates`, { headers, method: 'post' })
+    if (!res.ok) throw Error(`Certificates request returned status ${res.status}`)
+    const cert = await res.json()
+    const profileKeys = {
+      publicPEM: cert.keyPair.publicKey,
+      privatePEM: cert.keyPair.privateKey,
+      publicDER: toDER(cert.keyPair.publicKey),
+      privateDER: toDER(cert.keyPair.privateKey),
+      signature: Buffer.from(cert.publicKeySignature, 'base64'),
+      signatureV2: Buffer.from(cert.publicKeySignatureV2, 'base64'),
+      expiresOn: new Date(cert.expiresAt),
+      refreshAfter: new Date(cert.refreshedAfter)
+    }
+    profileKeys.public = crypto.createPublicKey({ key: profileKeys.publicDER, format: 'der', type: 'spki' })
+    profileKeys.private = crypto.createPrivateKey({ key: profileKeys.privateDER, format: 'der', type: 'pkcs8' })
+    return { profileKeys }
+  }
+
   function getProfileId (auths) {
     try {
       const lowerUsername = options.username.toLowerCase()
@@ -47,7 +74,7 @@ module.exports = async function (client, options) {
 
   if (options.haveCredentials) {
     // make a request to get the case-correct username before connecting.
-    const cb = function (err, session) {
+    const cb = async function (err, session) {
       if (options.profilesFolder) {
         getLauncherProfiles().then((auths) => {
           if (!auths.accounts) auths.accounts = []
@@ -104,6 +131,14 @@ module.exports = async function (client, options) {
       } else {
         client.session = session
         client.username = session.selectedProfile.name
+        if (!options.disableChatSigning) {
+          try {
+            const certificates = await fetchCertificates(session.accessToken)
+            Object.assign(client, certificates)
+          } catch (e) {
+            console.warn(`Failed to fetch player certificates: ${e}`)
+          }
+        }
         options.accessToken = session.accessToken
         client.emit('session', session)
         options.connect(client)
