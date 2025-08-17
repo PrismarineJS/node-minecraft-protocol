@@ -1,5 +1,6 @@
 const net = require('net')
 const dns = require('dns')
+const { createProxyConnector } = require('./proxy')
 
 module.exports = function (client, options) {
   // Default options
@@ -12,6 +13,13 @@ module.exports = function (client, options) {
       if (options.stream) {
         client.setSocket(options.stream)
         client.emit('connect')
+        return
+      }
+
+      // Check if proxy is configured
+      if (options.proxy) {
+        const proxyConnector = createProxyConnector(options.proxy)
+        proxyConnector(client, options.host, options.port)
         return
       }
 

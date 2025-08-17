@@ -285,6 +285,72 @@ for (const supportedVersion of mc.supportedVersions) {
           })
         })
       })
+
+      it('connects through SOCKS5 proxy', function (done) {
+        const net = require('net')
+        let proxyPort
+        let proxyServer
+
+        // Simple SOCKS5 proxy that forwards to MC server
+        const createProxy = () => {
+          return net.createServer((clientSocket) => {
+            let stage = 'auth'
+
+            clientSocket.on('data', (data) => {
+              if (stage === 'auth') {
+                if (data[0] === 0x05) {
+                  clientSocket.write(Buffer.from([0x05, 0x00])) // No auth required
+                  stage = 'connect'
+                }
+              } else if (stage === 'connect') {
+                if (data[0] === 0x05 && data[1] === 0x01) {
+                  // Forward to MC server
+                  const serverSocket = net.createConnection(PORT, 'localhost', () => {
+                    clientSocket.write(Buffer.from([0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]))
+                    clientSocket.pipe(serverSocket)
+                    serverSocket.pipe(clientSocket)
+                  })
+                  serverSocket.on('error', () => clientSocket.destroy())
+                }
+              }
+            })
+            clientSocket.on('error', () => {})
+          })
+        }
+
+        // Start proxy server
+        const { getPort } = require('./common/util')
+        getPort().then(port => {
+          proxyPort = port
+          proxyServer = createProxy()
+          proxyServer.listen(proxyPort, () => {
+            // Connect through proxy
+            const client = mc.createClient({
+              username: 'ProxyUser',
+              version: version.minecraftVersion,
+              port: PORT,
+              auth: 'offline',
+              proxy: {
+                type: 'socks5',
+                host: 'localhost',
+                port: proxyPort
+              }
+            })
+
+            client.on('login', () => {
+              console.log('✓ Connected through SOCKS5 proxy!')
+              client.end()
+              proxyServer.close()
+              done()
+            })
+
+            client.on('error', (err) => {
+              proxyServer.close()
+              done(err)
+            })
+          })
+        }).catch(done)
+      })
     })
 
     describe.skip('online', function () {
