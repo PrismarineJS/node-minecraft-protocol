@@ -16,11 +16,14 @@ module.exports = function (client, options) {
         return
       }
 
-      // Check if proxy is configured
-      if (options.proxy) {
-        const proxyConnect = createProxyConnect(options.proxy, options.host, options.port)
-        proxyConnect(client)
-        return
+      // Helper function to connect (direct or via proxy)
+      const connectToTarget = (targetHost, targetPort) => {
+        if (options.proxy) {
+          const proxyConnect = createProxyConnect(options.proxy, targetHost, targetPort)
+          proxyConnect(client)
+        } else {
+          client.setSocket(net.connect(targetPort, targetHost))
+        }
       }
 
       // If port was not defined (defauls to 25565), host is not an ip neither localhost
@@ -30,23 +33,21 @@ module.exports = function (client, options) {
           // Error resolving domain
           if (err) {
             // Could not resolve SRV lookup, connect directly
-            client.setSocket(net.connect(options.port, options.host))
+            connectToTarget(options.host, options.port)
             return
           }
 
           // SRV Lookup resolved conrrectly
           if (addresses && addresses.length > 0) {
-            options.host = addresses[0].name
-            options.port = addresses[0].port
-            client.setSocket(net.connect(addresses[0].port, addresses[0].name))
+            connectToTarget(addresses[0].name, addresses[0].port)
           } else {
             // Otherwise, just connect using the provided hostname and port
-            client.setSocket(net.connect(options.port, options.host))
+            connectToTarget(options.host, options.port)
           }
         })
       } else {
         // Otherwise, just connect using the provided hostname and port
-        client.setSocket(net.connect(options.port, options.host))
+        connectToTarget(options.host, options.port)
       }
     }
   }
