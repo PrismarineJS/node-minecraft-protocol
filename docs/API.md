@@ -161,42 +161,7 @@ Returns a `Client` instance and perform login.
 
 ### Proxy Support
 
-The `proxy` option allows connecting to Minecraft servers through SOCKS4, SOCKS5, HTTP, or HTTPS proxies. This feature integrates seamlessly with authentication and supports SRV record resolution.
-
-Example usage:
-
-```javascript
-const mc = require('minecraft-protocol')
-
-// SOCKS5 proxy with authentication
-const client = mc.createClient({
-  host: 'play.hypixel.net',
-  username: 'player',
-  auth: 'microsoft',
-  proxy: {
-    type: 'socks5',
-    host: '127.0.0.1',
-    port: 1080,
-    auth: {
-      username: 'proxyuser',
-      password: 'proxypass'
-    }
-  }
-})
-
-// HTTP proxy without authentication
-const client2 = mc.createClient({
-  host: 'localhost',
-  port: 25565,
-  username: 'player',
-  auth: 'offline',
-  proxy: {
-    type: 'http',
-    host: 'proxy.example.com',
-    port: 8080
-  }
-})
-```
+The `proxy` option allows connecting to Minecraft servers through SOCKS4, SOCKS5, HTTP, or HTTPS proxies. This feature integrates seamlessly with authentication and supports SRV record resolution. See the `examples/client_builtin_proxy/` folder for usage examples.
 
 ## mc.Client(isServer,version,[customPackets])
 
