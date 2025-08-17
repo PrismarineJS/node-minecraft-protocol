@@ -57,6 +57,8 @@
     "node-fetch": "^2.6.1",
     "node-rsa": "^0.4.2",
     "prismarine-auth": "^2.2.0",
+    "proxy-agent": "^6.3.1",
+    "socks": "^2.7.1",
     "prismarine-chat": "^1.10.0",
     "prismarine-nbt": "^2.5.0",
     "prismarine-realms": "^1.2.0",

@@ -138,6 +138,13 @@ Returns a `Client` instance and perform login.
  * connect : a function taking the client as parameter and that should client.setSocket(socket)
  and client.emit('connect') when appropriate (see the proxy examples for an example of use)
  * agent : a http agent that can be used to set proxy settings for yggdrasil authentication (see proxy-agent on npm)
+ * proxy : (optional) proxy configuration object for connecting through proxies
+   * type : proxy type, one of `'socks4'`, `'socks5'`, `'http'`, or `'https'`
+   * host : proxy server hostname
+   * port : proxy server port
+   * auth : (optional) authentication object for proxy
+     * username : proxy username
+     * password : proxy password
  * fakeHost : (optional) hostname to send to the server in the set_protocol packet
  * profilesFolder : optional
    * (mojang account) the path to the folder that contains your `launcher_profiles.json`. defaults to your minecraft folder if it exists, otherwise the local directory. set to `false` to disable managing profiles
@@ -152,6 +159,9 @@ Returns a `Client` instance and perform login.
    * pickRealm(realms) : A function which will have an array of the user Realms (joined/owned) passed to it. The function should return a Realm.
  * Client : You can pass a custom client class to use instead of the default one, which would allow you to create completely custom communication. Also note that you can use the `stream` option instead where you can supply custom duplex, but this will still use serialization/deserialization of packets.
 
+### Proxy Support
+
+The `proxy` option allows connecting to Minecraft servers through SOCKS4, SOCKS5, HTTP, or HTTPS proxies. This feature integrates seamlessly with authentication and supports SRV record resolution. See the `examples/client_builtin_proxy/` folder for usage examples.
 
 ## mc.Client(isServer,version,[customPackets])
 
