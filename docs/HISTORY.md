@@ -1,5 +1,8 @@
 # History
 
+## 1.61.0
+* [1.21.6 (#1416)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/0bfd970e954f1ab5e579ebe51cbefbf07d952939) (thanks @extremeheat)
+
 ## 1.60.1
 * [Fix undefined chat message signatures causing crash (#1413)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/2119b04f52605f62df2d029908d92d6443aa68db) (thanks @PiotrW01)
 * [types: add missing config state (#1397)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/5242498797e1e9877f9b0056ff608fb68e0a3508) (thanks @notsapinho)
