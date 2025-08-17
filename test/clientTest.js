@@ -304,9 +304,21 @@ for (const supportedVersion of mc.supportedVersions) {
                 }
               } else if (stage === 'connect') {
                 if (data[0] === 0x05 && data[1] === 0x01) {
+                  // Parse the connect request properly (for completeness)
+                  // We don't actually need to parse it since we forward to fixed target
+
                   // Forward to MC server
                   const serverSocket = net.createConnection(PORT, 'localhost', () => {
-                    clientSocket.write(Buffer.from([0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]))
+                    // Send proper SOCKS5 success response
+                    const response = Buffer.alloc(10)
+                    response[0] = 0x05 // Version
+                    response[1] = 0x00 // Success
+                    response[2] = 0x00 // Reserved
+                    response[3] = 0x01 // IPv4
+                    response.writeUInt32BE(0x7f000001, 4) // 127.0.0.1
+                    response.writeUInt16BE(PORT, 8) // Port
+                    clientSocket.write(response)
+
                     clientSocket.pipe(serverSocket)
                     serverSocket.pipe(clientSocket)
                   })
