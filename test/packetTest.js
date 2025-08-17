@@ -56,6 +56,22 @@ const nbtValue = {
 }
 
 function getFixedPacketPayload (version, packetName) {
+  if (packetName === 'teams') {
+    if (version['>=']('1.21.6')) {
+      return {
+        team: 'test_team',
+        mode: 'add',
+        name: nbtValue,
+        flags: 'always',
+        nameTagVisibility: 'always',
+        collisionRule: 'always',
+        formatting: 0, // no formatting
+        prefix: nbtValue,
+        suffix: nbtValue,
+        players: ['player1', 'player2']
+      }
+    }
+  }
   if (packetName === 'declare_recipes') {
     if (version['>=']('1.21.3')) {
       return {
@@ -319,6 +335,9 @@ const values = {
     })
     return results
   },
+  registryEntryHolder (typeArgs, context) {
+    return { [typeArgs.baseName]: 1 }
+  },
   soundSource: 'master',
   packedChunkPos: {
     x: 10,
@@ -392,6 +411,10 @@ const values = {
     count: 1,
     addedComponents: [],
     removedComponents: []
+  },
+  RecipeBookSetting: {
+    open: false,
+    filtering: false
   }
 }
 
