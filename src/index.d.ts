@@ -155,6 +155,7 @@ declare module 'minecraft-protocol' {
 		disableChatSigning?: boolean
 		/** Pass custom client implementation if needed. */
 		Client?: Client
+		msaToken?: string	// directly pass MSA bearer token
 	}
 
 	export class Server extends EventEmitter {
