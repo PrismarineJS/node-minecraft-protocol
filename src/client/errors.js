@@ -1,5 +1,5 @@
 class CustomPayloadParseError extends Error {
-  constructor(message, cause, data) {
+  constructor (message, cause, data) {
     super(message)
     this.name = 'CustomPayloadParseError'
     this.cause = cause
