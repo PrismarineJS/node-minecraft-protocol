@@ -190,7 +190,6 @@ module.exports = function (client, server, options) {
       client.once('login_acknowledged', onClientLoginAck)
     } else {
       client.state = states.PLAY
-      server.emit('playerJoin', client)
     }
     client.settings = {}
 
@@ -217,6 +216,9 @@ module.exports = function (client, server, options) {
     pluginChannels(client, options)
     if (client.supportFeature('signedChat')) chatPlugin(client, server, options)
     server.emit('login', client)
+    if (!client.supportFeature('hasConfigurationState')) {
+      server.emit('playerJoin', client)
+    }
   }
 
   function onClientLoginAck () {
