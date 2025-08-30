@@ -62,11 +62,16 @@ async function main () {
   exec('git config user.email "41898282+github-actions[bot]@users.noreply.github.com"')
   exec('git add --all')
   exec(`git commit -m "Update to version ${newVersion}"`)
-  exec(`git push origin ${branchName}`)
+  exec(`git push origin ${branchName} --force`)
   //     createPullRequest(title: string, body: string, fromBranch: string, intoBranch?: string): Promise<{ number: number, url: string }>;
   const pr = await github.createPullRequest(
-    `${newVersion} updates`,
-    `Automatically generated PR for Minecraft version ${newVersion}.\n\nRef: ${mcdataPrURL}`,
+    `🎈 ${newVersion}`,
+    `This automated PR sets up the relevant boilerplate for Minecraft version ${newVersion}.
+
+Related: ${mcDataPrURL}
+
+* You can help contribute to this PR by opening a PR against this <code branch>${branchName}</code> branch instead of <code>master</code>.
+    `,
     branchName,
     'master'
   )

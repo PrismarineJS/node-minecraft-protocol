@@ -27,11 +27,8 @@ jobs:
       with:
         token: ${{ secrets.PAT_PASSWORD }}
 
-    - name: Install dependencies
-      run: npm install gh-helpers
-
     - name: Run updator script
-      run: node .github/helper/updator.js
+      run: cd .github/helper && npm install && node updator.js
       env:
         GITHUB_TOKEN: ${{ secrets.PAT_PASSWORD }}
         MCDATA_BRANCH: ${{ github.event.inputs.mcdata_branch }}
