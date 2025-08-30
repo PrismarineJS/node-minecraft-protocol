@@ -1,25 +1,23 @@
 #!/usr/bin/env node
 /**
- * Updator script triggered from minecraft-data repository
- * This script can be customized to handle updates from minecraft-data
+ * Updator script triggered from minecraft-data repository to auto generate PR
  */
-const github = require('gh-helpers')()
 const fs = require('fs')
 const cp = require('child_process')
+const assert = require('assert')
+const github = require('gh-helpers')()
 const { join } = require('path')
 const exec = (cmd) => github.mock ? console.log('> ', cmd) : (console.log('> ', cmd), cp.execSync(cmd, { stdio: 'inherit' }))
 
 console.log('Starting update process...')
-const triggerBranch = process.env.TRIGGER_SOURCE
-const newVersion = process.env.DATA_VERSION
-const onBehalfOf = process.env.TRIGGER_REASON || 'workflow_dispatch'
-console.log('Trigger reason:', onBehalfOf)
-console.log('New version:', newVersion)
+// Sanitize and validate environment variables all non alpha numeric / underscore / dot
+const newVersion = process.env.NEW_MC_VERSION?.replace(/[^a-zA-Z0-9_.]/g, '_')
+const triggerBranch = process.env.MCDATA_BRANCH?.replace(/[^a-zA-Z0-9_.]/g, '_')
+const mcdataPrURL = process.env.MCDATA_PR_URL
+console.log({ newVersion, triggerBranch, mcdataPrURL })
 
-if (!newVersion) {
-  console.error('No new version provided. Exiting...')
-  process.exit(1)
-}
+assert(newVersion)
+assert(triggerBranch)
 
 async function main () {
   const currentSupportedPath = require.resolve('../../src/version.js')
@@ -39,7 +37,7 @@ async function main () {
   // Update the README.md
   const currentContentsReadme = fs.readFileSync(readmePath, 'utf8')
   if (!currentContentsReadme.includes(newVersion)) {
-    const newReadmeContents = currentContentsReadme.replace(' <!-- NEXT_VERSION -->', `, ${newVersion} <!-- NEXT_VERSION -->`)
+    const newReadmeContents = currentContentsReadme.replace('\n<!--add_next_version_above-->', `, ${newVersion}\n<!--add_next_version_above-->`)
     fs.writeFileSync(readmePath, newReadmeContents)
     console.log('Updated README with new version:', newVersion)
   }
@@ -58,7 +56,7 @@ async function main () {
     console.log('Updated CI workflow with new version:', newVersion)
   }
 
-  const branchName = 'pc' + newVersion.replace(/[^a-zA-Z0-9_]/g, '.')
+  const branchName = 'pc' + newVersion.replace(/[^a-zA-Z0-9_]/g, '_')
   exec(`git checkout -b ${branchName}`)
   exec('git add --all')
   exec(`git commit -m "Update to version ${newVersion}"`)
@@ -66,12 +64,11 @@ async function main () {
   //     createPullRequest(title: string, body: string, fromBranch: string, intoBranch?: string): Promise<{ number: number, url: string }>;
   const pr = await github.createPullRequest(
     `${newVersion} updates`,
-    `Automatically generated PR for Minecraft version ${newVersion}.\n\nRef: ${onBehalfOf}`,
+    `Automatically generated PR for Minecraft version ${newVersion}.\n\nRef: ${mcdataPrURL}`,
     branchName,
     'master'
   )
-  console.log(`Pull request created: ${pr.url} (PR #${pr.number})`)
-  console.log('Update process completed successfully!')
+  console.log(`Pull request created`, pr)
 }
 
 main().catch(err => {
