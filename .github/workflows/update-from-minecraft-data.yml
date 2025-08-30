@@ -24,6 +24,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.PAT_PASSWORD }}
 
     - name: Install dependencies
       run: npm install gh-helpers
@@ -31,7 +33,7 @@ jobs:
     - name: Run updator script
       run: node .github/helper/updator.js
       env:
-        GITHUB_TOKEN: ${{ secrets.PAT_PASSWORD || secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.PAT_PASSWORD }}
         MCDATA_BRANCH: ${{ github.event.inputs.mcdata_branch }}
         MCDATA_PR_URL: ${{ github.event.inputs.mcdata_pr_url }}
         NEW_MC_VERSION: ${{ github.event.inputs.new_mc_version }}
