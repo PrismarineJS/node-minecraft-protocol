@@ -58,6 +58,8 @@ async function main () {
 
   const branchName = 'pc' + newVersion.replace(/[^a-zA-Z0-9_]/g, '_')
   exec(`git checkout -b ${branchName}`)
+  exec('git config user.name "github-actions[bot]"')
+  exec('git config user.email "41898282+github-actions[bot]@users.noreply.github.com"')
   exec('git add --all')
   exec(`git commit -m "Update to version ${newVersion}"`)
   exec(`git push origin ${branchName}`)
