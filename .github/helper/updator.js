@@ -68,7 +68,7 @@ async function main () {
     `🎈 ${newVersion}`,
     `This automated PR sets up the relevant boilerplate for Minecraft version ${newVersion}.
 
-Related: ${mcDataPrURL}
+Related: ${mcdataPrURL}
 
 * You can help contribute to this PR by opening a PR against this <code branch>${branchName}</code> branch instead of <code>master</code>.
     `,
