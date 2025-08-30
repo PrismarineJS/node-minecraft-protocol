@@ -76,6 +76,23 @@ Related: ${mcdataPrURL}
     'master'
   )
   console.log(`Pull request created`, pr)
+
+  // Ask mineflayer to handle new update
+  const nodeDispatchPayload = {
+    owner: 'PrismarineJS',
+    repo: 'mineflayer',
+    workflow: 'handle-update.yml',
+    branch: 'master',
+    inputs: {
+      new_mc_version: latestVersion,
+      mcdata_branch: triggerBranch,
+      mcdata_pr_url: mcdataPrURL,
+      nmp_branch: branchName,
+      nmp_pr_url: pr.url
+    }
+  }
+  console.log('Sending workflow dispatch', nodeDispatchPayload)
+  await github.sendWorkflowDispatch(nodeDispatchPayload)
 }
 
 main().catch(err => {
