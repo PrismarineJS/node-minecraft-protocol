@@ -10,10 +10,9 @@ on:
       mcdata_branch:
         description: minecraft-data branch for this version
         required: true
-        default: 'minecraft-data'
         type: string
       mcdata_pr_url:
-        description: minecraft-data PR number to open here PR against
+        description: minecraft-data PR number to open a PR here against
         required: false
         default: ''
         type: string
@@ -32,7 +31,7 @@ jobs:
     - name: Run updator script
       run: node .github/helper/updator.js
       env:
-        GITHUB_TOKEN: ${{ github.event.inputs.GITHUB_TOKEN }}
-        MCDATA_BRANCH: ${{ github.event.inputs.MCDATA_BRANCH }}
-        MCDATA_PR_URL: ${{ github.event.inputs.MCDATA_PR_URL }}
-        NEW_MC_VERSION: ${{ github.event.inputs.NEW_MC_VERSION }}
+        GITHUB_TOKEN: ${{ secrets.PAT_PASSWORD || secrets.GITHUB_TOKEN }}
+        MCDATA_BRANCH: ${{ github.event.inputs.mcdata_branch }}
+        MCDATA_PR_URL: ${{ github.event.inputs.mcdata_pr_url }}
+        NEW_MC_VERSION: ${{ github.event.inputs.new_mc_version }}
