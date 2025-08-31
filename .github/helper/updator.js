@@ -47,8 +47,7 @@ async function main () {
   const currentContentsCI = fs.readFileSync(ciPath, 'utf8')
   if (!currentContentsCI.includes(newVersion)) {
     const newCIContents = currentContentsCI.replace(
-      '      run: npm install', `
-      run: npm install
+      'run: npm install', `run: npm install
     - run: cd node_modules && cd minecraft-data && mv minecraft-data minecraft-data-old && git clone -b ${triggerBranch} https://github.com/PrismarineJS/minecraft-data --depth 1 && node bin/generate_data.js
     - run: curl -o node_modules/protodef/src/serializer.js https://raw.githubusercontent.com/extremeheat/node-protodef/refs/heads/dlog/src/serializer.js && curl -o node_modules/protodef/src/compiler.js https://raw.githubusercontent.com/extremeheat/node-protodef/refs/heads/dlog/src/compiler.js
 `)
@@ -68,7 +67,7 @@ async function main () {
     `🎈 ${newVersion}`,
     `This automated PR sets up the relevant boilerplate for Minecraft version ${newVersion}.
 
-Related: ${mcdataPrURL}
+Ref: ${mcdataPrURL}
 
 * You can help contribute to this PR by opening a PR against this <code branch>${branchName}</code> branch instead of <code>master</code>.
     `,
@@ -84,7 +83,7 @@ Related: ${mcdataPrURL}
     workflow: 'handle-update.yml',
     branch: 'master',
     inputs: {
-      new_mc_version: latestVersion,
+      new_mc_version: newVersion,
       mcdata_branch: triggerBranch,
       mcdata_pr_url: mcdataPrURL,
       nmp_branch: branchName,
