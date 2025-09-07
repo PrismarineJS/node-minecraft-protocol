@@ -441,7 +441,7 @@ for (const supportedVersion of mc.supportedVersions) {
     before(async function () {
       PORT = await getPort()
       server = new Server(version.minecraftVersion)
-      if (mcData.supportFeature('mcDataHasEntityMetadata')) {
+      if (mcData.version['>=']('1.9')) {
         values.entityMetadata[0].type = 'byte'
       } else {
         values.entityMetadata[0].type = 0
