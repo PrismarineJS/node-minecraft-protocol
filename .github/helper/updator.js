@@ -1,25 +1,23 @@
 #!/usr/bin/env node
 /**
- * Updator script triggered from minecraft-data repository
- * This script can be customized to handle updates from minecraft-data
+ * Updator script triggered from minecraft-data repository to auto generate PR
  */
-const github = require('gh-helpers')()
 const fs = require('fs')
 const cp = require('child_process')
+const assert = require('assert')
+const github = require('gh-helpers')()
 const { join } = require('path')
 const exec = (cmd) => github.mock ? console.log('> ', cmd) : (console.log('> ', cmd), cp.execSync(cmd, { stdio: 'inherit' }))
 
 console.log('Starting update process...')
-const triggerBranch = process.env.TRIGGER_SOURCE
-const newVersion = process.env.DATA_VERSION
-const onBehalfOf = process.env.TRIGGER_REASON || 'workflow_dispatch'
-console.log('Trigger reason:', onBehalfOf)
-console.log('New version:', newVersion)
+// Sanitize and validate environment variables all non alpha numeric / underscore / dot
+const newVersion = process.env.NEW_MC_VERSION?.replace(/[^a-zA-Z0-9_.]/g, '_')
+const triggerBranch = process.env.MCDATA_BRANCH?.replace(/[^a-zA-Z0-9_.]/g, '_')
+const mcdataPrURL = process.env.MCDATA_PR_URL
+console.log({ newVersion, triggerBranch, mcdataPrURL })
 
-if (!newVersion) {
-  console.error('No new version provided. Exiting...')
-  process.exit(1)
-}
+assert(newVersion)
+assert(triggerBranch)
 
 async function main () {
   const currentSupportedPath = require.resolve('../../src/version.js')
@@ -39,7 +37,7 @@ async function main () {
   // Update the README.md
   const currentContentsReadme = fs.readFileSync(readmePath, 'utf8')
   if (!currentContentsReadme.includes(newVersion)) {
-    const newReadmeContents = currentContentsReadme.replace(' <!-- NEXT_VERSION -->', `, ${newVersion} <!-- NEXT_VERSION -->`)
+    const newReadmeContents = currentContentsReadme.replace('\n<!--add_next_version_above-->', `, ${newVersion}\n<!--add_next_version_above-->`)
     fs.writeFileSync(readmePath, newReadmeContents)
     console.log('Updated README with new version:', newVersion)
   }
@@ -49,8 +47,7 @@ async function main () {
   const currentContentsCI = fs.readFileSync(ciPath, 'utf8')
   if (!currentContentsCI.includes(newVersion)) {
     const newCIContents = currentContentsCI.replace(
-      '      run: npm install', `
-      run: npm install
+      'run: npm install', `run: npm install
     - run: cd node_modules && cd minecraft-data && mv minecraft-data minecraft-data-old && git clone -b ${triggerBranch} https://github.com/PrismarineJS/minecraft-data --depth 1 && node bin/generate_data.js
     - run: curl -o node_modules/protodef/src/serializer.js https://raw.githubusercontent.com/extremeheat/node-protodef/refs/heads/dlog/src/serializer.js && curl -o node_modules/protodef/src/compiler.js https://raw.githubusercontent.com/extremeheat/node-protodef/refs/heads/dlog/src/compiler.js
 `)
@@ -58,20 +55,43 @@ async function main () {
     console.log('Updated CI workflow with new version:', newVersion)
   }
 
-  const branchName = 'pc' + newVersion.replace(/[^a-zA-Z0-9_]/g, '.')
+  const branchName = 'pc' + newVersion.replace(/[^a-zA-Z0-9_]/g, '_')
   exec(`git checkout -b ${branchName}`)
+  exec('git config user.name "github-actions[bot]"')
+  exec('git config user.email "41898282+github-actions[bot]@users.noreply.github.com"')
   exec('git add --all')
   exec(`git commit -m "Update to version ${newVersion}"`)
-  exec(`git push origin ${branchName}`)
+  exec(`git push origin ${branchName} --force`)
   //     createPullRequest(title: string, body: string, fromBranch: string, intoBranch?: string): Promise<{ number: number, url: string }>;
   const pr = await github.createPullRequest(
-    `${newVersion} updates`,
-    `Automatically generated PR for Minecraft version ${newVersion}.\n\nRef: ${onBehalfOf}`,
+    `🎈 ${newVersion}`,
+    `This automated PR sets up the relevant boilerplate for Minecraft version ${newVersion}.
+
+Ref: ${mcdataPrURL}
+
+* You can help contribute to this PR by opening a PR against this <code branch>${branchName}</code> branch instead of <code>master</code>.
+    `,
     branchName,
     'master'
   )
-  console.log(`Pull request created: ${pr.url} (PR #${pr.number})`)
-  console.log('Update process completed successfully!')
+  console.log(`Pull request created`, pr)
+
+  // Ask mineflayer to handle new update
+  const nodeDispatchPayload = {
+    owner: 'PrismarineJS',
+    repo: 'mineflayer',
+    workflow: 'handle-update.yml',
+    branch: 'master',
+    inputs: {
+      new_mc_version: newVersion,
+      mcdata_branch: triggerBranch,
+      mcdata_pr_url: mcdataPrURL,
+      nmp_branch: branchName,
+      nmp_pr_url: pr.url
+    }
+  }
+  console.log('Sending workflow dispatch', nodeDispatchPayload)
+  await github.sendWorkflowDispatch(nodeDispatchPayload)
 }
 
 main().catch(err => {
