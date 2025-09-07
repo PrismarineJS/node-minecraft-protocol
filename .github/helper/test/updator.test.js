@@ -1,50 +1,54 @@
-const { jest } = require('@jest/globals')
+const sinon = require('sinon')
 const fs = require('fs')
 const cp = require('child_process')
+const assert = require('assert')
 
-// Mock dependencies
-jest.mock('fs')
-jest.mock('child_process')
-jest.mock('gh-helpers', () => () => ({
+// Mock gh-helpers
+const mockGithub = {
   mock: true,
-  createPullRequest: jest.fn().mockResolvedValue({ number: 123, url: 'test-pr' })
-}))
+  createPullRequest: sinon.stub().resolves({ number: 123, url: 'test-pr' })
+}
 
-describe('Node Minecraft Protocol Updator', () => {
+// Mock modules
+const Module = require('module')
+const originalRequire = Module.prototype.require
+
+Module.prototype.require = function(id) {
+  if (id === 'gh-helpers') {
+    return () => mockGithub
+  }
+  return originalRequire.apply(this, arguments)
+}
+
+describe('Node Minecraft Protocol Updator', function() {
   let originalEnv
-  let mockFs
-  let mockCp
+  let fsStub
+  let cpStub
 
-  beforeEach(() => {
+  beforeEach(function() {
     originalEnv = process.env
     process.env = { ...originalEnv }
     
-    mockFs = {
-      readFileSync: jest.fn(),
-      writeFileSync: jest.fn()
+    // Stub fs and child_process
+    fsStub = {
+      readFileSync: sinon.stub(fs, 'readFileSync'),
+      writeFileSync: sinon.stub(fs, 'writeFileSync')
     }
     
-    mockCp = {
-      execSync: jest.fn()
+    cpStub = {
+      execSync: sinon.stub(cp, 'execSync')
     }
     
-    fs.readFileSync = mockFs.readFileSync
-    fs.writeFileSync = mockFs.writeFileSync
-    cp.execSync = mockCp.execSync
-    
-    jest.clearAllMocks()
+    sinon.reset()
   })
 
-  afterEach(() => {
+  afterEach(function() {
     process.env = originalEnv
-    jest.restoreAllMocks()
+    sinon.restore()
   })
 
-  describe('Version Update', () => {
-    test('should add new version to supportedVersions array', () => {
-      process.env.NEW_MC_VERSION = '1.21.9'
-      process.env.MCDATA_BRANCH = 'test-branch'
-      
+  describe('Version Update', function() {
+    it('should add new version to supportedVersions array', function() {
       const currentVersionFile = `'use strict'
 
 module.exports = {
@@ -52,65 +56,52 @@ module.exports = {
   supportedVersions: ['1.7', '1.8.8', '1.21.8']
 }`
 
-      const expectedVersionFile = `'use strict'
-
-module.exports = {
-  defaultVersion: '1.21.8',
-  supportedVersions: ['1.7', '1.8.8', '1.21.8', '1.21.9']
-}`
-
-      mockFs.readFileSync.mockReturnValue(currentVersionFile)
+      fsStub.readFileSync.returns(currentVersionFile)
       
-      delete require.cache[require.resolve('../updator.js')]
-      
-      // Mock the actual script behavior
+      // Test the logic for adding new version
       const newContents = currentVersionFile.replace(", '1.21.8'", ", '1.21.8', '1.21.9'")
-      expect(newContents).toContain("'1.21.9'")
+      assert(newContents.includes("'1.21.9'"), 'Should contain new version')
     })
 
-    test('should not duplicate existing versions', () => {
-      process.env.NEW_MC_VERSION = '1.21.8'
-      
+    it('should not duplicate existing versions', function() {
       const versionFileWithExisting = `module.exports = {
   supportedVersions: ['1.21.6', '1.21.8']
 }`
 
-      mockFs.readFileSync.mockReturnValue(versionFileWithExisting)
+      fsStub.readFileSync.returns(versionFileWithExisting)
       
       // Should not add duplicate
       const result = versionFileWithExisting.includes('1.21.8') 
         ? versionFileWithExisting 
         : versionFileWithExisting.replace("]", ", '1.21.8']")
         
-      expect(result).toBe(versionFileWithExisting) // No change
+      assert.strictEqual(result, versionFileWithExisting, 'Should not change if version exists')
     })
 
-    test('should update README.md with new version', () => {
+    it('should update README.md with new version', function() {
       const readmeContent = `# Minecraft Protocol
 
 Supports Minecraft 1.8 to 1.21.8 (https://wiki.vg/Protocol_version_numbers)
 
-Versions 1.7.10, 1.8.8, 1.9.4, 1.10.2, 1.11.2, 1.12.2, 1.13.2, 1.14.4, 1.15.2, 1.16.5, 1.17.1, 1.18.2, 1.19, 1.19.2, 1.19.3, 1.19.4, 1.20, 1.20.1, 1.20.2, 1.20.4, 1.20.6, 1.21.1, 1.21.3, 1.21.4, 1.21.5, 1.21.6, 1.21.8) <!--version-->`
+Versions 1.7.10, 1.8.8, 1.21.6, 1.21.8) <!--version-->`
 
       const expectedReadme = readmeContent
         .replace('Minecraft 1.8 to 1.21.8 (', 'Minecraft 1.8 to 1.21.9 (')
         .replace(') <!--version-->', ', 1.21.9) <!--version-->')
 
-      expect(expectedReadme).toContain('1.21.9')
-      expect(expectedReadme).toContain('Minecraft 1.8 to 1.21.9')
+      assert(expectedReadme.includes('1.21.9'), 'README should contain new version')
+      assert(expectedReadme.includes('Minecraft 1.8 to 1.21.9'), 'README should update version range')
     })
   })
 
-  describe('Git Operations', () => {
-    test('should create correct branch name', () => {
+  describe('Git Operations', function() {
+    it('should create correct branch name', function() {
       const version = '1.21.9'
       const expectedBranch = 'pc' + version.replace(/[^a-zA-Z0-9_]/g, '_')
-      expect(expectedBranch).toBe('pc1_21_9')
+      assert.strictEqual(expectedBranch, 'pc1_21_9')
     })
 
-    test('should execute git commands in correct order', () => {
-      process.env.NEW_MC_VERSION = '1.21.9'
-      
+    it('should execute git commands in correct order', function() {
       const expectedCommands = [
         'git checkout -b pc1_21_9',
         'git config user.name "github-actions[bot]"',
@@ -122,22 +113,22 @@ Versions 1.7.10, 1.8.8, 1.9.4, 1.10.2, 1.11.2, 1.12.2, 1.13.2, 1.14.4, 1.15.2, 1
       
       // Verify command sequence would be correct
       expectedCommands.forEach((cmd, index) => {
-        expect(cmd).toContain('git')
+        assert(cmd.includes('git'), `Command ${index} should be a git command`)
       })
     })
   })
 
-  describe('Environment Variable Validation', () => {
-    test('should fail without required NEW_MC_VERSION', () => {
+  describe('Environment Variable Validation', function() {
+    it('should fail without required NEW_MC_VERSION', function() {
       delete process.env.NEW_MC_VERSION
       
-      expect(() => {
+      assert.throws(() => {
         const newVersion = process.env.NEW_MC_VERSION?.replace(/[^a-zA-Z0-9_.]/g, '_')
         if (!newVersion) throw new Error('NEW_MC_VERSION required')
-      }).toThrow('NEW_MC_VERSION required')
+      }, /NEW_MC_VERSION required/)
     })
 
-    test('should sanitize version strings correctly', () => {
+    it('should sanitize version strings correctly', function() {
       const testCases = [
         { input: '1.21.9', expected: '1.21.9' },
         { input: '1.21.9-test', expected: '1.21.9_test' },
@@ -147,13 +138,13 @@ Versions 1.7.10, 1.8.8, 1.9.4, 1.10.2, 1.11.2, 1.12.2, 1.13.2, 1.14.4, 1.15.2, 1
       
       testCases.forEach(({ input, expected }) => {
         const sanitized = input.replace(/[^a-zA-Z0-9_.]/g, '_')
-        expect(sanitized).toBe(expected)
+        assert.strictEqual(sanitized, expected)
       })
     })
   })
 
-  describe('PR Creation', () => {
-    test('should create PR with correct title and body', () => {
+  describe('PR Creation', function() {
+    it('should create PR with correct title and body', function() {
       const version = '1.21.9'
       const expectedTitle = `🎈 ${version}`
       const expectedBody = `This automated PR sets up the relevant boilerplate for Minecraft version ${version}.
@@ -163,41 +154,35 @@ Ref:
 * You can help contribute to this PR by opening a PR against this <code branch>pc1_21_9</code> branch instead of <code>master</code>.
     `
     
-      expect(expectedTitle).toBe('🎈 1.21.9')
-      expect(expectedBody).toContain('Minecraft version 1.21.9')
-      expect(expectedBody).toContain('pc1_21_9')
+      assert.strictEqual(expectedTitle, '🎈 1.21.9')
+      assert(expectedBody.includes('Minecraft version 1.21.9'), 'Body should contain version')
+      assert(expectedBody.includes('pc1_21_9'), 'Body should contain branch name')
     })
   })
 
-  describe('Error Handling', () => {
-    test('should handle git command failures', () => {
-      mockCp.execSync.mockImplementation((cmd) => {
-        if (cmd.includes('git push')) {
-          throw new Error('Push failed')
-        }
-      })
+  describe('Error Handling', function() {
+    it('should handle git command failures', function() {
+      cpStub.execSync.throws(new Error('Push failed'))
       
-      expect(() => {
+      assert.throws(() => {
         try {
-          mockCp.execSync('git push origin test --force')
+          cpStub.execSync('git push origin test --force')
         } catch (e) {
           throw new Error(`Git operation failed: ${e.message}`)
         }
-      }).toThrow('Git operation failed: Push failed')
+      }, /Git operation failed: Push failed/)
     })
 
-    test('should handle file system errors', () => {
-      mockFs.readFileSync.mockImplementation(() => {
-        throw new Error('File not found')
-      })
+    it('should handle file system errors', function() {
+      fsStub.readFileSync.throws(new Error('File not found'))
       
-      expect(() => {
+      assert.throws(() => {
         try {
-          mockFs.readFileSync('non-existent-file')
+          fsStub.readFileSync('non-existent-file')
         } catch (e) {
           throw new Error(`File operation failed: ${e.message}`)
         }
-      }).toThrow('File operation failed: File not found')
+      }, /File operation failed: File not found/)
     })
   })
 })
