@@ -1,5 +1,8 @@
 # History
 
+## 1.62.0
+* [Add support for Minecraft 1.21.8 (#1427)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/8a99613672298b2e9a1e66ca41f8bb720cf1a439) (thanks @rom1504)
+
 ## 1.61.0
 * [1.21.6 (#1416)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/0bfd970e954f1ab5e579ebe51cbefbf07d952939) (thanks @extremeheat)
 
