@@ -2,6 +2,7 @@ const ProtoDef = require('protodef').ProtoDef
 const minecraft = require('../datatypes/minecraft')
 const debug = require('debug')('minecraft-protocol')
 const nbt = require('prismarine-nbt')
+const { CustomPayloadParseError } = require('./errors')
 
 module.exports = function (client, options) {
   const mcdata = require('minecraft-data')(options.version || require('../version').defaultVersion)
@@ -57,7 +58,8 @@ module.exports = function (client, options) {
         try {
           packet.data = proto.parsePacketBuffer(channel, packet.data).data
         } catch (error) {
-          client.emit('error', error)
+          const customError = new CustomPayloadParseError(error.message, error, packet)
+          client.emit('error', customError)
           return
         }
       }
