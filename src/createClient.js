@@ -14,6 +14,7 @@ const tcpDns = require('./client/tcp_dns')
 const autoVersion = require('./client/autoVersion')
 const pluginChannels = require('./client/pluginChannels')
 const versionChecking = require('./client/versionChecking')
+const { createProxyAgent } = require('./client/proxy')
 const uuid = require('./datatypes/uuid')
 
 module.exports = createClient
@@ -35,6 +36,11 @@ function createClient (options) {
   const Client = options.Client || DefaultClientImpl
 
   const client = new Client(false, version.minecraftVersion, options.customPackets, hideErrors)
+
+  // Set up proxy agent if proxy is configured
+  if (options.proxy && !options.agent) {
+    options.agent = createProxyAgent(options.proxy)
+  }
 
   tcpDns(client, options)
   if (options.auth instanceof Function) {

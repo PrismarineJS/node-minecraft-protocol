@@ -285,6 +285,84 @@ for (const supportedVersion of mc.supportedVersions) {
           })
         })
       })
+
+      it('connects through SOCKS5 proxy', function (done) {
+        const net = require('net')
+        let proxyPort
+        let proxyServer
+
+        // Simple SOCKS5 proxy that forwards to MC server
+        const createProxy = () => {
+          return net.createServer((clientSocket) => {
+            let stage = 'auth'
+
+            clientSocket.on('data', (data) => {
+              if (stage === 'auth') {
+                if (data[0] === 0x05) {
+                  clientSocket.write(Buffer.from([0x05, 0x00])) // No auth required
+                  stage = 'connect'
+                }
+              } else if (stage === 'connect') {
+                if (data[0] === 0x05 && data[1] === 0x01) {
+                  // Parse the connect request properly (for completeness)
+                  // We don't actually need to parse it since we forward to fixed target
+
+                  // Forward to MC server
+                  const serverSocket = net.createConnection(PORT, 'localhost', () => {
+                    // Send proper SOCKS5 success response
+                    const response = Buffer.alloc(10)
+                    response[0] = 0x05 // Version
+                    response[1] = 0x00 // Success
+                    response[2] = 0x00 // Reserved
+                    response[3] = 0x01 // IPv4
+                    response.writeUInt32BE(0x7f000001, 4) // 127.0.0.1
+                    response.writeUInt16BE(PORT, 8) // Port
+                    clientSocket.write(response)
+
+                    clientSocket.pipe(serverSocket)
+                    serverSocket.pipe(clientSocket)
+                  })
+                  serverSocket.on('error', () => clientSocket.destroy())
+                }
+              }
+            })
+            clientSocket.on('error', () => {})
+          })
+        }
+
+        // Start proxy server
+        const { getPort } = require('./common/util')
+        getPort().then(port => {
+          proxyPort = port
+          proxyServer = createProxy()
+          proxyServer.listen(proxyPort, () => {
+            // Connect through proxy
+            const client = mc.createClient({
+              username: 'ProxyUser',
+              version: version.minecraftVersion,
+              port: PORT,
+              auth: 'offline',
+              proxy: {
+                type: 'socks5',
+                host: 'localhost',
+                port: proxyPort
+              }
+            })
+
+            client.on('login', () => {
+              console.log('✓ Connected through SOCKS5 proxy!')
+              client.end()
+              proxyServer.close()
+              done()
+            })
+
+            client.on('error', (err) => {
+              proxyServer.close()
+              done(err)
+            })
+          })
+        }).catch(done)
+      })
     })
 
     describe.skip('online', function () {
