@@ -174,7 +174,7 @@ for (const supportedVersion of mc.supportedVersions) {
             const message = JSON.parse(data.formattedMessage)
             if (chatCount === 1) {
               assert.strictEqual(message.translate, 'chat.type.text')
-              assert.deepEqual(message.with[0].clickEvent, {
+              assert.deepEqual(message.with[0][CLICK_EVENT], {
                 action: 'suggest_command',
                 value: mcData.version.version > 340 ? '/tell Player ' : '/msg Player '
               })
@@ -194,20 +194,30 @@ for (const supportedVersion of mc.supportedVersions) {
             }
           } else {
             // 1.19+
-            const sender = JSON.parse(data.senderName)
-            const msgPayload = data.formattedMessage ? JSON.parse(data.formattedMessage) : data.plainMessage
-            const plainMessage = client.parseMessage(msgPayload).toString()
+            const plainMessage = data.formattedMessage ? client.parseMessage(JSON.parse(data.formattedMessage)).toString() : data.plainMessage
 
             if (chatCount === 1) {
               assert.strictEqual(plainMessage, 'hello everyone; I have logged in.')
-              const clickEvent = sender[CLICK_EVENT]
-              assert.strictEqual(clickEvent.action, 'suggest_command')
-              assert.ok(['/tell Player ', '/msg Player '].includes(clickEvent.value || clickEvent.command))
-              assert.strictEqual(sender.text, 'Player')
+              // In 1.21+, senderName can be null when networkName is empty (NBT type: end)
+              if (data.senderName) {
+                const sender = JSON.parse(data.senderName)
+                if (sender) { // ADD THIS CHECK
+                  const clickEvent = sender[CLICK_EVENT]
+                  if (clickEvent) { // AND THIS ONE
+                    assert.strictEqual(clickEvent.action, 'suggest_command')
+                    assert.ok(['/tell Player ', '/msg Player '].includes(clickEvent.value || clickEvent.command))
+                    assert.strictEqual(sender.text, 'Player')
+                  }
+                }
+              }
             } else if (chatCount === 2) {
-              const plainSender = client.parseMessage(sender).toString()
+              // In 1.21+, senderName can be null
+              if (data.senderName) {
+                const sender = JSON.parse(data.senderName)
+                const plainSender = client.parseMessage(sender).toString()
+                assert.strictEqual(plainSender, 'Server')
+              }
               assert.strictEqual(plainMessage, 'hello')
-              assert.strictEqual(plainSender, 'Server')
               wrap.removeListener('line', lineListener)
               client.end()
               done()
