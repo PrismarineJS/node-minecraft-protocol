@@ -415,6 +415,34 @@ const values = {
   RecipeBookSetting: {
     open: false,
     filtering: false
+  },
+  lpVec3: { x: 0, y: 0, z: 0 },
+  DebugSubscriptionDataType: 0,
+  DebugSubscriptionUpdate: {
+    type: 0
+  },
+  DebugSubscriptionEvent: {
+    type: 0
+  },
+  RespawnData: {
+    globalPos: {
+      dimensionName: 'minecraft:overworld',
+      location: { x: 0, y: 64, z: 0 }
+    },
+    yaw: 0,
+    pitch: 0
+  },
+  GlobalPos: {
+    dimensionName: 'minecraft:overworld',
+    location: { x: 0, y: 64, z: 0 }
+  },
+  ExplosionParticleInfo: {
+    particle: {
+      particleId: 0,
+      data: null
+    },
+    speed: 0,
+    scaling: 0
   }
 }
 
