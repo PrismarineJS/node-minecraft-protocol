@@ -4,6 +4,7 @@ const nbt = require('prismarine-nbt')
 const UUID = require('uuid-1345')
 const zlib = require('zlib')
 const [readVarInt, writeVarInt, sizeOfVarInt] = require('protodef').types.varint
+const [readLpVec3, writeLpVec3, sizeOfLpVec3] = require('./lpVec3')
 
 module.exports = {
   varlong: [readVarLong, writeVarLong, sizeOfVarLong],
@@ -11,7 +12,8 @@ module.exports = {
   compressedNbt: [readCompressedNbt, writeCompressedNbt, sizeOfCompressedNbt],
   restBuffer: [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
   entityMetadataLoop: [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata],
-  topBitSetTerminatedArray: [readTopBitSetTerminatedArray, writeTopBitSetTerminatedArray, sizeOfTopBitSetTerminatedArray]
+  topBitSetTerminatedArray: [readTopBitSetTerminatedArray, writeTopBitSetTerminatedArray, sizeOfTopBitSetTerminatedArray],
+  lpVec3: [readLpVec3, writeLpVec3, sizeOfLpVec3]
 }
 const PartialReadError = require('protodef').utils.PartialReadError
 
