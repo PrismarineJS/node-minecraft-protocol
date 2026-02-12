@@ -167,8 +167,6 @@ for (const supportedVersion of mc.supportedVersions) {
           client.chat('hello everyone; I have logged in.')
         })
         client.on('playerChat', function (data) {
-          console.log('*playerChat')
-          console.dir(data, { depth: null })
           chatCount += 1
           assert.ok(chatCount <= 2)
 
