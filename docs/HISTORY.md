@@ -1,5 +1,8 @@
 # History
 
+## 1.64.1
+* [Backport velocity field changes from 1.21.9+ to older versions (#1467)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/b66c9aa08052859fb2e3075a3d6c6f84a84e77f1) (thanks @SuperGamerTron)
+
 ## 1.64.0
 * [🎈 1.21.11 (#1457)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/77f4167d93a70322f2963c3c81586c8fe0c6c299) (thanks @rom1504bot)
 
