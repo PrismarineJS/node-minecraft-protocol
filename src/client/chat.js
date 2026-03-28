@@ -4,6 +4,11 @@ const concat = require('../transforms/binaryStream').concat
 const { processNbtMessage } = require('prismarine-chat')
 const messageExpireTime = 420000 // 7 minutes (ms)
 
+const toSignedByte = (value) => {
+  const byte = value & 0xff
+  return byte > 127 ? byte - 256 : byte
+}
+
 function isFormatted (message) {
   // This should match the ChatComponent.isDecorated function from Vanilla
   try {
@@ -377,7 +382,7 @@ module.exports = function (client, options) {
           salt: options.salt,
           argumentSignatures: canSign ? signaturesForCommand(command, options.timestamp, options.salt, options.preview, acknowledgements) : [],
           messageCount: client._lastSeenMessages.pending,
-          checksum: computeChatChecksum(client._lastSeenMessages), // 1.21.5+
+          checksum: toSignedByte(computeChatChecksum(client._lastSeenMessages)), // 1.21.5+
           acknowledged
         }
         client.write((mcData.supportFeature('seperateSignedChatCommandPacket') && canSign) ? 'chat_command_signed' : 'chat_command', chatPacket)
