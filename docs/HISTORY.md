@@ -1,5 +1,10 @@
 # History
 
+## 1.65.0
+* [Update CI to Node 24 (#1473)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/8008fe065787d50c7ab490cb0a503cb9200043fe) (thanks @rom1504)
+* [Fix publish condition for npm-publish v4 (#1472)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/9bc871da00a82058ad68f7fb6fd661c268f6a7a9) (thanks @rom1504)
+* [Switch to trusted publishing via OIDC (#1471)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/f87f9d5b35888be3bccece3edf5761183cf916a4) (thanks @rom1504)
+
 ## 1.64.1
 * [Backport velocity field changes from 1.21.9+ to older versions (#1467)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/b66c9aa08052859fb2e3075a3d6c6f84a84e77f1) (thanks @SuperGamerTron)
 
