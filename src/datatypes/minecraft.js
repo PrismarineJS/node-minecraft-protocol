@@ -56,7 +56,12 @@ function readCompressedNbt (buffer, offset) {
 
   const compressedNbt = buffer.slice(offset + 2, offset + 2 + length)
 
-  const nbtBuffer = zlib.gunzipSync(compressedNbt) // TODO: async
+  let nbtBuffer
+  try {
+    nbtBuffer = zlib.gunzipSync(compressedNbt) // TODO: async
+  } catch (err) {
+    throw new PartialReadError('zlib decompress failed: ' + err.message)
+  }
 
   const results = nbt.proto.read(nbtBuffer, 0, 'nbt')
   return {
