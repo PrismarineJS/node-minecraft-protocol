@@ -1,5 +1,8 @@
 # History
 
+## 1.66.0
+* [Use sync zlib in packet compression to avoid uncaught errors (#1476)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/b23a31bf6754634dd7be1bd70d493f85e2da7bfa) (thanks @rom1504)
+
 ## 1.65.0
 * [Update CI to Node 24 (#1473)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/8008fe065787d50c7ab490cb0a503cb9200043fe) (thanks @rom1504)
 * [Fix publish condition for npm-publish v4 (#1472)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/9bc871da00a82058ad68f7fb6fd661c268f6a7a9) (thanks @rom1504)
