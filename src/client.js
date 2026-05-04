@@ -1,9 +1,10 @@
 'use strict'
 const EventEmitter = require('events').EventEmitter
-const debug = require('debug')('minecraft-protocol')
 const compression = require('./transforms/compression')
 const framing = require('./transforms/framing')
 const states = require('./states')
+const debug = require('debug')('minecraft-protocol')
+const debugSkip = process.env.DEBUG_SKIP?.split(',') ?? []
 
 const createSerializer = require('./transforms/serializer').createSerializer
 const createDeserializer = require('./transforms/serializer').createDeserializer
@@ -67,14 +68,14 @@ class Client extends EventEmitter {
     })
 
     this.deserializer.on('error', (e) => {
-      let parts
+      let parts = []
       if (e.field) {
         parts = e.field.split('.')
         parts.shift()
-      } else { parts = [] }
+      }
       const deserializerDirection = this.isServer ? 'toServer' : 'toClient'
       e.field = [this.protocolState, deserializerDirection].concat(parts).join('.')
-      e.message = `Deserialization error for ${e.field} : ${e.message}`
+      e.message = e.buffer ? `Parse error for ${e.field} (${e.buffer?.length} bytes, ${e.buffer?.toString('hex').slice(0, 6)}...) : ${e.message}` : `Parse error for ${e.field}: ${e.message}`
       if (!this.compressor) { this.splitter.pipe(this.deserializer) } else { this.decompressor.pipe(this.deserializer) }
       this.emit('error', e)
     })
@@ -89,8 +90,8 @@ class Client extends EventEmitter {
       parsed.metadata.name = parsed.data.name
       parsed.data = parsed.data.params
       parsed.metadata.state = state
-      debug('read packet ' + state + '.' + parsed.metadata.name)
-      if (debug.enabled) {
+      if (debug.enabled && !debugSkip.includes(parsed.metadata.name)) {
+        debug('read packet ' + state + '.' + parsed.metadata.name)
         const s = JSON.stringify(parsed.data, null, 2)
         debug(s && s.length > 10000 ? parsed.data : s)
       }
@@ -238,8 +239,10 @@ class Client extends EventEmitter {
 
   write (name, params) {
     if (!this.serializer.writable) { return }
-    debug('writing packet ' + this.state + '.' + name)
-    debug(params)
+    if (debug.enabled && !debugSkip.includes(name)) {
+      debug('writing packet ' + this.state + '.' + name)
+      debug(params)
+    }
     this.serializer.write({ name, params })
   }
 

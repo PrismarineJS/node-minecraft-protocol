@@ -76,14 +76,16 @@ for (const supportedVersion of mc.supportedVersions) {
       // more to be added
     }
   }
+  let nextChatIndex = 1
 
   function sendBroadcastMessage (server, clients, message, sender) {
     if (mcData.supportFeature('signedChat')) {
       server.writeToClients(clients, 'player_chat', {
+        globalIndex: nextChatIndex++, // 1.21.5+
         plainMessage: message,
         signedChatContent: '',
         unsignedChatContent: JSON.stringify({ text: message }),
-        type: mcData.supportFeature('incrementedChatType') ? { registryIndex: 1 } : 0,
+        type: mcData.supportFeature('chatTypeIsHolder') ? { chatType: 1 } : 0,
         senderUuid: 'd3527a0b-bc03-45d5-a878-2aafdd8c8a43', // random
         senderName: JSON.stringify({ text: sender }),
         senderTeam: undefined,

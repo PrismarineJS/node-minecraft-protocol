@@ -56,6 +56,9 @@ module.exports = function (client, options) {
       client.once('select_known_packs', () => {
         client.write('select_known_packs', { packs: [] })
       })
+      client.once('code_of_conduct', () => {
+        client.write('accept_code_of_conduct', {})
+      })
       // Server should send finish_configuration on its own right after sending the client a dimension codec
       // for login (that has data about world height, world gen, etc) after getting a login success from client
       client.once('finish_configuration', () => {
@@ -66,7 +69,6 @@ module.exports = function (client, options) {
     }
 
     function onReady () {
-      client.emit('playerJoin')
       if (mcData.supportFeature('signedChat')) {
         if (options.disableChatSigning && client.serverFeatures.enforcesSecureChat) {
           throw new Error('"disableChatSigning" was enabled in client options, but server is enforcing secure chat')
@@ -86,8 +88,8 @@ module.exports = function (client, options) {
       function unsignedChat (message) {
         client.write('chat', { message })
       }
-
       client.chat = client._signedChat || unsignedChat
+      client.emit('playerJoin')
     }
   }
 }

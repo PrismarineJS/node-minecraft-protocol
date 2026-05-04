@@ -4,6 +4,7 @@ const nbt = require('prismarine-nbt')
 const UUID = require('uuid-1345')
 const zlib = require('zlib')
 const [readVarInt, writeVarInt, sizeOfVarInt] = require('protodef').types.varint
+const [readLpVec3, writeLpVec3, sizeOfLpVec3] = require('./lpVec3')
 
 module.exports = {
   varlong: [readVarLong, writeVarLong, sizeOfVarLong],
@@ -12,7 +13,7 @@ module.exports = {
   restBuffer: [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
   entityMetadataLoop: [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata],
   topBitSetTerminatedArray: [readTopBitSetTerminatedArray, writeTopBitSetTerminatedArray, sizeOfTopBitSetTerminatedArray],
-  arrayWithLengthOffset: [readArrayWithLengthOffset, writeArrayWithLengthOffset, sizeOfArrayWithLengthOffset]
+  lpVec3: [readLpVec3, writeLpVec3, sizeOfLpVec3]
 }
 const PartialReadError = require('protodef').utils.PartialReadError
 
@@ -55,7 +56,12 @@ function readCompressedNbt (buffer, offset) {
 
   const compressedNbt = buffer.slice(offset + 2, offset + 2 + length)
 
-  const nbtBuffer = zlib.gunzipSync(compressedNbt) // TODO: async
+  let nbtBuffer
+  try {
+    nbtBuffer = zlib.gunzipSync(compressedNbt) // TODO: async
+  } catch (err) {
+    throw new PartialReadError('zlib decompress failed: ' + err.message)
+  }
 
   const results = nbt.proto.read(nbtBuffer, 0, 'nbt')
   return {
@@ -180,37 +186,4 @@ function sizeOfTopBitSetTerminatedArray (value, { type }) {
     size += this.sizeOf(value[i], type, {})
   }
   return size
-}
-
-//
-const { getCount, sendCount, calcCount, tryDoc } = require('protodef/src/utils')
-
-function readArrayWithLengthOffset (buffer, offset, typeArgs, rootNode) {
-  const results = {
-    value: [],
-    size: 0
-  }
-  let value
-  let { count, size } = getCount.call(this, buffer, offset, typeArgs, rootNode)
-  offset += size
-  results.size += size
-  for (let i = 0; i < count + typeArgs.lengthOffset; i++) {
-    ({ size, value } = tryDoc(() => this.read(buffer, offset, typeArgs.type, rootNode), i))
-    results.size += size
-    offset += size
-    results.value.push(value)
-  }
-  return results
-}
-
-// no changes
-function writeArrayWithLengthOffset (value, buffer, offset, typeArgs, rootNode) {
-  offset = sendCount.call(this, value.length, buffer, offset, typeArgs, rootNode)
-  return value.reduce((offset, v, index) => tryDoc(() => this.write(v, buffer, offset, typeArgs.type, rootNode), index), offset)
-}
-
-function sizeOfArrayWithLengthOffset (value, typeArgs, rootNode) {
-  let size = calcCount.call(this, value.length, typeArgs, rootNode)
-  size = value.reduce((size, v, index) => tryDoc(() => size + this.sizeOf(v, typeArgs.type, rootNode), index), size)
-  return size + typeArgs
 }

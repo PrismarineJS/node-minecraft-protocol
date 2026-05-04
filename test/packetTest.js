@@ -56,6 +56,22 @@ const nbtValue = {
 }
 
 function getFixedPacketPayload (version, packetName) {
+  if (packetName === 'teams') {
+    if (version['>=']('1.21.6')) {
+      return {
+        team: 'test_team',
+        mode: 'add',
+        name: nbtValue,
+        flags: 'always',
+        nameTagVisibility: 'always',
+        collisionRule: 'always',
+        formatting: 0, // no formatting
+        prefix: nbtValue,
+        suffix: nbtValue,
+        players: ['player1', 'player2']
+      }
+    }
+  }
   if (packetName === 'declare_recipes') {
     if (version['>=']('1.21.3')) {
       return {
@@ -91,6 +107,47 @@ function getFixedPacketPayload (version, packetName) {
             data: {
               category: 0
             }
+          }
+        ]
+      }
+    }
+  }
+  if (packetName === 'player_info') {
+    if (version.majorVersion === '1.7') return { playerName: 'test', online: true, ping: 1 }
+    if (version['>=']('1.19.3')) {
+      return {
+        action: {
+          _value: 63,
+          add_player: true,
+          initialize_chat: true,
+          update_game_mode: true,
+          update_listed: true,
+          update_latency: true,
+          update_display_name: true
+        },
+        data: [
+          {
+            uuid: 'a01e3843-e521-3998-958a-f459800e4d11',
+            player: { name: 'Player', properties: [] },
+            chatSession: undefined,
+            gamemode: 0,
+            listed: 1,
+            latency: 0,
+            displayName: undefined
+          }
+        ]
+      }
+    } else {
+      return {
+        action: 'add_player',
+        data: [
+          {
+            uuid: 'a01e3843-e521-3998-958a-f459800e4d11',
+            name: 'Player',
+            properties: [],
+            gamemode: 0,
+            ping: 0,
+            displayName: undefined
           }
         ]
       }
@@ -172,12 +229,20 @@ const values = {
   vec4f: {
     x: 0, y: 0, z: 0, w: 0
   },
+  vec3i: {
+    x: 0, y: 0, z: 0
+  },
+  vec3i16: {
+    x: 0, y: 0, z: 0
+  },
   count: 1, // TODO : might want to set this to a correct value
   bool: true,
   f64: 99999.2222,
   f32: -333.444,
   slot: slotValue,
   Slot: slotValue,
+  UntrustedSlot: slotValue,
+  HashedSlot: slotValue,
   SlotComponent: {
     type: 'hide_tooltip'
   },
@@ -273,6 +338,9 @@ const values = {
     })
     return results
   },
+  registryEntryHolder (typeArgs, context) {
+    return { [typeArgs.baseName]: 1 }
+  },
   soundSource: 'master',
   packedChunkPos: {
     x: 10,
@@ -337,7 +405,51 @@ const values = {
       keySignature: []
     }
   },
-  IDSet: { ids: [2, 5] }
+  IDSet: { ids: [2, 5] },
+  ItemSoundHolder: { soundId: 1 },
+  ChatTypesHolder: { chatType: 1 },
+  ExactComponentMatcher: [],
+  HashedStack: {
+    itemId: 1,
+    count: 1,
+    addedComponents: [],
+    removedComponents: []
+  },
+  RecipeBookSetting: {
+    open: false,
+    filtering: false
+  },
+  lpVec3: { x: 0, y: 0, z: 0 },
+  ExplosionParticleEntry: {
+    data: { // ExplosionParticleInfo
+      particle: {
+        particleId: 0,
+        data: null
+      },
+      speed: 0,
+      scaling: 0
+    },
+    weight: 1
+  },
+  DebugSubscriptionDataType: 0,
+  DebugSubscriptionUpdate: {
+    type: 0
+  },
+  DebugSubscriptionEvent: {
+    type: 0
+  },
+  RespawnData: {
+    globalPos: {
+      dimensionName: 'minecraft:overworld',
+      location: { x: 0, y: 64, z: 0 }
+    },
+    yaw: 0,
+    pitch: 0
+  },
+  GlobalPos: {
+    dimensionName: 'minecraft:overworld',
+    location: { x: 0, y: 64, z: 0 }
+  }
 }
 
 function getValue (_type, packet) {

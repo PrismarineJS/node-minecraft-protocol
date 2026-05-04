@@ -1,4 +1,5 @@
 const crypto = require('crypto')
+const { computeChatChecksum } = require('../datatypes/checksums')
 const concat = require('../transforms/binaryStream').concat
 const debug = require('debug')('minecraft-protocol')
 const messageExpireTime = 300000 // 5 min (ms)
@@ -103,6 +104,14 @@ module.exports = function (client, server, options) {
       return raise('multiplayer.disconnect.out_of_order_chat')
     }
     lastTimestamp = packet.timestamp
+
+    // Validate checksum for 1.21.5+
+    if (client.supportFeature('chatGlobalIndexAndChecksum') && options.enforceChatChecksum && packet.checksum !== undefined) {
+      const expectedChecksum = computeChatChecksum(client._lastSeenMessages || [])
+      if (packet.checksum !== 0 && packet.checksum !== expectedChecksum) {
+        return raise('multiplayer.disconnect.chat_validation_failed')
+      }
+    }
 
     // Checks here: 1) make sure client can chat, 2) chain/session is OK, 3) signature is OK, 4) log if expired
     if (client.settings.disabledChat) return raise('chat.disabled.options')

@@ -1,5 +1,50 @@
 # History
 
+## 1.66.0
+* [Use sync zlib in packet compression to avoid uncaught errors (#1476)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/b23a31bf6754634dd7be1bd70d493f85e2da7bfa) (thanks @rom1504)
+
+## 1.65.0
+* [Update CI to Node 24 (#1473)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/8008fe065787d50c7ab490cb0a503cb9200043fe) (thanks @rom1504)
+* [Fix publish condition for npm-publish v4 (#1472)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/9bc871da00a82058ad68f7fb6fd661c268f6a7a9) (thanks @rom1504)
+* [Switch to trusted publishing via OIDC (#1471)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/f87f9d5b35888be3bccece3edf5761183cf916a4) (thanks @rom1504)
+
+## 1.64.1
+* [Backport velocity field changes from 1.21.9+ to older versions (#1467)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/b66c9aa08052859fb2e3075a3d6c6f84a84e77f1) (thanks @SuperGamerTron)
+
+## 1.64.0
+* [🎈 1.21.11 (#1457)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/77f4167d93a70322f2963c3c81586c8fe0c6c299) (thanks @rom1504bot)
+
+## 1.63.0
+* [🎈 1.21.9 (#1435)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/0c35d94b9bf173b2127bae0b8d5f1c8789722fad) (thanks @rom1504bot)
+* [fix emitting playerJoin too early (#1424)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/bf89f7e86526c54d8c43f555d8f6dfa4948fd2d9) (thanks @zardoy)
+
+## 1.62.0
+* [Add support for Minecraft 1.21.8 (#1427)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/8a99613672298b2e9a1e66ca41f8bb720cf1a439) (thanks @rom1504)
+
+## 1.61.0
+* [1.21.6 (#1416)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/0bfd970e954f1ab5e579ebe51cbefbf07d952939) (thanks @extremeheat)
+
+## 1.60.1
+* [Fix undefined chat message signatures causing crash (#1413)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/2119b04f52605f62df2d029908d92d6443aa68db) (thanks @PiotrW01)
+* [types: add missing config state (#1397)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/5242498797e1e9877f9b0056ff608fb68e0a3508) (thanks @notsapinho)
+* [fix leak on entering config state twice (#1381)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/74aea5a5d6a495bfdfc7e97b164524f6a0c6a203) (thanks @zardoy)
+
+## 1.60.0
+* [1.21.5 (#1408)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/2467716b6f52d2c83a6c2173bcfa686d4a437868) (thanks @extremeheat)
+
+## 1.59.0
+* [fix: Wrap base64-encoded PEM with 64-char line boundary (#1292)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/0f6da566975a262e4e6f12a11e9b311496682508) (thanks @littledivy)
+
+## 1.58.0
+* [Fixes to protocol Holder implementation (#1355)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/7207b61f3a809ec9db01869a90c5ccaeafee4ca1) (thanks @extremeheat)
+* [Bump @types/node from 22.15.33 to 24.0.4 (#1405)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/1e38d8fc1e1bbe7aa834055cfd38ed0fa22c2085) (thanks @dependabot[bot])
+
+## 1.57.0
+* [Update package.json to remove lodash.get](https://github.com/PrismarineJS/node-minecraft-protocol/commit/031f13fea45264775311ae82e5a4efe74ebba96d) (thanks @rom1504)
+
+## 1.56.0
+* [Update serializer.js to remove usage of lodash.get (#1390)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/6a445312d384a7ca739e29d61bc37e4525da21e4) (thanks @rom1504)
+
 ## 1.55.0
 * [Fix `client.end()` (#1376)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/3bd4dc1b2002cd7badfa5b9cf8dda35cd6cc9ac1) (thanks @h5mcbox)
 * [Fix #1369 online-mode error 1.20.5-1.21.4 (#1375)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/5ec3dd4b367fcc039fbcb3edd214fe3cf8178a6d) (thanks @h5mcbox)

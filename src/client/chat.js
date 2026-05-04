@@ -1,4 +1,5 @@
 const crypto = require('crypto')
+const { computeChatChecksum } = require('../datatypes/checksums')
 const concat = require('../transforms/binaryStream').concat
 const { processNbtMessage } = require('prismarine-chat')
 const messageExpireTime = 420000 // 7 minutes (ms)
@@ -58,8 +59,14 @@ module.exports = function (client, options) {
 
       if (player.hasChainIntegrity) {
         const length = Buffer.byteLength(message, 'utf8')
-        const acknowledgements = previousMessages.length > 0 ? ['i32', previousMessages.length, 'buffer', Buffer.concat(...previousMessages.map(msg => msg.signature || client._signatureCache[msg.id]))] : ['i32', 0]
+        const validBuffers = previousMessages
+          .filter(msg => msg.signature || client._signatureCache[msg.id]) // Filter out invalid messages
+          .map(msg => msg.signature || client._signatureCache[msg.id])
+          .filter(buf => Buffer.isBuffer(buf))
 
+        const acknowledgements = validBuffers.length > 0
+          ? ['i32', validBuffers.length, 'buffer', Buffer.concat(validBuffers)]
+          : ['i32', 0]
         const signable = concat('i32', 1, 'UUID', uuid, 'UUID', player.sessionUuid, 'i32', index, 'i64', salt, 'i64', timestamp / 1000n, 'i32', length, 'pstring', message, ...acknowledgements)
 
         player.hasChainIntegrity = crypto.verify('RSA-SHA256', signable, player.publicKey, currentSignature)
@@ -106,38 +113,29 @@ module.exports = function (client, options) {
   })
 
   client.on('player_info', (packet) => {
-    if (mcData.supportFeature('playerInfoActionIsBitfield')) { // 1.19.3+
-      if (packet.action & 2) { // chat session
-        for (const player of packet.data) {
-          if (!player.chatSession) continue
-          client._players[player.UUID] = {
-            publicKey: crypto.createPublicKey({ key: player.chatSession.publicKey.keyBytes, format: 'der', type: 'spki' }),
-            publicKeyDER: player.chatSession.publicKey.keyBytes,
-            sessionUuid: player.chatSession.uuid
-          }
-          client._players[player.UUID].sessionIndex = true
-          client._players[player.UUID].hasChainIntegrity = true
+    for (const player of packet.data) {
+      if (player.chatSession) {
+        client._players[player.uuid] = {
+          publicKey: crypto.createPublicKey({ key: player.chatSession.publicKey.keyBytes, format: 'der', type: 'spki' }),
+          publicKeyDER: player.chatSession.publicKey.keyBytes,
+          sessionUuid: player.chatSession.uuid
         }
+        client._players[player.uuid].sessionIndex = true
+        client._players[player.uuid].hasChainIntegrity = true
       }
 
-      return
-    }
-
-    if (packet.action === 0) { // add player
-      for (const player of packet.data) {
-        if (player.crypto) {
-          client._players[player.UUID] = {
-            publicKey: crypto.createPublicKey({ key: player.crypto.publicKey, format: 'der', type: 'spki' }),
-            publicKeyDER: player.crypto.publicKey,
-            signature: player.crypto.signature,
-            displayName: player.displayName || player.name
-          }
-          client._players[player.UUID].hasChainIntegrity = true
+      if (player.crypto) {
+        client._players[player.uuid] = {
+          publicKey: crypto.createPublicKey({ key: player.crypto.publicKey, format: 'der', type: 'spki' }),
+          publicKeyDER: player.crypto.publicKey,
+          signature: player.crypto.signature,
+          displayName: player.displayName || player.name
         }
+        client._players[player.uuid].hasChainIntegrity = true
       }
-    } else if (packet.action === 4) { // remove player
-      for (const player of packet.data) {
-        delete client._players[player.UUID]
+
+      if (packet.action === 'remove_player') { // Only 1.8-1.9
+        delete client._players[player.uuid]
       }
     }
   })
@@ -201,6 +199,7 @@ module.exports = function (client, options) {
       const verified = !packet.unsignedChatContent && updateAndValidateSession(packet.senderUuid, packet.plainMessage, packet.signature, packet.index, packet.previousMessages, packet.salt, packet.timestamp) && !expired
       if (verified) client._signatureCache.push(packet.signature)
       client.emit('playerChat', {
+        globalIndex: packet.globalIndex,
         plainMessage: packet.plainMessage,
         unsignedContent: processMessage(packet.unsignedChatContent),
         type: packet.type,
@@ -372,14 +371,16 @@ module.exports = function (client, options) {
       if (mcData.supportFeature('useChatSessions')) { // 1.19.3+
         const { acknowledged, acknowledgements } = getAcknowledgements()
         const canSign = client.profileKeys && client._session
-        client.write((mcData.supportFeature('seperateSignedChatCommandPacket') && canSign) ? 'chat_command_signed' : 'chat_command', {
+        const chatPacket = {
           command,
           timestamp: options.timestamp,
           salt: options.salt,
           argumentSignatures: canSign ? signaturesForCommand(command, options.timestamp, options.salt, options.preview, acknowledgements) : [],
           messageCount: client._lastSeenMessages.pending,
+          checksum: computeChatChecksum(client._lastSeenMessages), // 1.21.5+
           acknowledged
-        })
+        }
+        client.write((mcData.supportFeature('seperateSignedChatCommandPacket') && canSign) ? 'chat_command_signed' : 'chat_command', chatPacket)
         client._lastSeenMessages.pending = 0
       } else {
         client.write('chat_command', {
@@ -392,6 +393,7 @@ module.exports = function (client, options) {
             messageSender: e.sender,
             messageSignature: e.signature
           })),
+          checksum: computeChatChecksum(client._lastSeenMessages),
           lastRejectedMessage: client._lastRejectedMessage
         })
       }
@@ -407,6 +409,7 @@ module.exports = function (client, options) {
         salt: options.salt,
         signature: (client.profileKeys && client._session) ? client.signMessage(message, options.timestamp, options.salt, undefined, acknowledgements) : undefined,
         offset: client._lastSeenMessages.pending,
+        checksum: computeChatChecksum(client._lastSeenMessages), // 1.21.5+
         acknowledged
       })
       client._lastSeenMessages.pending = 0
@@ -425,7 +428,8 @@ module.exports = function (client, options) {
           messageSender: e.sender,
           messageSignature: e.signature
         })),
-        lastRejectedMessage: client._lastRejectedMessage
+        lastRejectedMessage: client._lastRejectedMessage,
+        checksum: computeChatChecksum(client._lastSeenMessages) // 1.21.5+
       })
       client._lastSeenMessages.pending = 0
     } else if (client.serverFeatures.chatPreview) {

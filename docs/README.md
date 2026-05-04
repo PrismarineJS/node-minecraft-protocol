@@ -11,9 +11,16 @@ Parse and serialize minecraft packets, plus authentication and encryption.
 
 ## Features
 
- * Supports Minecraft PC version 1.7.10, 1.8.8, 1.9 (15w40b, 1.9, 1.9.1-pre2, 1.9.2, 1.9.4),
-  1.10 (16w20a, 1.10-pre1, 1.10, 1.10.1, 1.10.2), 1.11 (16w35a, 1.11, 1.11.2), 1.12 (17w15a, 17w18b, 1.12-pre4, 1.12, 1.12.1, 1.12.2), and 1.13 (17w50a, 1.13, 1.13.1, 1.13.2-pre1, 1.13.2-pre2, 1.13.2), 1.14 (1.14, 1.14.1, 1.14.3, 1.14.4)
-  , 1.15 (1.15, 1.15.1, 1.15.2) and 1.16 (20w13b, 20w14a, 1.16-rc1, 1.16, 1.16.1, 1.16.2, 1.16.3, 1.16.4, 1.16.5), 1.17 (21w07a, 1.17, 1.17.1), 1.18 (1.18, 1.18.1 and 1.18.2), 1.19 (1.19, 1.19.1, 1.19.2, 1.19.3, 1.19.4), 1.20 (1.20, 1.20.1, 1.20.2, 1.20.3, 1.20.4, 1.20.5, 1.20.6), 1.21 (1.21, 1.21.1, 1.21.3, 1.21.4)
+ * Supports Minecraft PC version
+   1.7.10, 1.8.8,  1.9 (15w40b, 1.9, 1.9.1-pre2, 1.9.2, 1.9.4), 1.10 (16w20a, 1.10-pre1, 1.10, 1.10.1, 1.10.2),
+   1.11 (16w35a, 1.11, 1.11.2), 1.12 (17w15a, 17w18b, 1.12-pre4, 1.12, 1.12.1, 1.12.2),
+   1.13 (17w50a, 1.13, 1.13.1, 1.13.2-pre1, 1.13.2-pre2, 1.13.2),1.14 (1.14, 1.14.1, 1.14.3, 1.14.4),
+   1.15 (1.15, 1.15.1, 1.15.2), 1.16 (20w13b, 20w14a, 1.16-rc1, 1.16, 1.16.1, 1.16.2, 1.16.3, 1.16.4, 1.16.5),
+   1.17 (21w07a, 1.17, 1.17.1), 1.18 (1.18, 1.18.1 and 1.18.2),
+   1.19 (1.19, 1.19.1, 1.19.2, 1.19.3, 1.19.4), 1.20 (1.20, 1.20.1, 1.20.2, 1.20.3, 1.20.4, 1.20.5, 1.20.6),
+   1.21, 1.21.1, 1.21.3, 1.21.4, 1.21.5, 1.21.6, 1.21.8, 1.21.9, 1.21.11
+<!--add_next_version_above-->
+
  * Parses all packets and emits events with packet fields as JavaScript
    objects.
  * Send a packet by supplying fields as a JavaScript object.
@@ -54,7 +61,7 @@ node-minecraft-protocol is pluggable.
    servers with a high level API, also a minecraft server by itself.
  * [pakkit](https://github.com/Heath123/pakkit) - A GUI tool to monitor Minecraft packets in real time, allowing you to view their data and interactively edit and resend them.
  * [minecraft-packet-debugger](https://github.com/wvffle/minecraft-packet-debugger) - A tool to capture Minecraft packets in a buffer then view them in a browser.
- * [aresrpg](https://github.com/aresrpg/aresrpg) - An open-source mmorpg minecraft server.
+ * [aresrpg](https://github.com/aresrpg/aresrpg-mc) - An open-source mmorpg minecraft server.
  * [SteveProxy](https://github.com/SteveProxy/proxy) - Proxy for Minecraft with the ability to change the gameplay using plugins.
  * and [several thousands others](https://github.com/PrismarineJS/node-minecraft-protocol/network/dependents?package_id=UGFja2FnZS0xODEzMDk0OQ%3D%3D)
 
@@ -174,7 +181,7 @@ server.on('playerJoin', function(client) {
       plainMessage: message,
       signedChatContent: '',
       unsignedChatContent: chatText(message),
-      type: 0,
+      type: mcData.supportFeature('chatTypeIsHolder') ? { chatType: 1 } : 0,
       senderUuid: 'd3527a0b-bc03-45d5-a878-2aafdd8c8a43', // random
       senderName: JSON.stringify({ text: 'me' }),
       senderTeam: undefined,
