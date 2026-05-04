@@ -1,5 +1,10 @@
 # History
 
+## 1.66.1
+* [Bump prismarine-auth from 2.7.0 to 3.1.1 (#1477)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/12f9a34fe259b2b96fa154f61f93a034d1d24120) (thanks @dependabot[bot])
+* [readme: fix aresrpg repo link (#1483)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/3162e72c232fb5b7b05fc035de2692e2199250a3) (thanks @AnotherPillow)
+* [Fix computeChatChecksum returning unsigned byte for i8 schema (#1485)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/a263bb92338c009701cc5d1eaa8fba597dde3946) (thanks @mio-rei)
+
 ## 1.66.0
 * [Use sync zlib in packet compression to avoid uncaught errors (#1476)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/b23a31bf6754634dd7be1bd70d493f85e2da7bfa) (thanks @rom1504)
 
