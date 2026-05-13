@@ -500,6 +500,10 @@ for (const supportedVersion of mc.supportedVersions) {
     })
 
     it('supports bundle packet', function (done) {
+      const updateTimeFields = mcData.protocol.play.toClient.types.packet_update_time[1].map(field => field.name)
+      const updateTimePacket = updateTimeFields.includes('clockUpdates')
+        ? { gameTime: 1, clockUpdates: Buffer.alloc(0) }
+        : { age: 1, time: 2 }
       const server = mc.createServer({
         'online-mode': false,
         version: version.minecraftVersion,
@@ -511,7 +515,7 @@ for (const supportedVersion of mc.supportedVersions) {
         })
         client.write('login', loginPacket(client, server))
         client.writeBundle([
-          ['update_time', { age: 1, time: 2 }],
+          ['update_time', updateTimePacket],
           ['close_window', { windowId: 0 }]
         ])
       })

@@ -73,7 +73,11 @@ function getFixedPacketPayload (version, packetName) {
     }
   }
   if (packetName === 'declare_recipes') {
-    if (version['>=']('1.21.3')) {
+    if (version['>=']('26.1.2')) {
+      return {
+        data: Buffer.alloc(0)
+      }
+    } else if (version['>=']('1.21.3')) {
       return {
         recipes: [
           {
@@ -554,6 +558,8 @@ for (const supportedVersion of mc.supportedVersions) {
     }
 
     function assertPacketsMatch (p1, p2) {
+      p1 = p1 || {}
+      p2 = p2 || {}
       packetInfo.forEach(function (field) {
         assert.deepEqual(p1[field], p2[field])
       })
