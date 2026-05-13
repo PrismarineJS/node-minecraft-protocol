@@ -1,5 +1,8 @@
 # History
 
+## 1.66.2
+* [Revert "Fix computeChatChecksum returning unsigned byte for i8 schema (#1485)" (#1489)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/db39bcbfa6d2419b17217da7f4eea6b689a5ac49) (thanks @extremeheat)
+
 ## 1.66.1
 * [Bump prismarine-auth from 2.7.0 to 3.1.1 (#1477)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/12f9a34fe259b2b96fa154f61f93a034d1d24120) (thanks @dependabot[bot])
 * [readme: fix aresrpg repo link (#1483)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/3162e72c232fb5b7b05fc035de2692e2199250a3) (thanks @AnotherPillow)
