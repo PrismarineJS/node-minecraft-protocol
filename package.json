@@ -55,7 +55,7 @@
     "minecraft-data": "^3.78.0",
     "minecraft-folder-path": "^1.2.0",
     "node-fetch": "^2.6.1",
-    "node-rsa": "^0.4.2",
+    "node-rsa": "^2.0.0",
     "prismarine-auth": "^3.1.1",
     "prismarine-chat": "^1.10.0",
     "prismarine-nbt": "^2.5.0",
