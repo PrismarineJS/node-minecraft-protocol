@@ -29,4 +29,10 @@ client.on('chat', function (packet) {
     if (username === client.username) return
     client.write('chat', { message: msg })
   }
+  if (jsonMsg.translate === 'chat.type.announcement' || jsonMsg.translate === 'chat.type.text') {
+    const username = jsonMsg.with[0].text
+    const msg = jsonMsg.with[1]
+    if (username === client.username) return
+    client.write('chat', { message: msg })
+  }
 })
