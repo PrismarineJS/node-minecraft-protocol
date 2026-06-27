@@ -53,6 +53,20 @@ module.exports = function (client, options) {
         client.write('configuration_acknowledged', {})
       }
       client.state = states.CONFIGURATION
+      // Mirror the vanilla client, which sends Client Information during the
+      // configuration phase. Some servers (e.g. Hypixel) wait for it before
+      // sending finish_configuration and close the socket otherwise. Must be
+      // after the CONFIGURATION state flip so it serializes correctly. (#3623)
+      client.write('settings', {
+        locale: 'en_us',
+        viewDistance: 10,
+        chatFlags: 0,
+        chatColors: true,
+        skinParts: 127,
+        mainHand: 1,
+        enableTextFiltering: false,
+        enableServerListing: true
+      })
       client.once('select_known_packs', () => {
         client.write('select_known_packs', { packs: [] })
       })
