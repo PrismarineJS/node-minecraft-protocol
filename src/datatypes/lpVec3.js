@@ -8,13 +8,13 @@ const [readVarInt, writeVarInt, sizeOfVarInt] = require('protodef').types.varint
 // Wire format (matching FriendlyByteBuf): byte `a`, byte `b`, then a 32-bit `c` read/written
 // BIG-endian via readUnsignedInt/writeInt. The 48-bit value is `c << 16 | b << 8 | a`.
 //
-// The decoded vector is exposed in the same 1/8000-block-per-tick units as vec3i16 (used by
-// pre-1.21.9 versions), so consumers such as mineflayer's fromNotchVelocity() handle every
-// version uniformly. The raw codec yields blocks per tick, hence the * NOTCH_UNITS_PER_BLOCK.
+// The decoded vector is in blocks per tick — the codec's natural units. Older versions encode
+// velocity as vec3i16 in 1/8000-block-per-tick "notch" units; normalizing between the two forms
+// is a version-specific consumer concern (mineflayer gates it with a supportFeature), not
+// something this wire codec should bake in.
 const MAX_QUANTIZED_VALUE = 32766.0
 const ABS_MIN_VALUE = 3.051944088384301e-5
 const ABS_MAX_VALUE = 1.7179869183e10
-const NOTCH_UNITS_PER_BLOCK = 8000
 
 function sanitize (value) {
   if (isNaN(value)) return 0.0
@@ -54,18 +54,18 @@ function readLpVec3 (buffer, offset) {
 
   return {
     value: {
-      x: unpack(packed, 3) * scale * NOTCH_UNITS_PER_BLOCK,
-      y: unpack(packed, 18) * scale * NOTCH_UNITS_PER_BLOCK,
-      z: unpack(packed, 33) * scale * NOTCH_UNITS_PER_BLOCK
+      x: unpack(packed, 3) * scale,
+      y: unpack(packed, 18) * scale,
+      z: unpack(packed, 33) * scale
     },
     size
   }
 }
 
 function writeLpVec3 (value, buffer, offset) {
-  const x = sanitize(value.x / NOTCH_UNITS_PER_BLOCK)
-  const y = sanitize(value.y / NOTCH_UNITS_PER_BLOCK)
-  const z = sanitize(value.z / NOTCH_UNITS_PER_BLOCK)
+  const x = sanitize(value.x)
+  const y = sanitize(value.y)
+  const z = sanitize(value.z)
 
   const chessboard = Math.max(Math.abs(x), Math.abs(y), Math.abs(z))
   if (chessboard < ABS_MIN_VALUE) {
@@ -91,7 +91,7 @@ function writeLpVec3 (value, buffer, offset) {
 }
 
 function sizeOfLpVec3 (value) {
-  const chessboard = Math.max(Math.abs(value.x), Math.abs(value.y), Math.abs(value.z)) / NOTCH_UNITS_PER_BLOCK
+  const chessboard = Math.max(Math.abs(value.x), Math.abs(value.y), Math.abs(value.z))
   if (chessboard < ABS_MIN_VALUE) return 1
   const scale = Math.ceil(chessboard)
   if (scale > 3) return 6 + sizeOfVarInt(Math.floor(scale / 4))

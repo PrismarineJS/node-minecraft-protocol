@@ -22,11 +22,11 @@ describe('lpVec3', () => {
   })
 
   it('decodes real 1.21.11 server velocity bytes to sane values', () => {
-    // big-endian 32-bit word; value exposed in 1/8000-block-per-tick units
+    // big-endian 32-bit word; value in blocks per tick (the codec's natural units)
     const r = readLpVec3(Buffer.from('f9ff7ffeebed', 'hex'), 0)
     assert.strictEqual(r.size, 6)
-    assert.ok(Math.abs(r.value.y / 8000 - (-0.0784)) < 0.001, 'unexpected y: ' + r.value.y)
-    assert.ok(Math.abs(r.value.x) < 8000 && Math.abs(r.value.z) < 8000, 'velocity out of range')
+    assert.ok(Math.abs(r.value.y - (-0.0784)) < 0.001, 'unexpected y: ' + r.value.y)
+    assert.ok(Math.abs(r.value.x) < 1 && Math.abs(r.value.z) < 1, 'velocity out of range')
   })
 
   it('round-trips real server velocity bytes exactly', () => {
