@@ -78,7 +78,7 @@ function writeLpVec3 (value, buffer, offset) {
 }
 
 function sizeOfLpVec3 (value) {
-  const max = Math.max(Math.abs(value.x), Math.abs(value.y), Math.abs(value.z))
+  const max = Math.max(Math.abs(sanitize(value.x)), Math.abs(sanitize(value.y)), Math.abs(sanitize(value.z)))
   if (max < ABS_MIN_VALUE) return 1
 
   const scale = Math.ceil(max)

@@ -27,4 +27,12 @@ describe('lpVec3', () => {
       assert.strictEqual(sizeOfLpVec3(value), end, 'sizeOf mismatch for ' + hex)
     }
   })
+
+  it('sizes sanitized values consistently', () => {
+    for (const x of [NaN, Infinity]) {
+      const value = { x, y: 0, z: 0 }
+      const size = sizeOfLpVec3(value)
+      assert.strictEqual(writeLpVec3(value, Buffer.alloc(size), 0), size)
+    }
+  })
 })
