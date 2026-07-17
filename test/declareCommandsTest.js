@@ -54,5 +54,4 @@ describe('declare_commands handling', () => {
     assert.strictEqual(writes[0].name, 'chat_command_signed')
     assert.deepStrictEqual(writes[0].data.argumentSignatures.map(sig => sig.argumentName), ['message'])
   })
-
 })
