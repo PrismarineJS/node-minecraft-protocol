@@ -511,7 +511,7 @@ for (const supportedVersion of mc.supportedVersions) {
         })
         client.write('login', loginPacket(client, server))
         client.writeBundle([
-          ['update_time', { age: 1, time: 2 }],
+          ['update_time', { age: 1, time: 2, clockUpdates: [] }],
           ['close_window', { windowId: 0 }]
         ])
       })
