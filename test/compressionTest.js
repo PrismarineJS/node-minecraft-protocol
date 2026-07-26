@@ -62,5 +62,12 @@ for (const supportedVersion of supportedVersions) {
       const out = await pump(createDecompressor(0, true), packet)
       assert.strictEqual(out.length, 0, 'over-cap declared length should be dropped before inflating')
     })
+
+    it('round-trips a packet at the maximum uncompressed length', async () => {
+      const original = Buffer.alloc(MAX_UNCOMPRESSED_LENGTH, 0)
+      const [compressed] = await pump(createCompressor(0), original)
+      const [restored] = await pump(createDecompressor(0), compressed)
+      assert.ok(restored.equals(original))
+    })
   })
 }
