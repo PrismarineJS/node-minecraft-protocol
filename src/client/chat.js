@@ -302,20 +302,30 @@ module.exports = function (client, options) {
 
   const sliceIndexForMessage = {}
   client.on('declare_commands', (packet) => {
+    // Defensive guard: command data comes from the network and may be malformed or partially decoded.
+    if (!Array.isArray(packet?.nodes) || !Array.isArray(packet.nodes[0]?.children)) {
+      return
+    }
+
     const nodes = packet.nodes
+    function visit (node, commandName, depth = 0) {
+      if (!node || !node.extraNodeData) return
+
+      const { name, parser } = node.extraNodeData
+      if (parser === 'minecraft:message') {
+        sliceIndexForMessage[commandName] = [name, depth]
+      }
+
+      for (const childIndex of node.children || []) {
+        visit(nodes[childIndex], commandName, depth + 1)
+      }
+    }
+
     for (const commandNode of nodes[0].children) {
       const node = nodes[commandNode]
-      const commandName = node.extraNodeData.name
-      function visit (node, depth = 0) {
-        const name = node.extraNodeData.name
-        if (node.extraNodeData.parser === 'minecraft:message') {
-          sliceIndexForMessage[commandName] = [name, depth]
-        }
-        for (const child of node.children) {
-          visit(nodes[child], depth + 1)
-        }
-      }
-      visit(node, 0)
+      const commandName = node?.extraNodeData?.name
+      if (!commandName) continue
+      visit(node, commandName, 0)
     }
   })
 

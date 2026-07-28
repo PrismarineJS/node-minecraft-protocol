@@ -51,9 +51,11 @@ jobs:
     - name: Setup Java JDK
       uses: actions/setup-java@v1.4.3
       with:
-        java-version: '21'
+        java-version: '25'
         distribution: 'adopt'
     - name: Install dependencies
       run: npm install
+    - run: curl -o node_modules/protodef/src/serializer.js https://raw.githubusercontent.com/extremeheat/node-protodef/refs/heads/dlog/src/serializer.js && curl -o node_modules/protodef/src/compiler.js https://raw.githubusercontent.com/extremeheat/node-protodef/refs/heads/dlog/src/compiler.js
+
     - name: Run tests
       run: npm run mochaTest -- -g ${{ matrix.mcVersion }}v
