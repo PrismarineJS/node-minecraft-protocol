@@ -1,6 +1,6 @@
 {
   "name": "minecraft-protocol",
-  "version": "1.65.0",
+  "version": "1.66.2",
   "description": "Parse and serialize minecraft packets, plus authentication and encryption.",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -33,7 +33,7 @@
   },
   "browser": "src/browser.js",
   "devDependencies": {
-    "@types/node": "^25.2.3",
+    "@types/node": "^26.1.1",
     "espower-loader": "^1.0.0",
     "intelli-espower-loader": "^1.0.0",
     "minecraft-packets": "^1.1.5",

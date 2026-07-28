@@ -53,6 +53,24 @@ module.exports = function (client, options) {
         client.write('configuration_acknowledged', {})
       }
       client.state = states.CONFIGURATION
+      // Mirror the vanilla client, which sends Client Information during the
+      // configuration phase. Some servers (e.g. Hypixel) wait for it before
+      // sending finish_configuration and will close the socket otherwise.
+      // Defaults are vanilla-safe and can be overridden per-field via the
+      // `clientSettings` option. A client that also sends Client Information in
+      // the play state (e.g. mineflayer on its 'login' event) still takes
+      // precedence there, exactly as the vanilla client re-sends settings. (#3623)
+      const clientSettings = options.clientSettings || {}
+      client.write('settings', {
+        locale: clientSettings.locale ?? 'en_us',
+        viewDistance: clientSettings.viewDistance ?? 10,
+        chatFlags: clientSettings.chatFlags ?? 0,
+        chatColors: clientSettings.chatColors ?? true,
+        skinParts: clientSettings.skinParts ?? 127,
+        mainHand: clientSettings.mainHand ?? 1,
+        enableTextFiltering: clientSettings.enableTextFiltering ?? false,
+        enableServerListing: clientSettings.enableServerListing ?? true
+      })
       client.once('select_known_packs', () => {
         client.write('select_known_packs', { packs: [] })
       })

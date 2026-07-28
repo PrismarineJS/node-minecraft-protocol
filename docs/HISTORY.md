@@ -1,5 +1,16 @@
 # History
 
+## 1.66.2
+* [Revert "Fix computeChatChecksum returning unsigned byte for i8 schema (#1485)" (#1489)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/db39bcbfa6d2419b17217da7f4eea6b689a5ac49) (thanks @extremeheat)
+
+## 1.66.1
+* [Bump prismarine-auth from 2.7.0 to 3.1.1 (#1477)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/12f9a34fe259b2b96fa154f61f93a034d1d24120) (thanks @dependabot[bot])
+* [readme: fix aresrpg repo link (#1483)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/3162e72c232fb5b7b05fc035de2692e2199250a3) (thanks @AnotherPillow)
+* [Fix computeChatChecksum returning unsigned byte for i8 schema (#1485)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/a263bb92338c009701cc5d1eaa8fba597dde3946) (thanks @mio-rei)
+
+## 1.66.0
+* [Use sync zlib in packet compression to avoid uncaught errors (#1476)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/b23a31bf6754634dd7be1bd70d493f85e2da7bfa) (thanks @rom1504)
+
 ## 1.65.0
 * [Update CI to Node 24 (#1473)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/8008fe065787d50c7ab490cb0a503cb9200043fe) (thanks @rom1504)
 * [Fix publish condition for npm-publish v4 (#1472)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/9bc871da00a82058ad68f7fb6fd661c268f6a7a9) (thanks @rom1504)

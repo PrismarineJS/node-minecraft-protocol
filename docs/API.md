@@ -147,6 +147,15 @@ Returns a `Client` instance and perform login.
  * id : a numeric client id used for referring to multiple clients in a server
  * validateChannelProtocol (optional) : whether or not to enable protocol validation for custom protocols using plugin channels. Defaults to true
  * disableChatSigning (optional) : Don't try obtaining chat signing keys from Mojang (1.19+)
+ * clientSettings (optional) : Client Information (settings) sent to the server during the configuration phase (1.20.2+). All fields are optional and default to vanilla-safe values:
+   * locale : language/locale string, default `'en_us'`
+   * viewDistance : view distance in chunks, default `10`
+   * chatFlags : chat mode, `0` = enabled, `1` = commands only, `2` = hidden, default `0`
+   * chatColors : whether chat colors are enabled, default `true`
+   * skinParts : displayed skin parts bitmask, default `127`
+   * mainHand : `0` = left, `1` = right, default `1`
+   * enableTextFiltering : default `false`
+   * enableServerListing : whether the player appears in server status player samples, default `true`
  * realms : An object which should contain one of the following properties: `realmId` or `pickRealm`. When defined will attempt to join a Realm without needing to specify host/port. **The authenticated account must either own the Realm or have been invited to it**
    * realmId : The id of the Realm to join.
    * pickRealm(realms) : A function which will have an array of the user Realms (joined/owned) passed to it. The function should return a Realm.
