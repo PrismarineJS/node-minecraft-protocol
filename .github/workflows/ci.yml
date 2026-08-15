@@ -5,8 +5,12 @@ on:
     branches:
       - master
   pull_request:
-    branches: 
+    branches:
       - master
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   Lint:
