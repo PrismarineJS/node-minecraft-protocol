@@ -300,14 +300,46 @@ module.exports = function (client, options) {
     })
   })
 
+  // Repeatedly remove nodes that can already be built/resolved; if no progress
+  // can be made while nodes remain, the tree contains a cycle or an
+  // unresolvable reference.
+  function validateCommandTree (nodes) {
+    if (!nodes.every(node => Array.isArray(node.children))) return false
+    let pending
+    const canBuild = index => nodes[index].redirectNode === undefined ||
+      !pending.has(nodes[index].redirectNode)
+    const canResolve = index => nodes[index].children.every(child => !pending.has(child))
+    for (const validator of [canBuild, canResolve]) {
+      pending = new Set(nodes.keys())
+      let progressed = true
+      while (pending.size > 0 && progressed) {
+        progressed = false
+        for (const index of [...pending]) {
+          if (validator(index)) {
+            pending.delete(index)
+            progressed = true
+          }
+        }
+      }
+      if (pending.size > 0) return false
+    }
+    return true
+  }
+
+  function rejectCommandTree () {
+    client.emit('error', new Error('Server sent an impossible command tree'))
+    client.end('impossibleCommandTree')
+  }
+
   const sliceIndexForMessage = {}
   client.on('declare_commands', (packet) => {
-    // Defensive guard: command data comes from the network and may be malformed or partially decoded.
-    if (!Array.isArray(packet?.nodes) || !Array.isArray(packet.nodes[0]?.children)) {
+    const nodes = packet?.nodes
+    if (!Array.isArray(nodes) || !Array.isArray(nodes[packet.rootIndex]?.children) ||
+      !validateCommandTree(nodes)) {
+      rejectCommandTree()
       return
     }
 
-    const nodes = packet.nodes
     function visit (node, commandName, depth = 0) {
       if (!node || !node.extraNodeData) return
 
@@ -321,7 +353,7 @@ module.exports = function (client, options) {
       }
     }
 
-    for (const commandNode of nodes[0].children) {
+    for (const commandNode of nodes[packet.rootIndex].children) {
       const node = nodes[commandNode]
       const commandName = node?.extraNodeData?.name
       if (!commandName) continue
