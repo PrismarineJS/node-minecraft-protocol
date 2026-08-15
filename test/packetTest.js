@@ -449,6 +449,10 @@ const values = {
   GlobalPos: {
     dimensionName: 'minecraft:overworld',
     location: { x: 0, y: 64, z: 0 }
+  },
+  GameRule: {
+    name: '',
+    value: ''
   }
 }
 

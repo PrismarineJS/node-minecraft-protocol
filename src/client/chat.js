@@ -300,22 +300,64 @@ module.exports = function (client, options) {
     })
   })
 
-  const sliceIndexForMessage = {}
-  client.on('declare_commands', (packet) => {
-    const nodes = packet.nodes
-    for (const commandNode of nodes[0].children) {
-      const node = nodes[commandNode]
-      const commandName = node.extraNodeData.name
-      function visit (node, depth = 0) {
-        const name = node.extraNodeData.name
-        if (node.extraNodeData.parser === 'minecraft:message') {
-          sliceIndexForMessage[commandName] = [name, depth]
-        }
-        for (const child of node.children) {
-          visit(nodes[child], depth + 1)
+  // Repeatedly remove nodes that can already be built/resolved; if no progress
+  // can be made while nodes remain, the tree contains a cycle or an
+  // unresolvable reference.
+  function validateCommandTree (nodes) {
+    if (!nodes.every(node => Array.isArray(node.children))) return false
+    let pending
+    const canBuild = index => nodes[index].redirectNode === undefined ||
+      !pending.has(nodes[index].redirectNode)
+    const canResolve = index => nodes[index].children.every(child => !pending.has(child))
+    for (const validator of [canBuild, canResolve]) {
+      pending = new Set(nodes.keys())
+      let progressed = true
+      while (pending.size > 0 && progressed) {
+        progressed = false
+        for (const index of [...pending]) {
+          if (validator(index)) {
+            pending.delete(index)
+            progressed = true
+          }
         }
       }
-      visit(node, 0)
+      if (pending.size > 0) return false
+    }
+    return true
+  }
+
+  function rejectCommandTree () {
+    client.emit('error', new Error('Server sent an impossible command tree'))
+    client.end('impossibleCommandTree')
+  }
+
+  const sliceIndexForMessage = {}
+  client.on('declare_commands', (packet) => {
+    const nodes = packet?.nodes
+    if (!Array.isArray(nodes) || !Array.isArray(nodes[packet.rootIndex]?.children) ||
+      !validateCommandTree(nodes)) {
+      rejectCommandTree()
+      return
+    }
+
+    function visit (node, commandName, depth = 0) {
+      if (!node || !node.extraNodeData) return
+
+      const { name, parser } = node.extraNodeData
+      if (parser === 'minecraft:message') {
+        sliceIndexForMessage[commandName] = [name, depth]
+      }
+
+      for (const childIndex of node.children || []) {
+        visit(nodes[childIndex], commandName, depth + 1)
+      }
+    }
+
+    for (const commandNode of nodes[packet.rootIndex].children) {
+      const node = nodes[commandNode]
+      const commandName = node?.extraNodeData?.name
+      if (!commandName) continue
+      visit(node, commandName, 0)
     }
   })
 
