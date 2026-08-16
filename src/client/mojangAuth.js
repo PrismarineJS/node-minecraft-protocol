@@ -17,7 +17,12 @@ module.exports = async function (client, options) {
     options.profilesFolder = mcFolderExists ? mcDefaultFolderPath : '.' // local folder if mc folder doesn't exist
   }
 
-  const yggdrasilClient = yggdrasil({ agent: options.agent, host: options.authServer || 'https://authserver.mojang.com' })
+  const mojangAuthServer = 'https://authserver.mojang.com'
+  const authServer = options.authServer || mojangAuthServer
+  if (authServer === mojangAuthServer) {
+    console.warn('[deprecated] mojang auth servers no longer accept mojang accounts to login. convert your account.\nhttps://help.minecraft.net/hc/en-us/articles/4403181904525-How-to-Migrate-Your-Mojang-Account-to-a-Microsoft-Account')
+  }
+  const yggdrasilClient = yggdrasil({ agent: options.agent, host: authServer })
   const clientToken = options.clientToken || (options.session && options.session.clientToken) || (options.profilesFolder && (await getLauncherProfiles()).mojangClientToken) || UUID.v4().toString().replace(/-/g, '')
   const skipValidation = false || options.skipValidation
   options.accessToken = null
