@@ -1,5 +1,8 @@
 # History
 
+## 1.68.0
+* [fix(ping): reject when the connection closes before a status response (#1514)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/0903e593a9936a5e5deffc1d4b229230de4258d8) (thanks @u9g)
+
 ## 1.67.0
 * [🎈 26.1 (#1469)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/404fb097e47244d366a6011bfe4f9d9d530f7ded) (thanks @rom1504bot)
 * [Send interim Client Information (settings) packet during configuration phase (#1499)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/aa23a03964bf84e2f7fe813818a4ec5b7b2a1270) (thanks @AChompSitsIn)
