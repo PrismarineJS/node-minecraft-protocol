@@ -6,8 +6,6 @@ const assert = require('assert')
 const encrypt = require('./client/encrypt')
 const keepalive = require('./client/keepalive')
 const compress = require('./client/compress')
-const auth = require('./client/mojangAuth')
-const microsoftAuth = require('./client/microsoftAuth')
 const setProtocol = require('./client/setProtocol')
 const play = require('./client/play')
 const tcpDns = require('./client/tcp_dns')
@@ -43,10 +41,13 @@ function createClient (options) {
   } else {
     switch (options.auth) {
       case 'mojang':
-        auth(client, options)
+        require('./client/mojangAuth')(client, options)
         onReady()
         break
-      case 'microsoft':
+      case 'microsoft': {
+        // Required here, not at the top: the Microsoft auth dependency tree
+        // (prismarine-auth, msal-node) must not load for offline clients.
+        const microsoftAuth = require('./client/microsoftAuth')
         if (options.realms) {
           microsoftAuth.realmAuthenticate(client, options).then(() => microsoftAuth.authenticate(client, options)).catch((err) => client.emit('error', err)).then(onReady)
         } else {
@@ -54,6 +55,7 @@ function createClient (options) {
           onReady()
         }
         break
+      }
       case 'offline':
       default:
         client.username = options.username

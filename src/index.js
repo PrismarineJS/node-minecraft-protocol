@@ -1,16 +1,16 @@
 'use strict'
 
 const Client = require('./client')
-const Server = require('./server')
 const serializer = require('./transforms/serializer')
 const createClient = require('./createClient')
-const createServer = require('./createServer')
 
 module.exports = {
   createClient,
-  createServer,
+  // Getters so client-only consumers never load the server dependency
+  // tree (node-rsa and the server plugins).
+  get createServer () { return require('./createServer') },
   Client,
-  Server,
+  get Server () { return require('./server') },
   states: require('./states'),
   createSerializer: serializer.createSerializer,
   createDeserializer: serializer.createDeserializer,
