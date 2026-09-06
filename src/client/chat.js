@@ -382,6 +382,7 @@ module.exports = function (client, options) {
   function getAcknowledgements () {
     let acc = 0
     const acknowledgements = []
+    const lastSeenMessages = []
 
     for (let i = 0; i < client._lastSeenMessages.capacity; i++) {
       const idx = (client._lastSeenMessages.offset + i) % 20
@@ -389,6 +390,7 @@ module.exports = function (client, options) {
       if (message) {
         acc |= 1 << i
         acknowledgements.push(message.signature)
+        lastSeenMessages.push(message)
         message.pending = false
       }
     }
@@ -400,7 +402,8 @@ module.exports = function (client, options) {
 
     return {
       acknowledgements,
-      acknowledged: bitset
+      acknowledged: bitset,
+      checksum: computeChatChecksum(lastSeenMessages)
     }
   }
 
@@ -411,7 +414,7 @@ module.exports = function (client, options) {
     if (message.startsWith('/')) {
       const command = message.slice(1)
       if (mcData.supportFeature('useChatSessions')) { // 1.19.3+
-        const { acknowledged, acknowledgements } = getAcknowledgements()
+        const { acknowledged, acknowledgements, checksum } = getAcknowledgements()
         const canSign = client.profileKeys && client._session
         const chatPacket = {
           command,
@@ -419,7 +422,7 @@ module.exports = function (client, options) {
           salt: options.salt,
           argumentSignatures: canSign ? signaturesForCommand(command, options.timestamp, options.salt, options.preview, acknowledgements) : [],
           messageCount: client._lastSeenMessages.pending,
-          checksum: computeChatChecksum(client._lastSeenMessages), // 1.21.5+
+          checksum, // 1.21.5+
           acknowledged
         }
         client.write((mcData.supportFeature('seperateSignedChatCommandPacket') && canSign) ? 'chat_command_signed' : 'chat_command', chatPacket)
@@ -444,14 +447,14 @@ module.exports = function (client, options) {
     }
 
     if (mcData.supportFeature('useChatSessions')) {
-      const { acknowledgements, acknowledged } = getAcknowledgements()
+      const { acknowledgements, acknowledged, checksum } = getAcknowledgements()
       client.write('chat_message', {
         message,
         timestamp: options.timestamp,
         salt: options.salt,
         signature: (client.profileKeys && client._session) ? client.signMessage(message, options.timestamp, options.salt, undefined, acknowledgements) : undefined,
         offset: client._lastSeenMessages.pending,
-        checksum: computeChatChecksum(client._lastSeenMessages), // 1.21.5+
+        checksum, // 1.21.5+
         acknowledged
       })
       client._lastSeenMessages.pending = 0
