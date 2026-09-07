@@ -9,6 +9,7 @@ const getFieldInfo = require('protodef').utils.getFieldInfo
 const getField = require('protodef').utils.getField
 
 const { getPort } = require('./common/util')
+const testedVersions = require('./common/testedVersions')
 
 function evalCount (count, fields) {
   if (fields[count.field] in count.map) { return count.map[fields[count.field]] }
@@ -467,7 +468,7 @@ function getValue (_type, packet) {
   }
 }
 
-for (const supportedVersion of mc.supportedVersions) {
+for (const supportedVersion of testedVersions) {
   let PORT
 
   const mcData = require('minecraft-data')(supportedVersion)
