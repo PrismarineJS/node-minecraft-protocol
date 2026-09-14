@@ -48,7 +48,12 @@ function createClient (options) {
         break
       case 'microsoft':
         if (options.realms) {
-          microsoftAuth.realmAuthenticate(client, options).then(() => microsoftAuth.authenticate(client, options)).catch((err) => client.emit('error', err)).then(onReady)
+          client.wait_connect = true // mirror autoVersion.js: onReady (registerChannel, etc.) only runs once realm+microsoft auth resolves
+          microsoftAuth.realmAuthenticate(client, options).then(() => microsoftAuth.authenticate(client, options)).catch((err) => client.emit('error', err)).then(() => {
+            onReady()
+            client.emit('connect_allowed')
+            client.wait_connect = false
+          })
         } else {
           microsoftAuth.authenticate(client, options).catch((err) => client.emit('error', err))
           onReady()
