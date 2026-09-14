@@ -13,6 +13,19 @@ const { getPort } = require('./common/util')
 const SURVIVE_TIME = 10000
 const MC_SERVER_PATH = path.join(__dirname, 'server')
 
+// Vanilla logs the "Done" line startServer waits on before it builds its status object,
+// and closes any status request that arrives in between without a reply (1.19.4+).
+async function pingWhenReady (options, attempts = 20) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await mc.ping(options)
+    } catch (err) {
+      if (attempt === attempts || !/closed before the server sent a status response/.test(err.message)) throw err
+      await new Promise(resolve => setTimeout(resolve, 50))
+    }
+  }
+}
+
 const Wrap = require('minecraft-wrap').Wrap
 
 for (const supportedVersion of mc.supportedVersions) {
@@ -79,25 +92,22 @@ for (const supportedVersion of mc.supportedVersions) {
         })
       })
 
-      it('pings the server', function (done) {
-        mc.ping({
+      it('pings the server', async function () {
+        const results = await pingWhenReady({
           version: version.minecraftVersion,
           port: PORT
-        }, function (err, results) {
-          if (err) return done(err)
-          assert.ok(results.latency >= 0)
-          assert.ok(results.latency <= 1000)
-          delete results.latency
-          delete results.favicon // too lazy to figure it out
-          /*        assert.deepEqual(results, {
-           version: {
-           name: '1.7.4',
-           protocol: 4
-           },
-           description: { text: "test1234" }
-           }); */
-          done()
         })
+        assert.ok(results.latency >= 0)
+        assert.ok(results.latency <= 1000)
+        delete results.latency
+        delete results.favicon // too lazy to figure it out
+        /*        assert.deepEqual(results, {
+         version: {
+         name: '1.7.4',
+         protocol: 4
+         },
+         description: { text: "test1234" }
+         }); */
       })
 
       // chat/Style.java
