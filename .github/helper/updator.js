@@ -7,7 +7,10 @@ const cp = require('child_process')
 const assert = require('assert')
 const github = require('gh-helpers')()
 const { join } = require('path')
-const exec = (cmd) => github.mock ? console.log('> ', cmd) : (console.log('> ', cmd), cp.execSync(cmd, { stdio: 'inherit' }))
+const spawnGit = (args) => {
+  console.log('> git', args.join(' '))
+  if (!github.mock) cp.spawnSync('git', args, { stdio: 'inherit', shell: false })
+}
 
 console.log('Starting update process...')
 // Sanitize and validate environment variables all non alpha numeric / underscore / dot
@@ -56,12 +59,12 @@ async function main () {
   }
 
   const branchName = 'pc' + newVersion.replace(/[^a-zA-Z0-9_]/g, '_')
-  exec(`git checkout -b ${branchName}`)
-  exec('git config user.name "github-actions[bot]"')
-  exec('git config user.email "41898282+github-actions[bot]@users.noreply.github.com"')
-  exec('git add --all')
-  exec(`git commit -m "Update to version ${newVersion}"`)
-  exec(`git push origin ${branchName} --force`)
+  spawnGit(['checkout', '-b', branchName])
+  spawnGit(['config', 'user.name', 'github-actions[bot]'])
+  spawnGit(['config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com'])
+  spawnGit(['add', '--all'])
+  spawnGit(['commit', '-m', `Update to version ${newVersion}`])
+  spawnGit(['push', 'origin', branchName, '--force'])
   //     createPullRequest(title: string, body: string, fromBranch: string, intoBranch?: string): Promise<{ number: number, url: string }>;
   const pr = await github.createPullRequest(
     `🎈 ${newVersion}`,
