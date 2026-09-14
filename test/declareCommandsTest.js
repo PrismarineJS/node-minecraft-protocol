@@ -41,6 +41,7 @@ describe('declare_commands handling', () => {
     client.signMessage = () => Buffer.from([1])
 
     client.emit('declare_commands', {
+      rootIndex: 0,
       nodes: [
         { children: [1] },
         { children: [2], extraNodeData: { name: 'msg' } },
