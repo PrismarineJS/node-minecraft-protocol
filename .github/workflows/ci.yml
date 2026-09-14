@@ -61,4 +61,6 @@ jobs:
       run: npm install
 
     - name: Run tests
-      run: npm run mochaTest -- -g ${{ matrix.mcVersion }}v
+      run: npm run mochaTest
+      env:
+        MC_VERSION: ${{ matrix.mcVersion }}

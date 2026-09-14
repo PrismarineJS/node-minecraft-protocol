@@ -3,9 +3,10 @@
 const ITERATIONS = 10000
 
 const mc = require('../')
+const testedVersions = require('./common/testedVersions')
 const states = mc.states
 
-for (const supportedVersion of mc.supportedVersions) {
+for (const supportedVersion of testedVersions) {
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
   const positionFlags = mcData.isNewerOrEqualTo('1.21.3') ? { flags: { onGround: true, hasHorizontalCollision: false } } : { onGround: true }
