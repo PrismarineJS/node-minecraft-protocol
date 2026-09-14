@@ -147,9 +147,11 @@ Returns a `Client` instance and perform login.
  * id : a numeric client id used for referring to multiple clients in a server
  * validateChannelProtocol (optional) : whether or not to enable protocol validation for custom protocols using plugin channels. Defaults to true
  * disableChatSigning (optional) : Don't try obtaining chat signing keys from Mojang (1.19+)
- * clientSettings (optional) : Client Information (settings) sent to the server during the configuration phase (1.20.2+). All fields are optional and default to vanilla-safe values:
+ * cookies (optional) : cookies to answer `cookie_request` packets with, as an object or Map of key to Buffer (1.20.5+). Pass the previous connection's `client._cookies` when following a `transfer` packet, like the vanilla client does
+ * brand (optional) : client brand sent on the `minecraft:brand` plugin channel when first entering the configuration phase (1.20.2+), default `'vanilla'`
+ * clientSettings (optional) : Client Information (settings) sent to the server, after the brand, when first entering the configuration phase (1.20.2+); like the vanilla client, they are not re-sent when a server sends the client back to configuration. All fields are optional and default to the vanilla values:
    * locale : language/locale string, default `'en_us'`
-   * viewDistance : view distance in chunks, default `10`
+   * viewDistance : view distance in chunks, default `12`
    * chatFlags : chat mode, `0` = enabled, `1` = commands only, `2` = hidden, default `0`
    * chatColors : whether chat colors are enabled, default `true`
    * skinParts : displayed skin parts bitmask, default `127`
@@ -157,6 +159,7 @@ Returns a `Client` instance and perform login.
    * enableTextFiltering : default `false`
    * enableServerListing : whether the player appears in server status player samples, default `true`
    * particleStatus : `'all'`, `'decreased'` or `'minimal'` (1.21.3+), default `'all'`
+ * knownPacks (optional) : data packs the client has locally, as an array of `{ namespace, id, version }` (1.20.5+). The reply to the server's `select_known_packs` is the part of the server's list found here, like the vanilla client, which knows `{ namespace: 'minecraft', id: 'core', version: '<game version>' }`. The server omits the registry entries of the packs in the reply, so the default is `[]` and the server sends its full registry data
  * realms : An object which should contain one of the following properties: `realmId` or `pickRealm`. When defined will attempt to join a Realm without needing to specify host/port. **The authenticated account must either own the Realm or have been invited to it**
    * realmId : The id of the Realm to join.
    * pickRealm(realms) : A function which will have an array of the user Realms (joined/owned) passed to it. The function should return a Realm.
@@ -167,6 +170,10 @@ Returns a `Client` instance and perform login.
 
 Create a new client, if `isServer` is true then it is a server-side client, otherwise it's a client-side client.
 Takes a minecraft `version` as second argument.
+
+### client._cookies
+
+Map of cookies (key to Buffer) received through `store_cookie` packets, seeded from the `cookies` option (1.20.5+). The client answers `cookie_request` packets from it in the login, configuration and play states, replying with an absent value for unknown cookies, like the vanilla client.
 
 ### client.write(name, params)
 
