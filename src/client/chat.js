@@ -413,16 +413,18 @@ module.exports = function (client, options) {
       if (mcData.supportFeature('useChatSessions')) { // 1.19.3+
         const { acknowledged, acknowledgements } = getAcknowledgements()
         const canSign = client.profileKeys && client._session
+        const argumentSignatures = canSign ? signaturesForCommand(command, options.timestamp, options.salt, options.preview, acknowledgements) : []
         const chatPacket = {
           command,
           timestamp: options.timestamp,
           salt: options.salt,
-          argumentSignatures: canSign ? signaturesForCommand(command, options.timestamp, options.salt, options.preview, acknowledgements) : [],
+          argumentSignatures,
           messageCount: client._lastSeenMessages.pending,
           checksum: computeChatChecksum(client._lastSeenMessages), // 1.21.5+
           acknowledged
         }
-        client.write((mcData.supportFeature('seperateSignedChatCommandPacket') && canSign) ? 'chat_command_signed' : 'chat_command', chatPacket)
+        // A command with nothing to sign goes as the unsigned chat_command whether or not the client can sign.
+        client.write((mcData.supportFeature('seperateSignedChatCommandPacket') && argumentSignatures.length > 0) ? 'chat_command_signed' : 'chat_command', chatPacket)
         client._lastSeenMessages.pending = 0
       } else {
         client.write('chat_command', {
