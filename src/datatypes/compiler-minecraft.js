@@ -111,7 +111,7 @@ if (n !== 0) {
 if (${baseName} != null) {
   offset = ${compiler.callType(`${baseName} + 1`, 'varint')}
 } else if (${otherwiseName}) {
-  offset += 1
+  offset = ${compiler.callType(0, 'varint')}
   offset = ${compiler.callType(`${otherwiseName}`, opts.otherwise.type)}
 } else {
   throw new Error('registryEntryHolder type requires "${baseName}" or "${otherwiseName}" fields to be set')
