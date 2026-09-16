@@ -66,14 +66,18 @@ function createClient (options) {
   }
 
   function onReady () {
-    if (options.version === false) autoVersion(client, options)
-    setProtocol(client, options)
-    keepalive(client, options)
-    encrypt(client, options)
-    play(client, options)
-    compress(client, options)
-    pluginChannels(client, options)
-    versionChecking(client, options)
+    try {
+      if (options.version === false) autoVersion(client, options)
+      setProtocol(client, options)
+      keepalive(client, options)
+      encrypt(client, options)
+      play(client, options)
+      compress(client, options)
+      pluginChannels(client, options)
+      versionChecking(client, options)
+    } catch (err) {
+      client.emit('error', err)
+    }
   }
 
   return client
