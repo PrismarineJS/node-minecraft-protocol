@@ -389,7 +389,6 @@ module.exports = function (client, options) {
       if (message) {
         acc |= 1 << i
         acknowledgements.push(message.signature)
-        message.pending = false
       }
     }
 
@@ -402,6 +401,15 @@ module.exports = function (client, options) {
       acknowledgements,
       acknowledged: bitset
     }
+  }
+
+  // Call only after writing a packet that carries the acknowledgements from getAcknowledgements.
+  function markAcknowledgementsSent () {
+    for (let i = 0; i < client._lastSeenMessages.capacity; i++) {
+      const message = client._lastSeenMessages[(client._lastSeenMessages.offset + i) % 20]
+      if (message) message.pending = false
+    }
+    client._lastSeenMessages.pending = 0
   }
 
   client._signedChat = (message, options = {}) => {
@@ -423,9 +431,12 @@ module.exports = function (client, options) {
           checksum: computeChatChecksum(client._lastSeenMessages), // 1.21.5+
           acknowledged
         }
+        const separateSignedPacket = mcData.supportFeature('seperateSignedChatCommandPacket')
         // A command with nothing to sign goes as the unsigned chat_command whether or not the client can sign.
-        client.write((mcData.supportFeature('seperateSignedChatCommandPacket') && argumentSignatures.length > 0) ? 'chat_command_signed' : 'chat_command', chatPacket)
-        client._lastSeenMessages.pending = 0
+        const signedPacket = separateSignedPacket && argumentSignatures.length > 0
+        client.write(signedPacket ? 'chat_command_signed' : 'chat_command', chatPacket)
+        // Once the packets are split, chat_command carries only the command, so it acknowledges nothing.
+        if (signedPacket || !separateSignedPacket) markAcknowledgementsSent()
       } else {
         client.write('chat_command', {
           command,
@@ -456,7 +467,7 @@ module.exports = function (client, options) {
         checksum: computeChatChecksum(client._lastSeenMessages), // 1.21.5+
         acknowledged
       })
-      client._lastSeenMessages.pending = 0
+      markAcknowledgementsSent()
 
       return
     }

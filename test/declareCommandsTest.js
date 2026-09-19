@@ -111,4 +111,55 @@ describe('declare_commands handling', () => {
     assert.strictEqual(writes.length, 1)
     assert.strictEqual(writes[0].name, 'chat_command')
   })
+
+  it('leaves acknowledgements pending after an unsigned command', () => {
+    const client = new EventEmitter()
+    client.version = '26.1'
+    client.verifyMessage = () => true
+    client.profileKeys = true
+    client._session = { uuid: '00000000-0000-0000-0000-000000000000' }
+
+    const writes = []
+    client.write = (name, data) => writes.push({ name, data })
+
+    injectChatPlugin(client, {})
+    client.signMessage = () => Buffer.from([1])
+
+    client._lastSeenMessages.push(Buffer.from([2]))
+    client._signedChat('/list', { timestamp: 1n, salt: 1n })
+    client._signedChat('hello', { timestamp: 2n, salt: 1n })
+
+    assert.deepStrictEqual(writes.map(write => write.name), ['chat_command', 'chat_message'])
+    assert.strictEqual(writes[1].data.offset, 1)
+    assert.strictEqual(client._lastSeenMessages.pending, 0)
+    assert.strictEqual(client._lastSeenMessages[0].pending, false)
+  })
+
+  it('acknowledges with chat_command before the signed command packet was split out', () => {
+    require.cache[minecraftDataPath] = {
+      exports: () => ({
+        supportFeature (feature) {
+          return feature === 'useChatSessions'
+        }
+      })
+    }
+
+    const client = new EventEmitter()
+    client.version = '1.20.4'
+    client.verifyMessage = () => true
+
+    const writes = []
+    client.write = (name, data) => writes.push({ name, data })
+
+    injectChatPlugin(client, {})
+
+    client._lastSeenMessages.push(Buffer.from([2]))
+    client._signedChat('/list', { timestamp: 1n, salt: 1n })
+
+    assert.strictEqual(writes.length, 1)
+    assert.strictEqual(writes[0].name, 'chat_command')
+    assert.strictEqual(writes[0].data.messageCount, 1)
+    assert.strictEqual(client._lastSeenMessages.pending, 0)
+    assert.strictEqual(client._lastSeenMessages[0].pending, false)
+  })
 })
