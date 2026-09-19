@@ -27,6 +27,8 @@ declare module 'minecraft-protocol' {
 		customPackets: any
 		protocolVersion: number
 		version: string
+		// 1.20.5+, cookies received through store_cookie, seeded from the cookies option
+		_cookies: Map<string, Buffer>
 		write(name: string, params: any): void
 		writeRaw(buffer: any): void
 		compressionThreshold: string
@@ -122,6 +124,12 @@ declare module 'minecraft-protocol' {
 		id: string
 	}
 
+	export interface KnownPack {
+		namespace: string
+		id: string
+		version: string
+	}
+
 	export interface ClientOptions {
 		username: string
 		port?: number
@@ -153,6 +161,11 @@ declare module 'minecraft-protocol' {
 		realms?: RealmsOptions
 		// 1.19+
 		disableChatSigning?: boolean
+		// 1.20.2+
+		brand?: string
+		// 1.20.5+
+		cookies?: Record<string, Buffer> | Map<string, Buffer>
+		knownPacks?: KnownPack[]
 		/** Pass custom client implementation if needed. */
 		Client?: Client
 	}
