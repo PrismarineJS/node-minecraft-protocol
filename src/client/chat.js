@@ -389,7 +389,6 @@ module.exports = function (client, options) {
       if (message) {
         acc |= 1 << i
         acknowledgements.push(message.signature)
-        message.pending = false
       }
     }
 
@@ -404,6 +403,15 @@ module.exports = function (client, options) {
     }
   }
 
+  // Call only after writing a packet that carries the acknowledgements from getAcknowledgements.
+  function markAcknowledgementsSent () {
+    for (let i = 0; i < client._lastSeenMessages.capacity; i++) {
+      const message = client._lastSeenMessages[(client._lastSeenMessages.offset + i) % 20]
+      if (message) message.pending = false
+    }
+    client._lastSeenMessages.pending = 0
+  }
+
   client._signedChat = (message, options = {}) => {
     options.timestamp = options.timestamp || BigInt(Date.now())
     options.salt = options.salt || 1n
@@ -413,17 +421,22 @@ module.exports = function (client, options) {
       if (mcData.supportFeature('useChatSessions')) { // 1.19.3+
         const { acknowledged, acknowledgements } = getAcknowledgements()
         const canSign = client.profileKeys && client._session
+        const argumentSignatures = canSign ? signaturesForCommand(command, options.timestamp, options.salt, options.preview, acknowledgements) : []
         const chatPacket = {
           command,
           timestamp: options.timestamp,
           salt: options.salt,
-          argumentSignatures: canSign ? signaturesForCommand(command, options.timestamp, options.salt, options.preview, acknowledgements) : [],
+          argumentSignatures,
           messageCount: client._lastSeenMessages.pending,
           checksum: computeChatChecksum(client._lastSeenMessages), // 1.21.5+
           acknowledged
         }
-        client.write((mcData.supportFeature('seperateSignedChatCommandPacket') && canSign) ? 'chat_command_signed' : 'chat_command', chatPacket)
-        client._lastSeenMessages.pending = 0
+        const separateSignedPacket = mcData.supportFeature('seperateSignedChatCommandPacket')
+        // A command with nothing to sign goes as the unsigned chat_command whether or not the client can sign.
+        const signedPacket = separateSignedPacket && argumentSignatures.length > 0
+        client.write(signedPacket ? 'chat_command_signed' : 'chat_command', chatPacket)
+        // Once the packets are split, chat_command carries only the command, so it acknowledges nothing.
+        if (signedPacket || !separateSignedPacket) markAcknowledgementsSent()
       } else {
         client.write('chat_command', {
           command,
@@ -454,7 +467,7 @@ module.exports = function (client, options) {
         checksum: computeChatChecksum(client._lastSeenMessages), // 1.21.5+
         acknowledged
       })
-      client._lastSeenMessages.pending = 0
+      markAcknowledgementsSent()
 
       return
     }
