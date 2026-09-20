@@ -5,6 +5,7 @@ const UUID = require('uuid-1345')
 const zlib = require('zlib')
 const [readVarInt, writeVarInt, sizeOfVarInt] = require('protodef').types.varint
 const [readLpVec3, writeLpVec3, sizeOfLpVec3] = require('./lpVec3')
+const [readVecDelta, writeVecDelta, sizeOfVecDelta] = require('./vecDelta')
 
 module.exports = {
   varlong: [readVarLong, writeVarLong, sizeOfVarLong],
@@ -13,7 +14,8 @@ module.exports = {
   restBuffer: [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
   entityMetadataLoop: [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata],
   topBitSetTerminatedArray: [readTopBitSetTerminatedArray, writeTopBitSetTerminatedArray, sizeOfTopBitSetTerminatedArray],
-  lpVec3: [readLpVec3, writeLpVec3, sizeOfLpVec3]
+  lpVec3: [readLpVec3, writeLpVec3, sizeOfLpVec3],
+  vecDelta: [readVecDelta, writeVecDelta, sizeOfVecDelta]
 }
 const PartialReadError = require('protodef').utils.PartialReadError
 
