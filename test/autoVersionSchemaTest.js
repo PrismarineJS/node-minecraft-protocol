@@ -32,6 +32,23 @@ describe('automatic version schema selection', () => {
     assert.equal(allowed, true)
   })
 
+  it('prefers the name-matching release over a newer patch on a shared protocol', () => {
+    // 1.21 and 1.21.1 share protocol 767; the server reported 1.21, so 1.21 must win (not the first-listed 1.21.1).
+    response = { version: { name: '1.21', protocol: 767 } }
+    const client = new EventEmitter()
+    const options = {}
+    require('../src/client/autoVersion')(client, options)
+    assert.equal(options.version, '1.21')
+  })
+
+  it('ignores an invalid protocol and resolves from the name', () => {
+    response = { version: { name: 'Paper 1.20.4', protocol: -1 } }
+    const client = new EventEmitter()
+    const options = {}
+    require('../src/client/autoVersion')(client, options)
+    assert.equal(options.version, '1.20.4')
+  })
+
   it('reports unsupported schemas without proceeding to connect', () => {
     response = { version: { name: 'unknown', protocol: -987654 } }
     const client = new EventEmitter()
