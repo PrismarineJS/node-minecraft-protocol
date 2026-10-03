@@ -2,7 +2,9 @@
 const assert = require('assert')
 const minecraftData = require('minecraft-data')
 
-describe('custom protocol isolation', () => {
+// Titled with the version it exercises (+ 'v') so CI's `mocha -g ${matrix.mcVersion}v` selects it in the 1.20.1 matrix job;
+// without a version-labelled title these assertions are skipped in every job.
+describe('custom protocol isolation (1.20.1v)', () => {
   let createSerializer
   const options = { version: '1.20.1', state: 'play', isServer: false }
   const custom = type => ({ '1.20': { types: { custom_probe: type } } })
