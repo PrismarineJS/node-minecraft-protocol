@@ -38,10 +38,10 @@ module.exports = function (client, options) {
     if (custom) {
       client.writeChannel(channelNames[1], [channel])
     }
-    const index = channels.find(function (name) {
+    const index = channels.findIndex(function (name) {
       return channel === name
     })
-    if (index) {
+    if (index !== -1) {
       proto.types[channel] = undefined
       channels.splice(index, 1)
       if (channels.length === 0) { client.removeListener('custom_payload', onCustomPayload) }
