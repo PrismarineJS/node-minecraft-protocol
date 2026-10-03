@@ -48,7 +48,16 @@ function createClient (options) {
         break
       case 'microsoft':
         if (options.realms) {
-          microsoftAuth.realmAuthenticate(client, options).then(() => microsoftAuth.authenticate(client, options)).catch((err) => client.emit('error', err)).then(onReady)
+          // realm auth is async, so onReady() (which sets up registerChannel/pluginChannels) can
+          // still be pending when this function returns. mineflayer's loader checks wait_connect
+          // right after createClient() returns and, if unset, injects plugins immediately -
+          // crashing with "registerChannel is not a function" before onReady ever runs.
+          client.wait_connect = true
+          microsoftAuth.realmAuthenticate(client, options).then(() => microsoftAuth.authenticate(client, options)).catch((err) => client.emit('error', err)).then(() => {
+            onReady()
+            client.wait_connect = false
+            client.emit('connect_allowed')
+          })
         } else {
           microsoftAuth.authenticate(client, options).catch((err) => client.emit('error', err))
           onReady()
@@ -66,14 +75,18 @@ function createClient (options) {
   }
 
   function onReady () {
-    if (options.version === false) autoVersion(client, options)
-    setProtocol(client, options)
-    keepalive(client, options)
-    encrypt(client, options)
-    play(client, options)
-    compress(client, options)
-    pluginChannels(client, options)
-    versionChecking(client, options)
+    try {
+      if (options.version === false) autoVersion(client, options)
+      setProtocol(client, options)
+      keepalive(client, options)
+      encrypt(client, options)
+      play(client, options)
+      compress(client, options)
+      pluginChannels(client, options)
+      versionChecking(client, options)
+    } catch (err) {
+      client.emit('error', err)
+    }
   }
 
   return client
