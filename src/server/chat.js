@@ -6,6 +6,11 @@ const messageExpireTime = 300000 // 5 min (ms)
 const { mojangPublicKeyPem } = require('./constants')
 
 class VerificationError extends Error {}
+
+function signaturesEqual (a, b) {
+  if (Buffer.isBuffer(a) && Buffer.isBuffer(b)) return a.equals(b)
+  return a === b
+}
 function validateLastMessages (pending, lastSeen, lastRejected) {
   if (lastRejected) {
     const rejectedTime = pending.get(lastRejected.sender, lastRejected.signature)
@@ -19,7 +24,7 @@ function validateLastMessages (pending, lastSeen, lastRejected) {
   for (const { messageSender, messageSignature } of lastSeen) {
     if (pending.previouslyAcknowledged(messageSender, messageSignature)) continue
 
-    const ts = pending.get(messageSender)(messageSignature)
+    const ts = pending.get(messageSender, messageSignature)
     if (!ts) {
       throw new VerificationError(`Client saw a message that we never sent from '${messageSender}'`)
     } else if (lastTimestamp && (ts < lastTimestamp)) {
@@ -241,20 +246,20 @@ class Pending extends Array {
     this.push([sender, signature])
   }
 
-  acknowledge (sender, username) {
-    delete this.m[sender][username]
-    this.splice(this.findIndex(([a, b]) => a === sender && b === username), 1)
+  acknowledge (sender, signature) {
+    if (this.m[sender]) delete this.m[sender][signature]
+    const index = this.findIndex(([a, b]) => a === sender && signaturesEqual(b, signature))
+    if (index !== -1) this.splice(index, 1)
   }
 
   acknowledgePrior (sender, signature) {
-    for (let i = 0; i < this.length; i++) {
+    const index = this.findIndex(([a, b]) => a === sender && signaturesEqual(b, signature))
+    if (index === -1) return
+    for (let i = 0; i <= index; i++) {
       const [a, b] = this[i]
-      delete this.m[a]
-      if (a === sender && b === signature) {
-        this.splice(0, i)
-        break
-      }
+      if (this.m[a]) delete this.m[a][b]
     }
+    this.splice(0, index + 1)
   }
 
   // Once we've acknowledged that the client has saw the messages we sent,
@@ -263,10 +268,12 @@ class Pending extends Array {
   // we need to store it in memory to allow those entries to be approved again without
   // erroring about a message we never sent in the next serverbound message packet we get.
   setPreviouslyAcknowledged (lastSeen, lastRejected = {}) {
-    this.lastSeen = lastSeen.map(e => Object.values(e)).push(Object.values(lastRejected))
+    this.lastSeen = lastSeen.map(e => Object.values(e))
+    const rejected = Object.values(lastRejected)
+    if (rejected.length) this.lastSeen.push(rejected)
   }
 
   previouslyAcknowledged (sender, signature) {
-    return this.lastSeen.some(([a, b]) => a === sender && b === signature)
+    return this.lastSeen.some(([a, b]) => a === sender && signaturesEqual(b, signature))
   }
 }
