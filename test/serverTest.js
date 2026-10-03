@@ -29,6 +29,10 @@ for (const supportedVersion of mc.supportedVersions) {
   let PORT
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
+  // minecraft-data 1.21.8 declares cookie_response.value as a bare ByteArray, so an absent
+  // value cannot be sent there
+  const hasCookies = 'packet_common_cookie_request' in mcData.protocol.types &&
+    mcData.protocol.types.packet_common_cookie_response[1][1].type[0] === 'option'
 
   const loginPacket = (client, server) => {
     if (mcData.loginPacket) {
@@ -564,6 +568,183 @@ for (const supportedVersion of mc.supportedVersions) {
         })
       })
     })
+
+    if (mcData.supportFeature('hasConfigurationState')) {
+      it('sends brand then client information once when entering configuration', function (done) {
+        const server = mc.createServer({
+          'online-mode': false,
+          version: version.minecraftVersion,
+          port: PORT
+        })
+        const received = []
+        server.on('connection', function (client) {
+          client.on('custom_payload', (packet) => {
+            if (client.state !== mc.states.CONFIGURATION) return
+            received.push({ channel: packet.channel, brand: packet.data.subarray(1).toString('utf8'), lengthPrefix: packet.data[0] })
+          })
+          client.on('settings', (packet) => {
+            if (client.state !== mc.states.CONFIGURATION) return
+            received.push({ settings: packet })
+          })
+          // The nmp server does not handle configuration_acknowledged; the state is moved by hand
+          client.on('configuration_acknowledged', () => {
+            client.state = mc.states.CONFIGURATION
+            client.once('finish_configuration', () => {
+              client.state = mc.states.PLAY
+              assert.deepStrictEqual(received, [
+                { channel: 'minecraft:brand', brand: 'nmp-test', lengthPrefix: 8 },
+                {
+                  settings: {
+                    locale: 'en_us',
+                    viewDistance: 7,
+                    chatFlags: 0,
+                    chatColors: true,
+                    skinParts: 127,
+                    mainHand: 1,
+                    enableTextFiltering: false,
+                    enableServerListing: true,
+                    ...(mcData.version.version >= 768 ? { particleStatus: 'all' } : {})
+                  }
+                }
+              ])
+              server.close()
+            })
+            client.write('finish_configuration', {})
+          })
+        })
+        server.on('playerJoin', function (client) {
+          client.write('login', loginPacket(client, server))
+          client.write('start_configuration', {})
+        })
+        server.on('close', done)
+        server.on('listening', function () {
+          mc.createClient({
+            username: 'configPlayer',
+            host: '127.0.0.1',
+            version: version.minecraftVersion,
+            port: PORT,
+            brand: 'nmp-test',
+            clientSettings: { viewDistance: 7 }
+          })
+        })
+      })
+    }
+
+    if ('packet_common_select_known_packs' in mcData.protocol.types) {
+      it('selects the known packs it shares with the server', function (done) {
+        const core = { namespace: 'minecraft', id: 'core', version: version.minecraftVersion }
+        const server = mc.createServer({
+          'online-mode': false,
+          version: version.minecraftVersion,
+          port: PORT
+        })
+        let reply
+        server.on('connection', function (client) {
+          client.on('select_known_packs', (packet) => {
+            reply = packet.packs
+          })
+          // Runs before the login plugin's own login_acknowledged handler
+          client.once('login_acknowledged', () => {
+            client.state = mc.states.CONFIGURATION
+            client.write('select_known_packs', { packs: [core, { namespace: 'test', id: 'server-only', version: '1' }] })
+          })
+        })
+        server.on('playerJoin', function () {
+          assert.deepStrictEqual(reply, [core])
+          server.close()
+        })
+        server.on('close', done)
+        server.on('listening', function () {
+          mc.createClient({
+            username: 'packPlayer',
+            host: '127.0.0.1',
+            version: version.minecraftVersion,
+            port: PORT,
+            knownPacks: [core, { namespace: 'test', id: 'client-only', version: '1' }]
+          })
+        })
+      })
+    }
+
+    if (hasCookies) {
+      it('answers login cookie requests from the cookies option', function (done) {
+        const seeded = Buffer.from('seeded-cookie')
+        // Login cookies must be exchanged before set_compression; mc.createServer sends
+        // set_compression first, so the login state is driven by hand
+        const server = net.createServer((socket) => {
+          const client = new mc.Client(true, version.minecraftVersion)
+          client.setSocket(socket)
+          client.on('set_protocol', () => {
+            client.state = mc.states.LOGIN
+          })
+          client.on('login_start', () => {
+            client.write('cookie_request', { cookie: 'test:seeded' })
+          })
+          client.on('cookie_response', (packet) => {
+            assert.strictEqual(client.state, mc.states.LOGIN)
+            assert.deepStrictEqual(packet, { key: 'test:seeded', value: seeded })
+            client.end('done')
+            server.close()
+          })
+        })
+        server.on('close', done)
+        server.listen(PORT, '127.0.0.1', () => {
+          mc.createClient({
+            username: 'cookieMonster',
+            host: '127.0.0.1',
+            version: version.minecraftVersion,
+            port: PORT,
+            cookies: { 'test:seeded': seeded }
+          })
+        })
+      })
+
+      it('answers cookie requests in configuration and play', function (done) {
+        const seeded = Buffer.from('seeded-cookie')
+        const stored = Buffer.from('stored-cookie')
+        const server = mc.createServer({
+          'online-mode': false,
+          version: version.minecraftVersion,
+          port: PORT
+        })
+        const responses = []
+        server.on('connection', function (client) {
+          client.on('cookie_response', (packet) => {
+            responses.push({ state: client.state, key: packet.key, value: packet.value })
+            if (responses.length === 3) {
+              assert.deepStrictEqual(responses, [
+                { state: mc.states.CONFIGURATION, key: 'test:seeded', value: seeded },
+                { state: mc.states.CONFIGURATION, key: 'test:stored', value: stored },
+                { state: mc.states.PLAY, key: 'test:unknown', value: undefined }
+              ])
+              server.close()
+            }
+          })
+          // Runs before the login plugin's own login_acknowledged handler, which sends
+          // registry data and finish_configuration
+          client.once('login_acknowledged', () => {
+            client.state = mc.states.CONFIGURATION
+            client.write('cookie_request', { cookie: 'test:seeded' })
+            client.write('store_cookie', { key: 'test:stored', value: stored })
+            client.write('cookie_request', { cookie: 'test:stored' })
+          })
+        })
+        server.on('playerJoin', function (client) {
+          client.write('login', loginPacket(client, server))
+          client.write('cookie_request', { cookie: 'test:unknown' })
+        })
+        server.on('close', done)
+        server.on('listening', function () {
+          mc.createClient({
+            username: 'cookieMonster',
+            host: '127.0.0.1',
+            version: version.minecraftVersion,
+            port: PORT,
+            cookies: { 'test:seeded': seeded }
+          })
+        })
+      })
+    }
   })
 }
 

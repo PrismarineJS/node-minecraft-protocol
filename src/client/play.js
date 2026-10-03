@@ -11,7 +11,9 @@ module.exports = function (client, options) {
     }
   })
 
-  client.once('login', (packet) => {
+  // Every login packet must start a fresh chat session (new session UUID, message
+  // index 0) with the same profile key pair
+  client.on('login', (packet) => {
     if (packet.enforcesSecureChat) client.serverFeatures.enforcesSecureChat = packet.enforcesSecureChat
     const mcData = require('minecraft-data')(client.version)
     if (mcData.supportFeature('useChatSessions') && client.profileKeys && client.cipher && client.session.selectedProfile.id === client.uuid.replace(/-/g, '')) {
@@ -35,6 +37,7 @@ module.exports = function (client, options) {
     const mcData = require('minecraft-data')(client.version)
     client.uuid = packet.uuid
     client.username = packet.username
+    let sentClientInformation = false
 
     if (mcData.supportFeature('hasConfigurationState')) {
       client.write('login_acknowledged', {})
@@ -53,27 +56,37 @@ module.exports = function (client, options) {
         client.write('configuration_acknowledged', {})
       }
       client.state = states.CONFIGURATION
-      // Mirror the vanilla client, which sends Client Information during the
-      // configuration phase. Some servers (e.g. Hypixel) wait for it before
-      // sending finish_configuration and will close the socket otherwise.
-      // Defaults are vanilla-safe and can be overridden per-field via the
-      // `clientSettings` option. A client that also sends Client Information in
-      // the play state (e.g. mineflayer on its 'login' event) still takes
-      // precedence there, exactly as the vanilla client re-sends settings. (#3623)
-      const clientSettings = options.clientSettings || {}
-      client.write('settings', {
-        locale: clientSettings.locale ?? 'en_us',
-        viewDistance: clientSettings.viewDistance ?? 10,
-        chatFlags: clientSettings.chatFlags ?? 0,
-        chatColors: clientSettings.chatColors ?? true,
-        skinParts: clientSettings.skinParts ?? 127,
-        mainHand: clientSettings.mainHand ?? 1,
-        enableTextFiltering: clientSettings.enableTextFiltering ?? false,
-        enableServerListing: clientSettings.enableServerListing ?? true,
-        particleStatus: clientSettings.particleStatus ?? 'all'
-      })
-      client.once('select_known_packs', () => {
-        client.write('select_known_packs', { packs: [] })
+      // Brand then Client Information are sent once per connection, on the first entry
+      // into configuration; re-entering configuration from play sends nothing else. Some
+      // servers (e.g. Hypixel) close the socket unless Client Information arrives before
+      // they send finish_configuration
+      if (!sentClientInformation) {
+        sentClientInformation = true
+        client.write('custom_payload', {
+          channel: 'minecraft:brand',
+          data: client.serializer.proto.createPacketBuffer('string', options.brand ?? 'vanilla')
+        })
+        const clientSettings = options.clientSettings || {}
+        client.write('settings', {
+          locale: clientSettings.locale ?? 'en_us',
+          viewDistance: clientSettings.viewDistance ?? 12,
+          chatFlags: clientSettings.chatFlags ?? 0,
+          chatColors: clientSettings.chatColors ?? true,
+          skinParts: clientSettings.skinParts ?? 127,
+          mainHand: clientSettings.mainHand ?? 1,
+          enableTextFiltering: clientSettings.enableTextFiltering ?? false,
+          enableServerListing: clientSettings.enableServerListing ?? true,
+          particleStatus: clientSettings.particleStatus ?? 'all'
+        })
+      }
+      // The server omits the registry entries of every pack in the reply, so a pack may
+      // only be listed when its data is available locally
+      client.once('select_known_packs', (packet) => {
+        const knownPacks = options.knownPacks ?? []
+        client.write('select_known_packs', {
+          packs: packet.packs.filter(pack => knownPacks.some(known =>
+            known.namespace === pack.namespace && known.id === pack.id && known.version === pack.version))
+        })
       })
       client.once('code_of_conduct', () => {
         client.write('accept_code_of_conduct', {})
