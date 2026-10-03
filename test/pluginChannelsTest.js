@@ -11,7 +11,7 @@ function makeClient () {
   return client
 }
 
-describe('pluginChannels', () => {
+describe('1.21.4v pluginChannels', () => {
   it('unregisterChannel removes the requested channel', () => {
     const client = makeClient()
     client.registerChannel('example:first')
@@ -29,12 +29,14 @@ describe('pluginChannels', () => {
 
   it('unregisterChannel removes a channel stored at index 0', () => {
     const client = makeClient()
-    client.unregisterChannel('minecraft:register')
-    client.registerChannel('example:only')
-    client.unregisterChannel('example:only') // built-in 'minecraft:unregister' now sits at index 0
     const received = []
-    client.on('minecraft:unregister', () => received.push('builtin'))
-    client.emit('custom_payload', { channel: 'example:only', data: Buffer.alloc(0) })
-    assert.deepStrictEqual(received, []) // example:only must stay unregistered
+    client.on('minecraft:register', () => received.push('builtin'))
+    const payload = () => ({ channel: 'minecraft:register', data: Buffer.from('example:only') })
+    client.emit('custom_payload', payload())
+    assert.deepStrictEqual(received, ['builtin']) // prove dispatch before unregistering
+
+    client.unregisterChannel('minecraft:register') // first built-in channel, at index 0
+    client.emit('custom_payload', payload())
+    assert.deepStrictEqual(received, ['builtin']) // no second delivery after removal
   })
 })
