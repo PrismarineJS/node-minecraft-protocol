@@ -126,6 +126,7 @@ Returns a `Client` instance and perform login.
      * id : The selected profiles uuid in short form (without `-`) needed for logging in with access and client Tokens.
  * authServer : auth server, default to https://authserver.mojang.com
  * sessionServer : session server, default to https://sessionserver.mojang.com
+ * servicesServer : services server, default to https://api.minecraftservices.com
  * keepAlive : send keep alive packets : default to true
  * closeTimeout : end the connection after this delay in milliseconds if server doesn't answer to ping, default to `120*1000`
  * noPongTimeout : after the server opened the connection, wait for a default of `5*1000` after pinging and answers without the latency
