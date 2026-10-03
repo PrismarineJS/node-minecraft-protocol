@@ -13,7 +13,7 @@ const protocols = {}
 
 function createProtocol (state, direction, version, customPackets, compiled = true) {
   const key = `${state};${direction};${version}${compiled ? ';c' : ''}`
-  if (protocols[key]) { return protocols[key] }
+  if (!customPackets && protocols[key]) { return protocols[key] }
 
   const mcData = minecraftData(version)
   const versionInfo = minecraftData.versionsByMinecraftVersion.pc[version]
@@ -24,7 +24,7 @@ function createProtocol (state, direction, version, customPackets, compiled = tr
     throw new Error(`Unsupported protocol version '${versionInfo.version}' (attempted to use '${mcData.version.version}' data); try updating your packages with 'npm update'`)
   }
 
-  const mergedProtocol = merge(mcData.protocol, customPackets?.[mcData.version.majorVersion] ?? {})
+  const mergedProtocol = merge({}, mcData.protocol, customPackets?.[mcData.version.majorVersion] ?? {})
 
   if (compiled) {
     const compiler = new ProtoDefCompiler()
@@ -32,7 +32,7 @@ function createProtocol (state, direction, version, customPackets, compiled = tr
     compiler.addProtocol(mergedProtocol, [state, direction])
     nbt.addTypesToCompiler('big', compiler)
     const proto = compiler.compileProtoDefSync()
-    protocols[key] = proto
+    if (!customPackets) protocols[key] = proto
     return proto
   }
 
@@ -40,7 +40,7 @@ function createProtocol (state, direction, version, customPackets, compiled = tr
   proto.addTypes(minecraft)
   proto.addProtocol(mergedProtocol, [state, direction])
   nbt.addTypesToInterperter('big', proto)
-  protocols[key] = proto
+  if (!customPackets) protocols[key] = proto
   return proto
 }
 
