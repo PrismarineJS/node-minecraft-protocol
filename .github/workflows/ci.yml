@@ -22,6 +22,15 @@ jobs:
       with:
         node-version: 24.x
     - run: npm i && npm run lint
+  UnitTests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js 24.x
+      uses: actions/setup-node@v1.4.4
+      with:
+        node-version: 24.x
+    - run: npm i && npm run mochaTest -- test/lpVec3Test.js
   PrepareSupportedVersions:
     runs-on: ubuntu-latest
     outputs:
