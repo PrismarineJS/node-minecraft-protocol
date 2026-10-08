@@ -9,6 +9,7 @@ const util = require('util')
 const applyClientHelpers = require('./common/clientHelpers')
 const download = util.promisify(require('minecraft-wrap').download)
 const { getPort } = require('./common/util')
+const testedVersions = require('./common/testedVersions')
 
 const SURVIVE_TIME = 10000
 const MC_SERVER_PATH = path.join(__dirname, 'server')
@@ -28,7 +29,7 @@ async function pingWhenReady (options, attempts = 20) {
 
 const Wrap = require('minecraft-wrap').Wrap
 
-for (const supportedVersion of mc.supportedVersions) {
+for (const supportedVersion of testedVersions) {
   let PORT = null
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
