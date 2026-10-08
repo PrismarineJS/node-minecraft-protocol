@@ -202,6 +202,7 @@ server.on('playerJoin', function(client) {
 
 * Ensure your system has the `java` executable in `PATH`.
 * `MC_SERVER_JAR_DIR=some/path/to/store/minecraft/server/ MC_USERNAME=email@example.com MC_PASSWORD=password npm test`
+* To test a single version, set `MC_VERSION`, e.g. `MC_VERSION=1.21.4 npm run mochaTest`. Suites without a version still run. Unset, every supported version is tested; a version not in `supportedVersions` fails the run.
 
 ## Debugging
 
