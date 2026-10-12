@@ -19,7 +19,7 @@ function validateLastMessages (pending, lastSeen, lastRejected) {
   for (const { messageSender, messageSignature } of lastSeen) {
     if (pending.previouslyAcknowledged(messageSender, messageSignature)) continue
 
-    const ts = pending.get(messageSender)(messageSignature)
+    const ts = pending.get(messageSender, messageSignature)
     if (!ts) {
       throw new VerificationError(`Client saw a message that we never sent from '${messageSender}'`)
     } else if (lastTimestamp && (ts < lastTimestamp)) {
@@ -232,29 +232,25 @@ class Pending extends Array {
   lastSeen = []
 
   get (sender, signature) {
-    return this.m[sender]?.[signature]
+    return this.m[sender]?.[signature.toString('hex')]
   }
 
   add (sender, signature, ts) {
     this.m[sender] = this.m[sender] || {}
-    this.m[sender][signature] = ts
+    this.m[sender][signature.toString('hex')] = ts
     this.push([sender, signature])
   }
 
-  acknowledge (sender, username) {
-    delete this.m[sender][username]
-    this.splice(this.findIndex(([a, b]) => a === sender && b === username), 1)
+  acknowledge (sender, signature) {
+    delete this.m[sender]?.[signature.toString('hex')]
+    const index = this.findIndex(([a, b]) => a === sender && b.equals(signature))
+    if (index !== -1) this.splice(index, 1)
   }
 
   acknowledgePrior (sender, signature) {
-    for (let i = 0; i < this.length; i++) {
-      const [a, b] = this[i]
-      delete this.m[a]
-      if (a === sender && b === signature) {
-        this.splice(0, i)
-        break
-      }
-    }
+    const index = this.findIndex(([a, b]) => a === sender && b.equals(signature))
+    if (index === -1) return
+    for (const [a, b] of this.splice(0, index + 1)) delete this.m[a]?.[b.toString('hex')]
   }
 
   // Once we've acknowledged that the client has saw the messages we sent,
@@ -263,10 +259,11 @@ class Pending extends Array {
   // we need to store it in memory to allow those entries to be approved again without
   // erroring about a message we never sent in the next serverbound message packet we get.
   setPreviouslyAcknowledged (lastSeen, lastRejected = {}) {
-    this.lastSeen = lastSeen.map(e => Object.values(e)).push(Object.values(lastRejected))
+    this.lastSeen = lastSeen.map(({ messageSender, messageSignature }) => [messageSender, messageSignature])
+    if (lastRejected.sender) this.lastSeen.push([lastRejected.sender, lastRejected.signature])
   }
 
   previouslyAcknowledged (sender, signature) {
-    return this.lastSeen.some(([a, b]) => a === sender && b === signature)
+    return this.lastSeen.some(([a, b]) => a === sender && b.equals(signature))
   }
 }
