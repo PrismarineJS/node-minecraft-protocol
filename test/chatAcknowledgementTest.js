@@ -192,3 +192,51 @@ for (const version of checksumVersions) {
     })
   })
 }
+
+const ackOffsetVersions = supportedVersions.filter(version => require('minecraft-data')(version).version['>=']('1.19.3'))
+
+for (const version of ackOffsetVersions) {
+  describe(`chat command pending offset ${version}v`, () => {
+    const mcData = require('minecraft-data')(version)
+    // 1.20.5+ splits signed commands into chat_command_signed; the unsigned
+    // chat_command schema carries { command } only and consumes nothing.
+    const unsignedCommandHasNoAck = mcData.supportFeature('seperateSignedChatCommandPacket')
+
+    it(`${unsignedCommandHasNoAck ? 'preserves' : 'resets'} the pending offset after an unsigned chat_command`, () => {
+      const client = new EventEmitter()
+      client.version = version
+      client.uuid = '00000000-0000-0000-0000-000000000001'
+
+      const writes = []
+      client.write = (name, data) => writes.push({ name, data })
+
+      injectChatPlugin(client, {})
+
+      client.emit('player_chat', {
+        signature: Buffer.from([1, 2]),
+        senderUuid: '00000000-0000-0000-0000-000000000002',
+        plainMessage: 'message 1',
+        index: 1,
+        previousMessages: [],
+        salt: 1n,
+        timestamp: 1n,
+        unsignedChatContent: null,
+        type: 0,
+        networkName: null,
+        networkTargetName: null
+      })
+      assert.strictEqual(client._lastSeenMessages.pending, 1)
+
+      client._signedChat('/help', { timestamp: 1n, salt: 1n })
+      assert.strictEqual(writes.length, 1)
+      assert.strictEqual(writes[0].name, 'chat_command')
+      assert.strictEqual(client._lastSeenMessages.pending, unsignedCommandHasNoAck ? 1 : 0)
+
+      // The message path always carries the acknowledgement and must reset.
+      client._signedChat('hello', { timestamp: 2n, salt: 1n })
+      assert.strictEqual(writes.length, 2)
+      assert.strictEqual(writes[1].name, 'chat_message')
+      assert.strictEqual(client._lastSeenMessages.pending, 0)
+    })
+  })
+}

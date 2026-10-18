@@ -426,7 +426,10 @@ module.exports = function (client, options) {
           acknowledged
         }
         client.write((mcData.supportFeature('seperateSignedChatCommandPacket') && canSign) ? 'chat_command_signed' : 'chat_command', chatPacket)
-        client._lastSeenMessages.pending = 0
+        // On 1.20.5+ the unsigned chat_command schema carries { command } only,
+        // so the server consumes no acknowledgement; keep the offset for the
+        // next outgoing packet that actually carries one.
+        if (canSign || !mcData.supportFeature('seperateSignedChatCommandPacket')) client._lastSeenMessages.pending = 0
       } else {
         client.write('chat_command', {
           command,
