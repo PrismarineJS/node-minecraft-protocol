@@ -8,6 +8,7 @@ const nbt = require('prismarine-nbt')
 const applyClientHelpers = require('./common/clientHelpers')
 
 const { getPort } = require('./common/util')
+const testedVersions = require('./common/testedVersions')
 
 const w = nbt.comp({
   piglin_safe: nbt.byte(0),
@@ -25,7 +26,7 @@ const w = nbt.comp({
   has_ceiling: nbt.byte(0)
 })
 
-for (const supportedVersion of mc.supportedVersions) {
+for (const supportedVersion of testedVersions) {
   let PORT
   const mcData = require('minecraft-data')(supportedVersion)
   const version = mcData.version
