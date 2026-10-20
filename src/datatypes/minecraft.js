@@ -13,7 +13,8 @@ module.exports = {
   restBuffer: [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
   entityMetadataLoop: [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata],
   topBitSetTerminatedArray: [readTopBitSetTerminatedArray, writeTopBitSetTerminatedArray, sizeOfTopBitSetTerminatedArray],
-  lpVec3: [readLpVec3, writeLpVec3, sizeOfLpVec3]
+  lpVec3: [readLpVec3, writeLpVec3, sizeOfLpVec3],
+  nbtOptionalLengthPrefixed: [readNbtOptionalLengthPrefixed, writeNbtOptionalLengthPrefixed, sizeOfNbtOptionalLengthPrefixed]
 }
 const PartialReadError = require('protodef').utils.PartialReadError
 
@@ -186,4 +187,26 @@ function sizeOfTopBitSetTerminatedArray (value, { type }) {
     size += this.sizeOf(value[i], type, {})
   }
   return size
+}
+
+// A network (anonymous) optional NBT tag preceded by its byte length as a VarInt.
+// This is Mojang's `ByteBufCodecs.optionalTagCodec(...).apply(ByteBufCodecs.lengthPrefixed(N))`
+// (e.g. the payload of ServerboundCustomClickActionPacket / the dialog system). An empty tag
+// is a single TAG_END (0) byte, so an absent value encodes as `01 00`.
+function readNbtOptionalLengthPrefixed (buffer, offset) {
+  const { value: length, size: lengthSize } = readVarInt(buffer, offset)
+  if (offset + lengthSize + length > buffer.length) { throw new PartialReadError() }
+  const tag = nbt.proto.read(buffer, offset + lengthSize, 'anonOptionalNbt')
+  return { value: tag.value, size: lengthSize + tag.size }
+}
+
+function writeNbtOptionalLengthPrefixed (value, buffer, offset) {
+  const innerSize = nbt.proto.sizeOf(value, 'anonOptionalNbt')
+  offset = writeVarInt(innerSize, buffer, offset)
+  return nbt.proto.write(value, buffer, offset, 'anonOptionalNbt')
+}
+
+function sizeOfNbtOptionalLengthPrefixed (value) {
+  const innerSize = nbt.proto.sizeOf(value, 'anonOptionalNbt')
+  return sizeOfVarInt(innerSize) + innerSize
 }
