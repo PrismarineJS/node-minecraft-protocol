@@ -35,7 +35,8 @@ function readLpVec3 (buffer, offset) {
 
   if ((a & 4) === 4) {
     const { value: varIntVal, size: varIntSize } = readVarInt(buffer, offset + 6)
-    scale = (varIntVal * 4) + scale
+    // vanilla masks the var-int to unsigned, scale >> 2 goes up to 2^32 - 1
+    scale = ((varIntVal >>> 0) * 4) + scale
     size += varIntSize
   }
 
