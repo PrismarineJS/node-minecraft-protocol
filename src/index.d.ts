@@ -195,6 +195,8 @@ declare module 'minecraft-protocol' {
 		kickTimeout?: number
 		checkTimeoutInterval?: number
 		'online-mode'?: boolean
+		/** Whether to enable encryption (handshake + encrypted transport). Used together with online-mode. */
+		encryption?: boolean
 		beforePing?: (response: any, client: Client, callback?: (error: any, result: any) => any) => any
 		beforeLogin?: (client: Client) => void
 		motd?: string
