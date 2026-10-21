@@ -3,11 +3,10 @@
  * Updator script triggered from minecraft-data repository to auto generate PR
  */
 const fs = require('fs')
-const cp = require('child_process')
 const assert = require('assert')
 const github = require('gh-helpers')()
 const { join } = require('path')
-const exec = (cmd) => github.mock ? console.log('> ', cmd) : (console.log('> ', cmd), cp.execSync(cmd, { stdio: 'inherit' }))
+const spawnGit = require('./spawnGit')
 
 console.log('Starting update process...')
 // Sanitize and validate environment variables all non alpha numeric / underscore / dot
@@ -56,12 +55,12 @@ async function main () {
   }
 
   const branchName = 'pc' + newVersion.replace(/[^a-zA-Z0-9_]/g, '_')
-  exec(`git checkout -b ${branchName}`)
-  exec('git config user.name "github-actions[bot]"')
-  exec('git config user.email "41898282+github-actions[bot]@users.noreply.github.com"')
-  exec('git add --all')
-  exec(`git commit -m "Update to version ${newVersion}"`)
-  exec(`git push origin ${branchName} --force`)
+  spawnGit(['checkout', '-b', branchName], { mock: github.mock })
+  spawnGit(['config', 'user.name', 'github-actions[bot]'], { mock: github.mock })
+  spawnGit(['config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com'], { mock: github.mock })
+  spawnGit(['add', '--all'], { mock: github.mock })
+  spawnGit(['commit', '-m', `Update to version ${newVersion}`], { mock: github.mock })
+  spawnGit(['push', 'origin', branchName, '--force'], { mock: github.mock })
   //     createPullRequest(title: string, body: string, fromBranch: string, intoBranch?: string): Promise<{ number: number, url: string }>;
   const pr = await github.createPullRequest(
     `🎈 ${newVersion}`,
