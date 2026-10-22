@@ -156,6 +156,7 @@ Returns a `Client` instance and perform login.
    * mainHand : `0` = left, `1` = right, default `1`
    * enableTextFiltering : default `false`
    * enableServerListing : whether the player appears in server status player samples, default `true`
+   * particleStatus : `'all'`, `'decreased'` or `'minimal'` (1.21.3+), default `'all'`
  * realms : An object which should contain one of the following properties: `realmId` or `pickRealm`. When defined will attempt to join a Realm without needing to specify host/port. **The authenticated account must either own the Realm or have been invited to it**
    * realmId : The id of the Realm to join.
    * pickRealm(realms) : A function which will have an array of the user Realms (joined/owned) passed to it. The function should return a Realm.

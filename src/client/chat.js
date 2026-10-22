@@ -196,7 +196,7 @@ module.exports = function (client, options) {
     if (mcData.supportFeature('useChatSessions')) {
       const tsDelta = BigInt(Date.now()) - packet.timestamp
       const expired = !packet.timestamp || tsDelta > messageExpireTime || tsDelta < 0
-      const verified = !packet.unsignedChatContent && updateAndValidateSession(packet.senderUuid, packet.plainMessage, packet.signature, packet.index, packet.previousMessages, packet.salt, packet.timestamp) && !expired
+      const verified = packet.signature && !packet.unsignedChatContent && updateAndValidateSession(packet.senderUuid, packet.plainMessage, packet.signature, packet.index, packet.previousMessages, packet.salt, packet.timestamp) && !expired
       if (verified) client._signatureCache.push(packet.signature)
       client.emit('playerChat', {
         globalIndex: packet.globalIndex,
@@ -300,22 +300,64 @@ module.exports = function (client, options) {
     })
   })
 
-  const sliceIndexForMessage = {}
-  client.on('declare_commands', (packet) => {
-    const nodes = packet.nodes
-    for (const commandNode of nodes[0].children) {
-      const node = nodes[commandNode]
-      const commandName = node.extraNodeData.name
-      function visit (node, depth = 0) {
-        const name = node.extraNodeData.name
-        if (node.extraNodeData.parser === 'minecraft:message') {
-          sliceIndexForMessage[commandName] = [name, depth]
-        }
-        for (const child of node.children) {
-          visit(nodes[child], depth + 1)
+  // Repeatedly remove nodes that can already be built/resolved; if no progress
+  // can be made while nodes remain, the tree contains a cycle or an
+  // unresolvable reference.
+  function validateCommandTree (nodes) {
+    if (!nodes.every(node => Array.isArray(node.children))) return false
+    let pending
+    const canBuild = index => nodes[index].redirectNode === undefined ||
+      !pending.has(nodes[index].redirectNode)
+    const canResolve = index => nodes[index].children.every(child => !pending.has(child))
+    for (const validator of [canBuild, canResolve]) {
+      pending = new Set(nodes.keys())
+      let progressed = true
+      while (pending.size > 0 && progressed) {
+        progressed = false
+        for (const index of [...pending]) {
+          if (validator(index)) {
+            pending.delete(index)
+            progressed = true
+          }
         }
       }
-      visit(node, 0)
+      if (pending.size > 0) return false
+    }
+    return true
+  }
+
+  function rejectCommandTree () {
+    client.emit('error', new Error('Server sent an impossible command tree'))
+    client.end('impossibleCommandTree')
+  }
+
+  const sliceIndexForMessage = {}
+  client.on('declare_commands', (packet) => {
+    const nodes = packet?.nodes
+    if (!Array.isArray(nodes) || !Array.isArray(nodes[packet.rootIndex]?.children) ||
+      !validateCommandTree(nodes)) {
+      rejectCommandTree()
+      return
+    }
+
+    function visit (node, commandName, depth = 0) {
+      if (!node || !node.extraNodeData) return
+
+      const { name, parser } = node.extraNodeData
+      if (parser === 'minecraft:message') {
+        sliceIndexForMessage[commandName] = [name, depth]
+      }
+
+      for (const childIndex of node.children || []) {
+        visit(nodes[childIndex], commandName, depth + 1)
+      }
+    }
+
+    for (const commandNode of nodes[packet.rootIndex].children) {
+      const node = nodes[commandNode]
+      const commandName = node?.extraNodeData?.name
+      if (!commandName) continue
+      visit(node, commandName, 0)
     }
   })
 
@@ -340,6 +382,7 @@ module.exports = function (client, options) {
   function getAcknowledgements () {
     let acc = 0
     const acknowledgements = []
+    const lastSeenMessages = []
 
     for (let i = 0; i < client._lastSeenMessages.capacity; i++) {
       const idx = (client._lastSeenMessages.offset + i) % 20
@@ -347,6 +390,7 @@ module.exports = function (client, options) {
       if (message) {
         acc |= 1 << i
         acknowledgements.push(message.signature)
+        lastSeenMessages.push(message)
         message.pending = false
       }
     }
@@ -358,7 +402,8 @@ module.exports = function (client, options) {
 
     return {
       acknowledgements,
-      acknowledged: bitset
+      acknowledged: bitset,
+      checksum: computeChatChecksum(lastSeenMessages)
     }
   }
 
@@ -369,7 +414,7 @@ module.exports = function (client, options) {
     if (message.startsWith('/')) {
       const command = message.slice(1)
       if (mcData.supportFeature('useChatSessions')) { // 1.19.3+
-        const { acknowledged, acknowledgements } = getAcknowledgements()
+        const { acknowledged, acknowledgements, checksum } = getAcknowledgements()
         const canSign = client.profileKeys && client._session
         const chatPacket = {
           command,
@@ -377,7 +422,7 @@ module.exports = function (client, options) {
           salt: options.salt,
           argumentSignatures: canSign ? signaturesForCommand(command, options.timestamp, options.salt, options.preview, acknowledgements) : [],
           messageCount: client._lastSeenMessages.pending,
-          checksum: computeChatChecksum(client._lastSeenMessages), // 1.21.5+
+          checksum, // 1.21.5+
           acknowledged
         }
         client.write((mcData.supportFeature('seperateSignedChatCommandPacket') && canSign) ? 'chat_command_signed' : 'chat_command', chatPacket)
@@ -402,14 +447,14 @@ module.exports = function (client, options) {
     }
 
     if (mcData.supportFeature('useChatSessions')) {
-      const { acknowledgements, acknowledged } = getAcknowledgements()
+      const { acknowledgements, acknowledged, checksum } = getAcknowledgements()
       client.write('chat_message', {
         message,
         timestamp: options.timestamp,
         salt: options.salt,
         signature: (client.profileKeys && client._session) ? client.signMessage(message, options.timestamp, options.salt, undefined, acknowledgements) : undefined,
         offset: client._lastSeenMessages.pending,
-        checksum: computeChatChecksum(client._lastSeenMessages), // 1.21.5+
+        checksum, // 1.21.5+
         acknowledged
       })
       client._lastSeenMessages.pending = 0

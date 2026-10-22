@@ -32,12 +32,22 @@ function ping (options) {
 
   const client = new Client(false, version.minecraftVersion)
   return new Promise((resolve, reject) => {
+    let gotStatus = false
     client.on('error', function (err) {
       clearTimeout(closeTimer)
       client.end()
       reject(err)
     })
+    // A server may close the connection instead of answering, which none of the
+    // handlers above see: the promise would wait out closeTimeout. Only applies
+    // before the status arrives — after it, noPongTimeout owns the close.
+    client.on('end', function () {
+      if (gotStatus) return
+      clearTimeout(closeTimer)
+      reject(new Error('Connection closed before the server sent a status response'))
+    })
     client.once('server_info', function (packet) {
+      gotStatus = true
       const data = JSON.parse(packet.response)
       const start = Date.now()
       const maxTime = setTimeout(() => {

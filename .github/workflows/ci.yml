@@ -5,8 +5,12 @@ on:
     branches:
       - master
   pull_request:
-    branches: 
+    branches:
       - master
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   Lint:
@@ -51,12 +55,11 @@ jobs:
     - name: Setup Java JDK
       uses: actions/setup-java@v1.4.3
       with:
-        java-version: '21'
+        java-version: '25'
         distribution: 'adopt'
     - name: Install dependencies
       run: npm install
     - run: cd node_modules && cd minecraft-data && mv minecraft-data minecraft-data-old && git clone -b pc_26_2 https://github.com/PrismarineJS/minecraft-data --depth 1 && node bin/generate_data.js
-    - run: curl -o node_modules/protodef/src/serializer.js https://raw.githubusercontent.com/extremeheat/node-protodef/refs/heads/dlog/src/serializer.js && curl -o node_modules/protodef/src/compiler.js https://raw.githubusercontent.com/extremeheat/node-protodef/refs/heads/dlog/src/compiler.js
 
     - name: Run tests
       run: npm run mochaTest -- -g ${{ matrix.mcVersion }}v

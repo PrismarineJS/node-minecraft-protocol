@@ -243,6 +243,7 @@ const values = {
   Slot: slotValue,
   UntrustedSlot: slotValue,
   HashedSlot: slotValue,
+  ItemStackTemplate: { itemId: 1111, itemCount: 1, addedComponentCount: 0, removedComponentCount: 0, components: [], removeComponents: [] },
   SlotComponent: {
     type: 'hide_tooltip'
   },
@@ -449,6 +450,10 @@ const values = {
   GlobalPos: {
     dimensionName: 'minecraft:overworld',
     location: { x: 0, y: 64, z: 0 }
+  },
+  GameRule: {
+    name: '',
+    value: ''
   }
 }
 
