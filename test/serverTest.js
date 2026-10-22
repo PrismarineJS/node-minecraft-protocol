@@ -1,5 +1,6 @@
 /* eslint-env mocha */
 
+const net = require('net')
 const mc = require('../')
 const assert = require('power-assert')
 const { once } = require('events')
@@ -379,6 +380,33 @@ for (const supportedVersion of mc.supportedVersions) {
       })
     })
 
+    it('clients can log in with a custom stream', function (done) {
+      const server = mc.createServer({
+        'online-mode': false,
+        version: version.minecraftVersion,
+        port: PORT
+      })
+      server.on('playerJoin', function (client) {
+        client.write('login', loginPacket(client, server))
+      })
+      server.on('close', done)
+      server.on('listening', function () {
+        // Connect first so the stream is already open when passed to createClient,
+        // like a stream tunneled from elsewhere would be
+        const socket = net.connect(PORT, '127.0.0.1', () => {
+          const client = mc.createClient({
+            username: 'streamPlayer',
+            version: version.minecraftVersion,
+            stream: socket
+          })
+          client.on('login', function () {
+            client.end()
+            server.close()
+          })
+        })
+      })
+    })
+
     it('kicks clients when invalid credentials', function (done) {
       this.timeout(10000)
       const server = mc.createServer({
@@ -511,7 +539,7 @@ for (const supportedVersion of mc.supportedVersions) {
         })
         client.write('login', loginPacket(client, server))
         client.writeBundle([
-          ['update_time', { age: 1, time: 2 }],
+          ['update_time', { age: 1, time: 2, clockUpdates: [] }],
           ['close_window', { windowId: 0 }]
         ])
       })

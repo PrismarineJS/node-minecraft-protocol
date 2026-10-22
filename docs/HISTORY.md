@@ -1,5 +1,15 @@
 # History
 
+## 1.68.0
+* [fix(ping): reject when the connection closes before a status response (#1514)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/0903e593a9936a5e5deffc1d4b229230de4258d8) (thanks @u9g)
+
+## 1.67.0
+* [🎈 26.1 (#1469)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/404fb097e47244d366a6011bfe4f9d9d530f7ded) (thanks @rom1504bot)
+* [Send interim Client Information (settings) packet during configuration phase (#1499)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/aa23a03964bf84e2f7fe813818a4ec5b7b2a1270) (thanks @AChompSitsIn)
+* [Add client_transfer example (#1507)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/73dc5bcde5c03a3e95d5a69e5c945ecc2bc766ae) (thanks @mliem2k)
+* [Bump @types/node from 25.9.5 to 26.1.1 (#1505)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/e8bf2323039faec2d8bdf5b5b5fbf5aa14722cb9) (thanks @dependabot[bot])
+* [Fix lpVec3 packet endianness (#1506)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/d0c522d0f9b37dfe2c83bcd62d1d005a13642b1f) (thanks @GenerelSchwerz)
+
 ## 1.66.2
 * [Revert "Fix computeChatChecksum returning unsigned byte for i8 schema (#1485)" (#1489)](https://github.com/PrismarineJS/node-minecraft-protocol/commit/db39bcbfa6d2419b17217da7f4eea6b689a5ac49) (thanks @extremeheat)
 
