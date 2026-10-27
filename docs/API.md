@@ -284,6 +284,22 @@ Emitted after the player enters the PLAY protocol state and can send and recieve
 
 Called when an error occurs within the client. Takes an Error as parameter.
 
+### `packetParseFailure` event
+
+Diagnostic event emitted when an incoming packet could not be parsed, or was not fully read. Nothing is computed
+unless there is a listener for this event. It does not replace the `error` event: a `ReadError` is still followed by an
+`error` event as before, while `PartialReadError` and `SizeMismatch` are otherwise silent. Takes one object parameter:
+* type -- `'ReadError'` (the deserializer threw), `'PartialReadError'` (the packet ended before its fields were fully read)
+  or `'SizeMismatch'` (the packet parsed but did not consume the whole buffer)
+* state -- the protocol state the packet was parsed in
+* direction -- `'toClient'` on a client, `'toServer'` on a server-side client
+* buffer -- the raw (decompressed) packet buffer, including the packet id
+* packetId -- the leading varint of the buffer, or null
+* packetName -- the packet name resolved from this version's protocol data, or null
+* error -- the Error, for `ReadError` and `PartialReadError`, else null
+* bytesRead -- how many bytes were parsed, for `SizeMismatch`, else null
+* partialData -- the parsed data, for `SizeMismatch`, else null
+
 ### `playerChat` event
 
 Called when a chat message from another player arrives. The emitted object contains:

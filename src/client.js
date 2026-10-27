@@ -13,6 +13,19 @@ const createDecipher = require('./transforms/encryption').createDecipher
 
 const closeTimeout = 30 * 1000
 
+// Read the leading varint of a packet buffer (the packet id), or null if it can't be read
+function readLeadingVarint (buffer) {
+  let result = 0
+  let shift = 0
+  for (let i = 0; i < buffer.length && i < 5; i++) {
+    const byte = buffer[i]
+    result |= (byte & 0x7f) << shift
+    if (!(byte & 0x80)) return result >>> 0
+    shift += 7
+  }
+  return null
+}
+
 class Client extends EventEmitter {
   constructor (isServer, version, customPackets, hideErrors = false) {
     super()
@@ -67,17 +80,46 @@ class Client extends EventEmitter {
       this.emit('error', e)
     })
 
+    const deserializerDirection = this.isServer ? 'toServer' : 'toClient'
+    // Diagnostic for packets the deserializer could not (fully) parse. Only built when
+    // someone listens for it, and never allowed to throw into the stream pipeline.
+    const emitParseFailure = (type, buffer, extra) => {
+      if (this.listenerCount('packetParseFailure') === 0) return
+      try {
+        const packetId = Buffer.isBuffer(buffer) ? readLeadingVarint(buffer) : null
+        this.emit('packetParseFailure', {
+          type,
+          state,
+          direction: deserializerDirection,
+          buffer,
+          packetId,
+          packetName: this._resolvePacketName(state, deserializerDirection, packetId),
+          error: null,
+          bytesRead: null,
+          partialData: null,
+          ...extra
+        })
+      } catch (err) {
+        debug('packetParseFailure diagnostic failed', err)
+      }
+    }
+
     this.deserializer.on('error', (e) => {
+      emitParseFailure('ReadError', e.buffer, { error: e })
       let parts = []
       if (e.field) {
         parts = e.field.split('.')
         parts.shift()
       }
-      const deserializerDirection = this.isServer ? 'toServer' : 'toClient'
       e.field = [this.protocolState, deserializerDirection].concat(parts).join('.')
       e.message = e.buffer ? `Parse error for ${e.field} (${e.buffer?.length} bytes, ${e.buffer?.toString('hex').slice(0, 6)}...) : ${e.message}` : `Parse error for ${e.field}: ${e.message}`
       if (!this.compressor) { this.splitter.pipe(this.deserializer) } else { this.decompressor.pipe(this.deserializer) }
       this.emit('error', e)
+    })
+    // protodef's FullPacketParser swallows partial reads (it only logs them unless
+    // noErrorLogging is set) and emits this event (protodef >= 1.20) with the chunk it could not read
+    this.deserializer.on('partialReadError', (e) => {
+      emitParseFailure('PartialReadError', e.buffer, { error: e })
     })
     this._mcBundle = []
     const emitPacket = (parsed) => {
@@ -87,6 +129,9 @@ class Client extends EventEmitter {
       this.emit('raw', parsed.buffer, parsed.metadata)
     }
     this.deserializer.on('data', (parsed) => {
+      if (parsed.fullBuffer && parsed.metadata.size !== parsed.fullBuffer.length) {
+        emitParseFailure('SizeMismatch', parsed.fullBuffer, { bytesRead: parsed.metadata.size, partialData: parsed.data })
+      }
       parsed.metadata.name = parsed.data.name
       parsed.data = parsed.data.params
       parsed.metadata.state = state
@@ -114,6 +159,17 @@ class Client extends EventEmitter {
         emitPacket(parsed)
       }
     })
+  }
+
+  // Resolve a packet id to its name from this version's protocol data, or null
+  _resolvePacketName (state, direction, packetId) {
+    if (packetId === null || packetId === undefined) return null
+    try {
+      const mappings = require('minecraft-data')(this.version).protocol[state][direction].types.packet[1][0].type[1].mappings
+      return mappings['0x' + packetId.toString(16).padStart(2, '0')] ?? null
+    } catch (err) {
+      return null
+    }
   }
 
   set state (newProperty) {

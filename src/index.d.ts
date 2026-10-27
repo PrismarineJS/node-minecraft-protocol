@@ -48,6 +48,7 @@ declare module 'minecraft-protocol' {
 		on(event: 'state', handler: (newState: States, oldState: States) => PromiseLike): this
 		on(event: 'end', handler: (reason: string) => PromiseLike): this
 		on(event: 'connect', handler: () => PromiseLike): this
+		on(event: 'packetParseFailure', handler: (failure: PacketParseFailure) => PromiseLike): this
 		on(event: string, handler: (data: any, packetMeta: PacketMeta) => PromiseLike): this
 		on(event: `raw.${string}`, handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
 		on(event: 'playerChat', handler: (data: {
@@ -74,6 +75,7 @@ declare module 'minecraft-protocol' {
 		once(event: 'state', handler: (newState: States, oldState: States) => PromiseLike): this
 		once(event: 'end', handler: (reasonce: string) => PromiseLike): this
 		once(event: 'connect', handler: () => PromiseLike): this
+		once(event: 'packetParseFailure', handler: (failure: PacketParseFailure) => PromiseLike): this
 		once(event: string, handler: (data: any, packetMeta: PacketMeta) => PromiseLike): this
 		once(event: `raw.${string}`, handler: (buffer: Buffer, packetMeta: PacketMeta) => PromiseLike): this
 	}
@@ -244,6 +246,18 @@ declare module 'minecraft-protocol' {
 	export interface PacketMeta {
 		name: string
 		state: States
+	}
+
+	export interface PacketParseFailure {
+		type: 'ReadError' | 'PartialReadError' | 'SizeMismatch'
+		state: States
+		direction: 'toServer' | 'toClient'
+		buffer: Buffer
+		packetId: number | null
+		packetName: string | null
+		error: Error | null
+		bytesRead: number | null
+		partialData: any
 	}
 
 	export interface PingOptions {
