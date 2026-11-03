@@ -56,6 +56,10 @@ const nbtValue = {
 }
 
 function getFixedPacketPayload (version, packetName) {
+  if (packetName === 'sync_entity_position' && version['>=']('26.3')) {
+    // 26.3: the position is a PositionPath (linear | stepped) behind an anonymous switch
+    return { entityId: 7, positionType: 'linear', x: 1.5, y: 64, z: -3.25, yaw: 90, pitch: 10, onGround: true }
+  }
   if (packetName === 'teams') {
     if (version['>=']('1.21.6')) {
       return {
@@ -207,6 +211,7 @@ const values = {
         ? (typeArgs[2].type[1].fields['minecraft:crafting_shapeless'] === undefined ? 'crafting_shapeless' : 'minecraft:crafting_shapeless')
         : getValue(typeArgs[index].type, results)
       if (typeArgs[index].anon) {
+        if (v === undefined) return // e.g. an anonymous switch that fell through to void
         Object.keys(v).forEach(key => {
           results[key] = v[key]
         })
@@ -421,6 +426,7 @@ const values = {
     filtering: false
   },
   lpVec3: { x: 0, y: 0, z: 0 },
+  entityDelta: { onGround: true, steps: [{ dX: 1, dY: -2, dZ: 3, ticks: 0 }] },
   ExplosionParticleEntry: {
     data: { // ExplosionParticleInfo
       particle: {
@@ -533,13 +539,13 @@ for (const supportedVersion of mc.supportedVersions) {
 
     function testPacket (mcData, packetName, packetInfo, state, toServer, done) {
       // empty object uses default values
-      const packet = getFixedPacketPayload(mcData.version, packetName) || getValue(packetInfo, {})
+      const packet = getFixedPacketPayload(mcData.version, packetName) || (packetInfo === 'void' ? {} : getValue(packetInfo, {}))
       if (toServer) {
         console.log('Writing to server', packetName, JSON.stringify(packet))
         serverClient.once(packetName, function (receivedPacket) {
           console.log('Recv', packetName)
           try {
-            assertPacketsMatch(packet, receivedPacket)
+            assertPacketsMatch(packet, receivedPacket || {}, packetInfo) // a void packet arrives with no params
           } catch (e) {
             console.log(packet, receivedPacket)
             throw e
@@ -551,15 +557,18 @@ for (const supportedVersion of mc.supportedVersions) {
         console.log('Writing to client', packetName, JSON.stringify(packet))
         client.once(packetName, function (receivedPacket) {
           console.log('Recv', packetName)
-          assertPacketsMatch(packet, receivedPacket)
+          assertPacketsMatch(packet, receivedPacket || {}, packetInfo)
           done()
         })
         serverClient.write(packetName, packet)
       }
     }
 
-    function assertPacketsMatch (p1, p2) {
-      packetInfo.forEach(function (field) {
+    function assertPacketsMatch (p1, p2, packetInfo) {
+      if (packetInfo === 'void') return // a packet with no fields (26.3 punch)
+      // a packet that is a named type (e.g. spawn_position: RespawnData) has no field list of its own
+      const fields = Array.isArray(packetInfo) ? packetInfo : []
+      fields.forEach(function (field) {
         assert.deepEqual(p1[field], p2[field])
       })
       Object.keys(p1).forEach(function (field) {
