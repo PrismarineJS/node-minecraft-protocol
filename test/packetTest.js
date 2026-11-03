@@ -243,6 +243,7 @@ const values = {
   Slot: slotValue,
   UntrustedSlot: slotValue,
   HashedSlot: slotValue,
+  ItemStackTemplate: { itemId: 1111, itemCount: 1, addedComponentCount: 0, removedComponentCount: 0, components: [], removeComponents: [] },
   SlotComponent: {
     type: 'hide_tooltip'
   },
