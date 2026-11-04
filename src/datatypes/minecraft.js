@@ -13,9 +13,104 @@ module.exports = {
   restBuffer: [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
   entityMetadataLoop: [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata],
   topBitSetTerminatedArray: [readTopBitSetTerminatedArray, writeTopBitSetTerminatedArray, sizeOfTopBitSetTerminatedArray],
-  lpVec3: [readLpVec3, writeLpVec3, sizeOfLpVec3]
+  lpVec3: [readLpVec3, writeLpVec3, sizeOfLpVec3],
+  entityDelta: [readEntityDelta, writeEntityDelta, sizeOfEntityDelta]
 }
 const PartialReadError = require('protodef').utils.PartialReadError
+
+// 26.3+ ClientboundMoveEntityPacket ("rel_entity_move" / "entity_move_look") delta encoding.
+//
+// Mojang replaced the old flat 3x-i16 delta with VecDelta, a packed `properties` varint
+// (bit 0 = onGround, remaining bits = stepCount) followed by either:
+//  - stepCount <= 0: the old flat format, 3x i16 (dX, dY, dZ) -- the common case when the
+//    entity moved every tick, which is why this bug only shows up with several entities/ticks
+//    skipped at once.
+//  - stepCount > 0: `stepCount` DeltaStep entries, each read in wire order as
+//    {ticks: varint, dX: i16, dY: i16, dZ: i16} -- these are chained deltas for smoother
+//    client-side interpolation (each step's delta is relative to the position produced by
+//    applying the previous step, not to the original base).
+//
+// Confirmed by decompiling VecDelta.read()/write() and ClientboundMoveEntityPacket's
+// packProperties/unpackProperties/unpackStepCount in the real 26.3 server jar.
+//
+// Parsed shape (uniform regardless of wire variant so downstream code never has to branch):
+//   { onGround: boolean, steps: [{ dX, dY, dZ, ticks }, ...] }
+// For the flat/Linear wire format this is always a single-element array with ticks: 0.
+function readEntityDelta (buffer, offset) {
+  let cursor = offset
+  const props = readVarInt(buffer, cursor)
+  cursor += props.size
+  const onGround = (props.value & 1) !== 0
+  const stepCount = props.value >>> 1
+
+  const steps = []
+  if (stepCount <= 0) {
+    if (cursor + 6 > buffer.length) throw new PartialReadError('Unexpected buffer end while reading entityDelta (linear)')
+    steps.push({
+      dX: buffer.readInt16BE(cursor),
+      dY: buffer.readInt16BE(cursor + 2),
+      dZ: buffer.readInt16BE(cursor + 4),
+      ticks: 0
+    })
+    cursor += 6
+  } else {
+    for (let i = 0; i < stepCount; i++) {
+      const ticksResult = readVarInt(buffer, cursor)
+      cursor += ticksResult.size
+      if (cursor + 6 > buffer.length) throw new PartialReadError('Unexpected buffer end while reading entityDelta (stepped)')
+      steps.push({
+        dX: buffer.readInt16BE(cursor),
+        dY: buffer.readInt16BE(cursor + 2),
+        dZ: buffer.readInt16BE(cursor + 4),
+        ticks: ticksResult.value
+      })
+      cursor += 6
+    }
+  }
+
+  return { value: { onGround, steps }, size: cursor - offset }
+}
+
+function writeEntityDelta (value, buffer, offset) {
+  const { onGround, steps } = value
+  const useLinear = steps.length === 1 && steps[0].ticks === 0
+  const stepCount = useLinear ? 0 : steps.length
+  const properties = (onGround ? 1 : 0) | (stepCount << 1)
+
+  offset = writeVarInt(properties, buffer, offset)
+  if (useLinear) {
+    buffer.writeInt16BE(steps[0].dX, offset)
+    buffer.writeInt16BE(steps[0].dY, offset + 2)
+    buffer.writeInt16BE(steps[0].dZ, offset + 4)
+    offset += 6
+  } else {
+    for (const step of steps) {
+      offset = writeVarInt(step.ticks, buffer, offset)
+      buffer.writeInt16BE(step.dX, offset)
+      buffer.writeInt16BE(step.dY, offset + 2)
+      buffer.writeInt16BE(step.dZ, offset + 4)
+      offset += 6
+    }
+  }
+  return offset
+}
+
+function sizeOfEntityDelta (value) {
+  const { onGround, steps } = value
+  const useLinear = steps.length === 1 && steps[0].ticks === 0
+  const stepCount = useLinear ? 0 : steps.length
+  const properties = (onGround ? 1 : 0) | (stepCount << 1)
+
+  let size = sizeOfVarInt(properties)
+  if (useLinear) {
+    size += 6
+  } else {
+    for (const step of steps) {
+      size += sizeOfVarInt(step.ticks) + 6
+    }
+  }
+  return size
+}
 
 function readVarLong (buffer, offset) {
   return readVarInt(buffer, offset)

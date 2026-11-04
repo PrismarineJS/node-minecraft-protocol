@@ -4,6 +4,11 @@ const [readVarInt, writeVarInt, sizeOfVarInt] = require('protodef').types.varint
 const zlib = require('zlib')
 const Transform = require('readable-stream').Transform
 
+// The protocol caps the uncompressed size of a packet at 2^23 bytes (8 MiB). A compressed
+// packet that declares — or inflates to — more than this is rejected, so a malicious peer
+// cannot force an unbounded synchronous allocation (a "decompression bomb"). See #664.
+const MAX_UNCOMPRESSED_LENGTH = 8388608 // 2 ** 23
+
 module.exports.createCompressor = function (threshold) {
   return new Compressor(threshold)
 }
@@ -53,9 +58,15 @@ class Decompressor extends Transform {
     if (value === 0) {
       this.push(chunk.slice(size))
       return cb()
+    } else if (value > MAX_UNCOMPRESSED_LENGTH) {
+      // Declared uncompressed length exceeds the protocol maximum; refuse to inflate.
+      if (!this.hideErrors) {
+        console.error('uncompressed length ' + value + ' exceeds maximum of ' + MAX_UNCOMPRESSED_LENGTH)
+      }
+      return cb()
     } else {
       try {
-        const newBuf = zlib.unzipSync(chunk.slice(size), { finishFlush: 2 })
+        const newBuf = zlib.unzipSync(chunk.slice(size), { maxOutputLength: MAX_UNCOMPRESSED_LENGTH, finishFlush: 2 })
         if (newBuf.length !== value && !this.hideErrors) {
           console.error('uncompressed length should be ' + value + ' but is ' + newBuf.length)
         }

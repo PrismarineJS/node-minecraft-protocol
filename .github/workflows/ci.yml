@@ -59,8 +59,9 @@ jobs:
         distribution: 'adopt'
     - name: Install dependencies
       run: npm install
-    - run: cd node_modules && cd minecraft-data && mv minecraft-data minecraft-data-old && git clone -b pc_26_3 https://github.com/PrismarineJS/minecraft-data --depth 1 && node bin/generate_data.js
-    - run: curl -o node_modules/protodef/src/serializer.js https://raw.githubusercontent.com/extremeheat/node-protodef/refs/heads/dlog/src/serializer.js && curl -o node_modules/protodef/src/compiler.js https://raw.githubusercontent.com/extremeheat/node-protodef/refs/heads/dlog/src/compiler.js
+    # Until the 26.3 data is published: the pc_26_3 data with the 26.3 fixes (PrismarineJS/minecraft-data#1301 + the
+    # stacked fix PR). The published protodef 1.19 handles the 26.3 encodings, so the debug build override is gone.
+    - run: cd node_modules && cd minecraft-data && mv minecraft-data minecraft-data-old && git clone -b port-26.3 https://github.com/suisarbre/minecraft-data --depth 1 && node bin/generate_data.js
 
 
     - name: Run tests

@@ -61,8 +61,15 @@ module.exports = function (client, server, options) {
     try {
       const unwrapped = pending.unwrap(packet.offset, packet.acknowledged)
 
+      if (client.supportFeature('chatGlobalIndexAndChecksum') && options.enforceChatChecksum && packet.checksum !== undefined) {
+        const expectedChecksum = computeChatChecksum(unwrapped.map(signature => ({ signature })))
+        if (packet.checksum !== 0 && packet.checksum !== expectedChecksum) {
+          throw new VerificationError('Invalid chat acknowledgement checksum')
+        }
+      }
+
       const length = Buffer.byteLength(packet.message, 'utf8')
-      const acknowledgements = unwrapped.length > 0 ? ['i32', unwrapped.length, 'buffer', Buffer.concat(...unwrapped)] : ['i32', 0]
+      const acknowledgements = unwrapped.length > 0 ? ['i32', unwrapped.length, 'buffer', Buffer.concat(unwrapped)] : ['i32', 0]
 
       const signable = concat('i32', 1, 'UUID', client.uuid, 'UUID', client._session.uuid, 'i32', client._session.index++, 'i64', packet.salt, 'i64', packet.timestamp / 1000n, 'i32', length, 'pstring', packet.message, ...acknowledgements)
       const valid = crypto.verify('RSA-SHA256', signable, client.profileKeys.public, packet.signature)
@@ -105,14 +112,6 @@ module.exports = function (client, server, options) {
     }
     lastTimestamp = packet.timestamp
 
-    // Validate checksum for 1.21.5+
-    if (client.supportFeature('chatGlobalIndexAndChecksum') && options.enforceChatChecksum && packet.checksum !== undefined) {
-      const expectedChecksum = computeChatChecksum(client._lastSeenMessages || [])
-      if (packet.checksum !== 0 && packet.checksum !== expectedChecksum) {
-        return raise('multiplayer.disconnect.chat_validation_failed')
-      }
-    }
-
     // Checks here: 1) make sure client can chat, 2) chain/session is OK, 3) signature is OK, 4) log if expired
     if (client.settings.disabledChat) return raise('chat.disabled.options')
     if (client.supportFeature('chainedChatWithHashing')) validateMessageChain(packet) // 1.19.1
@@ -124,7 +123,7 @@ module.exports = function (client, server, options) {
   // Client will occasionally send a list of seen messages to the server, here we listen & check chain validity
   client.on('message_acknowledgement', (packet) => {
     if (client.supportFeature('useChatSessions')) {
-      const valid = client._lastSeenMessages.applyOffset(packet.count)
+      const valid = pending.applyOffset(packet.count)
       if (!valid) {
         raise('multiplayer.disconnect.chat_validation_failed')
         if (!options.hideErrors) console.error(client.address, 'disconnected because', VerificationError('Failed to validate message acknowledgements'))
@@ -170,7 +169,7 @@ module.exports = function (client, server, options) {
   // On 1.19.1+, outbound messages from server (client->SERVER->players) are logged so we can verify
   // the last seen message field in inbound chat packets
   client.logSentMessageFromPeer = (chatPacket) => {
-    if (!options.enforceSecureProfile || !server.features.signedChat) return // nothing signable
+    if (!options.enforceSecureProfile || !client.supportFeature('signedChat')) return // nothing signable
 
     pending.add(chatPacket.senderUuid, chatPacket.signature, chatPacket.timestamp)
     if (pending.length > 4096) {
