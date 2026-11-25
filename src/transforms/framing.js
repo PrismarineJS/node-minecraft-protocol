@@ -1,7 +1,26 @@
 'use strict'
 
-const [readVarInt, writeVarInt, sizeOfVarInt] = require('protodef').types.varint
+const [, writeVarInt, sizeOfVarInt] = require('protodef').types.varint
 const Transform = require('readable-stream').Transform
+
+// Decode the packet-length varint without throwing when the buffer doesn't hold a complete one yet.
+// The splitter hits that on nearly every TCP segment (a packet spread across reads), and protodef's
+// readVarInt signals it by throwing a PartialReadError whose constructor captures a stack trace each
+// time, which showed up as a top CPU cost under load. Returns null when more bytes are needed, matching
+// the old "wait for more" behaviour (including an over-long length, which the previous code also waited on).
+function tryReadVarInt (buffer, offset) {
+  let value = 0
+  let shift = 0
+  let cursor = offset
+  while (cursor < buffer.length) {
+    const byte = buffer[cursor++]
+    value |= (byte & 0x7f) << shift
+    if (!(byte & 0x80)) return { value: value >>> 0, size: cursor - offset }
+    shift += 7
+    if (shift >= 35) return null // varint too long to be a valid 32-bit length
+  }
+  return null // incomplete: need more bytes
+}
 
 module.exports.createSplitter = function () {
   return new Splitter()
@@ -46,27 +65,11 @@ class Splitter extends Transform {
     }
 
     let offset = 0
-    let value, size
-    let stop = false
-    try {
-      ({ value, size } = readVarInt(this.buffer, offset))
-    } catch (e) {
-      if (!(e.partialReadError)) {
-        throw e
-      } else { stop = true }
-    }
-    if (!stop) {
-      while (this.buffer.length >= offset + size + value) {
-        try {
-          this.push(this.buffer.slice(offset + size, offset + size + value))
-          offset += size + value;
-          ({ value, size } = readVarInt(this.buffer, offset))
-        } catch (e) {
-          if (e.partialReadError) {
-            break
-          } else { throw e }
-        }
-      }
+    let decoded = tryReadVarInt(this.buffer, offset)
+    while (decoded !== null && this.buffer.length >= offset + decoded.size + decoded.value) {
+      this.push(this.buffer.slice(offset + decoded.size, offset + decoded.size + decoded.value))
+      offset += decoded.size + decoded.value
+      decoded = tryReadVarInt(this.buffer, offset)
     }
     this.buffer = this.buffer.slice(offset)
     return cb()
