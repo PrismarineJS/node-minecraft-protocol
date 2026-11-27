@@ -81,6 +81,7 @@ module.exports = function (client, options) {
       // Server should send finish_configuration on its own right after sending the client a dimension codec
       // for login (that has data about world height, world gen, etc) after getting a login success from client
       client.once('finish_configuration', () => {
+        client.precompileState(states.PLAY)
         client.write('finish_configuration', {})
         client.state = states.PLAY
         finishCb?.()

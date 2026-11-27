@@ -44,6 +44,11 @@ function createProtocol (state, direction, version, customPackets, compiled = tr
   return proto
 }
 
+function precompile (state, isServer, version, customPackets) {
+  createProtocol(state, !isServer ? 'toServer' : 'toClient', version, customPackets)
+  createProtocol(state, isServer ? 'toServer' : 'toClient', version, customPackets)
+}
+
 function createSerializer ({ state = states.HANDSHAKING, isServer = false, version, customPackets, compiled = true } = {}) {
   return new Serializer(createProtocol(state, !isServer ? 'toServer' : 'toClient', version, customPackets, compiled), 'packet')
 }
@@ -54,5 +59,6 @@ function createDeserializer ({ state = states.HANDSHAKING, isServer = false, ver
 
 module.exports = {
   createSerializer,
-  createDeserializer
+  createDeserializer,
+  precompile
 }
