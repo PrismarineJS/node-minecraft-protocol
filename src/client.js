@@ -8,6 +8,7 @@ const debugSkip = process.env.DEBUG_SKIP?.split(',') ?? []
 
 const createSerializer = require('./transforms/serializer').createSerializer
 const createDeserializer = require('./transforms/serializer').createDeserializer
+const precompile = require('./transforms/serializer').precompile
 const createCipher = require('./transforms/encryption').createCipher
 const createDecipher = require('./transforms/encryption').createDecipher
 
@@ -38,6 +39,10 @@ class Client extends EventEmitter {
 
   get state () {
     return this.protocolState
+  }
+
+  precompileState (state) {
+    precompile(state, this.isServer, this.version, this.customPackets)
   }
 
   setSerializer (state) {
