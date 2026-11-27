@@ -65,13 +65,9 @@ class Decompressor extends Transform {
       }
       return cb()
     } else {
+      let newBuf
       try {
-        const newBuf = zlib.unzipSync(chunk.slice(size), { maxOutputLength: MAX_UNCOMPRESSED_LENGTH, finishFlush: 2 })
-        if (newBuf.length !== value && !this.hideErrors) {
-          console.error('uncompressed length should be ' + value + ' but is ' + newBuf.length)
-        }
-        this.push(newBuf)
-        return cb()
+        newBuf = zlib.unzipSync(chunk.slice(size), { maxOutputLength: MAX_UNCOMPRESSED_LENGTH, finishFlush: 2 })
       } catch (err) {
         if (!this.hideErrors) {
           console.error('problem inflating chunk')
@@ -82,6 +78,16 @@ class Decompressor extends Transform {
         }
         return cb()
       }
+      if (newBuf.length !== value && !this.hideErrors) {
+        console.error('uncompressed length should be ' + value + ' but is ' + newBuf.length)
+      }
+      try {
+        this.push(newBuf)
+      } catch (err) {
+        // Downstream handlers can throw from push; report those errors on this stream.
+        return cb(err)
+      }
+      return cb()
     }
   }
 }

@@ -4,6 +4,7 @@
 // "decompression bomb" that inflates to an unbounded synchronous allocation. See #664.
 const assert = require('assert')
 const zlib = require('zlib')
+const Transform = require('readable-stream').Transform
 const [, writeVarInt, sizeOfVarInt] = require('protodef').types.varint
 const { supportedVersions } = require('../src/version')
 const { createCompressor, createDecompressor } = require('../src/transforms/compression')
@@ -47,6 +48,36 @@ for (const supportedVersion of supportedVersions) {
       const [framed] = await pump(createCompressor(256), original)
       const [restored] = await pump(createDecompressor(256), framed)
       assert.ok(restored.equals(original))
+    })
+
+    it('forwards downstream errors instead of reporting an inflation failure', async () => {
+      const original = Buffer.from('downstream payload')
+      const [compressed] = await pump(createCompressor(0), original)
+      const decompressor = createDecompressor(0)
+      const downstreamError = new Error('downstream failure')
+      const downstream = new Transform({
+        transform () {
+          throw downstreamError
+        }
+      })
+      downstream.on('error', () => {})
+      const errors = []
+      const consoleError = console.error
+      console.error = (...args) => errors.push(args)
+      try {
+        const emittedError = await new Promise(resolve => {
+          decompressor.once('error', resolve)
+          decompressor.once('end', () => resolve(null))
+          decompressor.pipe(downstream)
+          decompressor.end(compressed)
+        })
+        assert.strictEqual(emittedError, downstreamError)
+        assert.deepStrictEqual(errors, [])
+      } finally {
+        console.error = consoleError
+        decompressor.destroy()
+        downstream.destroy()
+      }
     })
 
     it('drops a decompression bomb instead of allocating past the maximum', async () => {
