@@ -35,6 +35,7 @@ async function authenticate (client, options) {
   const session = {
     accessToken: token,
     selectedProfile: profile,
+    availableProfiles: [profile],
     availableProfile: [profile]
   }
   Object.assign(client, certificates)
